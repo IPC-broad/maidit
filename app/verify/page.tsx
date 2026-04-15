@@ -18,7 +18,7 @@ export default function VerifyPage() {
     setError('')
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setError('Not logged in'); setLoading(false); return }
-    const { error } = await supabase.auth.resend({ type: 'signup', email: user.email })
+    const { error } = await supabase.auth.resend({ type: 'signup', email: user.email ?? '' })
     if (error) { setError(error.message); setLoading(false); return }
     setLoading(false)
     setStep('done')
