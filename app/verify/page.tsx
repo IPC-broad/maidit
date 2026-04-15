@@ -68,7 +68,7 @@ export default function VerifyPage() {
   const card = { background:'#ffffff', border:'1.5px solid #e5e7eb', borderRadius:'14px', padding:'16px', marginBottom:'12px', cursor:'pointer', display:'flex', gap:'13px', alignItems:'center' }
   const cardSel = { background:'rgba(26,107,60,.15)', border:'1.5px solid #1a6b3c' }
   const errBox = { background:'rgba(220,38,38,.1)', border:'1px solid rgba(220,38,38,.3)', borderRadius:'9px', padding:'10px 13px', fontSize:'.78rem', color:'#fca5a5', marginBottom:'12px' }
-  const dot = (active) => ({ width:'18px', height:'18px', borderRadius:'50%', border:'2px solid', borderColor: active ? '#1a6b3c' : 'rgba(255,255,255,.2)', background: active ? '#1a6b3c' : 'transparent', flexShrink:0 })
+  const dot = (active: boolean) => ({ width:'18px', height:'18px', borderRadius:'50%', border:'2px solid', borderColor: active ? '#1a6b3c' : 'rgba(255,255,255,.2)', background: active ? '#1a6b3c' : 'transparent', flexShrink:0 })
 
   return (
     <div style={w}>
