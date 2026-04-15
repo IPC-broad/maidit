@@ -17,6 +17,7 @@ export default function VerifyPage() {
     setLoading(true)
     setError('')
     const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
     if (!user) { setError('Not logged in'); setLoading(false); return }
     const { error } = await supabase.auth.resend({ type: 'signup', email: user.email ?? '' })
     if (error) { setError(error.message); setLoading(false); return }
@@ -45,6 +46,7 @@ export default function VerifyPage() {
     if (otp !== sentOtp) { setError('Wrong code. Please try again.'); return }
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
     await supabase.from('profiles').update({ verified: true, verified_via: 'mobile' }).eq('id', user.id)
     setLoading(false)
     setStep('done')
@@ -53,6 +55,7 @@ export default function VerifyPage() {
 
   const goToDashboard = async () => {
     const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
     if (!user) { router.push('/'); return }
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
     if (profile?.role === 'kasambahay') router.push('/dashboard/kasambahay')
