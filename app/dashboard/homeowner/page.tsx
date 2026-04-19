@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 
 export default function HWDashboard() {
   const router = useRouter()
-  const [profiles, setProfiles] = useState([])
+  const [profiles, setProfiles] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('Lahat')
   const [passed, setPassed] = useState({})
