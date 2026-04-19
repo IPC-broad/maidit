@@ -38,7 +38,7 @@ export default function HWDashboard() {
     return true
   }).filter(p => !passed[p.id])
 
-  const isProvince = (province) => {
+  const isProvince = (province: string) => {
     const metro = ['Quezon City', 'Makati', 'Pasig', 'Taguig', 'Manila', 'Mandaluyong', 'Marikina']
     return province && !metro.includes(province)
   }
