@@ -7,8 +7,8 @@ export default function HWDashboard() {
   const [profiles, setProfiles] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('Lahat')
-  const [passed, setPassed] = useState({})
-  const [offered, setOffered] = useState({})
+  const [passed, setPassed] = useState<Record<string, boolean>>({})
+  const [offered, setOffered] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     const init = async () => {
