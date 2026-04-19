@@ -10,19 +10,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, otp })
   }
 
-  const params = new URLSearchParams({
-    apikey: process.env.SEMAPHORE_API_KEY,
-    number: mobile,
-    message: `Your MaidIt verification code is: ${otp}. Valid for 10 minutes. Do not share this with anyone.`,
-    sendername: 'MaidIt'
-  })
+  try {
+    const params = new URLSearchParams({
+      apikey: process.env.SEMAPHORE_API_KEY,
+      number: mobile,
+      message: `Your MaidIt verification code is: ${otp}. Valid for 10 minutes. Do not share this with anyone.`,
+      sendername: 'MaidIt'
+    })
 
-  const res = await fetch('https://api.semaphore.co/api/v4/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString()
-  })
+    const res = await fetch('https://api.semaphore.co/api/v4/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    })
 
-  if (!res.ok) return NextResponse.json({ error: 'SMS failed' }, { status: 500 })
+    if (!res.ok) throw new Error('SMS failed')
+  } catch {
+    if (process.env.NODE_ENV === 'development') {
+      return NextResponse.json({ success: true, otp })
+    }
+    return NextResponse.json({ error: 'SMS failed' }, { status: 500 })
+  }
+
   return NextResponse.json({ success: true, otp })
 }

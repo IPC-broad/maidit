@@ -28,7 +28,7 @@ export default function Home() {
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '11px', width: '100%', maxWidth: '320px' }}>
-        <Link href="/signup/homeowner" style={{
+        <Link href="/homeowner" style={{
           padding: '14px',
           borderRadius: '13px',
           background: '#fff',
