@@ -37,7 +37,7 @@ export default function PostJobPage() {
     setLoading(true)
     setError('')
 
-    const { supabase } = await import('../../../lib/supabase')
+    const { supabase } = await import('../../../../lib/supabase')
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
