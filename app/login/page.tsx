@@ -24,6 +24,7 @@ export default function LoginPage() {
         .single()
       setLoading(false)
       if (profile?.role === 'kasambahay') router.push('/dashboard/kasambahay')
+      else if (profile?.role === 'partner') router.push('/dashboard/partner')
       else router.push('/dashboard/homeowner')
     } catch (e) {
       setError('Something went wrong. Please try again.')
@@ -45,7 +46,7 @@ export default function LoginPage() {
             {error}
           </div>
         )}
-        <label style={{ display:'block', fontSize:'.63rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'.5px', color:'#6b7280', marginBottom:'4px' }}>
+        <label style={{ display:'block', fontSize:'.63rem', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#6b7280', marginBottom:'4px' }}>
           Email Address
         </label>
         <input
@@ -55,7 +56,7 @@ export default function LoginPage() {
           value={email}
           onChange={e => setEmail(e.target.value)}
         />
-        <label style={{ display:'block', fontSize:'.63rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'.5px', color:'#6b7280', marginBottom:'4px' }}>
+        <label style={{ display:'block', fontSize:'.63rem', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#6b7280', marginBottom:'4px' }}>
           Password
         </label>
         <input
@@ -64,6 +65,7 @@ export default function LoginPage() {
           placeholder="Your password"
           value={password}
           onChange={e => setPassword(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleLogin()}
         />
         <button
           style={{ width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'.92rem', fontWeight:700, cursor:'pointer', opacity: loading ? 0.6 : 1 }}
@@ -78,7 +80,10 @@ export default function LoginPage() {
           {' or '}
           <a href="/signup/kasambahay" style={{ color:'#c9943a', fontWeight:700, textDecoration:'none' }}>Kasambahay</a>
         </div>
-        <div style={{ textAlign:'center', marginTop:'12px' }}>
+        <div style={{ textAlign:'center', marginTop:'8px' }}>
+          <a href="/forgot-password" style={{ fontSize:'.76rem', color:'#6b7280', textDecoration:'none' }}>Forgot password?</a>
+        </div>
+        <div style={{ textAlign:'center', marginTop:'8px' }}>
           <a href="/" style={{ fontSize:'.76rem', color:'#9ca3af', textDecoration:'none' }}>Back to Home</a>
         </div>
       </div>
