@@ -4,9 +4,9 @@ import { useRouter } from 'next/navigation'
 
 export default function KBDashboard() {
   const router = useRouter()
-  const [jobs, setJobs] = useState([])
+  const [jobs, setJobs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [applied, setApplied] = useState({})
+  const [applied, setApplied] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     const init = async () => {

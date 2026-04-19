@@ -35,13 +35,11 @@ export default function OfferConfirmPage() {
   const handleAgree = async () => {
     setSubmitting(true)
     setError('')
-
     const { supabase } = await import('../../../../lib/supabase')
     await supabase.from('offers').update({
       fare_agreed: offer.fare_estimate,
       status: 'agreed'
     }).eq('id', offerId)
-
     setSubmitting(false)
     setAction('done')
   }
@@ -49,13 +47,11 @@ export default function OfferConfirmPage() {
   const handleCounterFare = async () => {
     if (!counterFare) { setError('Please enter a counter fare amount'); return }
     setSubmitting(true)
-
     const { supabase } = await import('../../../../lib/supabase')
     await supabase.from('offers').update({
       fare_countered: parseInt(counterFare),
       status: 'fare_countered'
     }).eq('id', offerId)
-
     setSubmitting(false)
     setAction('done')
   }
@@ -92,16 +88,13 @@ export default function OfferConfirmPage() {
   )
 
   if (action === 'done') return (
-    <div style={{ minHeight:'100vh', background:'#f9fafb', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'28px', textAlign:'center', fontFamily:'sans-serif' }}>
+    <div style={{ minHeight:'100vh', background:'#f9fafb', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'28px', textAlign:'center' as const, fontFamily:'sans-serif' }}>
       <div style={{ fontSize:'3rem', marginBottom:'16px' }}>🎉</div>
       <h1 style={{ fontFamily:'serif', fontSize:'1.4rem', fontWeight:900, color:'#1a6b3c', marginBottom:'8px' }}>All Agreed!</h1>
       <p style={{ color:'#6b7280', fontSize:'.84rem', lineHeight:1.7, marginBottom:'24px' }}>
         Proceed to pay the ₱2,001 Hire Protection Fee<br/>to complete the hire.
       </p>
-      <button
-        style={{ ...s.btn, maxWidth:'320px' }}
-        onClick={() => router.push(`/pay/${offerId}`)}
-      >
+      <button style={{ ...s.btn, maxWidth:'320px' }} onClick={() => router.push(`/pay/${offerId}`)}>
         Pay ₱2,001 Hire Fee →
       </button>
       <button style={{ ...s.btnOutline, maxWidth:'320px' }} onClick={() => router.push('/dashboard/homeowner')}>
@@ -142,10 +135,26 @@ export default function OfferConfirmPage() {
 
         <div style={s.card}>
           <div style={s.cardTitle}>Agreed Terms</div>
-          <div style={s.row}><span style={s.rowLabel}>Salary</span><span style={s.rowValue}>₱{offer.salary?.toLocaleString()}/mo</span></div>
-          <div style={s.row}><span style={s.rowLabel}>Start Date</span><span style={s.rowValue}>{new Date(offer.start_date).toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric' })}</span></div>
-          <div style={s.row}><span style={s.rowLabel}>Setup</span><span style={s.rowValue}>{offer.setup}</span></div>
-          <div style={s.rowLast}><span style={s.rowLabel}>Scope</span><span style={s.rowValue} style={{ fontSize:'.74rem', maxWidth:'55%', textAlign:'right' as const }}>{offer.scope?.join(', ')}</span></div>
+          <div style={s.row}>
+            <span style={s.rowLabel}>Salary</span>
+            <span style={s.rowValue}>₱{offer.salary?.toLocaleString()}/mo</span>
+          </div>
+          <div style={s.row}>
+            <span style={s.rowLabel}>Start Date</span>
+            <span style={s.rowValue}>
+              {new Date(offer.start_date).toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric' })}
+            </span>
+          </div>
+          <div style={s.row}>
+            <span style={s.rowLabel}>Setup</span>
+            <span style={s.rowValue}>{offer.setup}</span>
+          </div>
+          <div style={s.rowLast}>
+            <span style={s.rowLabel}>Scope</span>
+            <span style={{ fontSize:'.74rem', fontWeight:700, color:'#111827', maxWidth:'55%', textAlign:'right' as const }}>
+              {offer.scope?.join(', ')}
+            </span>
+          </div>
         </div>
 
         {hasTransport && fareEstimate && (
@@ -159,11 +168,11 @@ export default function OfferConfirmPage() {
                 <div style={{ fontSize:'.68rem', color:'#92400e' }}>{kbProvince} → Metro Manila</div>
               </div>
               <div style={{ fontSize:'.72rem', color:'#78350f', textAlign:'right' as const, maxWidth:'55%', lineHeight:1.5 }}>
-                Your arrangement: {offer.transport_arrangement === 'full' ? 'You shoulder full fare' : offer.transport_arrangement === 'reimburse' ? 'You reimburse on arrival' : 'Kasambahay pays own fare'}
+                {offer.transport_arrangement === 'full' ? 'You shoulder full fare' : offer.transport_arrangement === 'reimburse' ? 'You reimburse on arrival' : 'Kasambahay pays own fare'}
               </div>
             </div>
             <div style={{ fontSize:'.68rem', color:'#92400e', background:'rgba(0,0,0,.04)', borderRadius:'7px', padding:'8px 10px', lineHeight:1.5 }}>
-              This is an estimate only. Actual fare to be settled directly between you and the kasambahay/referror outside the app.
+              This is an estimate only. Actual fare to be settled directly outside the app.
             </div>
           </div>
         )}
@@ -171,7 +180,7 @@ export default function OfferConfirmPage() {
         {hasTransport && !fareEstimate && (
           <div style={{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:'11px', padding:'13px 14px', marginBottom:'14px' }}>
             <div style={{ fontSize:'.78rem', color:'#dc2626', lineHeight:1.6 }}>
-              ⚠️ No fare estimate provided yet. Please contact {kbName} or their referror directly to confirm the transport amount before agreeing.
+              ⚠️ No fare estimate yet. Contact {kbName} or their referror to confirm transport before agreeing.
             </div>
           </div>
         )}
@@ -183,21 +192,14 @@ export default function OfferConfirmPage() {
               <strong>₱2,001 Hire Protection Fee</strong><br/>
               Transport ({fareEstimate ? `~₱${fareEstimate?.toLocaleString()}` : 'amount TBD'}) to be settled directly.
             </div>
-
-            <button
-              style={{ ...s.btn, opacity: submitting ? .6 : 1 }}
-              onClick={handleAgree}
-              disabled={submitting}
-            >
-              {submitting ? 'Confirming...' : `Yes, ₱${fareEstimate?.toLocaleString() || 'TBD'} — Proceed to Payment →`}
+            <button style={{ ...s.btn, opacity: submitting ? .6 : 1 }} onClick={handleAgree} disabled={submitting}>
+              {submitting ? 'Confirming...' : `Yes — Proceed to Payment →`}
             </button>
-
             {fareEstimate && (
               <button style={s.btnOutline} onClick={() => setAction('counter')}>
                 Counter Fare Amount
               </button>
             )}
-
             <button style={s.btnRed} onClick={handleDecline}>
               Decline Offer
             </button>

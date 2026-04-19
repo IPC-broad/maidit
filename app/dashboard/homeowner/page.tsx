@@ -126,7 +126,7 @@ export default function HWDashboard() {
             </div>
 
             <div style={{ display:'flex', gap:'4px', flexWrap:'wrap', marginBottom:'9px' }}>
-              {kb.skills?.map(skill => (
+              {kb.skills?.map((skill: string) => (
                 <span key={skill} style={{ fontSize:'.67rem', padding:'3px 7px', borderRadius:'4px', background:'#e8f5ee', color:'#1a6b3c' }}>
                   {skill}
                 </span>

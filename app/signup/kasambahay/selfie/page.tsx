@@ -3,11 +3,11 @@
 import { useRef, useState, useEffect } from 'react'
 
 export default function SelfieCapture() {
-  const videoRef = useRef(null)
-  const canvasRef = useRef(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  const [photo, setPhoto] = useState(null)
-  const [stream, setStream] = useState(null)
+  const [photo, setPhoto] = useState<string | null>(null)
+  const [stream, setStream] = useState<MediaStream | null>(null)
 
   useEffect(() => {
     startCamera()
@@ -50,7 +50,7 @@ export default function SelfieCapture() {
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
 
-    context.drawImage(video, 0, 0, canvas.width, canvas.height)
+    if (context) context.drawImage(video, 0, 0, canvas.width, canvas.height)
 
     const imageData = canvas.toDataURL('image/png')
     setPhoto(imageData)
