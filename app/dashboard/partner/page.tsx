@@ -14,6 +14,7 @@ const SKILLS = [
 ]
 const SETUPS = ['Stay-in', 'Stay-out', 'Kahit alin']
 const CIVIL_STATUS = ['Single', 'May asawa', 'Balo/Biyuda']
+const AVAILABILITY = ['1-3 araw', '1 linggo', '2 linggo', '1 buwan', 'Iba pa (custom)']
 
 type Payout = {
   id: string; amount: number; type: string; status: string; due_at: string
@@ -45,6 +46,7 @@ export default function PartnerDashboard() {
     setup: 'Kahit alin',
     civil_status: '',
     num_children: '0',
+    availability: '',
     photo: null as string | null,
   })
 
@@ -131,6 +133,7 @@ export default function PartnerDashboard() {
       setup: workerForm.setup,
       civil_status: workerForm.civil_status,
       num_children: parseInt(workerForm.num_children) || 0,
+      availability: workerForm.availability,
     })
 
     // Send SMS to worker
@@ -145,7 +148,7 @@ export default function PartnerDashboard() {
 
     setSaveMsg('Na-save na! Makakatanggap ng text message si ' + pangalan + '.')
     setSaving(false)
-    setWorkerForm({ apelyido: '', pangalan: '', mobile: '', province: '', skills: [], setup: 'Kahit alin', civil_status: '', num_children: '0', photo: null })
+    setWorkerForm({ apelyido: '', pangalan: '', mobile: '', province: '', skills: [], setup: 'Kahit alin', civil_status: '', num_children: '0', availability: '', photo: null })
 
     const { supabase: sb2 } = await import('../../../lib/supabase')
     const { data: workersData } = await sb2.from('kasambahay').select('*, profiles(*)').eq('referred_by', partner.id).order('created_at', { ascending: false })
@@ -400,6 +403,13 @@ export default function PartnerDashboard() {
               <select style={s.sel} value={workerForm.setup}
                 onChange={e => setWorkerForm(f => ({ ...f, setup: e.target.value }))}>
                 {SETUPS.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+
+              <label style={s.lbl}>Available Magtrabaho</label>
+              <select style={s.sel} value={workerForm.availability}
+                onChange={e => setWorkerForm(f => ({ ...f, availability: e.target.value }))}>
+                <option value="">Piliin...</option>
+                {AVAILABILITY.map(a => <option key={a} value={a}>{a}</option>)}
               </select>
 
               <label style={s.lbl}>Skills (piliin lahat ng applicable)</label>
