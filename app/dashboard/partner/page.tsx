@@ -1,383 +1,442 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
-type Payout = {
-  id: string
-  amount: number
-  type: string
-  status: string
-  due_at: string
-  offer: {
-    id: string
-    salary: number
-    kasambahay_profile: { full_name: string }
-    homeowner_profile: { full_name: string; city: string }
-  }
-}
+const SKILLS = [
+  { en: 'Housekeeping', tl: 'Paglilinis ng Bahay' },
+  { en: 'Yaya', tl: 'Pag-aalaga ng Bata' },
+  { en: 'Cooking', tl: 'Pagluluto' },
+  { en: 'Laundry', tl: 'Paglalaba' },
+  { en: 'Elder Care', tl: 'Pag-aalaga ng Matatanda' },
+  { en: 'Driving', tl: 'Pagmamaneho' },
+  { en: 'Gardening', tl: 'Paghahalaman' },
+  { en: 'Pet Care', tl: 'Pag-aalaga ng Alagang Hayop' },
+]
+const SETUPS = ['Stay-in', 'Stay-out', 'Kahit alin']
+const CIVIL_STATUS = ['Single', 'May asawa', 'Balo/Biyuda']
 
+type Payout = {
+  id: string; amount: number; type: string; status: string; due_at: string
+  offer: { kasambahay_profile: { full_name: string }; homeowner_profile: { full_name: string } }
+}
 type Worker = {
-  id: string
-  profiles: { full_name: string; city: string; mobile: string }
-  province: string
-  skills: string[]
-  status: string
+  id: string; province: string; skills: string[]; status: string
+  profiles: { full_name: string; mobile: string }
 }
 
 export default function PartnerDashboard() {
   const router = useRouter()
-  const [tab, setTab] = useState<'overview' | 'workers' | 'payouts'>('overview')
+  const [tab, setTab] = useState<'workers' | 'payouts' | 'add'>('workers')
   const [partner, setPartner] = useState<any>(null)
   const [payouts, setPayouts] = useState<Payout[]>([])
   const [workers, setWorkers] = useState<Worker[]>([])
   const [loading, setLoading] = useState(true)
-  const [showAddWorker, setShowAddWorker] = useState(false)
-  const [workerForm, setWorkerForm] = useState({
-    full_name: '', mobile: '', province: '', skills: ''
-  })
-  const [saving, setSaving] = useState(false)
+  const [copied, setCopied] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
+  const [saving, setSaving] = useState(false)
+  const photoRef = useRef<HTMLInputElement>(null)
+
+  const [workerForm, setWorkerForm] = useState({
+    apelyido: '',
+    pangalan: '',
+    mobile: '',
+    province: '',
+    skills: [] as string[],
+    setup: 'Kahit alin',
+    civil_status: '',
+    num_children: '0',
+    photo: null as string | null,
+  })
 
   useEffect(() => {
     const init = async () => {
       const { supabase } = await import('../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-
       const { data: partnerData } = await supabase
-        .from('partners')
-        .select('*')
-        .eq('profile_id', user.id)
-        .single()
-
+        .from('partners').select('*, profiles(*)').eq('profile_id', user.id).single()
       if (!partnerData) { router.push('/'); return }
       setPartner(partnerData)
-
-      const { data: payoutsData } = await supabase
-        .from('payouts')
-        .select(`
-          *,
-          offer:offers(
-            id, salary,
-            kasambahay_profile:profiles!offers_kasambahay_id_fkey(full_name),
-            homeowner_profile:profiles!offers_homeowner_id_fkey(full_name, city)
-          )
-        `)
-        .eq('partner_id', partnerData.id)
-        .order('due_at', { ascending: false })
-
+      const { data: payoutsData } = await supabase.from('payouts')
+        .select('*, offer:offers(kasambahay_profile:profiles!offers_kasambahay_id_fkey(full_name), homeowner_profile:profiles!offers_homeowner_id_fkey(full_name))')
+        .eq('partner_id', partnerData.id).order('due_at', { ascending: false })
       setPayouts(payoutsData || [])
-
-      const { data: workersData } = await supabase
-        .from('kasambahay')
-        .select('*, profiles(*)')
-        .eq('referred_by', partnerData.id)
-        .order('created_at', { ascending: false })
-
+      const { data: workersData } = await supabase.from('kasambahay')
+        .select('*, profiles(*)').eq('referred_by', partnerData.id).order('created_at', { ascending: false })
       setWorkers(workersData || [])
       setLoading(false)
     }
     init()
   }, [])
 
+  const referralCode = partner?.referral_code ||
+    (partner ? `MAID-${(partner.profiles?.full_name || 'P').split(' ').map((w: string) => w[0]).join('').toUpperCase()}${new Date(partner.created_at || Date.now()).getFullYear()}` : '')
+
+  const copyCode = () => {
+    const link = `https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`
+    navigator.clipboard.writeText(link).catch(() => {})
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const shareSMS = () => {
+    const msg = encodeURIComponent(`Mag-apply bilang kasambahay sa MaidIt! Libre at ligtas. Gamitin ang link ko: https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`)
+    window.open(`sms:?body=${msg}`, '_blank')
+  }
+
+  const shareMessenger = () => {
+    const link = encodeURIComponent(`https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`)
+    window.open(`fb-messenger://share?link=${link}`, '_blank')
+  }
+
+  const toggleSkill = (skill: string) => {
+    setWorkerForm(f => ({
+      ...f, skills: f.skills.includes(skill) ? f.skills.filter(s => s !== skill) : [...f.skills, skill]
+    }))
+  }
+
+  const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => setWorkerForm(f => ({ ...f, photo: ev.target?.result as string }))
+    reader.readAsDataURL(file)
+  }
+
   const handleAddWorker = async () => {
-    if (!workerForm.full_name || !workerForm.mobile || !workerForm.province) {
-      setSaveMsg('Please fill in name, mobile, and province.')
-      return
+    const { apelyido, pangalan, mobile, province } = workerForm
+    if (!apelyido || !pangalan || !mobile || !province) {
+      setSaveMsg('Pakisulat ang apelyido, pangalan, mobile, at probinsya.'); return
+    }
+    if (mobile.length !== 11 || !mobile.startsWith('09')) {
+      setSaveMsg('Pakisulat ang tamang 11-digit mobile number.'); return
     }
     setSaving(true)
     setSaveMsg('')
     const { supabase } = await import('../../../lib/supabase')
-
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        full_name: workerForm.full_name,
-        mobile: workerForm.mobile,
-        city: workerForm.province,
-        role: 'kasambahay',
-        verified: false
-      })
-      .select()
-      .single()
-
+    const full_name = `${pangalan} ${apelyido}`
+    const { data: profile, error: profileError } = await supabase.from('profiles').insert({
+      full_name, mobile, city: province, role: 'kasambahay', verified: false
+    }).select().single()
     if (profileError || !profile) {
-      setSaveMsg('Error — mobile may already be registered.')
-      setSaving(false)
-      return
+      setSaveMsg('Hindi ma-save. Baka registered na ang mobile number na ito.')
+      setSaving(false); return
     }
-
-    const skillsArray = workerForm.skills.split(',').map((s: string) => s.trim()).filter(Boolean)
     await supabase.from('kasambahay').insert({
       profile_id: profile.id,
-      province: workerForm.province,
-      skills: skillsArray,
+      province,
+      skills: workerForm.skills,
       referred_by: partner.id,
-      status: 'available'
+      status: 'pending_confirmation',
+      setup: workerForm.setup,
+      civil_status: workerForm.civil_status,
+      num_children: parseInt(workerForm.num_children) || 0,
     })
 
-    setSaveMsg('Worker added!')
+    // Send SMS to worker
+    await fetch('/api/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mobile,
+        message: `Kamusta ${pangalan}! Nirefer ka ni ${partner.profiles?.full_name} sa MaidIt para mahanap ng trabaho bilang kasambahay. I-reply ng YES para kumpirmahin at makasama sa listahan ng mga pwede i-hire. Libre ito!`
+      })
+    }).catch(() => {})
+
+    setSaveMsg('Na-save na! Makakatanggap ng text message si ' + pangalan + '.')
     setSaving(false)
-    setWorkerForm({ full_name: '', mobile: '', province: '', skills: '' })
-    setShowAddWorker(false)
+    setWorkerForm({ apelyido: '', pangalan: '', mobile: '', province: '', skills: [], setup: 'Kahit alin', civil_status: '', num_children: '0', photo: null })
 
-    const { data: workersData } = await supabase
-      .from('kasambahay')
-      .select('*, profiles(*)')
-      .eq('referred_by', partner.id)
-      .order('created_at', { ascending: false })
+    const { supabase: sb2 } = await import('../../../lib/supabase')
+    const { data: workersData } = await sb2.from('kasambahay').select('*, profiles(*)').eq('referred_by', partner.id).order('created_at', { ascending: false })
     setWorkers(workersData || [])
+    setTab('workers')
   }
 
-  const totalEarned = payouts.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0)
-  const totalPending = payouts.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.amount, 0)
-  const totalScheduled = payouts.filter(p => p.status === 'scheduled').reduce((sum, p) => sum + p.amount, 0)
+  const totalEarned = payouts.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0)
+  const totalPending = payouts.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0)
+  const isGold = partner?.tier === 'gold'
 
-  const statusColor: Record<string, string> = {
-    paid: '#166534', pending: '#92400e', scheduled: '#1e40af'
-  }
-  const statusBg: Record<string, string> = {
-    paid: '#f0fdf4', pending: '#fffbeb', scheduled: '#eff6ff'
+  const statusLabel: Record<string, { label: string; bg: string; color: string }> = {
+    hired: { label: 'Na-hire ✓', bg: 'rgba(26,107,60,.25)', color: '#6ee7b7' },
+    available: { label: 'Available', bg: 'rgba(37,99,235,.2)', color: '#93c5fd' },
+    pending_confirmation: { label: 'Hinihintay ang reply', bg: 'rgba(201,148,58,.2)', color: '#f0c97a' },
+    pending: { label: 'Hinihintay ang reply', bg: 'rgba(201,148,58,.2)', color: '#f0c97a' },
+    draft: { label: 'Draft', bg: 'rgba(255,255,255,.08)', color: 'rgba(255,255,255,.4)' },
   }
 
   const s: any = {
-    wrap: { minHeight: '100vh', background: '#f9fafb', fontFamily: 'sans-serif', color: '#111827' },
-    head: { background: '#0d1117', padding: '14px 18px' },
-    body: { padding: '16px 18px 40px' },
-    card: { background: '#fff', borderRadius: '12px', padding: '14px', border: '1.5px solid #e5e7eb', marginBottom: '12px' },
-    tabBtn: (active: boolean) => ({
-      padding: '8px 16px', borderRadius: '20px',
-      border: active ? 'none' : '1.5px solid #e5e7eb',
-      cursor: 'pointer', fontFamily: 'sans-serif', fontSize: '.78rem', fontWeight: 700,
-      background: active ? '#0d1117' : '#fff',
-      color: active ? '#fff' : '#6b7280'
+    wrap: { minHeight: '100vh', background: '#0d1117', color: '#fff', fontFamily: 'sans-serif' },
+    tab: (active: boolean) => ({
+      flex: 1, padding: '11px 4px', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700,
+      color: active ? '#f0c97a' : 'rgba(255,255,255,.4)', background: 'none', border: 'none',
+      cursor: 'pointer', borderBottom: `2px solid ${active ? '#c9943a' : 'transparent'}`
     }),
-    statCard: {
-      background: '#fff', borderRadius: '12px', padding: '14px',
-      border: '1.5px solid #e5e7eb', flex: 1
-    },
-    btn: {
-      width: '100%', padding: '12px', borderRadius: '12px', border: 'none',
-      background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif',
-      fontSize: '.88rem', fontWeight: 700, cursor: 'pointer', marginBottom: '8px'
-    },
-    input: {
-      width: '100%', padding: '10px 13px', border: '1.5px solid #e5e7eb',
-      borderRadius: '10px', fontFamily: 'sans-serif', fontSize: '.84rem',
-      outline: 'none', marginBottom: '10px', background: '#fff',
-      color: '#111827', boxSizing: 'border-box' as const
-    },
-    lbl: {
-      display: 'block', fontSize: '.62rem', fontWeight: 700,
-      textTransform: 'uppercase' as const, letterSpacing: '.5px',
-      color: '#6b7280', marginBottom: '4px'
-    },
+    card: { background: '#161b22', borderRadius: '12px', padding: '13px 14px', marginBottom: '10px', border: '1px solid rgba(255,255,255,.07)' },
+    lbl: { display: 'block', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: 'rgba(255,255,255,.4)', marginBottom: '4px' },
+    inp: { width: '100%', padding: '11px 12px', border: '1.5px solid rgba(255,255,255,.1)', borderRadius: '10px', fontFamily: 'sans-serif', fontSize: '14px', outline: 'none', background: 'rgba(255,255,255,.05)', color: '#fff', boxSizing: 'border-box' as const, marginBottom: '10px' },
+    sel: { width: '100%', padding: '11px 12px', border: '1.5px solid rgba(255,255,255,.1)', borderRadius: '10px', fontFamily: 'sans-serif', fontSize: '14px', outline: 'none', background: '#161b22', color: '#fff', boxSizing: 'border-box' as const, marginBottom: '10px' },
+    submitBtn: { width: '100%', padding: '13px', borderRadius: '11px', border: 'none', background: '#c9943a', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '8px' },
+    skillChip: (on: boolean) => ({
+      display: 'block', padding: '9px 10px', borderRadius: '9px', cursor: 'pointer',
+      fontSize: '13px', fontWeight: 600, textAlign: 'center' as const, transition: 'all .15s',
+      border: on ? 'none' : '1.5px solid rgba(255,255,255,.1)',
+      background: on ? 'rgba(201,148,58,.2)' : 'rgba(255,255,255,.04)',
+      color: on ? '#f0c97a' : 'rgba(255,255,255,.5)',
+      boxShadow: on ? '0 0 0 1.5px #c9943a' : 'none'
+    }),
   }
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif', color: '#6b7280' }}>
+    <div style={{ minHeight: '100vh', background: '#0d1117', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.4)', fontFamily: 'sans-serif' }}>
       Loading...
     </div>
   )
 
   return (
     <div style={s.wrap}>
-      <div style={s.head}>
-        <div style={{ fontFamily: 'serif', fontSize: '1.1rem', fontWeight: 900, color: '#fff', marginBottom: '2px' }}>
-          Partner Dashboard
+      {/* HEADER */}
+      <div style={{ background: 'linear-gradient(135deg,#161b22,#21262d)', borderBottom: '1px solid rgba(255,255,255,.07)', padding: '16px 16px 14px' }}>
+        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)', marginBottom: '2px' }}>Welcome back</div>
+        <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900 }}>{partner?.profiles?.full_name || 'Partner'}</div>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' as const, marginTop: '6px' }}>
+          <span style={{ background: partner?.approved ? 'rgba(26,107,60,.2)' : 'rgba(255,255,255,.08)', border: `1px solid ${partner?.approved ? 'rgba(26,107,60,.3)' : 'rgba(255,255,255,.1)'}`, borderRadius: '50px', padding: '3px 10px', fontSize: '10px', fontWeight: 700, color: partner?.approved ? '#6ee7b7' : 'rgba(255,255,255,.4)' }}>
+            {partner?.approved ? '✅ Approved' : '⏳ Pending Approval'} · {partner?.province || partner?.barangay?.split(',').slice(-1)[0]?.trim() || 'PH'}
+          </span>
+          {isGold && <span style={{ background: 'rgba(201,148,58,.2)', border: '1px solid rgba(201,148,58,.3)', borderRadius: '50px', padding: '3px 10px', fontSize: '10px', fontWeight: 700, color: '#f0c97a' }}>⭐ Gold Partner</span>}
         </div>
-        <div style={{ fontSize: '.72rem', color: 'rgba(255,255,255,.4)' }}>
-          {partner?.barangay || 'Community Partner'} · {partner?.approved ? '✅ Approved' : '⏳ Pending Approval'}
+
+        {/* REFERRAL CODE */}
+        <div style={{ background: 'rgba(201,148,58,.1)', border: '1px solid rgba(201,148,58,.2)', borderRadius: '10px', padding: '10px 13px', marginTop: '11px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.4)', marginBottom: '2px' }}>Referral code mo</div>
+            <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, color: '#f0c97a', letterSpacing: '1px' }}>{referralCode}</div>
+          </div>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <button onClick={copyCode} style={{ padding: '6px 12px', borderRadius: '7px', background: copied ? 'rgba(26,107,60,.3)' : 'rgba(201,148,58,.2)', border: `1px solid ${copied ? 'rgba(26,107,60,.4)' : 'rgba(201,148,58,.3)'}`, color: copied ? '#6ee7b7' : '#f0c97a', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>
+              {copied ? '✓ Copied' : 'Copy'}
+            </button>
+            <button onClick={shareSMS} style={{ padding: '6px 12px', borderRadius: '7px', background: 'rgba(37,99,235,.15)', border: '1px solid rgba(37,99,235,.25)', color: '#93c5fd', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>SMS</button>
+          </div>
         </div>
+        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.3)', marginTop: '5px', lineHeight: 1.5 }}>I-share sa mga naghahanap ng trabaho — sila mag-e-enter nito during signup</div>
       </div>
 
-      <div style={s.body}>
-        <div style={{ display: 'flex', gap: '6px', marginBottom: '18px' }}>
-          {(['overview', 'workers', 'payouts'] as const).map(t => (
-            <button key={t} style={s.tabBtn(tab === t)} onClick={() => setTab(t)}>
-              {t.charAt(0).toUpperCase() + t.slice(1)}
-            </button>
-          ))}
+      {/* STATS */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1px', background: 'rgba(255,255,255,.06)' }}>
+        {[
+          { num: `₱${totalEarned.toLocaleString()}`, lbl: 'Kinita', color: '#6ee7b7' },
+          { num: workers.filter(w => w.status === 'hired').length, lbl: 'Na-hire', color: '#f0c97a' },
+          { num: workers.length, lbl: 'Sa pool', color: '#93c5fd' },
+        ].map((stat, i) => (
+          <div key={i} style={{ background: '#0d1117', padding: '14px 10px', textAlign: 'center' }}>
+            <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 900, color: stat.color, marginBottom: '2px' }}>{stat.num}</div>
+            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.4)' }}>{stat.lbl}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* PAYOUT BANNER */}
+      <div style={{ background: isGold ? 'rgba(201,148,58,.12)' : 'rgba(26,107,60,.1)', borderBottom: '1px solid rgba(255,255,255,.06)', padding: '9px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <span style={{ fontSize: '14px' }}>{isGold ? '⭐' : '💰'}</span>
+        <div style={{ fontSize: '12px', color: isGold ? '#f0c97a' : '#6ee7b7', lineHeight: 1.5, flex: 1 }}>
+          {isGold
+            ? <><strong>Gold Partner:</strong> ₱1,000 upfront sa worker arrival.</>
+            : <><strong>Standard Partner:</strong> ₱600 sa arrival + ₱400 after 30 days = ₱1,000 total</>}
         </div>
+        {totalPending > 0 && <div style={{ fontFamily: 'serif', fontSize: '13px', fontWeight: 900, color: '#f0c97a' }}>₱{totalPending.toLocaleString()} pending</div>}
+      </div>
 
-        {tab === 'overview' && (
+      {/* TABS */}
+      <div style={{ display: 'flex', background: '#161b22', borderBottom: '1px solid rgba(255,255,255,.07)' }}>
+        {(['workers', 'payouts', 'add'] as const).map(t => (
+          <button key={t} style={s.tab(tab === t)} onClick={() => setTab(t)}>
+            {t === 'add' ? '+ Mag-add' : t === 'workers' ? 'Workers' : 'Payouts'}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ padding: '14px 14px 48px' }}>
+
+        {/* WORKERS TAB */}
+        {tab === 'workers' && (
           <>
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
-              {[
-                { label: 'Earned', value: `₱${totalEarned.toLocaleString()}`, color: '#1a6b3c' },
-                { label: 'Pending', value: `₱${totalPending.toLocaleString()}`, color: '#92400e' },
-                { label: 'Scheduled', value: `₱${totalScheduled.toLocaleString()}`, color: '#1e40af' },
-              ].map((stat, i) => (
-                <div key={i} style={s.statCard}>
-                  <div style={{ fontSize: '.6rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#6b7280', marginBottom: '4px' }}>
-                    {stat.label}
+            {workers.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 20px', color: 'rgba(255,255,255,.3)' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '8px' }}>👥</div>
+                <div style={{ fontSize: '13px', marginBottom: '4px' }}>Wala pang workers sa pool mo.</div>
+                <div style={{ fontSize: '12px' }}>Mag-tap ng "+ Mag-add" para magsimula.</div>
+              </div>
+            ) : workers.map(w => {
+              const st = statusLabel[w.status] || statusLabel.draft
+              return (
+                <div key={w.id} style={s.card}>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(201,148,58,.15)', border: '2px solid rgba(201,148,58,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', flexShrink: 0 }}>👩</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: '14px' }}>{w.profiles?.full_name}</div>
+                      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)' }}>{w.province} · {w.profiles?.mobile}</div>
+                    </div>
+                    <div style={{ fontSize: '9px', fontWeight: 800, padding: '3px 9px', borderRadius: '50px', textTransform: 'uppercase', background: st.bg, color: st.color }}>{st.label}</div>
                   </div>
-                  <div style={{ fontFamily: 'serif', fontSize: '1.3rem', fontWeight: 900, color: stat.color }}>
-                    {stat.value}
-                  </div>
+                  {w.skills?.length > 0 && (
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                      {w.skills.map((skill: string) => (
+                        <span key={skill} style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '4px', background: 'rgba(255,255,255,.07)', color: 'rgba(255,255,255,.55)' }}>{skill}</span>
+                      ))}
+                    </div>
+                  )}
+                  {w.status === 'pending_confirmation' && (
+                    <div style={{ marginTop: '8px', background: 'rgba(201,148,58,.1)', borderRadius: '8px', padding: '7px 10px', fontSize: '11px', color: 'rgba(255,255,255,.5)', lineHeight: 1.5 }}>
+                      📱 Naghihintay ng reply sa text message
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-
-            <div style={s.card}>
-              <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#6b7280', marginBottom: '10px' }}>
-                Your stats
-              </div>
-              {[
-                { label: 'Workers uploaded', value: workers.length },
-                { label: 'Active hires', value: payouts.filter(p => p.status !== 'scheduled').length },
-                { label: 'GCash number', value: partner?.gcash_number || '—' },
-              ].map((row, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < 2 ? '1px solid #f3f4f6' : 'none' }}>
-                  <span style={{ fontSize: '.8rem', color: '#6b7280' }}>{row.label}</span>
-                  <span style={{ fontSize: '.82rem', fontWeight: 700, color: '#111827' }}>{String(row.value)}</span>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '11px', padding: '13px 14px' }}>
-              <div style={{ fontSize: '.72rem', fontWeight: 700, color: '#92400e', marginBottom: '6px' }}>
-                💸 Payout per hire
-              </div>
-              <div style={{ fontSize: '.74rem', color: '#78350f', lineHeight: 1.8 }}>
-                ₱600 on worker arrival<br />
-                ₱400 on Day 30 (if worker stays)<br />
-                <span style={{ opacity: .7 }}>Paid to GCash: {partner?.gcash_number || 'not set'}</span>
-              </div>
-            </div>
+              )
+            })}
+            <button onClick={() => setTab('add')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'rgba(201,148,58,.12)', border: '1.5px dashed rgba(201,148,58,.3)', color: '#f0c97a', fontSize: '13px', fontWeight: 700, cursor: 'pointer', marginTop: '4px', fontFamily: 'sans-serif' }}>
+              + Mag-add ng Worker
+            </button>
           </>
         )}
 
-        {tab === 'workers' && (
+        {/* PAYOUTS TAB */}
+        {tab === 'payouts' && (
           <>
-            <button style={s.btn} onClick={() => setShowAddWorker(!showAddWorker)}>
-              {showAddWorker ? '✕ Cancel' : '+ Add Worker'}
-            </button>
+            <div style={{ background: 'rgba(26,107,60,.15)', border: '1px solid rgba(26,107,60,.25)', borderRadius: '12px', padding: '14px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ fontSize: '26px' }}>💰</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.45)' }}>Total kinita</div>
+                <div style={{ fontFamily: 'serif', fontSize: '26px', fontWeight: 900, color: '#6ee7b7' }}>₱{totalEarned.toLocaleString()}</div>
+                {totalPending > 0 && <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)', marginTop: '2px' }}>₱{totalPending.toLocaleString()} pending</div>}
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.35)', marginBottom: '2px' }}>GCash</div>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#f0c97a' }}>{partner?.gcash_number || '—'}</div>
+              </div>
+            </div>
+            {payouts.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px 0', color: 'rgba(255,255,255,.3)', fontSize: '13px' }}>
+                Wala pang payouts. Lalabas ito kapag na-hire na ang iyong workers.
+              </div>
+            ) : payouts.map(p => (
+              <div key={p.id} style={{ background: '#161b22', borderRadius: '10px', padding: '12px 13px', marginBottom: '8px', border: `1px solid ${p.status === 'pending' ? 'rgba(201,148,58,.15)' : 'rgba(255,255,255,.07)'}`, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '34px', height: '34px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.status === 'paid' ? 'rgba(26,107,60,.2)' : 'rgba(201,148,58,.15)', flexShrink: 0, fontSize: '14px' }}>
+                  {p.status === 'paid' ? '💚' : '⏳'}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: '13px' }}>{p.offer?.kasambahay_profile?.full_name}</div>
+                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)', marginTop: '1px' }}>
+                    {p.type === 'arrival' ? 'Arrival payout' : 'Day-30 payout'} · {new Date(p.due_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontFamily: 'serif', fontSize: '15px', fontWeight: 900, color: p.status === 'paid' ? '#6ee7b7' : '#f0c97a' }}>₱{p.amount.toLocaleString()}</div>
+                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.4)', marginTop: '1px' }}>{p.status}</div>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* ADD WORKER TAB */}
+        {tab === 'add' && (
+          <>
+            <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.4)', marginBottom: '14px', lineHeight: 1.6 }}>
+              I-upload ang kasambahay sa iyong pool.
+            </div>
 
             {saveMsg && (
-              <div style={{
-                background: saveMsg.includes('added') ? '#f0fdf4' : '#fef2f2',
-                border: `1px solid ${saveMsg.includes('added') ? '#bbf7d0' : '#fecaca'}`,
-                borderRadius: '9px', padding: '10px 13px', fontSize: '.78rem',
-                color: saveMsg.includes('added') ? '#166534' : '#dc2626', marginBottom: '12px'
-              }}>
+              <div style={{ background: saveMsg.includes('Na-save') ? 'rgba(26,107,60,.2)' : 'rgba(220,38,38,.1)', border: `1px solid ${saveMsg.includes('Na-save') ? 'rgba(26,107,60,.3)' : 'rgba(220,38,38,.3)'}`, borderRadius: '9px', padding: '10px 13px', fontSize: '13px', color: saveMsg.includes('Na-save') ? '#6ee7b7' : '#f87171', marginBottom: '12px', lineHeight: 1.5 }}>
                 {saveMsg}
               </div>
             )}
 
-            {showAddWorker && (
-              <div style={s.card}>
-                <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#6b7280', marginBottom: '12px' }}>
-                  Worker details
-                </div>
-                <label style={s.lbl}>Full name *</label>
-                <input
-                  style={s.input}
-                  placeholder="e.g. Maria Santos"
-                  value={workerForm.full_name}
-                  onChange={e => setWorkerForm(f => ({ ...f, full_name: e.target.value }))}
-                />
-                <label style={s.lbl}>Mobile *</label>
-                <input
-                  style={s.input}
-                  placeholder="09XXXXXXXXX"
-                  value={workerForm.mobile}
-                  onChange={e => setWorkerForm(f => ({ ...f, mobile: e.target.value }))}
-                />
-                <label style={s.lbl}>Province *</label>
-                <input
-                  style={s.input}
-                  placeholder="e.g. Samar, Leyte, Cebu"
-                  value={workerForm.province}
-                  onChange={e => setWorkerForm(f => ({ ...f, province: e.target.value }))}
-                />
-                <label style={s.lbl}>Skills (comma-separated)</label>
-                <input
-                  style={s.input}
-                  placeholder="e.g. cooking, laundry, childcare"
-                  value={workerForm.skills}
-                  onChange={e => setWorkerForm(f => ({ ...f, skills: e.target.value }))}
-                />
-                <button
-                  style={{ ...s.btn, opacity: saving ? .6 : 1 }}
-                  onClick={handleAddWorker}
-                  disabled={saving}
-                >
-                  {saving ? 'Saving...' : 'Save Worker →'}
-                </button>
-              </div>
-            )}
+            <div style={s.card}>
+              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', color: '#f0c97a', marginBottom: '13px' }}>Detalye ng Worker</div>
 
-            {workers.length === 0 ? (
-              <div style={{ textAlign: 'center' as const, padding: '32px 0', color: '#9ca3af', fontSize: '.82rem' }}>
-                No workers yet. Tap "+ Add Worker" to start.
-              </div>
-            ) : workers.map(w => (
-              <div key={w.id} style={s.card}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <div style={{ fontSize: '.88rem', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>
-                      {w.profiles?.full_name}
-                    </div>
-                    <div style={{ fontSize: '.72rem', color: '#6b7280' }}>
-                      {w.province} · {w.profiles?.mobile}
-                    </div>
-                    {w.skills?.length > 0 && (
-                      <div style={{ fontSize: '.68rem', color: '#9ca3af', marginTop: '3px' }}>
-                        {w.skills.join(', ')}
-                      </div>
-                    )}
-                  </div>
-                  <div style={{
-                    fontSize: '.65rem', fontWeight: 700, padding: '3px 8px',
-                    borderRadius: '20px',
-                    background: w.status === 'hired' ? '#f0fdf4' : '#f3f4f6',
-                    color: w.status === 'hired' ? '#166534' : '#6b7280'
-                  }}>
-                    {w.status || 'available'}
-                  </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={s.lbl}>Apelyido *</label>
+                  <input style={s.inp} placeholder="Santos" value={workerForm.apelyido}
+                    onChange={e => setWorkerForm(f => ({ ...f, apelyido: e.target.value.replace(/\b\w/g, c => c.toUpperCase()) }))} />
+                </div>
+                <div>
+                  <label style={s.lbl}>Pangalan *</label>
+                  <input style={s.inp} placeholder="Maria" value={workerForm.pangalan}
+                    onChange={e => setWorkerForm(f => ({ ...f, pangalan: e.target.value.replace(/\b\w/g, c => c.toUpperCase()) }))} />
                 </div>
               </div>
-            ))}
-          </>
-        )}
 
-        {tab === 'payouts' && (
-          <>
-            {payouts.length === 0 ? (
-              <div style={{ textAlign: 'center' as const, padding: '32px 0', color: '#9ca3af', fontSize: '.82rem' }}>
-                No payouts yet. Appears once your workers are hired.
-              </div>
-            ) : payouts.map(p => (
-              <div key={p.id} style={s.card}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <div style={{ fontSize: '.84rem', fontWeight: 700, color: '#111827' }}>
-                      ₱{p.amount.toLocaleString()} — {p.type === 'arrival' ? 'Arrival payout' : 'Day-30 payout'}
-                    </div>
-                    <div style={{ fontSize: '.7rem', color: '#6b7280', marginTop: '2px' }}>
-                      {p.offer?.kasambahay_profile?.full_name} → {p.offer?.homeowner_profile?.full_name}
-                    </div>
-                    <div style={{ fontSize: '.68rem', color: '#9ca3af', marginTop: '2px' }}>
-                      Due: {new Date(p.due_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </div>
-                  </div>
-                  <div style={{
-                    fontSize: '.65rem', fontWeight: 700, padding: '3px 9px',
-                    borderRadius: '20px',
-                    background: statusBg[p.status] || '#f3f4f6',
-                    color: statusColor[p.status] || '#6b7280'
-                  }}>
-                    {p.status}
-                  </div>
+              <label style={s.lbl}>Mobile Number *</label>
+              <input style={s.inp} type="tel" placeholder="09XXXXXXXXX" maxLength={11} value={workerForm.mobile}
+                onChange={e => setWorkerForm(f => ({ ...f, mobile: e.target.value.replace(/\D/g, '').slice(0, 11) }))} />
+
+              <label style={s.lbl}>Probinsya *</label>
+              <input style={s.inp} placeholder="e.g. Batangas, Iloilo, Cebu" value={workerForm.province}
+                onChange={e => setWorkerForm(f => ({ ...f, province: e.target.value }))} />
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={s.lbl}>Civil Status</label>
+                  <select style={s.sel} value={workerForm.civil_status}
+                    onChange={e => setWorkerForm(f => ({ ...f, civil_status: e.target.value }))}>
+                    <option value="">Piliin...</option>
+                    {CIVIL_STATUS.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={s.lbl}>Bilang ng Anak</label>
+                  <select style={s.sel} value={workerForm.num_children}
+                    onChange={e => setWorkerForm(f => ({ ...f, num_children: e.target.value }))}>
+                    {Array.from({ length: 21 }, (_, i) => (
+                      <option key={i} value={i}>{i === 0 ? 'Wala' : i}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
-            ))}
-            <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '11px', padding: '12px 14px', marginTop: '8px' }}>
-              <div style={{ fontSize: '.7rem', color: '#6b7280', lineHeight: 1.7 }}>
-                Payouts sent to GCash: <strong>{partner?.gcash_number || 'not set'}</strong><br />
-                Questions? Contact MaidIt admin.
+
+              <label style={s.lbl}>Setup</label>
+              <select style={s.sel} value={workerForm.setup}
+                onChange={e => setWorkerForm(f => ({ ...f, setup: e.target.value }))}>
+                {SETUPS.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+
+              <label style={s.lbl}>Skills (piliin lahat ng applicable)</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '12px' }}>
+                {SKILLS.map(skill => (
+                  <div key={skill.en} style={s.skillChip(workerForm.skills.includes(skill.en))}
+                    onClick={() => toggleSkill(skill.en)}>
+                    {skill.tl}
+                  </div>
+                ))}
               </div>
+
+              {/* PHOTO */}
+              <label style={s.lbl}>Litrato ng Worker</label>
+              {workerForm.photo && (
+                <img src={workerForm.photo} alt="worker" style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', borderRadius: '10px', marginBottom: '8px' }} />
+              )}
+              <div onClick={() => photoRef.current?.click()} style={{ background: 'rgba(255,255,255,.04)', border: `2px dashed ${workerForm.photo ? '#1a6b3c' : 'rgba(255,255,255,.15)'}`, borderRadius: '11px', padding: '20px', textAlign: 'center', cursor: 'pointer', marginBottom: '12px' }}>
+                {workerForm.photo
+                  ? <><div style={{ fontSize: '18px', marginBottom: '4px' }}>✅</div><div style={{ fontSize: '13px', color: '#6ee7b7', fontWeight: 700 }}>Litrato na-upload!</div><div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)', marginTop: '2px' }}>I-tap para palitan</div></>
+                  : <><div style={{ fontSize: '28px', marginBottom: '6px' }}>📷</div><div style={{ fontSize: '13px', fontWeight: 700 }}>I-tap para mag-upload ng litrato</div><div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)', marginTop: '2px' }}>Malinaw na mukha ng worker</div></>
+                }
+              </div>
+              <input ref={photoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhoto} />
+            </div>
+
+            {/* SMS NOTE */}
+            <div style={{ background: 'rgba(37,99,235,.1)', border: '1px solid rgba(37,99,235,.2)', borderRadius: '10px', padding: '12px 14px', marginBottom: '14px', fontSize: '12px', color: '#93c5fd', lineHeight: 1.65 }}>
+              📱 <strong>Makakatanggap ng text message ang iyong nirefer.</strong><br />
+              Kapag kinompirma nya na sya ay nag-aapply, siya ay makakasama na sa mga pwede i-hire ng mga homeowner.
+            </div>
+
+            <button style={{ ...s.submitBtn, opacity: saving ? .6 : 1 }} onClick={handleAddWorker} disabled={saving}>
+              {saving ? 'Nagse-save...' : 'I-submit ang Worker →'}
+            </button>
+            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.3)', textAlign: 'center', marginTop: '6px', lineHeight: 1.6 }}>
+              Mave-verify ng MaidIt within 24 hours.
             </div>
           </>
         )}

@@ -149,14 +149,14 @@ export default function PartnerPage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const shareWA = () => {
-    const msg = encodeURIComponent(`Sumali ka sa MaidIt — libreng job matching para sa mga kasambahay! Gamitin ang referral link ko: https://maidit.vercel.app/signup/kasambahay?ref=${refCode}`)
-    window.open(`https://wa.me/?text=${msg}`, '_blank')
+  const shareSMS = () => {
+    const msg = encodeURIComponent(`Mag-apply bilang kasambahay sa MaidIt! Libre at ligtas. Gamitin ang link ko: https://maidit.vercel.app/signup/kasambahay?ref=${refCode}`)
+    window.open(`sms:?body=${msg}`, '_blank')
   }
 
-  const shareFB = () => {
-    const msg = encodeURIComponent(`Sumali ka sa MaidIt! https://maidit.vercel.app/signup/kasambahay?ref=${refCode}`)
-    window.open(`https://m.me/?text=${msg}`, '_blank')
+  const shareMessenger = () => {
+    const link = encodeURIComponent(`https://maidit.vercel.app/signup/kasambahay?ref=${refCode}`)
+    window.open(`fb-messenger://share?link=${link}`, '_blank')
   }
 
   const s: any = {
@@ -371,9 +371,9 @@ export default function PartnerPage() {
       </nav>
       <div style={{ padding: '36px 18px 48px', textAlign: 'center' }}>
         <div style={{ fontSize: '40px', marginBottom: '12px' }}>🎉</div>
-        <h1 style={{ fontFamily: 'serif', fontSize: '24px', fontWeight: 900, color: '#f0c97a', marginBottom: '8px' }}>Nasa iyo na ang referral link mo!</h1>
+        <h1 style={{ fontFamily: 'serif', fontSize: '24px', fontWeight: 900, color: '#f0c97a', marginBottom: '8px' }}>Eto na ang referral link mo!</h1>
         <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.55)', lineHeight: 1.7, marginBottom: '24px' }}>
-          I-share ito sa mga kakilala mong kasambahay. Kapag na-hire sila, kumikita ka ng <strong style={{ color: '#fff' }}>₱1,000</strong>.
+          Simulan nang kumita sa pagshare nito sa mga kakilala mong naghahanap ng trabaho.
         </p>
 
         <div style={{ background: '#161b22', border: '1px solid rgba(201,148,58,.3)', borderRadius: '13px', padding: '16px', marginBottom: '14px', textAlign: 'left' }}>
@@ -384,13 +384,13 @@ export default function PartnerPage() {
             <button onClick={copyLink} style={{ padding: '10px', borderRadius: '9px', background: copied ? 'rgba(26,107,60,.25)' : 'rgba(201,148,58,.2)', border: `1px solid ${copied ? 'rgba(26,107,60,.4)' : 'rgba(201,148,58,.3)'}`, color: copied ? '#6ee7b7' : '#f0c97a', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>
               {copied ? '✅ Copied!' : '📋 Copy Link'}
             </button>
-            <button onClick={shareWA} style={{ padding: '10px', borderRadius: '9px', background: 'rgba(37,99,235,.2)', border: '1px solid rgba(37,99,235,.3)', color: '#93c5fd', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>📲 Share</button>
+            <button onClick={shareSMS} style={{ padding: '10px', borderRadius: '9px', background: 'rgba(37,99,235,.2)', border: '1px solid rgba(37,99,235,.3)', color: '#93c5fd', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>📲 Share</button>
           </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '20px' }}>
-          <button onClick={shareWA} style={{ padding: '11px', borderRadius: '10px', background: 'rgba(37,211,102,.15)', border: '1px solid rgba(37,211,102,.25)', color: '#4ade80', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>💬 WhatsApp</button>
-          <button onClick={shareFB} style={{ padding: '11px', borderRadius: '10px', background: 'rgba(24,119,242,.15)', border: '1px solid rgba(24,119,242,.25)', color: '#93c5fd', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>💙 Messenger</button>
+          <button onClick={shareSMS} style={{ padding: '11px', borderRadius: '10px', background: 'rgba(37,99,235,.15)', border: '1px solid rgba(37,99,235,.25)', color: '#93c5fd', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>💬 Text Message</button>
+          <button onClick={shareMessenger} style={{ padding: '11px', borderRadius: '10px', background: 'rgba(24,119,242,.15)', border: '1px solid rgba(24,119,242,.25)', color: '#93c5fd', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>💙 Messenger</button>
         </div>
 
         <div style={{ background: 'rgba(201,148,58,.08)', border: '1px solid rgba(201,148,58,.15)', borderRadius: '12px', padding: '14px', marginBottom: '20px', textAlign: 'left' }}>
