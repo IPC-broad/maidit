@@ -14,7 +14,7 @@ const SKILLS = [
 ]
 const SETUPS = ['Stay-in', 'Stay-out', 'Kahit alin']
 const CIVIL_STATUS = ['Single', 'May asawa', 'Balo/Biyuda']
-const AVAILABILITY = ['1-3 araw', '1 linggo', '2 linggo', '1 buwan', 'Iba pa (custom)']
+const AVAILABILITY = ['1-6 araw', '1 linggo', '2 linggo', '1 buwan', 'Iba pa (custom)']
 
 type Payout = {
   id: string; amount: number; type: string; status: string; due_at: string
@@ -47,6 +47,7 @@ export default function PartnerDashboard() {
     civil_status: '',
     num_children: '0',
     availability: '',
+    availability_custom: '',
     photo: null as string | null,
   })
 
@@ -133,7 +134,9 @@ export default function PartnerDashboard() {
       setup: workerForm.setup,
       civil_status: workerForm.civil_status,
       num_children: parseInt(workerForm.num_children) || 0,
-      availability: workerForm.availability,
+      availability: workerForm.availability === 'Iba pa (custom)' && workerForm.availability_custom
+        ? `${workerForm.availability_custom} araw`
+        : workerForm.availability,
     })
 
     // Send SMS to worker
@@ -148,7 +151,7 @@ export default function PartnerDashboard() {
 
     setSaveMsg('Na-save na! Makakatanggap ng text message si ' + pangalan + '.')
     setSaving(false)
-    setWorkerForm({ apelyido: '', pangalan: '', mobile: '', province: '', skills: [], setup: 'Kahit alin', civil_status: '', num_children: '0', availability: '', photo: null })
+    setWorkerForm({ apelyido: '', pangalan: '', mobile: '', province: '', skills: [], setup: 'Kahit alin', civil_status: '', num_children: '0', availability: '', availability_custom: '', photo: null })
 
     const { supabase: sb2 } = await import('../../../lib/supabase')
     const { data: workersData } = await sb2.from('kasambahay').select('*, profiles(*)').eq('referred_by', partner.id).order('created_at', { ascending: false })
@@ -407,10 +410,14 @@ export default function PartnerDashboard() {
 
               <label style={s.lbl}>Available Magtrabaho</label>
               <select style={s.sel} value={workerForm.availability}
-                onChange={e => setWorkerForm(f => ({ ...f, availability: e.target.value }))}>
+                onChange={e => setWorkerForm(f => ({ ...f, availability: e.target.value, availability_custom: '' }))}>
                 <option value="">Piliin...</option>
                 {AVAILABILITY.map(a => <option key={a} value={a}>{a}</option>)}
               </select>
+              {workerForm.availability === 'Iba pa (custom)' && (
+                <input style={s.inp} type="number" placeholder="Ilang araw? e.g. 45" value={workerForm.availability_custom}
+                  onChange={e => setWorkerForm(f => ({ ...f, availability_custom: e.target.value }))} />
+              )}
 
               <label style={s.lbl}>Skills (piliin lahat ng applicable)</label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '12px' }}>
