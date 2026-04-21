@@ -127,7 +127,7 @@ export default function KasambahaySignup() {
   }
 
   const s: any = {
-    wrap: { minHeight:'100vh', background:'#f9fafb', padding:'24px 20px', fontFamily:'sans-serif', color:'#111827' },
+    wrap: { minHeight:'100vh', background:'#faf8f5', padding:'24px 20px', fontFamily:'sans-serif', color:'#111827' },
     toprow: { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'16px' },
     back: { background:'none', border:'none', fontSize:'1rem', color:'#6b7280', cursor:'pointer', padding:0 },
     stepnum: { fontSize:'.72rem', color:'#9ca3af' },

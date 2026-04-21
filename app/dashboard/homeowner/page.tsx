@@ -44,15 +44,15 @@ export default function HWDashboard() {
   }
 
   if (loading) return (
-    <div style={{ minHeight:'100vh', background:'#f9fafb', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif', color:'#6b7280' }}>
+    <div style={{ minHeight:'100vh', background:'#faf8f5', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif', color:'#6b7280' }}>
       Loading profiles...
     </div>
   )
 
   return (
-    <div style={{ minHeight:'100vh', background:'#f9fafb', fontFamily:'sans-serif', paddingBottom:'80px' }}>
+    <div style={{ minHeight:'100vh', background:'#faf8f5', fontFamily:'sans-serif', paddingBottom:'80px' }}>
 
-      <div style={{ background:'#0d1117', padding:'16px 20px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+      <div style={{ background:'#fff', padding:'16px 20px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
         <h1 style={{ fontFamily:'serif', fontSize:'1.3rem', fontWeight:900, color:'#fff', letterSpacing:'-0.5px' }}>
           Maid<span style={{ color:'#f0c97a' }}>It</span>
         </h1>

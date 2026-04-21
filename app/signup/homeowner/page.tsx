@@ -46,14 +46,14 @@ export default function HomeownerSignup() {
   }
 
   const s: any = {
-    wrap: { minHeight:'100vh', background:'#f9fafb', padding:'24px 20px', fontFamily:'sans-serif', color:'#111827' },
+    wrap: { minHeight:'100vh', background:'#faf8f5', padding:'24px 20px', fontFamily:'sans-serif', color:'#111827' },
     toprow: { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'16px' },
     back: { background:'none', border:'none', color:'#6b7280', fontSize:'1.1rem', cursor:'pointer', padding:'4px 8px' },
     title: { fontWeight:900, fontSize:'1.3rem', marginBottom:'4px', color:'#111827' },
     sub: { fontSize:'.76rem', color:'#6b7280', marginBottom:'20px' },
     label: { display:'block', fontSize:'.63rem', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#6b7280', marginBottom:'4px' },
-    input: { width:'100%', padding:'11px 13px', border:'1.5px solid #e5e7eb', borderRadius:'11px', background:'rgba(255,255,255,.05)', color:'#111827', fontFamily:'sans-serif', fontSize:'.88rem', outline:'none', marginBottom:'13px' },
-    btn: { width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:'#1a6b3c', color:'#111827', fontFamily:'sans-serif', fontSize:'.92rem', fontWeight:700, cursor:'pointer', marginTop:'6px' },
+    input: { width:'100%', padding:'11px 13px', border:'1.5px solid #e5e7eb', borderRadius:'11px', background:'#fff', color:'#111827', fontFamily:'sans-serif', fontSize:'.88rem', outline:'none', marginBottom:'13px' },
+    btn: { width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'.92rem', fontWeight:700, cursor:'pointer', marginTop:'6px' },
     bar: { display:'flex', gap:'4px', marginBottom:'20px' },
     err: { background:'rgba(220,38,38,.1)', border:'1px solid rgba(220,38,38,.3)', borderRadius:'9px', padding:'10px 13px', fontSize:'.78rem', color:'#fca5a5', marginBottom:'12px' },
     chipWrap: { display:'flex', gap:'8px', flexWrap:'wrap' as const, marginBottom:'13px' },
@@ -135,7 +135,7 @@ export default function HomeownerSignup() {
         <div style={s.sub}>Step 3 of 3 · Browse all profiles free</div>
         <label style={s.label}>Password</label>
         <input style={s.input} type="password" placeholder="Min. 8 characters" value={form.password} onChange={e => update('password', e.target.value)}/>
-        <div style={{ background:'rgba(26,107,60,.1)', border:'1px solid rgba(26,107,60,.2)', borderRadius:'12px', padding:'13px', marginBottom:'14px', fontSize:'.76rem', lineHeight:1.7, color:'rgba(255,255,255,.7)' }}>
+        <div style={{ background:'rgba(26,107,60,.1)', border:'1px solid rgba(26,107,60,.2)', borderRadius:'12px', padding:'13px', marginBottom:'14px', fontSize:'.76rem', lineHeight:1.7, color:'#374151' }}>
           ✅ Browse profiles — free<br/>
           ✅ Message candidates anytime (₱499/month)<br/>
           ✅ Pay hiring fee only when you successfully hire
