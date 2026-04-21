@@ -62,7 +62,7 @@ export default function VerifyPage() {
     else router.push('/dashboard/homeowner')
   }
 
-  const w = { minHeight:'100vh', background:'#f9fafb', padding:'24px 20px', fontFamily:'sans-serif', color:'#111827' }
+  const w = { minHeight:'100vh', background:'#faf8f5', padding:'24px 20px', fontFamily:'sans-serif', color:'#111827' }
   const btn = { width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:'#1a6b3c', color:'#111827', fontFamily:'sans-serif', fontSize:'.92rem', fontWeight:700, cursor:'pointer', marginTop:'8px' }
   const inp = { width:'100%', padding:'11px 13px', border:'1.5px solid #e5e7eb', borderRadius:'11px', background:'#ffffff', color:'#111827', fontFamily:'sans-serif', fontSize:'.88rem', outline:'none', marginBottom:'13px' }
   const card = { background:'#ffffff', border:'1.5px solid #e5e7eb', borderRadius:'14px', padding:'16px', marginBottom:'12px', cursor:'pointer', display:'flex', gap:'13px', alignItems:'center' }
