@@ -125,6 +125,9 @@ export default function PartnerDashboard() {
       setSaveMsg('Hindi ma-save. Baka registered na ang mobile number na ito.')
       setSaving(false); return
     }
+    // Generate a unique confirmation token
+    const token = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)
+
     await supabase.from('kasambahay').insert({
       profile_id: profile.id,
       province,
@@ -137,17 +140,28 @@ export default function PartnerDashboard() {
       availability: workerForm.availability === 'Iba pa (custom)' && workerForm.availability_custom
         ? `${workerForm.availability_custom} araw`
         : workerForm.availability,
+      confirm_token: token,
     })
 
-    // Send SMS to worker
-    await fetch('/api/send-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        mobile,
-        message: `Kamusta ${pangalan}! Nirefer ka ni ${partner.profiles?.full_name} sa MaidIt para mahanap ng trabaho bilang kasambahay. I-reply ng YES para kumpirmahin at makasama sa listahan ng mga pwede i-hire. Libre ito!`
-      })
-    }).catch(() => {})
+    // Get the new kasambahay ID
+    const { data: newKb } = await supabase
+      .from('kasambahay')
+      .select('id')
+      .eq('profile_id', profile.id)
+      .single()
+
+    // Send confirmation SMS to worker
+    if (newKb?.id) {
+      await fetch('/api/send-sms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'worker_added',
+          kasambahayId: newKb.id,
+          token,
+        })
+      }).catch(() => {})
+    }
 
     setSaveMsg('Na-save na! Makakatanggap ng text message si ' + pangalan + '.')
     setSaving(false)
@@ -173,29 +187,28 @@ export default function PartnerDashboard() {
   }
 
   const s: any = {
-    wrap: { minHeight: '100vh', background: '#0d1117', color: '#fff', fontFamily: 'sans-serif' },
+    wrap: { minHeight: '100vh', background: '#faf8f5', color: '#1a1a1a', fontFamily: 'sans-serif' },
     tab: (active: boolean) => ({
       flex: 1, padding: '11px 4px', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700,
-      color: active ? '#f0c97a' : 'rgba(255,255,255,.4)', background: 'none', border: 'none',
+      color: active ? '#c9943a' : '#9ca3af', background: 'none', border: 'none',
       cursor: 'pointer', borderBottom: `2px solid ${active ? '#c9943a' : 'transparent'}`
     }),
-    card: { background: '#161b22', borderRadius: '12px', padding: '13px 14px', marginBottom: '10px', border: '1px solid rgba(255,255,255,.07)' },
-    lbl: { display: 'block', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: 'rgba(255,255,255,.4)', marginBottom: '4px' },
-    inp: { width: '100%', padding: '11px 12px', border: '1.5px solid rgba(255,255,255,.1)', borderRadius: '10px', fontFamily: 'sans-serif', fontSize: '14px', outline: 'none', background: 'rgba(255,255,255,.05)', color: '#fff', boxSizing: 'border-box' as const, marginBottom: '10px' },
-    sel: { width: '100%', padding: '11px 12px', border: '1.5px solid rgba(255,255,255,.1)', borderRadius: '10px', fontFamily: 'sans-serif', fontSize: '14px', outline: 'none', background: '#161b22', color: '#fff', boxSizing: 'border-box' as const, marginBottom: '10px' },
+    card: { background: '#fff', borderRadius: '12px', padding: '13px 14px', marginBottom: '10px', border: '1px solid #ede8e0' },
+    lbl: { display: 'block', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '4px' },
+    inp: { width: '100%', padding: '11px 12px', border: '1.5px solid #e5e0d8', borderRadius: '10px', fontFamily: 'sans-serif', fontSize: '14px', outline: 'none', background: '#fff', color: '#1a1a1a', boxSizing: 'border-box' as const, marginBottom: '10px' },
+    sel: { width: '100%', padding: '11px 12px', border: '1.5px solid #e5e0d8', borderRadius: '10px', fontFamily: 'sans-serif', fontSize: '14px', outline: 'none', background: '#fff', color: '#1a1a1a', boxSizing: 'border-box' as const, marginBottom: '10px' },
     submitBtn: { width: '100%', padding: '13px', borderRadius: '11px', border: 'none', background: '#c9943a', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '8px' },
     skillChip: (on: boolean) => ({
       display: 'block', padding: '9px 10px', borderRadius: '9px', cursor: 'pointer',
       fontSize: '13px', fontWeight: 600, textAlign: 'center' as const, transition: 'all .15s',
-      border: on ? 'none' : '1.5px solid rgba(255,255,255,.1)',
-      background: on ? 'rgba(201,148,58,.2)' : 'rgba(255,255,255,.04)',
-      color: on ? '#f0c97a' : 'rgba(255,255,255,.5)',
-      boxShadow: on ? '0 0 0 1.5px #c9943a' : 'none'
+      border: on ? '1.5px solid #c9943a' : '1.5px solid #e5e0d8',
+      background: on ? '#fef3e2' : '#fff',
+      color: on ? '#92400e' : '#6b7280',
     }),
   }
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#0d1117', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,.4)', fontFamily: 'sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#faf8f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontFamily: 'sans-serif' }}>
       Loading...
     </div>
   )
@@ -233,32 +246,32 @@ export default function PartnerDashboard() {
       </div>
 
       {/* STATS */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1px', background: 'rgba(255,255,255,.06)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1px', background: '#ede8e0' }}>
         {[
-          { num: `₱${totalEarned.toLocaleString()}`, lbl: 'Kinita', color: '#6ee7b7' },
-          { num: workers.filter(w => w.status === 'hired').length, lbl: 'Na-hire', color: '#f0c97a' },
-          { num: workers.length, lbl: 'Narecruit', color: '#93c5fd' },
+          { num: `₱${totalEarned.toLocaleString()}`, lbl: 'Kinita', color: '#1a6b3c' },
+          { num: workers.filter(w => w.status === 'hired').length, lbl: 'Na-hire', color: '#c9943a' },
+          { num: workers.length, lbl: 'Narecruit', color: '#2563eb' },
         ].map((stat, i) => (
-          <div key={i} style={{ background: '#0d1117', padding: '14px 10px', textAlign: 'center' }}>
+          <div key={i} style={{ background: '#fff', padding: '14px 10px', textAlign: 'center' }}>
             <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 900, color: stat.color, marginBottom: '2px' }}>{stat.num}</div>
-            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.4)' }}>{stat.lbl}</div>
+            <div style={{ fontSize: '10px', color: '#9ca3af' }}>{stat.lbl}</div>
           </div>
         ))}
       </div>
 
       {/* PAYOUT BANNER */}
-      <div style={{ background: isGold ? 'rgba(201,148,58,.12)' : 'rgba(26,107,60,.1)', borderBottom: '1px solid rgba(255,255,255,.06)', padding: '9px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ background: isGold ? '#fef3c7' : '#dcfce7', borderBottom: '1px solid #ede8e0', padding: '9px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
         <span style={{ fontSize: '14px' }}>{isGold ? '⭐' : '💰'}</span>
-        <div style={{ fontSize: '12px', color: isGold ? '#f0c97a' : '#6ee7b7', lineHeight: 1.5, flex: 1 }}>
+        <div style={{ fontSize: '12px', color: isGold ? '#92400e' : '#166534', lineHeight: 1.5, flex: 1 }}>
           {isGold
             ? <><strong>Gold Partner:</strong> ₱1,000 upfront sa worker arrival.</>
             : <><strong>Standard Partner:</strong> ₱600 sa arrival + ₱400 after 30 days = ₱1,000 total</>}
         </div>
-        {totalPending > 0 && <div style={{ fontFamily: 'serif', fontSize: '13px', fontWeight: 900, color: '#f0c97a' }}>₱{totalPending.toLocaleString()} pending</div>}
+        {totalPending > 0 && <div style={{ fontFamily: 'serif', fontSize: '13px', fontWeight: 900, color: '#92400e' }}>₱{totalPending.toLocaleString()} pending</div>}
       </div>
 
       {/* TABS */}
-      <div style={{ display: 'flex', background: '#161b22', borderBottom: '1px solid rgba(255,255,255,.07)' }}>
+      <div style={{ display: 'flex', background: '#fff', borderBottom: '1px solid #ede8e0' }}>
         {(['workers', 'payouts', 'add'] as const).map(t => (
           <button key={t} style={s.tab(tab === t)} onClick={() => setTab(t)}>
             {t === 'add' ? '+ Mag-add' : t === 'workers' ? 'Workers' : 'Payouts'}
