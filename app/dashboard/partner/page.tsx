@@ -164,11 +164,12 @@ export default function PartnerDashboard() {
   const isGold = partner?.tier === 'gold'
 
   const statusLabel: Record<string, { label: string; bg: string; color: string }> = {
-    hired: { label: 'Na-hire ✓', bg: 'rgba(26,107,60,.25)', color: '#6ee7b7' },
+    hired: { label: 'Na-hire na', bg: 'rgba(26,107,60,.25)', color: '#6ee7b7' },
+    offer: { label: 'May Offer', bg: 'rgba(139,92,246,.25)', color: '#c4b5fd' },
     available: { label: 'Available', bg: 'rgba(37,99,235,.2)', color: '#93c5fd' },
-    pending_confirmation: { label: 'Hinihintay ang reply', bg: 'rgba(201,148,58,.2)', color: '#f0c97a' },
-    pending: { label: 'Hinihintay ang reply', bg: 'rgba(201,148,58,.2)', color: '#f0c97a' },
-    draft: { label: 'Draft', bg: 'rgba(255,255,255,.08)', color: 'rgba(255,255,255,.4)' },
+    pending_confirmation: { label: 'Hindi pa nagcoconfirm', bg: 'rgba(201,148,58,.2)', color: '#f0c97a' },
+    pending: { label: 'Hindi pa nagcoconfirm', bg: 'rgba(201,148,58,.2)', color: '#f0c97a' },
+    draft: { label: 'Hindi pa nagcoconfirm', bg: 'rgba(201,148,58,.2)', color: '#f0c97a' },
   }
 
   const s: any = {
@@ -203,7 +204,10 @@ export default function PartnerDashboard() {
     <div style={s.wrap}>
       {/* HEADER */}
       <div style={{ background: 'linear-gradient(135deg,#161b22,#21262d)', borderBottom: '1px solid rgba(255,255,255,.07)', padding: '16px 16px 14px' }}>
-        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)', marginBottom: '2px' }}>Welcome back</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)' }}>Welcome back</div>
+          <button onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.auth.signOut(); router.push('/login') }} style={{ background: 'rgba(255,255,255,.07)', border: '1px solid rgba(255,255,255,.1)', borderRadius: '8px', padding: '5px 11px', color: 'rgba(255,255,255,.45)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'sans-serif' }}>Sign out</button>
+        </div>
         <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900 }}>{partner?.profiles?.full_name || 'Partner'}</div>
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' as const, marginTop: '6px' }}>
           <span style={{ background: partner?.approved ? 'rgba(26,107,60,.2)' : 'rgba(255,255,255,.08)', border: `1px solid ${partner?.approved ? 'rgba(26,107,60,.3)' : 'rgba(255,255,255,.1)'}`, borderRadius: '50px', padding: '3px 10px', fontSize: '10px', fontWeight: 700, color: partner?.approved ? '#6ee7b7' : 'rgba(255,255,255,.4)' }}>
@@ -233,7 +237,7 @@ export default function PartnerDashboard() {
         {[
           { num: `₱${totalEarned.toLocaleString()}`, lbl: 'Kinita', color: '#6ee7b7' },
           { num: workers.filter(w => w.status === 'hired').length, lbl: 'Na-hire', color: '#f0c97a' },
-          { num: workers.length, lbl: 'Sa pool', color: '#93c5fd' },
+          { num: workers.length, lbl: 'Narecruit', color: '#93c5fd' },
         ].map((stat, i) => (
           <div key={i} style={{ background: '#0d1117', padding: '14px 10px', textAlign: 'center' }}>
             <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 900, color: stat.color, marginBottom: '2px' }}>{stat.num}</div>
