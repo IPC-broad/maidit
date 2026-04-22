@@ -53,12 +53,12 @@ export default function HWDashboard() {
     <div style={{ minHeight:'100vh', background:'#faf8f5', fontFamily:'sans-serif', paddingBottom:'80px' }}>
 
       <div style={{ background:'#fff', padding:'16px 20px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-        <h1 style={{ fontFamily:'serif', fontSize:'1.3rem', fontWeight:900, color:'#fff', letterSpacing:'-0.5px' }}>
+        <h1 style={{ fontFamily:'serif', fontSize:'1.3rem', fontWeight:900, color:'#1a1a1a', letterSpacing:'-0.5px' }}>
           Maid<span style={{ color:'#f0c97a' }}>It</span>
         </h1>
         <div style={{ display:'flex', gap:'10px', alignItems:'center' }}>
-          <span style={{ fontSize:'.72rem', color:'rgba(255,255,255,.5)' }}>Browse</span>
-          <a href="/login" style={{ fontSize:'.72rem', color:'rgba(255,255,255,.4)', textDecoration:'none' }}>Sign out</a>
+          <span style={{ fontSize:'.72rem', color:'#9ca3af' }}>Browse</span>
+          <a href="/login" style={{ fontSize:'.72rem', color:'#9ca3af', textDecoration:'none' }}>Sign out</a>
         </div>
       </div>
 
