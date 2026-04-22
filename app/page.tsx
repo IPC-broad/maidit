@@ -48,6 +48,18 @@ export default function Home() {
         }}>
           💼 Naghahanap ng Trabaho?
         </Link>
+        <Link href="/login" style={{
+          padding: '12px',
+          borderRadius: '13px',
+          background: 'transparent',
+          color: '#6b7280',
+          fontWeight: 600,
+          textDecoration: 'none',
+          fontSize: '0.88rem',
+          border: '1.5px solid #ede8e0'
+        }}>
+          🔐 Already have an account? Sign In
+        </Link>
       </div>
       <div style={{ display: 'flex', gap: '16px', marginTop: '28px', flexWrap: 'wrap', justifyContent: 'center' }}>
         <span style={{ fontSize: '0.65rem', color: '#9ca3af' }}>✅ Verified profiles</span>
