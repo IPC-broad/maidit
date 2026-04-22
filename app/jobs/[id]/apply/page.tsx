@@ -89,8 +89,8 @@ export default function ApplyPage() {
 
   const s: any = {
     wrap: { minHeight:'100vh', background:'#f9fafb', fontFamily:'sans-serif', color:'#111827' },
-    head: { background:'#0d1117', padding:'14px 18px', display:'flex', alignItems:'center', gap:'10px' },
-    back: { background:'none', border:'none', color:'rgba(255,255,255,.5)', fontSize:'1rem', cursor:'pointer', padding:0 },
+    head: { background:'#fff', padding:'14px 18px', display:'flex', alignItems:'center', gap:'10px' },
+    back: { background:'none', border:'none', color:'#9ca3af', fontSize:'1rem', cursor:'pointer', padding:0 },
     body: { padding:'20px 18px 40px' },
     title: { fontFamily:'serif', fontSize:'1.2rem', fontWeight:900, marginBottom:'4px', color:'#111827' },
     sub: { fontSize:'.76rem', color:'#6b7280', marginBottom:'20px', lineHeight:1.6 },
@@ -140,7 +140,7 @@ export default function ApplyPage() {
     <div style={s.wrap}>
       <div style={s.head}>
         <button style={s.back} onClick={() => router.back()}>←</button>
-        <span style={{ fontFamily:'serif', fontSize:'1rem', fontWeight:900, color:'#fff' }}>Apply for Job</span>
+        <span style={{ fontFamily:'serif', fontSize:'1rem', fontWeight:900, color:'#1a1a1a' }}>Apply for Job</span>
       </div>
 
       <div style={s.body}>
@@ -154,7 +154,7 @@ export default function ApplyPage() {
           <div style={s.row}><span style={s.rowLabel}>Location</span><span style={s.rowValue}>📍 {job.city}</span></div>
           <div style={s.row}><span style={s.rowLabel}>Setup</span><span style={s.rowValue}>🏠 {job.setup}</span></div>
           <div style={s.row}><span style={s.rowLabel}>Salary</span><span style={s.rowValue} >₱{job.salary?.toLocaleString()}/mo</span></div>
-          <div style={s.row}><span style={s.rowLabel}>Start Date</span><span style={s.rowValue}>{new Date(job.start_date).toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric' })}</span></div>
+          <div style={s.row}><span style={s.rowLabel}>Start Date</span><span style={s.rowValue}>{job.start_date ? new Date(job.start_date).toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric' }) : job.urgency}</span></div>
           <div style={s.row}><span style={s.rowLabel}>Day Off</span><span style={s.rowValue}>{job.day_off}</span></div>
           <div style={s.rowLast}><span style={s.rowLabel}>Scope</span><span style={s.rowValue}>{job.scope?.join(', ')}</span></div>
         </div>
@@ -193,7 +193,7 @@ export default function ApplyPage() {
               {form.availability_confirmed && <span style={{ color:'#fff', fontSize:'.7rem', fontWeight:900 }}>✓</span>}
             </div>
             <div style={s.checkLabel}>
-              I am available to start on {new Date(job.start_date).toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric' })} and agree to the {job.setup} setup in {job.city}
+              I am available to start on {job.start_date ? new Date(job.start_date).toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric' }) : job.urgency} and agree to the {job.setup} setup in {job.city}
             </div>
           </div>
           <div style={s.checkLast} onClick={() => setForm(f => ({ ...f, setup_confirmed: !f.setup_confirmed }))}>
