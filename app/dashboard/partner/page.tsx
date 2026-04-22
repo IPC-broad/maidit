@@ -216,10 +216,10 @@ export default function PartnerDashboard() {
   return (
     <div style={s.wrap}>
       {/* HEADER */}
-      <div style={{ background: 'linear-gradient(135deg,#161b22,#21262d)', borderBottom: '1px solid rgba(255,255,255,.07)', padding: '16px 16px 14px' }}>
+      <div style={{ background: '#fff', borderBottom: '1px solid #ede8e0', padding: '16px 16px 14px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)' }}>Welcome back</div>
-          <button onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.auth.signOut(); router.push('/login') }} style={{ background: 'rgba(255,255,255,.07)', border: '1px solid rgba(255,255,255,.1)', borderRadius: '8px', padding: '5px 11px', color: 'rgba(255,255,255,.45)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'sans-serif' }}>Sign out</button>
+          <div style={{ fontSize: '11px', color: '#9ca3af' }}>Welcome back</div>
+          <button onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.auth.signOut(); router.push('/login') }} style={{ background: '#f9f6f2', border: '1px solid #ede8e0', borderRadius: '8px', padding: '5px 11px', color: '#6b7280', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'sans-serif' }}>Sign out</button>
         </div>
         <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900 }}>{partner?.profiles?.full_name || 'Partner'}</div>
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' as const, marginTop: '6px' }}>
@@ -232,7 +232,7 @@ export default function PartnerDashboard() {
         {/* REFERRAL CODE */}
         <div style={{ background: 'rgba(201,148,58,.1)', border: '1px solid rgba(201,148,58,.2)', borderRadius: '10px', padding: '10px 13px', marginTop: '11px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.4)', marginBottom: '2px' }}>Referral code mo</div>
+            <div style={{ fontSize: '10px', color: '#9ca3af', marginBottom: '2px' }}>Referral code mo</div>
             <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, color: '#f0c97a', letterSpacing: '1px' }}>{referralCode}</div>
           </div>
           <div style={{ display: 'flex', gap: '6px' }}>
@@ -242,7 +242,7 @@ export default function PartnerDashboard() {
             <button onClick={shareSMS} style={{ padding: '6px 12px', borderRadius: '7px', background: 'rgba(37,99,235,.15)', border: '1px solid rgba(37,99,235,.25)', color: '#93c5fd', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>SMS</button>
           </div>
         </div>
-        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.3)', marginTop: '5px', lineHeight: 1.5 }}>I-share sa mga naghahanap ng trabaho — sila mag-e-enter nito during signup</div>
+        <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '5px', lineHeight: 1.5 }}>I-share sa mga naghahanap ng trabaho — sila mag-e-enter nito during signup</div>
       </div>
 
       {/* STATS */}
@@ -285,7 +285,7 @@ export default function PartnerDashboard() {
         {tab === 'workers' && (
           <>
             {workers.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px 20px', color: 'rgba(255,255,255,.3)' }}>
+              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#9ca3af' }}>
                 <div style={{ fontSize: '2rem', marginBottom: '8px' }}>👥</div>
                 <div style={{ fontSize: '13px', marginBottom: '4px' }}>Wala pang workers sa pool mo.</div>
                 <div style={{ fontSize: '12px' }}>Mag-tap ng "+ Mag-add" para magsimula.</div>
@@ -298,19 +298,19 @@ export default function PartnerDashboard() {
                     <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(201,148,58,.15)', border: '2px solid rgba(201,148,58,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', flexShrink: 0 }}>👩</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: '14px' }}>{w.profiles?.full_name}</div>
-                      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)' }}>{w.province} · {w.profiles?.mobile}</div>
+                      <div style={{ fontSize: '11px', color: '#9ca3af' }}>{w.province} · {w.profiles?.mobile}</div>
                     </div>
                     <div style={{ fontSize: '9px', fontWeight: 800, padding: '3px 9px', borderRadius: '50px', textTransform: 'uppercase', background: st.bg, color: st.color }}>{st.label}</div>
                   </div>
                   {w.skills?.length > 0 && (
                     <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
                       {w.skills.map((skill: string) => (
-                        <span key={skill} style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '4px', background: 'rgba(255,255,255,.07)', color: 'rgba(255,255,255,.55)' }}>{skill}</span>
+                        <span key={skill} style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '4px', background: '#f3ede5', color: '#92400e' }}>{skill}</span>
                       ))}
                     </div>
                   )}
                   {w.status === 'pending_confirmation' && (
-                    <div style={{ marginTop: '8px', background: 'rgba(201,148,58,.1)', borderRadius: '8px', padding: '7px 10px', fontSize: '11px', color: 'rgba(255,255,255,.5)', lineHeight: 1.5 }}>
+                    <div style={{ marginTop: '8px', background: 'rgba(201,148,58,.1)', borderRadius: '8px', padding: '7px 10px', fontSize: '11px', color: '#6b7280', lineHeight: 1.5 }}>
                       📱 Naghihintay ng reply sa text message
                     </div>
                   )}
@@ -329,33 +329,33 @@ export default function PartnerDashboard() {
             <div style={{ background: 'rgba(26,107,60,.15)', border: '1px solid rgba(26,107,60,.25)', borderRadius: '12px', padding: '14px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{ fontSize: '26px' }}>💰</div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.45)' }}>Total kinita</div>
+                <div style={{ fontSize: '11px', color: '#9ca3af' }}>Total kinita</div>
                 <div style={{ fontFamily: 'serif', fontSize: '26px', fontWeight: 900, color: '#6ee7b7' }}>₱{totalEarned.toLocaleString()}</div>
-                {totalPending > 0 && <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)', marginTop: '2px' }}>₱{totalPending.toLocaleString()} pending</div>}
+                {totalPending > 0 && <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>₱{totalPending.toLocaleString()} pending</div>}
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.35)', marginBottom: '2px' }}>GCash</div>
+                <div style={{ fontSize: '10px', color: '#9ca3af', marginBottom: '2px' }}>GCash</div>
                 <div style={{ fontSize: '12px', fontWeight: 700, color: '#f0c97a' }}>{partner?.gcash_number || '—'}</div>
               </div>
             </div>
             {payouts.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '32px 0', color: 'rgba(255,255,255,.3)', fontSize: '13px' }}>
+              <div style={{ textAlign: 'center', padding: '32px 0', color: '#9ca3af', fontSize: '13px' }}>
                 Wala pang payouts. Lalabas ito kapag na-hire na ang iyong workers.
               </div>
             ) : payouts.map(p => (
-              <div key={p.id} style={{ background: '#161b22', borderRadius: '10px', padding: '12px 13px', marginBottom: '8px', border: `1px solid ${p.status === 'pending' ? 'rgba(201,148,58,.15)' : 'rgba(255,255,255,.07)'}`, display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div key={p.id} style={{ background: '#fff', borderRadius: '10px', padding: '12px 13px', marginBottom: '8px', border: `1px solid ${p.status === 'pending' ? '#fde8c0' : '#ede8e0'}`, display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{ width: '34px', height: '34px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.status === 'paid' ? 'rgba(26,107,60,.2)' : 'rgba(201,148,58,.15)', flexShrink: 0, fontSize: '14px' }}>
                   {p.status === 'paid' ? '💚' : '⏳'}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700, fontSize: '13px' }}>{p.offer?.kasambahay_profile?.full_name}</div>
-                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)', marginTop: '1px' }}>
+                  <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '1px' }}>
                     {p.type === 'arrival' ? 'Arrival payout' : 'Day-30 payout'} · {new Date(p.due_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontFamily: 'serif', fontSize: '15px', fontWeight: 900, color: p.status === 'paid' ? '#6ee7b7' : '#f0c97a' }}>₱{p.amount.toLocaleString()}</div>
-                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.4)', marginTop: '1px' }}>{p.status}</div>
+                  <div style={{ fontSize: '10px', color: '#9ca3af', marginTop: '1px' }}>{p.status}</div>
                 </div>
               </div>
             ))}
@@ -365,7 +365,7 @@ export default function PartnerDashboard() {
         {/* ADD WORKER TAB */}
         {tab === 'add' && (
           <>
-            <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.4)', marginBottom: '14px', lineHeight: 1.6 }}>
+            <div style={{ fontSize: '13px', color: '#9ca3af', marginBottom: '14px', lineHeight: 1.6 }}>
               I-upload ang kasambahay sa iyong pool.
             </div>
 
@@ -451,10 +451,10 @@ export default function PartnerDashboard() {
               {workerForm.photo && (
                 <img src={workerForm.photo} alt="worker" style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', borderRadius: '10px', marginBottom: '8px' }} />
               )}
-              <div onClick={() => photoRef.current?.click()} style={{ background: 'rgba(255,255,255,.04)', border: `2px dashed ${workerForm.photo ? '#1a6b3c' : 'rgba(255,255,255,.15)'}`, borderRadius: '11px', padding: '20px', textAlign: 'center', cursor: 'pointer', marginBottom: '12px' }}>
+              <div onClick={() => photoRef.current?.click()} style={{ background: '#fdf9f4', border: `2px dashed ${workerForm.photo ? '#1a6b3c' : '#e5e0d8'}`, borderRadius: '11px', padding: '20px', textAlign: 'center', cursor: 'pointer', marginBottom: '12px' }}>
                 {workerForm.photo
-                  ? <><div style={{ fontSize: '18px', marginBottom: '4px' }}>✅</div><div style={{ fontSize: '13px', color: '#6ee7b7', fontWeight: 700 }}>Litrato na-upload!</div><div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)', marginTop: '2px' }}>I-tap para palitan</div></>
-                  : <><div style={{ fontSize: '28px', marginBottom: '6px' }}>📷</div><div style={{ fontSize: '13px', fontWeight: 700 }}>I-tap para mag-upload ng litrato</div><div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)', marginTop: '2px' }}>Malinaw na mukha ng worker</div></>
+                  ? <><div style={{ fontSize: '18px', marginBottom: '4px' }}>✅</div><div style={{ fontSize: '13px', color: '#6ee7b7', fontWeight: 700 }}>Litrato na-upload!</div><div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>I-tap para palitan</div></>
+                  : <><div style={{ fontSize: '28px', marginBottom: '6px' }}>📷</div><div style={{ fontSize: '13px', fontWeight: 700 }}>I-tap para mag-upload ng litrato</div><div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>Malinaw na mukha ng worker</div></>
                 }
               </div>
               <input ref={photoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhoto} />
@@ -469,7 +469,7 @@ export default function PartnerDashboard() {
             <button style={{ ...s.submitBtn, opacity: saving ? .6 : 1 }} onClick={handleAddWorker} disabled={saving}>
               {saving ? 'Nagse-save...' : 'I-submit ang Worker →'}
             </button>
-            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.3)', textAlign: 'center', marginTop: '6px', lineHeight: 1.6 }}>
+            <div style={{ fontSize: '11px', color: '#9ca3af', textAlign: 'center', marginTop: '6px', lineHeight: 1.6 }}>
               Mave-verify ng MaidIt within 24 hours.
             </div>
           </>
