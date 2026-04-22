@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-const PAYMONGO_LINK = 'https://pm.link/org-9FQv6XBpoCxdDMaMPY8gze3N/3H88IVz'
+const PAYMONGO_LINK = 'https://pm.link/org-9FQv6XBpoCxdDMaMPY8gze3N/bK90nx0'
 
 export default function PostJobPage() {
   const router = useRouter()
@@ -15,14 +15,14 @@ export default function PostJobPage() {
   const [form, setForm] = useState({
     salary: '',
     start_date: '',
-    urgency: '1-7 days',
+    urgency: 'Kailangan na (ASAP)',
     custom_date: '',
     setup: 'Stay-in',
     day_off: 'Every Sunday',
     city: 'Quezon City',
     area: '',
     scope: [] as string[],
-    household: { adults: 2, kids: 0 },
+    household: { adults: 2, kids: 0, seniors: 0 },
     pets: 'No'
   })
 
@@ -80,7 +80,7 @@ export default function PostJobPage() {
     center: { display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '28px', textAlign: 'center' as const, fontFamily: 'sans-serif', background: '#faf8f5' },
   }
 
-  const scopeItems = ['🧹 Housekeeping','👶 Yaya','🍳 Cooking','🧺 Laundry','🚗 Driver','👴 Elder Care','🐕 Pet Care','🛒 Pamimili']
+  const scopeItems = ['🧹 All-around Maid','🍳 Tagaluto','🧺 Tagalaba','👶 Yaya','🐕 Taga-alaga ng Pets','👴 Taga-alaga ng Matanda','🚗 Driver','🛒 Pamimili']
 
   // ── DONE ──
   if (step === 'done') return (
@@ -305,16 +305,21 @@ export default function PostJobPage() {
         <input style={s.inp} placeholder="e.g. Teachers Village" onChange={e => update('area', e.target.value)} />
 
         <label style={s.lbl}>Household</label>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
           <div>
             <label style={{ ...s.lbl, marginBottom: '4px' }}>Adults</label>
-            <input style={s.inp} type="number" min="1" value={form.household.adults}
-              onChange={e => setForm(f => ({ ...f, household: { ...f.household, adults: parseInt(e.target.value) || 1 } }))} />
+            <input style={s.inp} type="number" min="0" value={form.household.adults}
+              onChange={e => setForm(f => ({ ...f, household: { ...f.household, adults: parseInt(e.target.value) || 0 } }))} />
           </div>
           <div>
             <label style={{ ...s.lbl, marginBottom: '4px' }}>Kids</label>
             <input style={s.inp} type="number" min="0" value={form.household.kids}
               onChange={e => setForm(f => ({ ...f, household: { ...f.household, kids: parseInt(e.target.value) || 0 } }))} />
+          </div>
+          <div>
+            <label style={{ ...s.lbl, marginBottom: '4px' }}>Seniors</label>
+            <input style={s.inp} type="number" min="0" value={form.household.seniors}
+              onChange={e => setForm(f => ({ ...f, household: { ...f.household, seniors: parseInt(e.target.value) || 0 } }))} />
           </div>
         </div>
 
@@ -334,17 +339,13 @@ export default function PostJobPage() {
           <option>To be discussed</option>
         </select>
 
-        <label style={s.lbl}>When do you need help?</label>
+        <label style={s.lbl}>Kailan kailangan?</label>
         <select style={s.inp} value={form.urgency} onChange={e => update('urgency', e.target.value)}>
-          <option>Now</option>
-          <option>1-7 days</option>
-          <option>2 weeks</option>
-          <option>Flexible</option>
-          <option>Custom</option>
+          <option>Kailangan na (ASAP)</option>
+          <option>Sa loob ng ilang araw</option>
+          <option>Sa susunod na linggo</option>
+          <option>Pwede pag-usapan</option>
         </select>
-        {form.urgency === 'Custom' && (
-          <input type="date" style={s.inp} onChange={e => update('custom_date', e.target.value)} />
-        )}
 
         <label style={s.lbl}>Monthly Salary (₱)</label>
         <input style={s.inp} type="number" placeholder="e.g. 9000" value={form.salary}
