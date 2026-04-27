@@ -19,7 +19,7 @@ export default function HWDashboard() {
       const { data } = await supabase
         .from('kasambahay')
         .select('*, profiles(*)')
-        .order('id', { ascending: false })
+        
 
       setProfiles(data || [])
       setLoading(false)
@@ -30,7 +30,7 @@ export default function HWDashboard() {
   const filters = ['Lahat', 'Stay-in', 'Stay-out', 'Metro Manila', 'Province']
 
   const filtered = profiles.filter(p => {
-    if (filter === 'Lahat') return true
+    if (!p.profiles) return false; if (filter === 'Lahat') return true
     if (filter === 'Stay-in') return p.setup === 'Stay-in'
     if (filter === 'Stay-out') return p.setup === 'Stay-out'
     if (filter === 'Metro Manila') return !p.province || p.province === 'Quezon City' || p.province === 'Makati'
