@@ -135,7 +135,7 @@ export default function BrowsePage() {
               </div>
 
               <button
-                className="w-full bg-[#1a6b3c] text-white py-3 rounded-lg font-semibold mb-2"
+                className="w-full bg-[#1a6b3c] text-white py-3 rounded-lg font-semibold mb-2" onClick={() => window.open("https://pm.link/org-9FQv6XBpoCxdDMaMPY8gze3N/3H88IVz", "_blank")}
               >
                 Pay ₱499 and Send Job Offer
               </button>
