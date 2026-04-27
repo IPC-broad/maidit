@@ -28,7 +28,7 @@ export default function KBDashboard() {
         const { data: offersData } = await supabase
           .from('offers')
           .select('*, homeowner_profile:profiles!offers_homeowner_id_fkey(full_name, mobile)')
-          .eq('kasambahay_id', user.id)
+          .eq('kasambahay_id', kbData.id)
           .order('created_at', { ascending: false })
         setOffers(offersData || [])
         const { data: apps } = await supabase.from('applications').select('job_id').eq('kasambahay_id', kbData.id)
