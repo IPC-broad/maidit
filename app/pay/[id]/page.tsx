@@ -105,7 +105,7 @@ export default function PayPage() {
   if (step === 'confirm') return (
     <div style={s.wrap}>
       <div style={s.head}>
-        <span style={{ fontFamily: 'serif', fontSize: '1rem', fontWeight: 900, color: '#fff' }}>Confirm Payment</span>
+        <span style={{ fontFamily: 'serif', fontSize: '1rem', fontWeight: 900, color: '#1a1a1a' }}>Confirm Payment</span>
       </div>
       <div style={s.body}>
         <div style={{ fontFamily: 'serif', fontSize: '1.1rem', fontWeight: 900, marginBottom: '6px' }}>
@@ -140,7 +140,7 @@ export default function PayPage() {
     <div style={s.wrap}>
       <div style={s.head}>
         <button style={s.back} onClick={() => router.back()}>←</button>
-        <span style={{ fontFamily: 'serif', fontSize: '1rem', fontWeight: 900, color: '#fff' }}>Pay Hire Fee</span>
+        <span style={{ fontFamily: 'serif', fontSize: '1rem', fontWeight: 900, color: '#1a1a1a' }}>Pay Hire Fee</span>
       </div>
       <div style={s.body}>
         <div style={{ fontFamily: 'serif', fontSize: '1.15rem', fontWeight: 900, marginBottom: '4px' }}>

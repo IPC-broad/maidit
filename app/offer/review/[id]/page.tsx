@@ -162,7 +162,7 @@ export default function OfferReviewPage() {
     <div style={s.wrap}>
       <div style={s.head}>
         <button style={s.back} onClick={() => router.back()}>←</button>
-        <span style={{ fontFamily:'serif', fontSize:'1rem', fontWeight:900, color:'#fff' }}>Review Offer</span>
+        <span style={{ fontFamily:'serif', fontSize:'1rem', fontWeight:900, color:'#1a1a1a' }}>Review Offer</span>
       </div>
 
       <div style={s.body}>

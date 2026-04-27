@@ -159,7 +159,7 @@ export default function VerifyPage() {
               Click the link to verify and unlock all features.
             </p>
           </div>
-          <p style={{ color:'rgba(255,255,255,.35)', fontSize:'.74rem', marginBottom:'20px' }}>Did not get it? Check your spam folder.</p>
+          <p style={{ color:'#6b7280', fontSize:'.74rem', marginBottom:'20px' }}>Did not get it? Check your spam folder.</p>
           <button style={btn} onClick={goToDashboard}>Go to Dashboard</button>
         </div>
       )}

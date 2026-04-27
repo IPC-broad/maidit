@@ -181,9 +181,9 @@ export default function PartnerDashboard() {
     hired: { label: 'Na-hire na', bg: 'rgba(26,107,60,.25)', color: '#6ee7b7' },
     offer: { label: 'May Offer', bg: 'rgba(139,92,246,.25)', color: '#c4b5fd' },
     available: { label: 'Available', bg: 'rgba(37,99,235,.2)', color: '#93c5fd' },
-    pending_confirmation: { label: 'Hindi pa nagcoconfirm', bg: 'rgba(201,148,58,.2)', color: '#f0c97a' },
-    pending: { label: 'Hindi pa nagcoconfirm', bg: 'rgba(201,148,58,.2)', color: '#f0c97a' },
-    draft: { label: 'Hindi pa nagcoconfirm', bg: 'rgba(201,148,58,.2)', color: '#f0c97a' },
+    pending_confirmation: { label: 'Hindi pa nagcoconfirm', bg: 'rgba(201,148,58,.2)', color: '#c9943a' },
+    pending: { label: 'Hindi pa nagcoconfirm', bg: 'rgba(201,148,58,.2)', color: '#c9943a' },
+    draft: { label: 'Hindi pa nagcoconfirm', bg: 'rgba(201,148,58,.2)', color: '#c9943a' },
   }
 
   const s: any = {
@@ -226,14 +226,14 @@ export default function PartnerDashboard() {
           <span style={{ background: partner?.approved ? 'rgba(26,107,60,.2)' : 'rgba(255,255,255,.08)', border: `1px solid ${partner?.approved ? 'rgba(26,107,60,.3)' : 'rgba(255,255,255,.1)'}`, borderRadius: '50px', padding: '3px 10px', fontSize: '10px', fontWeight: 700, color: partner?.approved ? '#6ee7b7' : 'rgba(255,255,255,.4)' }}>
             {partner?.approved ? '✅ Approved' : '⏳ Pending Approval'} · {partner?.province || partner?.barangay?.split(',').slice(-1)[0]?.trim() || 'PH'}
           </span>
-          {isGold && <span style={{ background: 'rgba(201,148,58,.2)', border: '1px solid rgba(201,148,58,.3)', borderRadius: '50px', padding: '3px 10px', fontSize: '10px', fontWeight: 700, color: '#f0c97a' }}>⭐ Gold Partner</span>}
+          {isGold && <span style={{ background: 'rgba(201,148,58,.2)', border: '1px solid rgba(201,148,58,.3)', borderRadius: '50px', padding: '3px 10px', fontSize: '10px', fontWeight: 700, color: '#c9943a' }}>⭐ Gold Partner</span>}
         </div>
 
         {/* REFERRAL CODE */}
         <div style={{ background: 'rgba(201,148,58,.1)', border: '1px solid rgba(201,148,58,.2)', borderRadius: '10px', padding: '10px 13px', marginTop: '11px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <div style={{ fontSize: '10px', color: '#9ca3af', marginBottom: '2px' }}>Referral code mo</div>
-            <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, color: '#f0c97a', letterSpacing: '1px' }}>{referralCode}</div>
+            <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, color: '#c9943a', letterSpacing: '1px' }}>{referralCode}</div>
           </div>
           <div style={{ display: 'flex', gap: '6px' }}>
             <button onClick={copyCode} style={{ padding: '6px 12px', borderRadius: '7px', background: copied ? 'rgba(26,107,60,.3)' : 'rgba(201,148,58,.2)', border: `1px solid ${copied ? 'rgba(26,107,60,.4)' : 'rgba(201,148,58,.3)'}`, color: copied ? '#6ee7b7' : '#f0c97a', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>
@@ -317,7 +317,7 @@ export default function PartnerDashboard() {
                 </div>
               )
             })}
-            <button onClick={() => setTab('add')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'rgba(201,148,58,.12)', border: '1.5px dashed rgba(201,148,58,.3)', color: '#f0c97a', fontSize: '13px', fontWeight: 700, cursor: 'pointer', marginTop: '4px', fontFamily: 'sans-serif' }}>
+            <button onClick={() => setTab('add')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'rgba(201,148,58,.12)', border: '1.5px dashed rgba(201,148,58,.3)', color: '#c9943a', fontSize: '13px', fontWeight: 700, cursor: 'pointer', marginTop: '4px', fontFamily: 'sans-serif' }}>
               + Mag-add ng Worker
             </button>
           </>
@@ -335,7 +335,7 @@ export default function PartnerDashboard() {
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '10px', color: '#9ca3af', marginBottom: '2px' }}>GCash</div>
-                <div style={{ fontSize: '12px', fontWeight: 700, color: '#f0c97a' }}>{partner?.gcash_number || '—'}</div>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#c9943a' }}>{partner?.gcash_number || '—'}</div>
               </div>
             </div>
             {payouts.length === 0 ? (
@@ -376,7 +376,7 @@ export default function PartnerDashboard() {
             )}
 
             <div style={s.card}>
-              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', color: '#f0c97a', marginBottom: '13px' }}>Detalye ng Worker</div>
+              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', color: '#c9943a', marginBottom: '13px' }}>Detalye ng Worker</div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
