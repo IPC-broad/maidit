@@ -46,7 +46,7 @@ export default function SendOfferPage({ params }: any) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
     const { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
-    const { error: offerError } = await supabase.from('offers').insert({ homeowner_id: hw?.id, kasambahay_id: kb?.profile_id, salary: parseInt(form.salary), urgency: form.urgency, scope: form.scope, setup: form.setup, city: form.city, status: 'pending' })
+    const { error: offerError } = await supabase.from('offers').insert({ homeowner_id: hw?.id, kasambahay_id: kasambahayId, salary: parseInt(form.salary), urgency: form.urgency, scope: form.scope, setup: form.setup, city: form.city, status: 'pending' })
     if (offerError) { setSubmitting(false); setError(offerError.message); return }
     const { data: profile } = await supabase.from('profiles').select('job_offer_credits').eq('id', user.id).single()
     await supabase.from('profiles').update({ job_offer_credits: (profile?.job_offer_credits ?? 1) - 1 }).eq('id', user.id)
