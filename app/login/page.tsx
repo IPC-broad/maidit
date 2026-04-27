@@ -1,9 +1,11 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams?.get('redirect') || ''
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -23,9 +25,8 @@ export default function LoginPage() {
         .eq('id', data.user.id)
         .single()
       setLoading(false)
-      if (profile?.role === 'kasambahay') router.push('/dashboard/kasambahay')
-      else if (profile?.role === 'partner') router.push('/dashboard/partner')
-      else router.push('/dashboard/homeowner')
+      const dest = redirectTo || (profile?.role === 'kasambahay' ? '/dashboard/kasambahay' : profile?.role === 'partner' ? '/dashboard/partner' : '/dashboard/homeowner')
+      router.push(dest)
     } catch (e) {
       setError('Something went wrong. Please try again.')
       setLoading(false)
