@@ -16,9 +16,10 @@ export default function HWDashboard() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('kasambahay')
         .select('*, profiles(*)')
+      console.log('kasambahay data:', data, 'error:', error)
         
 
       setProfiles(data || [])
