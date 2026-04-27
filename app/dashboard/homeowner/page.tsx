@@ -6,6 +6,7 @@ export default function HWDashboard() {
   const router = useRouter()
   const [profiles, setProfiles] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [currentUser, setCurrentUser] = useState<any>(null)
   const [filter, setFilter] = useState('Lahat')
   const [passed, setPassed] = useState<Record<string, boolean>>({})
   const [offered, setOffered] = useState<Record<string, boolean>>({})
@@ -15,6 +16,7 @@ export default function HWDashboard() {
       const { supabase } = await import('../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+      setCurrentUser(user)
 
       const { data, error } = await supabase
         .from('kasambahay')
@@ -146,7 +148,7 @@ export default function HWDashboard() {
               <div style={{ display:'flex', gap:'7px' }}>
                 <button
                   style={{ flex:2, padding:'9px', background:'#1a6b3c', color:'#fff', border:'none', borderRadius:'9px', fontFamily:'sans-serif', fontSize:'.78rem', fontWeight:700, cursor:'pointer' }}
-                  onClick={async () => { const { supabase } = await import('../../../lib/supabase'); const { data: { user } } = await supabase.auth.getUser(); if (!user) { router.push('/login?redirect=/dashboard/homeowner'); } else { router.push(`/offer/send/${kb.id}`); } }}
+                  onClick={() => { if (!currentUser) { router.push('/login?redirect=/dashboard/homeowner'); } else { router.push(`/offer/send/${kb.id}`); } }}
                 >
                   Send Offer
                 </button>
