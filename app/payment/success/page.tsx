@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 export default function PaymentSuccessPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const kasambahayId = searchParams.get('kasambahay')
+  const kasambahayId = searchParams?.get('kasambahay')
   const [status, setStatus] = useState<'loading'|'done'|'error'>('loading')
   useEffect(() => {
     const activate = async () => {
