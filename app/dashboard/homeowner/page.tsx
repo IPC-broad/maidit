@@ -19,7 +19,7 @@ export default function HWDashboard() {
       const { data } = await supabase
         .from('kasambahay')
         .select('*, profiles(*)')
-        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
 
       setProfiles(data || [])
       setLoading(false)
