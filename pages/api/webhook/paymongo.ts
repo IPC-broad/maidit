@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
-export default async function handler(req, res) {
+import { NextApiRequest, NextApiResponse } from "next"; export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const event = req.body
 
   if (!event?.data?.attributes) {
