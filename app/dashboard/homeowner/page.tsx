@@ -134,7 +134,7 @@ export default function HWDashboard() {
             </div>
 
             <div style={{ fontSize:'.72rem', color:'#6b7280', marginBottom:'10px' }}>
-              Available: {new Date(kb.available_from).toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric' })}
+              Available: {kb.available_from ? new Date(kb.available_from).toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric' }) : 'Pwede pag-usapan'}
             </div>
 
             {offered[kb.id] ? (
