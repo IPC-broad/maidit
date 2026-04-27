@@ -34,8 +34,8 @@ export default function SendOfferPage({ params }: any) {
       const res = await fetch('/api/pay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kasambahayId }) })
       const data = await res.json()
       if (data.checkout_url) { window.location.href = data.checkout_url }
-      else { window.open('https://pm.link/org-9FQv6XBpoCxdDMaMPY8gze3N/3H88IVz', '_blank'); setPaying(false) }
-    } catch { window.open('https://pm.link/org-9FQv6XBpoCxdDMaMPY8gze3N/3H88IVz', '_blank'); setPaying(false) }
+      else { window.location.href = 'https://pm.link/org-9FQv6XBpoCxdDMaMPY8gze3N/3H88IVz'; setPaying(false) }
+    } catch { window.location.href = 'https://pm.link/org-9FQv6XBpoCxdDMaMPY8gze3N/3H88IVz'; setPaying(false) }
   }
 
   const handleSendOffer = async () => {
