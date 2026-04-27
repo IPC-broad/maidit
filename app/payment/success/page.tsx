@@ -1,7 +1,9 @@
 'use client'
+import { Suspense } from 'react'
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-export default function PaymentSuccessPage() {
+
+function PaymentSuccess() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const kasambahayId = searchParams?.get('kasambahay')
@@ -33,4 +35,8 @@ export default function PaymentSuccessPage() {
       </button>
     </div>
   )
+}
+
+export default function PaymentSuccessPage() {
+  return <Suspense fallback={<div style={{minHeight:'100vh',background:'#faf8f5',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'sans-serif',color:'#6b7280'}}>Loading...</div>}><PaymentSuccess /></Suspense>
 }
