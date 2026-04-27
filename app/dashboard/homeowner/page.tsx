@@ -15,8 +15,7 @@ export default function HWDashboard() {
     const init = async () => {
       const { supabase } = await import('../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
-      setCurrentUser(user)
+      setCurrentUser(user || null)
 
       const { data, error } = await supabase
         .from('kasambahay')
