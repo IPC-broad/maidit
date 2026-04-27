@@ -147,7 +147,7 @@ export default function HWDashboard() {
               <div style={{ display:'flex', gap:'7px' }}>
                 <button
                   style={{ flex:2, padding:'9px', background:'#1a6b3c', color:'#fff', border:'none', borderRadius:'9px', fontFamily:'sans-serif', fontSize:'.78rem', fontWeight:700, cursor:'pointer' }}
-                  onClick={() => { if (!currentUser) { router.push('/login?redirect=/dashboard/homeowner'); } else { router.push(`/offer/send/${kb.id}`); } }}
+                  onClick={() => { if (!currentUser) { router.push(`/login?redirect=/offer/send/${kb.id}`); } else { router.push(`/offer/send/${kb.id}`); } }}
                 >
                   Send Offer
                 </button>
