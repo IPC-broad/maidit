@@ -1,10 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 
 export default function SendOfferPage({ params }: any) {
   const router = useRouter()
-  const kasambahayId = params.id
+  const rawParams = useParams()
+  const kasambahayId = rawParams?.id as string
   const [kb, setKb] = useState<any>(null)
   const [form, setForm] = useState({
     salary: '',
