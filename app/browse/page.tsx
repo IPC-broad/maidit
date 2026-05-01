@@ -13,6 +13,7 @@ export default function HWDashboard() {
   const [filter, setFilter] = useState('Lahat')
   const [passed, setPassed] = useState<Record<string, boolean>>({})
   const [offered, setOffered] = useState<Record<string, boolean>>({})
+  const [offersLoaded, setOffersLoaded] = useState(false)
 
   useEffect(() => {
     const init = async () => {
@@ -27,7 +28,7 @@ export default function HWDashboard() {
   }, [])
 
   const loadOffers = async () => {
-    if (offers.length > 0) return
+    if (offersLoaded) return
     setOffersLoading(true)
     const { supabase } = await import('../../lib/supabase')
     const { data: { user } } = await supabase.auth.getUser()
@@ -41,13 +42,14 @@ export default function HWDashboard() {
         .order('created_at', { ascending: false })
       setOffers(data || [])
     }
+    setOffersLoaded(true)
     setOffersLoading(false)
   }
 
   const handleTabChange = (t: 'browse' | 'offers' | 'postjob') => {
+    if (t === 'postjob') { router.push('/dashboard/homeowner/post-job'); return }
     setTab(t)
     if (t === 'offers') loadOffers()
-    if (t === 'postjob') router.push('/dashboard/homeowner/post-job')
   }
 
   const filters = ['Lahat', 'Stay-in', 'Stay-out', 'Metro Manila', 'Province']
@@ -99,12 +101,8 @@ export default function HWDashboard() {
       {tab === 'browse' && (
         <>
           <div style={{ padding:'14px 16px 8px' }}>
-            <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, marginBottom:'2px', color:'#111827' }}>
-              Browse Kasambahay
-            </div>
-            <div style={{ fontSize:'.72rem', color:'#6b7280', marginBottom:'12px' }}>
-              {filtered.length} profiles available
-            </div>
+            <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, marginBottom:'2px', color:'#111827' }}>Browse Kasambahay</div>
+            <div style={{ fontSize:'.72rem', color:'#6b7280', marginBottom:'12px' }}>{filtered.length} profiles available</div>
             <div style={{ display:'flex', gap:'6px', overflowX:'auto', paddingBottom:'8px' }}>
               {filters.map(f => (
                 <button key={f} onClick={() => setFilter(f)} style={{ padding:'6px 13px', borderRadius:'50px', border:'1.5px solid', borderColor: filter === f ? '#1a6b3c' : '#e5e7eb', background: filter === f ? '#e8f5ee' : '#fff', color: filter === f ? '#1a6b3c' : '#6b7280', fontFamily:'sans-serif', fontSize:'.72rem', fontWeight:600, cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 }}>
@@ -113,13 +111,8 @@ export default function HWDashboard() {
               ))}
             </div>
           </div>
-
           <div style={{ padding:'4px 16px 32px', display:'flex', flexDirection:'column', gap:'12px' }}>
-            {filtered.length === 0 && (
-              <div style={{ textAlign:'center', padding:'40px 20px', color:'#6b7280', fontSize:'.84rem' }}>
-                No profiles found for this filter.
-              </div>
-            )}
+            {filtered.length === 0 && <div style={{ textAlign:'center', padding:'40px 20px', color:'#6b7280', fontSize:'.84rem' }}>No profiles found.</div>}
             {filtered.map((kb) => (
               <div key={kb.id} style={{ background:'#fff', borderRadius:'14px', padding:'13px 14px', boxShadow:'0 2px 8px rgba(0,0,0,.06)', border:'1.5px solid #f3f4f6' }}>
                 <div style={{ display:'flex', gap:'11px', alignItems:'center', marginBottom:'9px' }}>
@@ -128,23 +121,15 @@ export default function HWDashboard() {
                     <div style={{ fontWeight:700, fontSize:'.9rem', color:'#111827' }}>
                       {kb.profiles?.full_name?.split(' ')[0]} {kb.profiles?.full_name?.split(' ')[1]?.[0]}.
                     </div>
-                    <div style={{ fontSize:'.68rem', color:'#6b7280' }}>
-                      {kb.province || kb.profiles?.city} · {kb.setup}
-                    </div>
+                    <div style={{ fontSize:'.68rem', color:'#6b7280' }}>{kb.province || kb.profiles?.city} · {kb.setup}</div>
                   </div>
                   <div style={{ textAlign:'right' }}>
-                    <div style={{ fontFamily:'serif', fontSize:'1rem', fontWeight:900, color:'#1a6b3c' }}>
-                      ₱{kb.asking_salary?.toLocaleString()}
-                    </div>
+                    <div style={{ fontFamily:'serif', fontSize:'1rem', fontWeight:900, color:'#1a6b3c' }}>₱{kb.asking_salary?.toLocaleString()}</div>
                     <div style={{ fontSize:'.6rem', color:'#6b7280' }}>asking/mo</div>
                   </div>
                 </div>
-                <div style={{ display:'flex', gap:'5px', flexWrap:'wrap', marginBottom:'9px' }}>
-                  {isProvince(kb.province) && (
-                    <span style={{ fontSize:'.6rem', fontWeight:700, padding:'2px 7px', borderRadius:'4px', background:'#eff6ff', color:'#2563eb' }}>
-                      Province · Transpo Needed
-                    </span>
-                  )}
+                <div style={{ display:'flex', gap:'4px', flexWrap:'wrap', marginBottom:'9px' }}>
+                  {isProvince(kb.province) && <span style={{ fontSize:'.6rem', fontWeight:700, padding:'2px 7px', borderRadius:'4px', background:'#eff6ff', color:'#2563eb' }}>Province · Transpo Needed</span>}
                 </div>
                 <div style={{ display:'flex', gap:'4px', flexWrap:'wrap', marginBottom:'9px' }}>
                   {kb.skills?.map((skill: string) => (
@@ -152,9 +137,7 @@ export default function HWDashboard() {
                   ))}
                 </div>
                 {offered[kb.id] ? (
-                  <div style={{ background:'#e8f5ee', border:'1.5px solid rgba(26,107,60,.2)', borderRadius:'9px', padding:'9px', textAlign:'center', fontSize:'.76rem', color:'#1a6b3c', fontWeight:700 }}>
-                    Offer sent! Waiting for response (48 hrs)
-                  </div>
+                  <div style={{ background:'#e8f5ee', border:'1.5px solid rgba(26,107,60,.2)', borderRadius:'9px', padding:'9px', textAlign:'center', fontSize:'.76rem', color:'#1a6b3c', fontWeight:700 }}>Offer sent! Waiting for response</div>
                 ) : (
                   <div style={{ display:'flex', gap:'7px' }}>
                     <button style={{ flex:2, padding:'9px', background:'#1a6b3c', color:'#fff', border:'none', borderRadius:'9px', fontFamily:'sans-serif', fontSize:'.78rem', fontWeight:700, cursor:'pointer' }}
@@ -177,14 +160,12 @@ export default function HWDashboard() {
         <div style={{ padding:'16px 16px 32px' }}>
           <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, marginBottom:'2px', color:'#111827' }}>Mga Offer Ko</div>
           <div style={{ fontSize:'.72rem', color:'#6b7280', marginBottom:'14px' }}>{offers.length} offer ang naipadala mo</div>
-          {offersLoading && <div style={{ textAlign:'center', padding:'40px', color:'#6b7280', fontSize:'.84rem' }}>Loading...</div>}
+          {offersLoading && <div style={{ textAlign:'center', padding:'40px', color:'#6b7280' }}>Loading...</div>}
           {!offersLoading && offers.length === 0 && (
             <div style={{ textAlign:'center', padding:'40px 20px' }}>
               <div style={{ fontSize:'2.5rem', marginBottom:'12px' }}>📭</div>
-              <div style={{ color:'#6b7280', fontSize:'.84rem', lineHeight:1.7 }}>Wala ka pang naipadala na offer.<br/>Mag-browse ng kasambahay para makapag-send.</div>
-              <button onClick={() => setTab('browse')} style={{ marginTop:'16px', padding:'10px 20px', borderRadius:'10px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'.84rem', fontWeight:700, cursor:'pointer' }}>
-                Mag-browse
-              </button>
+              <div style={{ color:'#6b7280', fontSize:'.84rem', lineHeight:1.7 }}>Wala ka pang naipadala na offer.</div>
+              <button onClick={() => setTab('browse')} style={{ marginTop:'16px', padding:'10px 20px', borderRadius:'10px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'.84rem', fontWeight:700, cursor:'pointer' }}>Mag-browse</button>
             </div>
           )}
           {offers.map((offer: any) => {
@@ -218,7 +199,7 @@ export default function HWDashboard() {
                   {needsPayment && (
                     <button style={{ width:'100%', padding:'11px', borderRadius:'10px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'13px', fontWeight:700, cursor:'pointer' }}
                       onClick={() => router.push(`/pay/${offer.id}`)}>
-                      Bayaran — ₱2,001 Hire Fee →
+                      Bayaran — ₱2,001 Hire Fee
                     </button>
                   )}
                   {isHired && (
@@ -234,12 +215,12 @@ export default function HWDashboard() {
       )}
 
       <div style={{ position:'fixed', bottom:0, left:0, right:0, background:'#fff', borderTop:'1px solid #f3f4f6', display:'flex' }}>
-        {[
+        {([
           { id:'browse', icon:'🔍', label:'Browse' },
           { id:'offers', icon:'📋', label:'My Offers' },
           { id:'postjob', icon:'📝', label:'Post Job' },
-        ].map((t) => (
-          <button key={t.id} onClick={() => handleTabChange(t.id as any)} style={{ flex:1, padding:'10px 4px 9px', display:'flex', flexDirection:'column', alignItems:'center', gap:'3px', border:'none', background:'transparent', cursor:'pointer' }}>
+        ] as const).map((t) => (
+          <button key={t.id} onClick={() => handleTabChange(t.id)} style={{ flex:1, padding:'10px 4px 9px', display:'flex', flexDirection:'column', alignItems:'center', gap:'3px', border:'none', background:'transparent', cursor:'pointer' }}>
             <span style={{ fontSize:'1.1rem' }}>{t.icon}</span>
             <span style={{ fontSize:'.57rem', fontWeight: tab === t.id ? 700 : 600, color: tab === t.id ? '#1a6b3c' : '#6b7280' }}>{t.label}</span>
           </button>
