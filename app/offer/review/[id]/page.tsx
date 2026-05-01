@@ -63,8 +63,8 @@ export default function OfferReviewPage() {
   }
 
   const transportLabel = (t: string) => {
-    if (t === 'full') return 'Ang amo ang magbabayad ng buong pamasahe'
-    if (t === 'reimburse') return 'Ibabalik ng amo ang pamasahe sa pagdating mo'
+    if (t === 'full') return 'Ang amo ang magbabayad sa pamasahe. Ilagay ang estimate ng pamasahe kung magkano aabutin.'
+    if (t === 'reimburse') return 'Ikaw muna ang magbabayad ng pamasahe pero babayaran ito o irereimburse ng amo pagdating mo sa trabaho.'
     return 'Ikaw ang magbabayad ng sarili mong pamasahe'
   }
 
