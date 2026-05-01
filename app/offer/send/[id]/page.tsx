@@ -6,7 +6,17 @@ export default function SendOfferPage({ params }: any) {
   const router = useRouter()
   const kasambahayId = params.id
   const [kb, setKb] = useState<any>(null)
-  const [form, setForm] = useState({ salary: '', urgency: 'Kailangan na (ASAP)', scope: [] as string[], setup: 'Stay-in', city: 'Quezon City' })
+  const [form, setForm] = useState({
+    salary: '',
+    urgency: 'Kailangan na (ASAP)',
+    scope: [] as string[],
+    setup: 'Stay-in',
+    city: 'Quezon City',
+    adults: '1',
+    seniors: '0',
+    kids: '0',
+    pets: 'Wala',
+  })
   const [submitting, setSubmitting] = useState(false)
   const [paying, setPaying] = useState(false)
   const [error, setError] = useState('')
@@ -46,7 +56,23 @@ export default function SendOfferPage({ params }: any) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
     const { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
-    const { error: offerError } = await supabase.from('offers').insert({ homeowner_id: hw?.id, kasambahay_id: kasambahayId, salary: parseInt(form.salary), urgency: form.urgency, scope: form.scope, setup: form.setup, city: form.city, status: 'pending' })
+    const household = {
+      adults: parseInt(form.adults) || 0,
+      seniors: parseInt(form.seniors) || 0,
+      kids: parseInt(form.kids) || 0,
+    }
+    const { error: offerError } = await supabase.from('offers').insert({
+      homeowner_id: hw?.id,
+      kasambahay_id: kasambahayId,
+      salary: parseInt(form.salary),
+      urgency: form.urgency,
+      scope: form.scope,
+      setup: form.setup,
+      city: form.city,
+      household,
+      pets: form.pets,
+      status: 'pending',
+    })
     if (offerError) { setSubmitting(false); setError(offerError.message); return }
     const { data: profile } = await supabase.from('profiles').select('job_offer_credits').eq('id', user.id).single()
     await supabase.from('profiles').update({ job_offer_credits: (profile?.job_offer_credits ?? 1) - 1 }).eq('id', user.id)
@@ -62,11 +88,12 @@ export default function SendOfferPage({ params }: any) {
     head: { background: '#fff', borderBottom: '1px solid #ede8e0', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '10px' },
     body: { padding: '20px 18px 48px' },
     lbl: { display: 'block', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '4px' },
-    inp: { width: '100%', padding: '11px 13px', border: '1.5px solid #e5e0d8', borderRadius: '11px', fontSize: '14px', background: '#fff', color: '#1a1a1a', fontFamily: 'sans-serif', outline: 'none', marginBottom: '12px' },
-    sel: { width: '100%', padding: '11px 13px', border: '1.5px solid #e5e0d8', borderRadius: '11px', fontSize: '14px', background: '#fff', color: '#1a1a1a', fontFamily: 'sans-serif', outline: 'none', marginBottom: '12px' },
+    inp: { width: '100%', padding: '11px 13px', border: '1.5px solid #e5e0d8', borderRadius: '11px', fontSize: '14px', background: '#fff', color: '#1a1a1a', fontFamily: 'sans-serif', outline: 'none', marginBottom: '12px', boxSizing: 'border-box' as const },
+    sel: { width: '100%', padding: '11px 13px', border: '1.5px solid #e5e0d8', borderRadius: '11px', fontSize: '14px', background: '#fff', color: '#1a1a1a', fontFamily: 'sans-serif', outline: 'none', marginBottom: '12px', boxSizing: 'border-box' as const },
     btn: { width: '100%', padding: '13px', borderRadius: '12px', border: 'none', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '10px' },
     btnAmber: { width: '100%', padding: '13px', borderRadius: '12px', border: 'none', background: '#c9943a', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '10px' },
     btnOutline: { width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid #ede8e0', background: 'transparent', color: '#6b7280', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 600, cursor: 'pointer' },
+    numBtn: (active: boolean) => ({ padding: '8px 14px', borderRadius: '8px', border: active ? '1.5px solid #c9943a' : '1.5px solid #e5e0d8', background: active ? '#fef3e2' : '#fff', color: active ? '#92400e' : '#6b7280', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }),
   }
 
   if (success) return (
@@ -96,32 +123,67 @@ export default function SendOfferPage({ params }: any) {
           </div>
         )}
         {error && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '9px', padding: '10px 13px', fontSize: '13px', color: '#dc2626', marginBottom: '12px' }}>{error}</div>}
+
         <label style={s.lbl}>Monthly Salary (₱) *</label>
         <input style={s.inp} type="number" placeholder="e.g. 9000" value={form.salary} onChange={e => setForm(f => ({ ...f, salary: e.target.value }))} />
+
         <label style={s.lbl}>Kailan kailangan?</label>
         <select style={s.sel} value={form.urgency} onChange={e => setForm(f => ({ ...f, urgency: e.target.value }))}>
           <option>Kailangan na (ASAP)</option><option>Sa loob ng ilang araw</option><option>Sa susunod na linggo</option><option>Pwede pag-usapan</option>
         </select>
+
         <label style={s.lbl}>Setup</label>
         <select style={s.sel} value={form.setup} onChange={e => setForm(f => ({ ...f, setup: e.target.value }))}>
           <option>Stay-in</option><option>Stay-out</option><option>Either</option>
         </select>
+
         <label style={s.lbl}>City</label>
         <select style={s.sel} value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))}>
           <option>Quezon City</option><option>Makati</option><option>Pasig</option><option>Taguig</option><option>Mandaluyong</option><option>Marikina</option><option>Paranaque</option><option>Las Pinas</option>
         </select>
+
+        <label style={s.lbl}>Household</label>
+        <div style={{ background: '#fff', border: '1.5px solid #e5e0d8', borderRadius: '11px', padding: '13px', marginBottom: '12px' }}>
+          {[
+            { label: 'Adults', key: 'adults' },
+            { label: 'Seniors (60+)', key: 'seniors' },
+            { label: 'Kids', key: 'kids' },
+          ].map(({ label, key }) => (
+            <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontSize: '13px', color: '#374151', fontWeight: 600 }}>{label}</span>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                {['0','1','2','3','4+'].map(n => (
+                  <button key={n} type="button" style={s.numBtn(form[key as keyof typeof form] === n)}
+                    onClick={() => setForm(f => ({ ...f, [key]: n }))}>{n}</button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <label style={s.lbl}>Pets</label>
+        <select style={s.sel} value={form.pets} onChange={e => setForm(f => ({ ...f, pets: e.target.value }))}>
+          <option value="Wala">Walang Pets</option>
+          <option value="Aso">Aso</option>
+          <option value="Pusa">Pusa</option>
+          <option value="Aso at Pusa">Aso at Pusa</option>
+          <option value="Iba pa">Iba pa</option>
+        </select>
+
         <label style={s.lbl}>Scope of work *</label>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '16px' }}>
           {scopeItems.map(sc => (
             <button key={sc} onClick={() => toggleScope(sc)} style={{ padding: '9px 10px', borderRadius: '9px', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textAlign: 'center' as const, border: form.scope.includes(sc) ? '1.5px solid #c9943a' : '1.5px solid #e5e0d8', background: form.scope.includes(sc) ? '#fef3e2' : '#fff', color: form.scope.includes(sc) ? '#92400e' : '#6b7280' }}>{sc}</button>
           ))}
         </div>
+
         <button style={{ ...s.btn, opacity: submitting ? .6 : 1 }} onClick={handleSendOffer} disabled={submitting}>{submitting ? 'Sending...' : 'Send Offer →'}</button>
       </div>
+
       {showPaywall && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', zIndex: 50 }}>
           <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', maxWidth: '340px', width: '100%' }}>
-            <div style={{ fontFamily: 'serif', fontSize: '1.2rem', fontWeight: 900, marginBottom: '6px', color: '#1a1a1a' }}>I-activate ang account mo 🎯</div>
+            <div style={{ fontFamily: 'serif', fontSize: '1.2rem', fontWeight: 900, marginBottom: '6px', color: '#1a1a1a' }}>I-activate ang account mo</div>
             <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '16px', lineHeight: 1.6 }}>Bayaran ang one-time fee para makapag-send ng job offers.</div>
             <div style={{ background: '#1a6b3c', borderRadius: '12px', padding: '16px', textAlign: 'center', marginBottom: '14px' }}>
               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.6)', textTransform: 'uppercase' as const, letterSpacing: '1px', marginBottom: '4px' }}>Activation Fee</div>
@@ -129,9 +191,9 @@ export default function SendOfferPage({ params }: any) {
               <div style={{ fontSize: '12px', color: 'rgba(255,255,255,.7)' }}>One-time · 30 days</div>
             </div>
             <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px', marginBottom: '14px' }}>
-              <div style={{ fontSize: '12px', color: '#166534', lineHeight: 1.8 }}>✅ 10 job offer credits<br/>✅ Send offers directly to kasambahay<br/>✅ ₱499 deducted from final hire fee<br/>✅ Priority visibility</div>
+              <div style={{ fontSize: '12px', color: '#166534', lineHeight: 1.8 }}>10 job offer credits · Send offers directly to kasambahay · 499 deducted from final hire fee · Priority visibility</div>
             </div>
-            <button style={{ ...s.btnAmber, opacity: paying ? .6 : 1 }} onClick={handlePay} disabled={paying}>{paying ? 'Redirecting...' : 'Pay ₱499 and Continue →'}</button>
+            <button style={{ ...s.btnAmber, opacity: paying ? .6 : 1 }} onClick={handlePay} disabled={paying}>{paying ? 'Redirecting...' : 'Pay 499 and Continue'}</button>
             <button style={s.btnOutline} onClick={() => router.push('/dashboard/homeowner')}>Cancel</button>
           </div>
         </div>
