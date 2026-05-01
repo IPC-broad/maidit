@@ -22,14 +22,14 @@ export default function KBDashboard() {
       setProfile(prof)
       const { data: kbData } = await supabase.from('kasambahay').select('*').eq('profile_id', user.id).single()
       setKb(kbData)
-      const { data: jobsData } = await supabase.from('jobs').select('*').eq('active', true).order('created_at', { ascending: false })
+      const { data: jobsData } = await supabase.from('jobs').select('*').eq('active', true)
       setJobs(jobsData || [])
       if (kbData) {
         const { data: offersData } = await supabase
           .from('offers')
           .select('*, homeowner_profile:profiles!offers_homeowner_id_fkey(full_name, mobile)')
           .eq('kasambahay_id', kbData.id)
-          .order('created_at', { ascending: false })
+          
         setOffers(offersData || [])
         const { data: apps } = await supabase.from('applications').select('job_id').eq('kasambahay_id', kbData.id)
         if (apps) setAppliedIds(new Set(apps.map((a: any) => a.job_id)))
