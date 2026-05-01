@@ -14,6 +14,7 @@ export default function HWDashboard() {
   const [passed, setPassed] = useState<Record<string, boolean>>({})
   const [offered, setOffered] = useState<Record<string, boolean>>({})
   const [offersLoaded, setOffersLoaded] = useState(false)
+  const [hwId, setHwId] = useState<string | null>(null)
 
   useEffect(() => {
     const init = async () => {
@@ -27,21 +28,25 @@ export default function HWDashboard() {
     init()
   }, [])
 
-  const loadOffers = async () => {
-    if (offersLoaded) return
+  const loadOffers = async (forceReload = false) => {
+    if (offersLoaded && !forceReload) return
     setOffersLoading(true)
     const { supabase } = await import('../../lib/supabase')
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
-    const { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
-    if (hw) {
-      const { data } = await supabase
-        .from('offers')
-        .select('*, kasambahay:kasambahay_id(*, profiles(full_name, mobile))')
-        .eq('homeowner_id', hw.id)
-        .order('created_at', { ascending: false })
-      setOffers(data || [])
+    let currentHwId = hwId
+    if (!currentHwId) {
+      const { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
+      if (!hw) { setOffersLoading(false); return }
+      currentHwId = hw.id
+      setHwId(hw.id)
     }
+    const { data } = await supabase
+      .from('offers')
+      .select('*, kasambahay:kasambahay_id(*, profiles(full_name, mobile))')
+      .eq('homeowner_id', currentHwId)
+      .order('created_at', { ascending: false })
+    setOffers(data || [])
     setOffersLoaded(true)
     setOffersLoading(false)
   }
@@ -49,7 +54,7 @@ export default function HWDashboard() {
   const handleTabChange = (t: 'browse' | 'offers' | 'postjob') => {
     if (t === 'postjob') { router.push('/dashboard/homeowner/post-job'); return }
     setTab(t)
-    if (t === 'offers') loadOffers()
+    if (t === 'offers') loadOffers(true)
   }
 
   const filters = ['Lahat', 'Stay-in', 'Stay-out', 'Metro Manila', 'Province']
