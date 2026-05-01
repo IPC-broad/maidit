@@ -27,9 +27,8 @@ export default function KBDashboard() {
       if (kbData) {
         const { data: offersData } = await supabase
           .from('offers')
-          .select('*, homeowner_profile:profiles!offers_homeowner_id_fkey(full_name, mobile)')
+          .select('*')
           .eq('kasambahay_id', kbData.id)
-          
         setOffers(offersData || [])
         const { data: apps } = await supabase.from('applications').select('job_id').eq('kasambahay_id', kbData.id)
         if (apps) setAppliedIds(new Set(apps.map((a: any) => a.job_id)))
@@ -66,14 +65,14 @@ export default function KBDashboard() {
   const petsText = (pets: string) => (!pets || pets === 'No') ? 'Walang Pets' : `May ${pets}`
 
   const offerStatusMap: Record<string, { label: string; bg: string; color: string }> = {
-    pending:         { label: '🆕 Bagong Offer',              bg: '#fef3e2', color: '#c9943a' },
-    reviewed:        { label: '⏳ Hinihintay ang homeowner',  bg: '#eff6ff', color: '#2563eb' },
-    agreed:          { label: '💳 Hinihintay ang bayad',      bg: '#fffbeb', color: '#92400e' },
-    payment_pending: { label: '💳 Processing payment',        bg: '#fffbeb', color: '#92400e' },
-    paid:            { label: '✅ Aktibo — Naka-hire',         bg: '#f0fdf4', color: '#1a6b3c' },
-    active:          { label: '✅ Aktibo — Naka-hire',         bg: '#f0fdf4', color: '#1a6b3c' },
-    hired:           { label: '✅ Aktibo — Naka-hire',         bg: '#f0fdf4', color: '#1a6b3c' },
-    declined:        { label: 'May Na-hire Na',                bg: '#fef2f2', color: '#dc2626' },
+    pending:         { label: 'Bagong Offer',              bg: '#fef3e2', color: '#c9943a' },
+    reviewed:        { label: 'Hinihintay ang homeowner',  bg: '#eff6ff', color: '#2563eb' },
+    agreed:          { label: 'Hinihintay ang bayad',      bg: '#fffbeb', color: '#92400e' },
+    payment_pending: { label: 'Processing payment',        bg: '#fffbeb', color: '#92400e' },
+    paid:            { label: 'Aktibo - Naka-hire',         bg: '#f0fdf4', color: '#1a6b3c' },
+    active:          { label: 'Aktibo - Naka-hire',         bg: '#f0fdf4', color: '#1a6b3c' },
+    hired:           { label: 'Aktibo - Naka-hire',         bg: '#f0fdf4', color: '#1a6b3c' },
+    declined:        { label: 'May Na-hire Na',             bg: '#fef2f2', color: '#dc2626' },
   }
 
   const s: any = {
@@ -106,8 +105,8 @@ export default function KBDashboard() {
 
       {pendingOffers > 0 && (
         <div style={{ background: '#fef3e2', borderBottom: '1px solid #fde8c0', padding: '9px 16px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => setTab('offers')}>
-          <span>📨</span>
-          <div style={{ fontSize: '12px', color: '#92400e', flex: 1 }}><strong>{pendingOffers} bagong job offer</strong> — i-tap para tingnan</div>
+          <span>Bagong offer</span>
+          <div style={{ fontSize: '12px', color: '#92400e', flex: 1 }}><strong>{pendingOffers} bagong job offer</strong> - i-tap para tingnan</div>
           <span style={{ color: '#c9943a', fontSize: '13px' }}>→</span>
         </div>
       )}
@@ -149,9 +148,9 @@ export default function KBDashboard() {
                 </div>
                 <div style={{ fontSize: '12px', color: '#374151', marginBottom: '10px' }}>Kailangan: <strong>{job.scope?.join(' · ') || '—'}</strong></div>
                 {appliedIds.has(job.id) ? (
-                  <div style={{ width: '100%', padding: '10px', borderRadius: '9px', background: '#f0fdf4', border: '1.5px solid #bbf7d0', color: '#1a6b3c', fontSize: '12px', fontWeight: 700, textAlign: 'center' }}>✅ Nag-apply ka na — hintayin ang sagot</div>
+                  <div style={{ width: '100%', padding: '10px', borderRadius: '9px', background: '#f0fdf4', border: '1.5px solid #bbf7d0', color: '#1a6b3c', fontSize: '12px', fontWeight: 700, textAlign: 'center' }}>Nag-apply ka na - hintayin ang sagot</div>
                 ) : (
-                  <button style={s.btn('#c9943a')} onClick={() => router.push(`/jobs/${job.id}/apply`)}>✋ Mag-apply — Libre!</button>
+                  <button style={s.btn('#c9943a')} onClick={() => router.push(`/jobs/${job.id}/apply`)}>Mag-apply - Libre</button>
                 )}
               </div>
             </div>
@@ -163,17 +162,16 @@ export default function KBDashboard() {
         <div style={{ padding: '14px 14px 32px' }}>
           <div style={{ fontFamily: 'serif', fontSize: '17px', fontWeight: 900, marginBottom: '2px' }}>Job Offer Para Sayo</div>
           <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '14px' }}>{offers.length === 0 ? 'Wala pang offer.' : `${offers.length} offer ang natanggap mo`}</div>
-          {offers.length === 0 && <div style={{ textAlign: 'center', padding: '40px 20px' }}><div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📭</div><div style={{ color: '#9ca3af', fontSize: '13px', lineHeight: 1.7 }}>Wala ka pang natanggap na offer.<br/>Mag-apply sa mga trabaho para makatanggap ng offer.</div></div>}
+          {offers.length === 0 && <div style={{ textAlign: 'center', padding: '40px 20px' }}><div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📭</div><div style={{ color: '#9ca3af', fontSize: '13px', lineHeight: 1.7 }}>Wala ka pang natanggap na offer.</div></div>}
           {offers.map((offer: any) => {
             const st = offerStatusMap[offer.status] || { label: offer.status, bg: '#f3f4f6', color: '#6b7280' }
-            const hwName = offer.homeowner_profile?.full_name || 'Homeowner'
             const isHired = ['paid','active','hired'].includes(offer.status)
             const isClosed = offer.status === 'declined'
             return (
               <div key={offer.id} style={s.card}>
                 <div style={{ padding: '13px 14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <div><div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '2px' }}>{hwName}</div><div style={{ fontSize: '11px', color: '#9ca3af' }}>{new Date(offer.created_at).toLocaleDateString('fil-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</div></div>
+                    <div><div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '2px' }}>Job Offer</div><div style={{ fontSize: '11px', color: '#9ca3af' }}>{new Date(offer.created_at).toLocaleDateString('fil-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</div></div>
                     <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: st.bg, color: st.color, whiteSpace: 'nowrap' as const }}>{st.label}</span>
                   </div>
                   <div style={{ ...s.infoBox, opacity: isClosed ? .6 : 1 }}>
@@ -188,10 +186,10 @@ export default function KBDashboard() {
                     <div style={{ fontSize: '12px', color: '#374151', marginBottom: '4px' }}>Kailangan: <strong>{offer.scope?.join(' · ') || '—'}</strong></div>
                     <div style={{ fontSize: '12px', color: '#374151', marginBottom: '10px' }}>Kailan: <strong>{urgencyLabel(offer.urgency)}</strong></div>
                   </>}
-                  {offer.status === 'pending' && <button style={s.btn('#c9943a')} onClick={() => router.push(`/offer/review/${offer.id}`)}>👀 Tingnan ang Buong Offer →</button>}
+                  {offer.status === 'pending' && <button style={s.btn('#c9943a')} onClick={() => router.push(`/offer/review/${offer.id}`)}>Tingnan ang Buong Offer</button>}
                   {offer.status === 'reviewed' && <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#2563eb', textAlign: 'center' }}>Hinihintay ang confirmation ng homeowner.</div>}
-                  {offer.status === 'agreed' && <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center', fontWeight: 600 }}>⏳ Hinihintay ang bayad ng homeowner.</div>}
-                  {isHired && <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#166534', fontWeight: 600, textAlign: 'center' }}>✅ Aktibo ang iyong trabaho. Goodluck!</div>}
+                  {offer.status === 'agreed' && <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center', fontWeight: 600 }}>Hinihintay ang bayad ng homeowner.</div>}
+                  {isHired && <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#166534', fontWeight: 600, textAlign: 'center' }}>Aktibo ang iyong trabaho. Goodluck!</div>}
                   {isClosed && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#dc2626', textAlign: 'center' }}>Nakahanap na ng kasambahay ang pamilyang ito.</div>}
                 </div>
               </div>
@@ -210,7 +208,7 @@ export default function KBDashboard() {
               <div style={{ padding: '13px 14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                   <div><div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '1px' }}>Pamilya sa {job.city}</div><div style={{ fontSize: '11px', color: '#9ca3af' }}>{urgencyLabel(job.urgency)}</div></div>
-                  <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: '#fffbeb', color: '#92400e' }}>⏳ Hinihintay</span>
+                  <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: '#fffbeb', color: '#92400e' }}>Hinihintay</span>
                 </div>
                 <div style={s.infoBox}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -228,7 +226,7 @@ export default function KBDashboard() {
               </div>
             </div>
           ))}
-          {appliedIds.size > 0 && <button style={{ ...s.btn('#c9943a'), marginTop: '8px' }} onClick={() => setTab('jobs')}>💼 Mag-apply pa ng ibang trabaho</button>}
+          {appliedIds.size > 0 && <button style={{ ...s.btn('#c9943a'), marginTop: '8px' }} onClick={() => setTab('jobs')}>Mag-apply pa ng ibang trabaho</button>}
         </div>
       )}
 
@@ -241,7 +239,7 @@ export default function KBDashboard() {
               <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900 }}>{profile?.full_name}</div>
               <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '8px' }}>{profile?.mobile}</div>
               <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 12px', borderRadius: '50px', background: kb?.status === 'available' ? '#f0fdf4' : '#fef3e2', border: `1px solid ${kb?.status === 'available' ? '#bbf7d0' : '#fde8c0'}`, color: kb?.status === 'available' ? '#166534' : '#92400e' }}>
-                {kb?.status === 'available' ? '✅ Available' : kb?.status === 'hired' ? '✅ Naka-hire' : '⏳ Pending'}
+                {kb?.status === 'available' ? 'Available' : kb?.status === 'hired' ? 'Naka-hire' : 'Pending'}
               </span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '14px' }}>
