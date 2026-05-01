@@ -62,7 +62,7 @@ export default function KBDashboard() {
     return parts.join(' · ') || '—'
   }
 
-  const petsText = (pets: string) => (!pets || pets === 'No') ? 'Walang Pets' : `May ${pets}`
+  const petsText = (pets: string) => (!pets || pets === 'No' || pets === 'Wala') ? 'Walang Pets' : `May ${pets}`
 
   const offerStatusMap: Record<string, { label: string; bg: string; color: string }> = {
     pending:         { label: 'Bagong Offer',              bg: '#fef3e2', color: '#c9943a' },
