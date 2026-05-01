@@ -30,6 +30,7 @@ export default function KBDashboard() {
           .select('*, homeowner_profile:profiles!offers_homeowner_id_fkey(full_name, mobile)')
           .eq('kasambahay_id', kbData.id)
           
+        console.log("offers data:", offersData, "kb:", kbData)
         setOffers(offersData || [])
         const { data: apps } = await supabase.from('applications').select('job_id').eq('kasambahay_id', kbData.id)
         if (apps) setAppliedIds(new Set(apps.map((a: any) => a.job_id)))
