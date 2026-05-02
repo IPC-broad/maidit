@@ -13,6 +13,7 @@ export default function KasambahaySignup() {
   const [hasNbi, setHasNbi] = useState(false)
   const [govtIdTypes, setGovtIdTypes] = useState<string[]>([])
   const toggleGovtId = (id: string) => setGovtIdTypes(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+
   const [form, setForm] = useState({
     first_name: '',
     last_name: '',
@@ -38,13 +39,44 @@ export default function KasambahaySignup() {
     }, 1000)
   }
 
-  const sendOtp = async () => {
+  // Step 1: check if mobile is already registered, then advance
+  const checkMobile = async () => {
     if (!form.first_name || !form.last_name || !form.mobile) {
       setError('Punan ang lahat ng fields')
       return
     }
     if (form.mobile.length < 11) {
       setError('Ilagay ang tamang mobile number (11 digits)')
+      return
+    }
+    setLoading(true)
+    setError('')
+
+    const res = await fetch('/api/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile: form.mobile, checkOnly: true })
+    })
+    const data = await res.json()
+
+    if (!res.ok) {
+      setError(data.error || 'May error. Subukan ulit.')
+      setLoading(false)
+      return
+    }
+
+    setLoading(false)
+    setStep(2)
+  }
+
+  // Step 2: validate profile fields, send OTP, then advance
+  const sendOtpAndProceed = async () => {
+    if (!form.email || !form.password || !form.city || !form.salary) {
+      setError('Punan ang lahat ng fields')
+      return
+    }
+    if (form.password.length < 8) {
+      setError('Password must be at least 8 characters')
       return
     }
     setLoading(true)
@@ -65,11 +97,32 @@ export default function KasambahaySignup() {
 
     setSentOtp(data.otp)
     setLoading(false)
-    setStep(2)
+    setStep(3)
     startCooldown()
   }
 
-  const verifyOtp = () => {
+  // Step 3: resend OTP
+  const resendOtp = async () => {
+    if (cooldown > 0 || loading) return
+    setLoading(true)
+    setError('')
+
+    const res = await fetch('/api/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile: form.mobile })
+    })
+    const data = await res.json()
+
+    if (res.ok) {
+      setSentOtp(data.otp)
+      startCooldown()
+    }
+    setLoading(false)
+  }
+
+  // Step 3: verify OTP then create account
+  const verifyAndCreate = async () => {
     if (!form.otp || form.otp.length < 6) {
       setError('Ilagay ang 6-digit code')
       return
@@ -79,20 +132,7 @@ export default function KasambahaySignup() {
       return
     }
     setError('')
-    setStep(3)
-  }
-
-  const handleSignup = async () => {
-    if (!form.email || !form.password || !form.city || !form.salary) {
-      setError('Punan ang lahat ng fields')
-      return
-    }
-    if (form.password.length < 8) {
-      setError('Password must be at least 8 characters')
-      return
-    }
     setLoading(true)
-    setError('')
 
     const { supabase } = await import('../../../lib/supabase')
 
@@ -160,10 +200,11 @@ export default function KasambahaySignup() {
 
       {error && <div style={s.err}>⚠️ {error}</div>}
 
+      {/* ── STEP 1: Name + Mobile ── */}
       {step === 1 && (
         <>
           <div style={s.title}>Mag-sign up</div>
-          <div style={s.sub}>I-verify ang iyong mobile number para makapagsimula</div>
+          <div style={s.sub}>Ilagay ang iyong pangalan at mobile number para makapagsimula</div>
 
           <label style={s.lbl}>Pangalan</label>
           <input style={s.input} placeholder="Ana" value={form.first_name} onChange={e => update('first_name', e.target.value)} />
@@ -181,60 +222,21 @@ export default function KasambahaySignup() {
             maxLength={11}
           />
 
-          <div style={s.note}>
-            📱 Magpapadala kami ng 6-digit verification code sa iyong number via SMS.
-          </div>
-
           <button
-            style={{ ...s.btn, opacity: (loading || cooldown > 0) ? .6 : 1 }}
-            onClick={sendOtp}
-            disabled={loading || cooldown > 0}
+            style={{ ...s.btn, opacity: loading ? .6 : 1 }}
+            onClick={checkMobile}
+            disabled={loading}
           >
-            {loading ? 'Sending...' : cooldown > 0 ? `Maghintay ${cooldown}s` : 'I-send ang Code →'}
+            {loading ? 'Checking...' : 'Susunod →'}
           </button>
         </>
       )}
 
+      {/* ── STEP 2: Profile Details ── */}
       {step === 2 && (
         <>
-          <div style={s.title}>I-verify ang number mo</div>
-          <div style={s.sub}>
-            Nagpadala kami ng 6-digit code sa{' '}
-            <strong style={{ color:'#111827' }}>{form.mobile}</strong>
-          </div>
-
-          <label style={s.lbl}>Verification Code</label>
-          <input
-            style={{ ...s.input, fontSize:'1.3rem', fontWeight:700, textAlign:'center', letterSpacing:'8px' }}
-            placeholder="000000"
-            value={form.otp}
-            onChange={e => update('otp', e.target.value.replace(/\D/g,'').slice(0,6))}
-            maxLength={6}
-            inputMode="numeric"
-          />
-
-          <button
-            style={{ ...s.btn, opacity: (loading || form.otp.length < 6) ? .6 : 1 }}
-            onClick={verifyOtp}
-            disabled={loading || form.otp.length < 6}
-          >
-            {loading ? 'Verifying...' : 'I-verify →'}
-          </button>
-
-          <button
-            style={{ width:'100%', padding:'11px', marginTop:'10px', background:'transparent', border:'1.5px solid #e5e7eb', borderRadius:'12px', fontFamily:'sans-serif', fontSize:'.82rem', color:'#6b7280', cursor: cooldown > 0 ? 'not-allowed' : 'pointer' }}
-            onClick={sendOtp}
-            disabled={cooldown > 0 || loading}
-          >
-            {cooldown > 0 ? `I-resend sa ${cooldown}s` : 'I-resend ang code'}
-          </button>
-        </>
-      )}
-
-      {step === 3 && (
-        <>
           <div style={s.title}>Karagdagang Impormasyon</div>
-          <div style={s.sub}>Na-verify na ang iyong number ✅</div>
+          <div style={s.sub}>Kumpleto ang iyong profile para makita ng mga homeowner</div>
 
           <label style={s.lbl}>Email</label>
           <input style={s.input} type="email" placeholder="ana@gmail.com" value={form.email} onChange={e => update('email', e.target.value)} />
@@ -288,7 +290,7 @@ export default function KasambahaySignup() {
               {['PhilHealth ID','SSS ID','Postal ID','Passport','UMID'].map((label) => (
                 <div key={label} style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => toggleGovtId(label)}>
                   <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: govtIdTypes.includes(label) ? '#c9943a' : '#d1d5db', background: govtIdTypes.includes(label) ? '#c9943a' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                    {govtIdTypes.includes(label) && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>v</span>}
+                    {govtIdTypes.includes(label) && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>✓</span>}
                   </div>
                   <span style={{ fontSize:'13px', color:'#374151' }}>{label}</span>
                 </div>
@@ -296,19 +298,61 @@ export default function KasambahaySignup() {
               <div style={{ borderTop:'1px solid #f3f4f6', paddingTop:'10px' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => setHasNbi(!hasNbi)}>
                   <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: hasNbi ? '#1a6b3c' : '#d1d5db', background: hasNbi ? '#1a6b3c' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                    {hasNbi && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>v</span>}
+                    {hasNbi && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>✓</span>}
                   </div>
                   <span style={{ fontSize:'13px', color:'#374151' }}>NBI Clearance</span>
                 </div>
               </div>
             </div>
           </div>
+
+          <div style={s.note}>
+            📱 Magpapadala kami ng 6-digit verification code sa <strong>{form.mobile}</strong> sa susunod na hakbang.
+          </div>
+
           <button
             style={{ ...s.btn, opacity: loading ? .6 : 1 }}
-            onClick={handleSignup}
+            onClick={sendOtpAndProceed}
             disabled={loading}
           >
-            {loading ? 'Ginagawa...' : 'I-create ang Account →'}
+            {loading ? 'Sending code...' : 'Susunod — I-verify ang Number →'}
+          </button>
+        </>
+      )}
+
+      {/* ── STEP 3: OTP Verification ── */}
+      {step === 3 && (
+        <>
+          <div style={s.title}>I-verify ang number mo</div>
+          <div style={s.sub}>
+            Nagpadala kami ng 6-digit code sa{' '}
+            <strong style={{ color:'#111827' }}>{form.mobile}</strong>
+          </div>
+
+          <label style={s.lbl}>Verification Code</label>
+          <input
+            style={{ ...s.input, fontSize:'1.3rem', fontWeight:700, textAlign:'center', letterSpacing:'8px' }}
+            placeholder="000000"
+            value={form.otp}
+            onChange={e => update('otp', e.target.value.replace(/\D/g,'').slice(0,6))}
+            maxLength={6}
+            inputMode="numeric"
+          />
+
+          <button
+            style={{ ...s.btn, opacity: (loading || form.otp.length < 6) ? .6 : 1 }}
+            onClick={verifyAndCreate}
+            disabled={loading || form.otp.length < 6}
+          >
+            {loading ? 'Ginagawa...' : 'I-verify at Gumawa ng Account →'}
+          </button>
+
+          <button
+            style={{ width:'100%', padding:'11px', marginTop:'10px', background:'transparent', border:'1.5px solid #e5e7eb', borderRadius:'12px', fontFamily:'sans-serif', fontSize:'.82rem', color:'#6b7280', cursor: cooldown > 0 ? 'not-allowed' : 'pointer' }}
+            onClick={resendOtp}
+            disabled={cooldown > 0 || loading}
+          >
+            {cooldown > 0 ? `I-resend sa ${cooldown}s` : 'I-resend ang code'}
           </button>
         </>
       )}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
-  const { mobile } = await req.json()
+  const { mobile, checkOnly } = await req.json()
 
   const { createClient } = await import('@supabase/supabase-js')
   const supabase = createClient(
@@ -20,6 +20,10 @@ export async function POST(req: NextRequest) {
       { error: 'Nairehistro na ang number na ito. Mag-login na lang.' },
       { status: 409 }
     )
+  }
+
+  if (checkOnly) {
+    return NextResponse.json({ success: true })
   }
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString()
