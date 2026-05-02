@@ -190,7 +190,7 @@ export default function KBDashboard() {
                   {offer.status === 'pending' && <button style={s.btn('#c9943a')} onClick={() => router.push(`/offer/review/${offer.id}`)}>Tingnan ang Buong Offer</button>}
                   {offer.status === 'reviewed' && <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#2563eb', textAlign: 'center' }}>Hinihintay ang confirmation ng homeowner.</div>}
                   {offer.status === 'agreed' && <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center', fontWeight: 600 }}>Hinihintay ang bayad ng homeowner.</div>}
-                  {isHired && <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#166534', fontWeight: 600, textAlign: 'center' }}>Aktibo ang iyong trabaho. Goodluck!</div>}
+                  {isHired && <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#166534', fontWeight: 600, textAlign: 'center' }}>HIRED! Inaantay na ang pagdating mo sa lugar ng pagtatrabahuan.</div>}
                   {isClosed && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#dc2626', textAlign: 'center' }}>Nakahanap na ng kasambahay ang pamilyang ito.</div>}
                 </div>
               </div>
