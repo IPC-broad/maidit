@@ -69,9 +69,9 @@ export default function KBDashboard() {
     reviewed:        { label: 'Hinihintay ang homeowner',  bg: '#eff6ff', color: '#2563eb' },
     agreed:          { label: 'Hinihintay ang bayad',      bg: '#fffbeb', color: '#92400e' },
     payment_pending: { label: 'Processing payment',        bg: '#fffbeb', color: '#92400e' },
-    paid:            { label: 'Aktibo - Naka-hire',         bg: '#f0fdf4', color: '#1a6b3c' },
-    active:          { label: 'Aktibo - Naka-hire',         bg: '#f0fdf4', color: '#1a6b3c' },
-    hired:           { label: 'Aktibo - Naka-hire',         bg: '#f0fdf4', color: '#1a6b3c' },
+    paid:            { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
+    active:          { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
+    hired:           { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
     declined:        { label: 'May Na-hire Na',             bg: '#fef2f2', color: '#dc2626' },
   }
 
