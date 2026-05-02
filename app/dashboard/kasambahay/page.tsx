@@ -73,6 +73,7 @@ export default function KBDashboard() {
     active:          { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
     hired:           { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
     countered:       { label: 'Counter offer — naghihintay ng sagot', bg: '#fef3e2', color: '#c9943a' },
+    counter_declined: { label: 'Hindi tinanggap ang counter', bg: '#fef2f2', color: '#dc2626' },
     declined:        { label: 'May Na-hire Na',             bg: '#fef2f2', color: '#dc2626' },
   }
 
@@ -192,6 +193,12 @@ export default function KBDashboard() {
                   {offer.status === 'reviewed' && <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#2563eb', textAlign: 'center' }}>Hinihintay ang confirmation ng homeowner.</div>}
                   {offer.status === 'agreed' && <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center', fontWeight: 600 }}>Hinihintay ang bayad ng homeowner.</div>}
                   {isHired && <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#166534', fontWeight: 600, textAlign: 'center' }}>HIRED! Inaantay na ang pagdating mo sa lugar ng pagtatrabahuan.</div>}
+                  {offer.status === 'counter_declined' && (
+                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#dc2626', lineHeight: 1.6 }}>
+                      Hindi tinanggap ang iyong counter offer.<br/>
+                      <button onClick={() => router.push('/offer/review/' + offer.id)} style={{ marginTop: '6px', width: '100%', padding: '8px', borderRadius: '8px', background: '#c9943a', border: 'none', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>Tingnan ang Origihinal na Job Offer</button>
+                    </div>
+                  )}
                   {isClosed && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#dc2626', textAlign: 'center' }}>Nakahanap na ng kasambahay ang pamilyang ito.</div>}
                 </div>
               </div>
