@@ -49,6 +49,10 @@ export default function PartnerDashboard() {
     availability: '',
     availability_custom: '',
     photo: null as string | null,
+    has_nbi: false,
+    govt_id_types: [] as string[],
+    has_nbi: false,
+    govt_id_types: [] as string[],
   })
 
   useEffect(() => {
@@ -92,6 +96,12 @@ export default function PartnerDashboard() {
     window.open(`fb-messenger://share?link=${link}`, '_blank')
   }
 
+  const toggleGovtId2 = (id: string) => {
+    setWorkerForm(f => ({ ...f, govt_id_types: f.govt_id_types.includes(id) ? f.govt_id_types.filter((x: string) => x !== id) : [...f.govt_id_types, id] }))
+  }
+  const toggleGovtId2 = (id: string) => {
+    setWorkerForm(f => ({ ...f, govt_id_types: f.govt_id_types.includes(id) ? f.govt_id_types.filter((x: string) => x !== id) : [...f.govt_id_types, id] }))
+  }
   const toggleSkill = (skill: string) => {
     setWorkerForm(f => ({
       ...f, skills: f.skills.includes(skill) ? f.skills.filter(s => s !== skill) : [...f.skills, skill]
@@ -141,6 +151,10 @@ export default function PartnerDashboard() {
         ? `${workerForm.availability_custom} araw`
         : workerForm.availability,
       confirm_token: token,
+      has_nbi: workerForm.has_nbi,
+      govt_id_types: workerForm.govt_id_types,
+      has_nbi: workerForm.has_nbi,
+      govt_id_types: workerForm.govt_id_types,
     })
 
     // Get the new kasambahay ID
@@ -165,7 +179,7 @@ export default function PartnerDashboard() {
 
     setSaveMsg('Na-save na! Makakatanggap ng text message si ' + pangalan + '.')
     setSaving(false)
-    setWorkerForm({ apelyido: '', pangalan: '', mobile: '', province: '', skills: [], setup: 'Kahit alin', civil_status: '', num_children: '0', availability: '', availability_custom: '', photo: null })
+    setWorkerForm({ apelyido: '', pangalan: '', mobile: '', province: '', skills: [], setup: 'Kahit alin', civil_status: '', num_children: '0', availability: '', availability_custom: '', photo: null, has_nbi: false, govt_id_types: [] })
 
     const { supabase: sb2 } = await import('../../../lib/supabase')
     const { data: workersData } = await sb2.from('kasambahay').select('*, profiles(*)').eq('referred_by', partner.id).order('created_at', { ascending: false })
@@ -264,8 +278,8 @@ export default function PartnerDashboard() {
         <span style={{ fontSize: '14px' }}>{isGold ? '⭐' : '💰'}</span>
         <div style={{ fontSize: '12px', color: isGold ? '#92400e' : '#166534', lineHeight: 1.5, flex: 1 }}>
           {isGold
-            ? <><strong>Gold Partner:</strong> ₱1,000 upfront sa worker arrival.</>
-            : <><strong>Standard Partner:</strong> ₱600 sa arrival + ₱400 after 30 days = ₱1,000 total</>}
+            ? <><strong>VIP Partner:</strong> ₱1,000 upfront sa worker arrival.</>
+            : <><strong>Partner:</strong> ₱600 sa arrival + ₱400 after 30 days = ₱1,000 total</>}
         </div>
         {totalPending > 0 && <div style={{ fontFamily: 'serif', fontSize: '13px', fontWeight: 900, color: '#92400e' }}>₱{totalPending.toLocaleString()} pending</div>}
       </div>
@@ -460,6 +474,48 @@ export default function PartnerDashboard() {
               <input ref={photoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhoto} />
             </div>
 
+            <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'12px' }}>
+              <div style={{ fontSize:'11px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>MGA DOKUMENTO (i-tick kung mayroon)</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+                {['PhilHealth ID','SSS ID','Postal ID','Passport','UMID'].map((label) => (
+                  <div key={label} style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => toggleGovtId2(label)}>
+                    <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: workerForm.govt_id_types.includes(label) ? '#c9943a' : '#d1d5db', background: workerForm.govt_id_types.includes(label) ? '#c9943a' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      {workerForm.govt_id_types.includes(label) && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>v</span>}
+                    </div>
+                    <span style={{ fontSize:'13px', color:'#374151' }}>{label}</span>
+                  </div>
+                ))}
+                <div style={{ borderTop:'1px solid #f3f4f6', paddingTop:'10px' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => setWorkerForm(f => ({ ...f, has_nbi: !f.has_nbi }))}>
+                    <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: workerForm.has_nbi ? '#1a6b3c' : '#d1d5db', background: workerForm.has_nbi ? '#1a6b3c' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      {workerForm.has_nbi && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>v</span>}
+                    </div>
+                    <span style={{ fontSize:'13px', color:'#374151' }}>NBI Clearance</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'12px' }}>
+              <div style={{ fontSize:'11px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>MGA DOKUMENTO (i-tick kung mayroon)</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+                {['PhilHealth ID','SSS ID','Postal ID','Passport','UMID'].map((label) => (
+                  <div key={label} style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => toggleGovtId2(label)}>
+                    <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: workerForm.govt_id_types.includes(label) ? '#c9943a' : '#d1d5db', background: workerForm.govt_id_types.includes(label) ? '#c9943a' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      {workerForm.govt_id_types.includes(label) && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>v</span>}
+                    </div>
+                    <span style={{ fontSize:'13px', color:'#374151' }}>{label}</span>
+                  </div>
+                ))}
+                <div style={{ borderTop:'1px solid #f3f4f6', paddingTop:'10px' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => setWorkerForm(f => ({ ...f, has_nbi: !f.has_nbi }))}>
+                    <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: workerForm.has_nbi ? '#1a6b3c' : '#d1d5db', background: workerForm.has_nbi ? '#1a6b3c' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      {workerForm.has_nbi && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>v</span>}
+                    </div>
+                    <span style={{ fontSize:'13px', color:'#374151' }}>NBI Clearance</span>
+                  </div>
+                </div>
+              </div>
+            </div>
             {/* SMS NOTE */}
             <div style={{ background: 'rgba(37,99,235,.1)', border: '1px solid rgba(37,99,235,.2)', borderRadius: '10px', padding: '12px 14px', marginBottom: '14px', fontSize: '12px', color: '#93c5fd', lineHeight: 1.65 }}>
               📱 <strong>Makakatanggap ng text message ang iyong nirefer.</strong><br />
@@ -469,9 +525,7 @@ export default function PartnerDashboard() {
             <button style={{ ...s.submitBtn, opacity: saving ? .6 : 1 }} onClick={handleAddWorker} disabled={saving}>
               {saving ? 'Nagse-save...' : 'I-submit ang Worker →'}
             </button>
-            <div style={{ fontSize: '11px', color: '#9ca3af', textAlign: 'center', marginTop: '6px', lineHeight: 1.6 }}>
-              Mave-verify ng MaidIt within 24 hours.
-            </div>
+
           </>
         )}
       </div>

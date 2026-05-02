@@ -10,6 +10,12 @@ export default function KasambahaySignup() {
   const [sentOtp, setSentOtp] = useState('')
   const [cooldown, setCooldown] = useState(0)
 
+  const [hasNbi, setHasNbi] = useState(false)
+  const [govtIdTypes, setGovtIdTypes] = useState<string[]>([])
+  const toggleGovtId = (id: string) => setGovtIdTypes(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  const [hasNbi, setHasNbi] = useState(false)
+  const [govtIdTypes, setGovtIdTypes] = useState<string[]>([])
+  const toggleGovtId = (id: string) => setGovtIdTypes(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
   const [form, setForm] = useState({
     first_name: '',
     last_name: '',
@@ -118,6 +124,10 @@ export default function KasambahaySignup() {
       profile_id: data.user?.id,
       asking_salary: parseInt(form.salary),
       setup: form.setup,
+      has_nbi: hasNbi,
+      govt_id_types: govtIdTypes,
+      has_nbi: hasNbi,
+      govt_id_types: govtIdTypes,
       experience: form.experience,
       province: form.city
     })
@@ -277,6 +287,48 @@ export default function KasambahaySignup() {
             </div>
           </div>
 
+          <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
+            <div style={{ fontSize:'11px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>MGA DOKUMENTO (i-tick kung mayroon)</div>
+            <div style={{ display:'flex', flexDirection:'column' as const, gap:'10px' }}>
+              {['PhilHealth ID','SSS ID','Postal ID','Passport','UMID'].map((label) => (
+                <div key={label} style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => toggleGovtId(label)}>
+                  <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: govtIdTypes.includes(label) ? '#c9943a' : '#d1d5db', background: govtIdTypes.includes(label) ? '#c9943a' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    {govtIdTypes.includes(label) && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>v</span>}
+                  </div>
+                  <span style={{ fontSize:'13px', color:'#374151' }}>{label}</span>
+                </div>
+              ))}
+              <div style={{ borderTop:'1px solid #f3f4f6', paddingTop:'10px' }}>
+                <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => setHasNbi(!hasNbi)}>
+                  <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: hasNbi ? '#1a6b3c' : '#d1d5db', background: hasNbi ? '#1a6b3c' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    {hasNbi && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>v</span>}
+                  </div>
+                  <span style={{ fontSize:'13px', color:'#374151' }}>NBI Clearance</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
+            <div style={{ fontSize:'11px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>MGA DOKUMENTO (i-tick kung mayroon)</div>
+            <div style={{ display:'flex', flexDirection:'column' as const, gap:'10px' }}>
+              {['PhilHealth ID','SSS ID','Postal ID','Passport','UMID'].map((label) => (
+                <div key={label} style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => toggleGovtId(label)}>
+                  <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: govtIdTypes.includes(label) ? '#c9943a' : '#d1d5db', background: govtIdTypes.includes(label) ? '#c9943a' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    {govtIdTypes.includes(label) && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>v</span>}
+                  </div>
+                  <span style={{ fontSize:'13px', color:'#374151' }}>{label}</span>
+                </div>
+              ))}
+              <div style={{ borderTop:'1px solid #f3f4f6', paddingTop:'10px' }}>
+                <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => setHasNbi(!hasNbi)}>
+                  <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: hasNbi ? '#1a6b3c' : '#d1d5db', background: hasNbi ? '#1a6b3c' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    {hasNbi && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>v</span>}
+                  </div>
+                  <span style={{ fontSize:'13px', color:'#374151' }}>NBI Clearance</span>
+                </div>
+              </div>
+            </div>
+          </div>
           <button
             style={{ ...s.btn, opacity: loading ? .6 : 1 }}
             onClick={handleSignup}
