@@ -112,7 +112,7 @@ export default function PayPage() {
           Did you complete the payment? 💳
         </div>
         <div style={{ fontSize: '.76rem', color: '#6b7280', marginBottom: '20px', lineHeight: 1.6 }}>
-          Once you've paid ₱2,001 on PayMongo, tap confirm below.
+          Once you've completed the PayMongo payment, tap the button below to notify us. We'll verify and activate your hire within a few minutes.
         </div>
         <div style={{ ...s.card, background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
           <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.8 }}>
@@ -122,7 +122,7 @@ export default function PayPage() {
           </div>
         </div>
         <button style={{ ...s.btn, opacity: submitting ? .6 : 1 }} onClick={handleConfirmPaid} disabled={submitting}>
-          {submitting ? 'Submitting...' : "✅ Yes, I've paid ₱2,001"}
+          {submitting ? 'Verifying...' : "✅ I've Completed Payment"}
         </button>
         <button style={s.btnBlue} onClick={() => window.open(PAYMONGO_LINK, '_blank')}>
           ↗ Re-open PayMongo

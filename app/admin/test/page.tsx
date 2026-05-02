@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 
 const STATUSES = ['pending', 'reviewed', 'agreed', 'payment_pending', 'paid', 'active', 'hired', 'declined', 'countered', 'fare_pending']
+const PAY_STATUSES = ['agreed', 'payment_pending', 'paid']
 
 const statusColors: Record<string, string> = {
   pending: '#c9943a',
