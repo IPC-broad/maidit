@@ -22,7 +22,7 @@ export default function PayPage() {
 
       const { data } = await supabase
         .from('offers')
-        .select('*, kasambahay_profile:profiles!offers_kasambahay_id_fkey(full_name)')
+        .select('*, kasambahay:kasambahay_id(*, profiles(full_name))')
         .eq('id', offerId)
         .single()
 
