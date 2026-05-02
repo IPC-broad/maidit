@@ -77,8 +77,9 @@ export default function OfferReviewPage() {
     await supabase.from('offers').update({
       fare_estimate: fareInput ? parseInt(fareInput) : null,
       checklist_confirmed: true,
-      status: 'fare_pending'
+      status: 'agreed'
     }).eq('id', offerId)
+    await fetch('/api/send-sms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'offer_agreed', offerId }) }).catch(() => {})
     setSubmitting(false)
     setAction('done')
   }

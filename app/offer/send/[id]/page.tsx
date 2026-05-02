@@ -78,6 +78,11 @@ export default function SendOfferPage({ params }: any) {
     if (offerError) { setSubmitting(false); setError(offerError.message); return }
     const { data: profile } = await supabase.from('profiles').select('job_offer_credits').eq('id', user.id).single()
     await supabase.from('profiles').update({ job_offer_credits: (profile?.job_offer_credits ?? 1) - 1 }).eq('id', user.id)
+    // Get the new offer id
+    const { data: newOffer } = await supabase.from('offers').select('id').eq('kasambahay_id', kasambahayId).eq('status', 'pending').order('created_at', { ascending: false }).limit(1).single()
+    if (newOffer?.id) {
+      await fetch('/api/send-sms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'offer_sent', offerId: newOffer.id }) }).catch(() => {})
+    }
     setSubmitting(false)
     setSuccess(true)
   }
