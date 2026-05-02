@@ -488,27 +488,7 @@ export default function PartnerDashboard() {
                 </div>
               </div>
             </div>
-            <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'12px' }}>
-              <div style={{ fontSize:'11px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>MGA DOKUMENTO (i-tick kung mayroon)</div>
-              <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
-                {['PhilHealth ID','SSS ID','Postal ID','Passport','UMID'].map((label) => (
-                  <div key={label} style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => toggleGovtId2(label)}>
-                    <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: workerForm.govt_id_types.includes(label) ? '#c9943a' : '#d1d5db', background: workerForm.govt_id_types.includes(label) ? '#c9943a' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                      {workerForm.govt_id_types.includes(label) && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>v</span>}
-                    </div>
-                    <span style={{ fontSize:'13px', color:'#374151' }}>{label}</span>
-                  </div>
-                ))}
-                <div style={{ borderTop:'1px solid #f3f4f6', paddingTop:'10px' }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => setWorkerForm(f => ({ ...f, has_nbi: !f.has_nbi }))}>
-                    <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: workerForm.has_nbi ? '#1a6b3c' : '#d1d5db', background: workerForm.has_nbi ? '#1a6b3c' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                      {workerForm.has_nbi && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>v</span>}
-                    </div>
-                    <span style={{ fontSize:'13px', color:'#374151' }}>NBI Clearance</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+
             {/* SMS NOTE */}
             <div style={{ background: 'rgba(37,99,235,.1)', border: '1px solid rgba(37,99,235,.2)', borderRadius: '10px', padding: '12px 14px', marginBottom: '14px', fontSize: '12px', color: '#93c5fd', lineHeight: 1.65 }}>
               📱 <strong>Makakatanggap ng text message ang iyong nirefer.</strong><br />
