@@ -11,8 +11,6 @@ export default function KasambahaySignup() {
   const [cooldown, setCooldown] = useState(0)
 
   const [hasNbi, setHasNbi] = useState(false)
-  const [govtIdTypes, setGovtIdTypes] = useState<string[]>([])
-  const toggleGovtId = (id: string) => setGovtIdTypes(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
   const [hasNbi, setHasNbi] = useState(false)
   const [govtIdTypes, setGovtIdTypes] = useState<string[]>([])
   const toggleGovtId = (id: string) => setGovtIdTypes(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
