@@ -187,8 +187,8 @@ export default function HWDashboard() {
                   </div>
                   <div style={{ background:'#faf8f5', borderRadius:'10px', padding:'10px 12px', marginBottom:'10px' }}>
                     <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
-                      <div><div style={{ fontSize:'10px', color:'#9ca3af', marginBottom:'2px' }}>Sahod</div><div style={{ fontFamily:'serif', fontSize:'16px', fontWeight:900, color:'#1a6b3c' }}>₱{offer.salary?.toLocaleString()}<span style={{ fontSize:'10px', fontWeight:400, color:'#9ca3af' }}>/buwan</span></div></div>
-                      <div><div style={{ fontSize:'10px', color:'#9ca3af', marginBottom:'2px' }}>Lokasyon</div><div style={{ fontSize:'13px', fontWeight:700 }}>{offer.city || '—'}</div></div>
+                      <div><div style={{ fontSize:'10px', color:'#9ca3af', marginBottom:'2px' }}>Salary</div><div style={{ fontFamily:'serif', fontSize:'16px', fontWeight:900, color:'#1a6b3c' }}>₱{offer.salary?.toLocaleString()}<span style={{ fontSize:'10px', fontWeight:400, color:'#9ca3af' }}>/buwan</span></div></div>
+                      <div><div style={{ fontSize:'10px', color:'#9ca3af', marginBottom:'2px' }}>Location</div><div style={{ fontSize:'13px', fontWeight:700 }}>{offer.city || '—'}</div></div>
                       <div><div style={{ fontSize:'10px', color:'#9ca3af', marginBottom:'2px' }}>Setup</div><div style={{ fontSize:'13px', fontWeight:700 }}>{offer.setup || '—'}</div></div>
                       <div><div style={{ fontSize:'10px', color:'#9ca3af', marginBottom:'2px' }}>Scope</div><div style={{ fontSize:'12px', fontWeight:600, lineHeight:1.4 }}>{offer.scope?.join(', ') || '—'}</div></div>
                     </div>
