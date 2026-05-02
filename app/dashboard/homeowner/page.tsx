@@ -22,6 +22,11 @@ export default function HWDashboard() {
       setCurrentUser(user || null)
       const { data } = await supabase.from('kasambahay').select('*, profiles(*)')
       setProfiles(data || [])
+      const { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
+      if (hw) {
+        const { data: offersData } = await supabase.from('offers').select('id, status').eq('homeowner_id', hw.id)
+        setOffers(offersData || [])
+      }
       setLoading(false)
     }
     init()
