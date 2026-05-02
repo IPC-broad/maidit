@@ -223,59 +223,62 @@ export default function PartnerDashboard() {
   return (
     <div style={s.wrap}>
       {/* HEADER */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #ede8e0', padding: '16px 16px 14px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-          <div style={{ fontSize: '12px', color: '#6b7280', fontWeight: 600 }}>Welcome back</div>
+      <div style={{ background: '#fff', borderBottom: '1px solid #ede8e0', padding: '14px 16px 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <div style={{ fontSize: '11px', color: '#9ca3af' }}>Welcome back</div>
           <button onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.auth.signOut(); router.push('/login') }} style={{ background: '#f9f6f2', border: '1px solid #ede8e0', borderRadius: '8px', padding: '5px 11px', color: '#6b7280', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'sans-serif' }}>Sign out</button>
         </div>
-        <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 900, color: '#1a1a1a' }}>{partner?.profiles?.full_name || 'Partner'}</div>
-        <div style={{ fontSize: '13px', color: '#c9943a', fontWeight: 600, marginTop: '2px' }}>Kumita sa bawat referral mo</div>
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' as const, marginTop: '6px' }}>
-          <span style={{ background: partner?.approved ? 'rgba(26,107,60,.2)' : 'rgba(255,255,255,.08)', border: `1px solid ${partner?.approved ? 'rgba(26,107,60,.3)' : 'rgba(255,255,255,.1)'}`, borderRadius: '50px', padding: '3px 10px', fontSize: '10px', fontWeight: 700, color: partner?.approved ? '#6ee7b7' : 'rgba(255,255,255,.4)' }}>
-            {partner?.approved ? '✅ Approved' : '⏳ Pending Approval'} · {partner?.province || partner?.barangay?.split(',').slice(-1)[0]?.trim() || 'PH'}
-          </span>
-          {isGold && <span style={{ background: 'rgba(201,148,58,.2)', border: '1px solid rgba(201,148,58,.3)', borderRadius: '50px', padding: '3px 10px', fontSize: '10px', fontWeight: 700, color: '#c9943a' }}>⭐ VIP Partner</span>}
-        </div>
 
-        {/* REFERRAL CODE */}
-        <div style={{ background: 'rgba(201,148,58,.1)', border: '1px solid rgba(201,148,58,.2)', borderRadius: '10px', padding: '10px 13px', marginTop: '11px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontSize: '10px', color: '#9ca3af', marginBottom: '2px' }}>Referral code mo</div>
-            <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, color: '#c9943a', letterSpacing: '1px' }}>{referralCode}</div>
+        {/* EARNINGS HERO CARD */}
+        <div style={{ background: '#1a6b3c', borderRadius: '16px', padding: '18px 16px', marginBottom: '14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+            <div>
+              <div style={{ fontSize: '12px', color: 'rgba(255,255,255,.6)', marginBottom: '2px' }}>Total Kinita</div>
+              <div style={{ fontFamily: 'serif', fontSize: '32px', fontWeight: 900, color: '#fff' }}>₱{totalEarned.toLocaleString()}</div>
+              <div style={{ fontSize: '12px', color: 'rgba(255,255,255,.7)', marginTop: '2px' }}>Kumita ng ₱1,000 kada successful hire</div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.5)', marginBottom: '2px' }}>{partner?.profiles?.full_name || 'Partner'}</div>
+              <span style={{ background: 'rgba(255,255,255,.15)', borderRadius: '50px', padding: '3px 10px', fontSize: '10px', fontWeight: 700, color: '#fff' }}>
+                {partner?.approved ? '✅ Approved' : '⏳ Pending'} {isGold ? '· VIP' : ''}
+              </span>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <button onClick={copyCode} style={{ padding: '6px 12px', borderRadius: '7px', background: copied ? 'rgba(26,107,60,.3)' : 'rgba(201,148,58,.2)', border: `1px solid ${copied ? 'rgba(26,107,60,.4)' : 'rgba(201,148,58,.3)'}`, color: copied ? '#6ee7b7' : '#f0c97a', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>
-              {copied ? '✓ Copied' : 'Copy'}
+          {/* REFERRAL CODE */}
+          <div style={{ background: 'rgba(255,255,255,.12)', borderRadius: '10px', padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.5)', marginBottom: '3px' }}>Referral Code mo</div>
+              <div style={{ fontFamily: 'serif', fontSize: '18px', fontWeight: 900, color: '#fff', letterSpacing: '1px' }}>{referralCode}</div>
+            </div>
+            <button onClick={copyCode} style={{ padding: '8px 16px', borderRadius: '8px', background: copied ? 'rgba(255,255,255,.3)' : '#fff', border: 'none', color: copied ? '#fff' : '#1a6b3c', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>
+              {copied ? 'Copied!' : 'Copy'}
             </button>
-            <button onClick={shareSMS} style={{ padding: '6px 12px', borderRadius: '7px', background: 'rgba(37,99,235,.15)', border: '1px solid rgba(37,99,235,.25)', color: '#93c5fd', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>SMS</button>
           </div>
         </div>
-        <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '5px', lineHeight: 1.5 }}>I-share ang link na ito sa mga naghahanap ng trabaho bilang kasambahay.</div>
-      </div>
 
-      {/* STATS */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1px', background: '#ede8e0' }}>
-        {[
-          { num: `₱${totalEarned.toLocaleString()}`, lbl: 'Kinita', color: '#1a6b3c' },
-          { num: workers.filter(w => w.status === 'hired').length, lbl: 'Na-hire', color: '#c9943a' },
-          { num: workers.length, lbl: 'Narecruit', color: '#2563eb' },
-        ].map((stat, i) => (
-          <div key={i} style={{ background: '#fff', padding: '14px 10px', textAlign: 'center' }}>
-            <div style={{ fontFamily: 'serif', fontSize: '24px', fontWeight: 900, color: stat.color, marginBottom: '3px' }}>{stat.num}</div>
-            <div style={{ fontSize: '12px', color: '#4b5563', fontWeight: 600 }}>{stat.lbl}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* PAYOUT BANNER */}
-      <div style={{ background: isGold ? '#fef3c7' : '#dcfce7', borderBottom: '1px solid #ede8e0', padding: '9px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span style={{ fontSize: '14px' }}>{isGold ? '⭐' : '💰'}</span>
-        <div style={{ fontSize: '12px', color: isGold ? '#92400e' : '#166534', lineHeight: 1.5, flex: 1 }}>
-          {isGold
-            ? <><strong>VIP Partner:</strong> ₱1,000 upfront sa worker arrival.</>
-            : <><strong>Partner:</strong> ₱600 sa arrival + ₱400 after 30 days = ₱1,000 total</>}
+        {/* STATS ROW */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '14px' }}>
+          {[
+            { num: workers.filter(w => w.status === 'hired').length, lbl: 'Na-hire', color: '#1a6b3c' },
+            { num: workers.length, lbl: 'Na-recruit', color: '#c9943a' },
+            { num: totalPending > 0 ? `₱${totalPending.toLocaleString()}` : '—', lbl: 'Pending Payout', color: '#92400e' },
+          ].map((stat, i) => (
+            <div key={i} style={{ background: '#faf8f5', borderRadius: '10px', padding: '10px', textAlign: 'center', border: '1px solid #ede8e0' }}>
+              <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, color: stat.color }}>{stat.num}</div>
+              <div style={{ fontSize: '11px', color: '#6b7280', fontWeight: 600, marginTop: '2px' }}>{stat.lbl}</div>
+            </div>
+          ))}
         </div>
-        {totalPending > 0 && <div style={{ fontFamily: 'serif', fontSize: '13px', fontWeight: 900, color: '#92400e' }}>₱{totalPending.toLocaleString()} pending</div>}
+
+        {/* PAYOUT INFO */}
+        <div style={{ background: isGold ? '#fef3c7' : '#f0fdf4', border: `1px solid ${isGold ? '#fde68a' : '#bbf7d0'}`, borderRadius: '10px', padding: '10px 13px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>{isGold ? '⭐' : '💰'}</span>
+          <div style={{ fontSize: '12px', color: isGold ? '#92400e' : '#166534', lineHeight: 1.5, flex: 1, fontWeight: 600 }}>
+            {isGold
+              ? 'VIP Partner: ₱1,000 upfront sa worker arrival'
+              : 'Partner: ₱600 sa arrival + ₱400 after 30 days = ₱1,000 total'}
+          </div>
+        </div>
       </div>
 
       {/* TABS */}
