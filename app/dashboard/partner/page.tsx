@@ -22,7 +22,7 @@ type Payout = {
   offer: { kasambahay_profile: { full_name: string }; homeowner_profile: { full_name: string } }
 }
 type Worker = {
-  id: string; province: string; skills: string[]; status: string
+  id: string; province: string; skills: string[]; status: string; confirmed_at?: string
   profiles: { full_name: string; mobile: string }
 }
 
