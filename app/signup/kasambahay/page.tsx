@@ -123,8 +123,6 @@ export default function KasambahaySignup() {
       setup: form.setup,
       has_nbi: hasNbi,
       govt_id_types: govtIdTypes,
-      has_nbi: hasNbi,
-      govt_id_types: govtIdTypes,
       experience: form.experience,
       province: form.city
     })
