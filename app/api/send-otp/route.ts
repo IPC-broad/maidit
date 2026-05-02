@@ -2,6 +2,26 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   const { mobile } = await req.json()
+
+  const { createClient } = await import('@supabase/supabase-js')
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  const { data: existing } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('mobile', mobile)
+    .maybeSingle()
+
+  if (existing) {
+    return NextResponse.json(
+      { error: 'Nairehistro na ang number na ito. Mag-login na lang.' },
+      { status: 409 }
+    )
+  }
+
   const otp = Math.floor(100000 + Math.random() * 900000).toString()
 
   console.log(`OTP for ${mobile}: ${otp}`)

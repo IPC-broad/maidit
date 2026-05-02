@@ -58,7 +58,7 @@ export default function KasambahaySignup() {
     const data = await res.json()
 
     if (!res.ok) {
-      setError('Hindi mapadala ang SMS. Subukan ulit.')
+      setError(data.error || 'Hindi mapadala ang SMS. Subukan ulit.')
       setLoading(false)
       return
     }
@@ -128,7 +128,7 @@ export default function KasambahaySignup() {
     })
 
     setLoading(false)
-    router.push('/dashboard/kasambahay')
+    router.push('/signup/kasambahay/selfie')
   }
 
   const s: any = {
