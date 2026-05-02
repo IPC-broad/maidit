@@ -102,7 +102,7 @@ export default function HWDashboard() {
         <h1 style={{ fontFamily:'serif', fontSize:'1.3rem', fontWeight:900, color:'#1a1a1a', letterSpacing:'-0.5px' }}>
           Maid<span style={{ color:'#f0c97a' }}>It</span>
         </h1>
-        <a href="/login" style={{ fontSize:'.72rem', color:'#9ca3af', textDecoration:'none' }}>Sign out</a>
+        <button onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.auth.signOut(); router.push('/login') }} style={{ background:'none', border:'none', fontSize:'.72rem', color:'#9ca3af', cursor:'pointer', padding:0, fontFamily:'sans-serif' }}>Sign out</button>
       </div>
 
       {actionCount > 0 && tab !== 'offers' && (
