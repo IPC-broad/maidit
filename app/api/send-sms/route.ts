@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 async function sendSMS(mobile: string, message: string) {
   if (!process.env.SEMAPHORE_API_KEY) {
-    console.log(`[SMS] To ${mobile}: ${message}`)
+    console.log('[SMS] To ' + mobile + ': ' + message)
     return { success: true }
   }
   const params = new URLSearchParams({
@@ -23,7 +23,6 @@ async function sendSMS(mobile: string, message: string) {
 export async function POST(req: NextRequest) {
   try {
     const { event, offerId } = await req.json()
-
     const { createClient } = await import('@supabase/supabase-js')
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,64 +31,48 @@ export async function POST(req: NextRequest) {
 
     const { data: offer, error } = await supabase
       .from('offers')
-      .select(`
-        *,
       .select('*, homeowner_id, kasambahay_id')
       .eq('id', offerId)
       .single()
+
     if (error || !offer) {
       return NextResponse.json({ error: 'Offer not found' }, { status: 404 })
     }
+
     const { data: hw } = await supabase.from('homeowners').select('profile_id').eq('id', offer.homeowner_id).single()
-    const { data: hwProfile } = hw?.profile_id ? await supabase.from('profiles').select('full_name, mobile').eq('id', hw.profile_id).single() : { data: null }
+    const hwLookup = hw?.profile_id ? await supabase.from('profiles').select('full_name, mobile').eq('id', hw.profile_id).single() : { data: null }
+    const hwProfile = hwLookup.data
+
     const { data: kb } = await supabase.from('kasambahay').select('profile_id').eq('id', offer.kasambahay_id).single()
-    const { data: kbProfile } = kb?.profile_id ? await supabase.from('profiles').select('full_name, mobile').eq('id', kb.profile_id).single() : { data: null }
+    const kbLookup = kb?.profile_id ? await supabase.from('profiles').select('full_name, mobile').eq('id', kb.profile_id).single() : { data: null }
+    const kbProfile = kbLookup.data
+
     const hwName = hwProfile?.full_name?.split(' ')[0] || 'Homeowner'
-    const hwMobile = hwProfile?.mobile
+    const hwMobile = hwProfile?.mobile || ''
     const kbName = kbProfile?.full_name?.split(' ')[0] || 'Kasambahay'
-    const kbMobile = kbProfile?.mobile
-
-    }
-
+    const kbMobile = kbProfile?.mobile || ''
+    const salary = offer.salary?.toLocaleString()
+    const reviewUrl = 'maidit.vercel.app/offer/review/' + offerId
+    const payUrl = 'maidit.vercel.app/pay/' + offerId
+    const arrivalUrl = 'maidit.vercel.app/arrival/' + offerId
 
     const messages: Record<string, { mobile: string; msg: string }[]> = {
       offer_sent: [
-        {
-          mobile: kbMobile,
-          msg: `Hi ${kbName}! ${hwName} sent you a job offer on MaidIt. Salary: ₱${offer.salary?.toLocaleString()}/mo. Review it now: maidit.vercel.app/offer/review/${offerId}`
-        }
+        { mobile: kbMobile, msg: 'Hi ' + kbName + '! ' + hwName + ' sent you a job offer on MaidIt. Salary: P' + salary + '/mo. Review it now: ' + reviewUrl }
       ],
       offer_reviewed: [
-        {
-          mobile: hwMobile,
-          msg: `Hi ${hwName}! ${kbName} reviewed your offer on MaidIt. Final step — confirm and pay: maidit.vercel.app/offer/confirm/${offerId}`
-        }
+        { mobile: hwMobile, msg: 'Hi ' + hwName + '! ' + kbName + ' reviewed your offer on MaidIt. Check it here: maidit.vercel.app/offer/confirm/' + offerId }
       ],
       offer_agreed: [
-        {
-          mobile: hwMobile,
-          msg: `Hi ${hwName}! ${kbName} agreed to your offer. Please pay the ₱2,001 hire fee: maidit.vercel.app/pay/${offerId}`
-        },
-        {
-          mobile: kbMobile,
-          msg: `Hi ${kbName}! ${hwName} confirmed your offer on MaidIt. Waiting for their payment to finalize. We'll notify you once done!`
-        }
+        { mobile: hwMobile, msg: 'Hi ' + hwName + '! ' + kbName + ' agreed to your offer. Please pay the P2,001 hire fee: ' + payUrl },
+        { mobile: kbMobile, msg: 'Hi ' + kbName + '! ' + hwName + ' confirmed your offer on MaidIt. Waiting for their payment. We will notify you once done!' }
       ],
       payment_confirmed: [
-        {
-          mobile: hwMobile,
-          msg: `Hi ${hwName}! Payment received. Confirm ${kbName}'s arrival once they reach your home: maidit.vercel.app/arrival/${offerId}`
-        },
-        {
-          mobile: kbMobile,
-          msg: `Hi ${kbName}! ${hwName} has paid the hire fee. Your employment is confirmed. Safe travels!`
-        }
+        { mobile: hwMobile, msg: 'Hi ' + hwName + '! Payment received. Confirm ' + kbName + ' arrival once they reach your home: ' + arrivalUrl },
+        { mobile: kbMobile, msg: 'Hi ' + kbName + '! ' + hwName + ' has paid the hire fee. Your employment is confirmed. Safe travels!' }
       ],
       arrival_confirmed: [
-        {
-          mobile: kbMobile,
-          msg: `Hi ${kbName}! ${hwName} confirmed your arrival. Your 30-day trial has started. Good luck on your first day!`
-        }
+        { mobile: kbMobile, msg: 'Hi ' + kbName + '! ' + hwName + ' confirmed your arrival. Your 30-day trial has started. Good luck on your first day!' }
       ]
     }
 
@@ -106,7 +89,6 @@ export async function POST(req: NextRequest) {
 
     const failed = results.filter(r => r.status === 'rejected').length
     return NextResponse.json({ success: true, sent: toSend.length - failed, failed })
-
   } catch (err) {
     console.error('send-sms error:', err)
     return NextResponse.json({ error: 'Internal error' }, { status: 500 })
