@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   try {
-    const { kasambahayId, name, mobile, partnerName } = await req.json()
+    const { kasambahayId, name, mobile, partnerName, token } = await req.json()
 
-    if (!mobile || !kasambahayId) {
+    if (!mobile || !kasambahayId || !token) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
     const firstName = name?.split(' ')[0] || 'po'
-    const confirmUrl = `https://maidit.vercel.app/confirm/${kasambahayId}`
+    const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://maidit.vercel.app').replace(/\/$/, '')
+    const confirmUrl = `${baseUrl}/confirm/${token}`
     const message = `Hi ${firstName}! Si ${partnerName || 'isang community partner'} ay nag-refer sa inyo sa MaidIt para makahanap ng trabaho bilang kasambahay. Libre po ito. I-confirm lang ang inyong profile: ${confirmUrl}`
 
     if (!process.env.SEMAPHORE_API_KEY) {

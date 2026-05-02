@@ -135,8 +135,14 @@ export default function PartnerDashboard() {
     })
     const { data: newKb } = await supabase.from('kasambahay').select('id').eq('profile_id', profile.id).single()
     if (newKb?.id) {
-      fetch('/api/send-sms', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event: 'worker_added', kasambahayId: newKb.id, token }) }).catch(() => {})
+      fetch('/api/notify-worker', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kasambahayId: newKb.id,
+          token,
+          name: full_name,
+          mobile: workerForm.mobile,
+          partnerName: partner?.profiles?.full_name?.split(' ')[0] || 'MaidIt Partner'
+        }) }).catch(() => {})
     }
     setSavedName(pangalan)
     setShowSuccess(true)
