@@ -16,7 +16,6 @@ export default function OfferReviewPage() {
   const [fareInput, setFareInput] = useState('')
   const [busLine, setBusLine] = useState('')
   const [arrivalDate, setArrivalDate] = useState('')
-  const [arrivalDate, setArrivalDate] = useState('')
   const [isProvince, setIsProvince] = useState(false)
 
   const [checklist, setChecklist] = useState({
