@@ -329,6 +329,13 @@ export default function KasambahaySignup() {
             <strong style={{ color:'#111827' }}>{form.mobile}</strong>
           </div>
 
+          {process.env.NEXT_PUBLIC_DEV_MODE === 'true' && sentOtp && (
+            <div style={{ background:'#1e1b4b', border:'2px dashed #6366f1', borderRadius:'10px', padding:'10px 13px', marginBottom:'13px', fontFamily:'monospace' }}>
+              <div style={{ fontSize:'10px', fontWeight:800, color:'#a5b4fc', letterSpacing:'1px', marginBottom:'4px' }}>⚠️ DEV ONLY — OTP CODE</div>
+              <div style={{ fontSize:'1.4rem', fontWeight:900, color:'#fff', letterSpacing:'8px' }}>{sentOtp}</div>
+            </div>
+          )}
+
           <label style={s.lbl}>Verification Code</label>
           <input
             style={{ ...s.input, fontSize:'1.3rem', fontWeight:700, textAlign:'center', letterSpacing:'8px' }}
