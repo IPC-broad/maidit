@@ -192,6 +192,15 @@ export default function PartnerDashboard() {
       </div>
 
       <div style={{ padding: '14px 16px' }}>
+        {newlyConfirmed > 0 && (
+          <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", padding: "12px 14px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => setTab("workers")}>
+            <span style={{ fontSize: "20px" }}>🎉</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: "13px", fontWeight: 700, color: "#1a6b3c" }}>{newlyConfirmed} bagong referral na nagconfirm!</div>
+              <div style={{ fontSize: "11px", color: "#166534", marginTop: "1px" }}>Makikita na sila ng mga homeowner. Tap para tingnan.</div>
+            </div>
+          </div>
+        )}
         {/* EARNINGS HERO */}
         <div style={{ background: '#1a6b3c', borderRadius: '16px', padding: '20px 18px', marginBottom: '12px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
