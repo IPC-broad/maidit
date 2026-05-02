@@ -61,8 +61,8 @@ export default function PayPage() {
 
   const s: any = {
     wrap: { minHeight: '100vh', background: '#f9fafb', fontFamily: 'sans-serif', color: '#111827' },
-    head: { background: '#0d1117', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '10px' },
-    back: { background: 'none', border: 'none', color: 'rgba(255,255,255,.5)', fontSize: '1rem', cursor: 'pointer', padding: 0 },
+    head: { background: '#1a6b3c', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '10px' },
+    back: { background: 'none', border: 'none', color: '#9ca3af', fontSize: '1rem', cursor: 'pointer', padding: 0 },
     body: { padding: '24px 18px 48px', maxWidth: '480px', margin: '0 auto' },
     card: { background: '#fff', borderRadius: '12px', padding: '16px', border: '1.5px solid #e5e7eb', marginBottom: '14px' },
     btn: { width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', marginBottom: '10px' },
@@ -134,7 +134,7 @@ export default function PayPage() {
     </div>
   )
 
-  const kbName = offer?.kasambahay_profile?.full_name?.split(' ')[0] || 'your kasambahay'
+  const kbName = offer?.kasambahay?.profiles?.full_name?.split(' ')[0] || 'your kasambahay'
 
   return (
     <div style={s.wrap}>
@@ -149,7 +149,7 @@ export default function PayPage() {
         <div style={{ fontSize: '.76rem', color: '#6b7280', marginBottom: '20px', lineHeight: 1.6 }}>
           Activate your hire of <strong>{kbName}</strong> with a one-time fee.
         </div>
-        <div style={{ ...s.card, background: '#0d1117', border: 'none', textAlign: 'center' as const, padding: '22px' }}>
+        <div style={{ ...s.card, background: '#1a6b3c', border: 'none', textAlign: 'center' as const, padding: '22px' }}>
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '1px', color: 'rgba(255,255,255,.35)', marginBottom: '6px' }}>
             Hire Protection Fee
           </div>
