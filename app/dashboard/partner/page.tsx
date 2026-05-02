@@ -148,6 +148,12 @@ export default function PartnerDashboard() {
   const totalPending = payouts.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0)
   const isGold = partner?.tier === 'gold'
   const hiredCount = workers.filter(w => w.status === 'hired').length
+  const newlyConfirmed = workers.filter(w => {
+    if (w.status !== 'available') return false
+    if (!w.confirmed_at) return false
+    const days = (Date.now() - new Date(w.confirmed_at).getTime()) / (1000 * 60 * 60 * 24)
+    return days <= 7
+  }).length
 
   const statusLabel: Record<string, { label: string; bg: string; color: string }> = {
     hired: { label: 'Na-hire', bg: '#f0fdf4', color: '#1a6b3c' },
@@ -268,13 +274,14 @@ export default function PartnerDashboard() {
         {/* TABS */}
         <div style={{ display: 'flex', background: '#fff', borderRadius: '12px', border: '1px solid #ede8e0', marginBottom: '14px', overflow: 'hidden' }}>
           {([
-            { id: 'workers', icon: '👥', label: 'Workers' },
-            { id: 'payouts', icon: '💳', label: 'Payouts' },
-            { id: 'add', icon: '🎁', label: 'Mag-refer' },
+            { id: 'workers', icon: '👥', label: 'Workers', badge: newlyConfirmed },
+            { id: 'payouts', icon: '💳', label: 'Payouts', badge: 0 },
+            { id: 'add', icon: '🎁', label: 'Mag-refer', badge: 0 },
           ] as const).map((t, i) => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, padding: '11px 4px', border: 'none', borderLeft: i > 0 ? '1px solid #ede8e0' : 'none', background: tab === t.id ? '#1a6b3c' : 'transparent', cursor: 'pointer', fontFamily: 'sans-serif', fontSize: '11px', fontWeight: 700, color: tab === t.id ? '#fff' : '#6b7280', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+            <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, padding: '11px 4px', border: 'none', borderLeft: i > 0 ? '1px solid #ede8e0' : 'none', background: tab === t.id ? '#1a6b3c' : 'transparent', cursor: 'pointer', fontFamily: 'sans-serif', fontSize: '11px', fontWeight: 700, color: tab === t.id ? '#fff' : '#6b7280', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', position: 'relative' }}>
               <span style={{ fontSize: '16px' }}>{t.icon}</span>
               <span>{t.label}</span>
+              {(t as any).badge > 0 && tab !== t.id && <span style={{ position: 'absolute', top: '4px', right: 'calc(50% - 18px)', background: '#dc2626', color: '#fff', borderRadius: '50%', width: '15px', height: '15px', fontSize: '9px', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{(t as any).badge}</span>}
             </button>
           ))}
         </div>
@@ -305,7 +312,12 @@ export default function PartnerDashboard() {
                         </div>
                       )}
                     </div>
-                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: st.bg, color: st.color, whiteSpace: 'nowrap' as const, border: `1px solid ${st.color}30` }}>{st.label}</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
+                      {w.confirmed_at && w.status === 'available' && (Date.now() - new Date(w.confirmed_at).getTime()) / (1000*60*60*24) <= 7 && (
+                        <span style={{ fontSize: '9px', fontWeight: 800, padding: '2px 7px', borderRadius: '50px', background: '#dc2626', color: '#fff' }}>BAGO!</span>
+                      )}
+                      <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: st.bg, color: st.color, whiteSpace: 'nowrap' as const, border: `1px solid ${st.color}30` }}>{st.label}</span>
+                    </div>
                   </div>
                   {w.status === 'pending_confirmation' && (
                     <div style={{ background: '#fef3e2', borderRadius: '8px', padding: '7px 10px', fontSize: '12px', color: '#92400e' }}>
