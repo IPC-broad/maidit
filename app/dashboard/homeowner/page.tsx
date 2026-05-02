@@ -105,6 +105,17 @@ export default function HWDashboard() {
         <a href="/login" style={{ fontSize:'.72rem', color:'#9ca3af', textDecoration:'none' }}>Sign out</a>
       </div>
 
+      {actionCount > 0 && tab !== 'offers' && (
+          <div style={{ background: "#c9943a", borderRadius: "12px", padding: "12px 14px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => handleTabChange("offers")}>
+            <span style={{ fontSize: "20px" }}>📨</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: "13px", fontWeight: 700, color: "#fff" }}>{actionCount} offer {actionCount === 1 ? "needs" : "need"} your attention!</div>
+              <div style={{ fontSize: "11px", color: "rgba(255,255,255,.8)", marginTop: "1px" }}>Tap to review accepted or countered offers.</div>
+            </div>
+            <span style={{ color: "#fff", fontSize: "14px" }}>to</span>
+          </div>
+        )}
+
       {tab === 'browse' && (
         <>
           <div style={{ padding:'14px 16px 8px' }}>
