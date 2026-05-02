@@ -99,9 +99,6 @@ export default function PartnerDashboard() {
   const toggleGovtId2 = (id: string) => {
     setWorkerForm(f => ({ ...f, govt_id_types: f.govt_id_types.includes(id) ? f.govt_id_types.filter((x: string) => x !== id) : [...f.govt_id_types, id] }))
   }
-  const toggleGovtId2 = (id: string) => {
-    setWorkerForm(f => ({ ...f, govt_id_types: f.govt_id_types.includes(id) ? f.govt_id_types.filter((x: string) => x !== id) : [...f.govt_id_types, id] }))
-  }
   const toggleSkill = (skill: string) => {
     setWorkerForm(f => ({
       ...f, skills: f.skills.includes(skill) ? f.skills.filter(s => s !== skill) : [...f.skills, skill]
