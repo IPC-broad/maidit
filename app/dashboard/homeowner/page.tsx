@@ -214,6 +214,20 @@ export default function HWDashboard() {
                       Fare estimate ng kasambahay: <strong>₱{offer.fare_estimate?.toLocaleString()}</strong>
                     </div>
                   )}
+                  {offer.status === 'countered' && (
+                    <div style={{ background:'#fef3e2', border:'1px solid #fde8c0', borderRadius:'9px', padding:'11px 13px', marginBottom:'10px' }}>
+                      <div style={{ fontSize:'12px', fontWeight:700, color:'#92400e', marginBottom:'6px' }}>Counter Offer ng kasambahay:</div>
+                      <div style={{ fontSize:'13px', color:'#374151', lineHeight:1.7 }}>
+                        {offer.fare_countered ? <span>Sweldo: <strong>P{offer.fare_countered?.toLocaleString()}/buwan</strong><br/></span> : null}
+                        {offer.estimated_arrival ? <span>Start date: <strong>{new Date(offer.estimated_arrival).toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric' })}</strong></span> : null}
+                        {!offer.fare_countered && !offer.estimated_arrival ? <span>Walang detalye ng counter.</span> : null}
+                      </div>
+                      <div style={{ display:'flex', gap:'8px', marginTop:'10px' }}>
+                        <button onClick={() => router.push('/pay/' + offer.id)} style={{ flex:1, padding:'9px', borderRadius:'9px', background:'#1a6b3c', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'12px', fontWeight:700, cursor:'pointer' }}>Tanggapin</button>
+                        <button style={{ flex:1, padding:'9px', borderRadius:'9px', background:'transparent', border:'1.5px solid #fde8c0', color:'#92400e', fontFamily:'sans-serif', fontSize:'12px', fontWeight:600, cursor:'pointer' }}>I-decline</button>
+                      </div>
+                    </div>
+                  )}
                   {needsPayment && (
                     <button style={{ width:'100%', padding:'11px', borderRadius:'10px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'13px', fontWeight:700, cursor:'pointer' }}
                       onClick={() => router.push(`/pay/${offer.id}`)}>
