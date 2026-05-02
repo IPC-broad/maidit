@@ -80,7 +80,6 @@ export default function OfferReviewPage() {
       fare_estimate: fareInput ? parseInt(fareInput) : null,
       checklist_confirmed: true,
       status: 'agreed',
-      estimated_arrival: arrivalDate || null,
       estimated_arrival: arrivalDate || null
     }).eq('id', offerId)
     await fetch('/api/send-sms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'offer_agreed', offerId }) }).catch(() => {})
