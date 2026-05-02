@@ -70,16 +70,16 @@ export default function HWDashboard() {
   }
 
   const offerStatusMap: Record<string, { label: string; bg: string; color: string }> = {
-    pending:         { label: 'Hinihintay ang kasambahay', bg: '#fef3e2', color: '#c9943a' },
-    reviewed:        { label: 'Nirereview ng kasambahay',  bg: '#eff6ff', color: '#2563eb' },
-    fare_pending:    { label: 'May fare estimate',          bg: '#fffbeb', color: '#92400e' },
-    agreed:          { label: 'Sumang-ayon — Bayaran na',  bg: '#f0fdf4', color: '#1a6b3c' },
+    pending:         { label: 'Waiting for kasambahay', bg: '#fef3e2', color: '#c9943a' },
+    reviewed:        { label: 'Kasambahay is reviewing',  bg: '#eff6ff', color: '#2563eb' },
+    fare_pending:    { label: 'Fare estimate received',          bg: '#fffbeb', color: '#92400e' },
+    agreed:          { label: 'Accepted — Pay Now',  bg: '#f0fdf4', color: '#1a6b3c' },
     payment_pending: { label: 'Processing payment',        bg: '#fffbeb', color: '#92400e' },
-    paid:            { label: 'Naka-hire',                  bg: '#f0fdf4', color: '#1a6b3c' },
-    active:          { label: 'Naka-hire',                  bg: '#f0fdf4', color: '#1a6b3c' },
-    hired:           { label: 'Naka-hire',                  bg: '#f0fdf4', color: '#1a6b3c' },
-    countered:       { label: 'May counter offer',          bg: '#fef3e2', color: '#c9943a' },
-    declined:        { label: 'Hindi tinanggap',            bg: '#fef2f2', color: '#dc2626' },
+    paid:            { label: 'Hired',                  bg: '#f0fdf4', color: '#1a6b3c' },
+    active:          { label: 'Hired',                  bg: '#f0fdf4', color: '#1a6b3c' },
+    hired:           { label: 'Hired',                  bg: '#f0fdf4', color: '#1a6b3c' },
+    countered:       { label: 'Counter offer received',          bg: '#fef3e2', color: '#c9943a' },
+    declined:        { label: 'Declined',            bg: '#fef2f2', color: '#dc2626' },
   }
 
   if (loading) return (
@@ -159,13 +159,13 @@ export default function HWDashboard() {
       {tab === 'offers' && (
         <div style={{ padding:'16px 16px 32px' }}>
           <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, marginBottom:'2px', color:'#111827' }}>Offers Made</div>
-          <div style={{ fontSize:'.72rem', color:'#6b7280', marginBottom:'14px' }}>{offers.length} offer ang naipadala mo</div>
+          <div style={{ fontSize:'.72rem', color:'#6b7280', marginBottom:'14px' }}>{offers.length} offers sent</div>
           {offersLoading && <div style={{ textAlign:'center', padding:'40px', color:'#6b7280' }}>Loading...</div>}
           {!offersLoading && offers.length === 0 && (
             <div style={{ textAlign:'center', padding:'40px 20px' }}>
               <div style={{ fontSize:'2.5rem', marginBottom:'12px' }}>📭</div>
-              <div style={{ color:'#6b7280', fontSize:'.84rem', lineHeight:1.7 }}>Wala ka pang naipadala na offer.</div>
-              <button onClick={() => setTab('browse')} style={{ marginTop:'16px', padding:'10px 20px', borderRadius:'10px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'.84rem', fontWeight:700, cursor:'pointer' }}>Mag-browse</button>
+              <div style={{ color:'#6b7280', fontSize:'.84rem', lineHeight:1.7 }}>You haven't sent any offers yet.</div>
+              <button onClick={() => setTab('browse')} style={{ marginTop:'16px', padding:'10px 20px', borderRadius:'10px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'.84rem', fontWeight:700, cursor:'pointer' }}>Browse Kasambahay</button>
             </div>
           )}
           {offers.map((offer: any) => {
@@ -199,12 +199,12 @@ export default function HWDashboard() {
                   {needsPayment && (
                     <button style={{ width:'100%', padding:'11px', borderRadius:'10px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'13px', fontWeight:700, cursor:'pointer' }}
                       onClick={() => router.push(`/pay/${offer.id}`)}>
-                      Bayaran — ₱2,001 Hire Fee
+                      Pay ₱2,001 Hire Fee →
                     </button>
                   )}
                   {isHired && (
                     <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:'9px', padding:'9px 12px', fontSize:'12px', color:'#166534', fontWeight:600, textAlign:'center' }}>
-                      Naka-hire na! Abangan ang arrival ng kasambahay.
+                      Hired! Waiting for kasambahay arrival.
                     </div>
                   )}
                 </div>
