@@ -88,7 +88,7 @@ export default function PostJobPage() {
       <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🎉</div>
       <h1 style={{ fontFamily: 'serif', fontSize: '1.5rem', fontWeight: 900, color: '#1a6b3c', marginBottom: '8px' }}>Job Posted!</h1>
       <p style={{ color: '#6b7280', fontSize: '.84rem', lineHeight: 1.7, marginBottom: '24px' }}>
-        Your job listing is now live.<br/>Applicants will start coming in shortly.
+        Your job post and offer credits are now active. Start browsing and sending offers to kasambahay!
       </p>
       <button style={{ ...s.btn, maxWidth: '300px' }} onClick={() => router.push('/dashboard/homeowner')}>
         Back to Dashboard
@@ -107,7 +107,7 @@ export default function PostJobPage() {
           Did you complete the payment? 💳
         </div>
         <div style={{ fontSize: '.76rem', color: '#6b7280', marginBottom: '20px', lineHeight: 1.6 }}>
-          Once you've paid ₱499 on PayMongo, tap confirm below to activate your job listing.
+          Once payment is confirmed, your job post and offer credits will be activated automatically.
         </div>
         <div style={{ ...s.card, background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
           <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.8 }}>
@@ -143,10 +143,10 @@ export default function PostJobPage() {
       </div>
       <div style={s.body}>
         <div style={{ fontFamily: 'serif', fontSize: '1.15rem', fontWeight: 900, marginBottom: '4px' }}>
-          One-time activation fee 🎯
+          One-Time Activation Fee 🎯
         </div>
         <div style={{ fontSize: '.76rem', color: '#6b7280', marginBottom: '20px', lineHeight: 1.6 }}>
-          Pay once to post your job and send up to 10 job offers to kasambahay.
+          Pay once to post your job and send up to 10 job offers to qualified candidates.
         </div>
 
         {/* Amount card */}
@@ -156,7 +156,7 @@ export default function PostJobPage() {
           </div>
           <div style={{ fontFamily: 'serif', fontSize: '2.8rem', fontWeight: 900, color: '#fff', marginBottom: '4px' }}>₱499</div>
           <div style={{ fontSize: '.7rem', color: 'rgba(255,255,255,.6)' }}>
-            One-time · 1 job post + 10 offer credits
+            One-time payment • Includes 1 job post + up to 10 offer credits
           </div>
         </div>
 
@@ -164,10 +164,10 @@ export default function PostJobPage() {
         <div style={s.card}>
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '10px' }}>What's included</div>
           {[
-            { icon: '📋', text: '1 active job listing posted to all kasambahay' },
-            { icon: '👥', text: 'Send up to 10 job offers to kasambahay' },
-            { icon: '💬', text: 'Send job offers directly to kasambahay' },
-            { icon: '🛡️', text: 'MaidIt support throughout hiring' },
+            { icon: '📋', text: '1 active job listing visible to all kasambahay' },
+            { icon: '👥', text: 'Send up to 10 job offers' },
+            { icon: '💬', text: 'Message and send offers directly to candidates' },
+            { icon: '🛡️', text: 'Ongoing MaidIt support throughout your hiring process' },
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', gap: '10px', padding: '7px 0', borderBottom: i < 3 ? '1px solid #f3f4f6' : 'none', alignItems: 'flex-start' }}>
               <span style={{ fontSize: '1rem', minWidth: '20px' }}>{item.icon}</span>
@@ -178,7 +178,7 @@ export default function PostJobPage() {
 
         {/* How to pay */}
         <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '11px', padding: '12px 14px', marginBottom: '18px' }}>
-          <div style={{ fontSize: '.7rem', fontWeight: 700, color: '#92400e', marginBottom: '6px' }}>How it works:</div>
+          <div style={{ fontSize: '.7rem', fontWeight: 700, color: '#92400e', marginBottom: '6px' }}>How It Works:</div>
           {[
             'Tap "Pay ₱499 via PayMongo" — a new tab opens',
             'Scan the QRPh code with GCash or your bank app',
