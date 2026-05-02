@@ -34,20 +34,23 @@ export async function POST(req: NextRequest) {
       .from('offers')
       .select(`
         *,
-        homeowner_profile:profiles!offers_homeowner_id_fkey(full_name, mobile),
-        kasambahay_profile:profiles!offers_kasambahay_id_fkey(full_name, mobile)
-      `)
+      .select('*, homeowner_id, kasambahay_id')
       .eq('id', offerId)
       .single()
-
     if (error || !offer) {
       return NextResponse.json({ error: 'Offer not found' }, { status: 404 })
     }
+    const { data: hw } = await supabase.from('homeowners').select('profile_id').eq('id', offer.homeowner_id).single()
+    const { data: hwProfile } = hw?.profile_id ? await supabase.from('profiles').select('full_name, mobile').eq('id', hw.profile_id).single() : { data: null }
+    const { data: kb } = await supabase.from('kasambahay').select('profile_id').eq('id', offer.kasambahay_id).single()
+    const { data: kbProfile } = kb?.profile_id ? await supabase.from('profiles').select('full_name, mobile').eq('id', kb.profile_id).single() : { data: null }
+    const hwName = hwProfile?.full_name?.split(' ')[0] || 'Homeowner'
+    const hwMobile = hwProfile?.mobile
+    const kbName = kbProfile?.full_name?.split(' ')[0] || 'Kasambahay'
+    const kbMobile = kbProfile?.mobile
 
-    const hwName = offer.homeowner_profile?.full_name?.split(' ')[0] || 'Homeowner'
-    const hwMobile = offer.homeowner_profile?.mobile
-    const kbName = offer.kasambahay_profile?.full_name?.split(' ')[0] || 'Kasambahay'
-    const kbMobile = offer.kasambahay_profile?.mobile
+    }
+
 
     const messages: Record<string, { mobile: string; msg: string }[]> = {
       offer_sent: [
