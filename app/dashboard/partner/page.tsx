@@ -193,7 +193,7 @@ export default function PartnerDashboard() {
 
       <div style={{ padding: '14px 16px' }}>
         {newlyConfirmed > 0 && (
-          <div style={{ background: "#0d9488", border: "1px solid #0d9488", borderRadius: "12px", padding: "12px 14px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => setTab("workers")}>
+          <div style={{ background: "#c9943a", border: "1px solid #c9943a", borderRadius: "12px", padding: "12px 14px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => setTab("workers")}>
             <span style={{ fontSize: "20px" }}>🎉</span>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: "13px", fontWeight: 700, color: "#fff" }}>{newlyConfirmed} bagong referral na nagconfirm!</div>
