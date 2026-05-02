@@ -51,8 +51,6 @@ export default function PartnerDashboard() {
     photo: null as string | null,
     has_nbi: false,
     govt_id_types: [] as string[],
-    has_nbi: false,
-    govt_id_types: [] as string[],
   })
 
   useEffect(() => {
@@ -148,8 +146,6 @@ export default function PartnerDashboard() {
         ? `${workerForm.availability_custom} araw`
         : workerForm.availability,
       confirm_token: token,
-      has_nbi: workerForm.has_nbi,
-      govt_id_types: workerForm.govt_id_types,
       has_nbi: workerForm.has_nbi,
       govt_id_types: workerForm.govt_id_types,
     })
