@@ -35,6 +35,8 @@ export default function PartnerDashboard() {
   const [copied, setCopied] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
   const [saving, setSaving] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [savedName, setSavedName] = useState('')
   const photoRef = useRef<HTMLInputElement>(null)
 
   const [workerForm, setWorkerForm] = useState({
@@ -173,7 +175,8 @@ export default function PartnerDashboard() {
       }).catch(() => {})
     }
 
-    setSaveMsg('Na-save na si ' + pangalan + '! Makakatanggap siya ng text message para i-confirm ang kanyang profile.')
+    setSavedName(pangalan)
+    setShowSuccess(true)
     setSaving(false)
     setWorkerForm({ apelyido: '', pangalan: '', mobile: '', province: '', skills: [], setup: 'Kahit alin', civil_status: '', num_children: '0', availability: '', availability_custom: '', photo: null, has_nbi: false, govt_id_types: [] })
 
@@ -410,8 +413,12 @@ export default function PartnerDashboard() {
                 onChange={e => setWorkerForm(f => ({ ...f, mobile: e.target.value.replace(/\D/g, '').slice(0, 11) }))} />
 
               <label style={s.lbl}>Probinsya *</label>
-              <input style={s.inp} placeholder="e.g. Batangas, Iloilo, Cebu" value={workerForm.province}
-                onChange={e => setWorkerForm(f => ({ ...f, province: e.target.value }))} />
+              <select style={s.sel} value={workerForm.province} onChange={e => setWorkerForm(f => ({ ...f, province: e.target.value }))}>
+                <option value="">Piliin ang probinsya...</option>
+                {['Abra','Agusan del Norte','Agusan del Sur','Aklan','Albay','Antique','Apayao','Aurora','Basilan','Bataan','Batanes','Batangas','Benguet','Biliran','Bohol','Bukidnon','Bulacan','Cagayan','Camarines Norte','Camarines Sur','Camiguin','Capiz','Catanduanes','Cavite','Cebu','Cotabato','Davao de Oro','Davao del Norte','Davao del Sur','Davao Occidental','Davao Oriental','Dinagat Islands','Eastern Samar','Guimaras','Ifugao','Ilocos Norte','Ilocos Sur','Iloilo','Isabela','Kalinga','La Union','Laguna','Lanao del Norte','Lanao del Sur','Leyte','Maguindanao del Norte','Maguindanao del Sur','Marinduque','Masbate','Metro Manila','Misamis Occidental','Misamis Oriental','Mountain Province','Negros Occidental','Negros Oriental','Northern Samar','Nueva Ecija','Nueva Vizcaya','Occidental Mindoro','Oriental Mindoro','Palawan','Pampanga','Pangasinan','Quezon','Quirino','Rizal','Romblon','Samar','Sarangani','Siquijor','Sorsogon','South Cotabato','Southern Leyte','Sultan Kudarat','Sulu','Surigao del Norte','Surigao del Sur','Tarlac','Tawi-Tawi','Zambales','Zamboanga del Norte','Zamboanga del Sur','Zamboanga Sibugay'].map(p => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
@@ -509,6 +516,22 @@ export default function PartnerDashboard() {
           </>
         )}
       </div>
+      {/* SUCCESS MODAL */}
+      {showSuccess && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: '#fff', borderRadius: '16px', padding: '28px 20px', maxWidth: '320px', width: '100%', textAlign: 'center' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '12px' }}>✅</div>
+            <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, color: '#1a6b3c', marginBottom: '8px' }}>Na-save na!</div>
+            <div style={{ fontSize: '14px', color: '#374151', lineHeight: 1.6, marginBottom: '20px' }}>
+              <strong>{savedName}</strong> ay naidagdag na sa iyong pool.<br/>
+              Makakatanggap siya ng SMS para i-confirm ang kanyang profile.
+            </div>
+            <button onClick={() => { setShowSuccess(false); setTab('workers') }} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: '#1a6b3c', border: 'none', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>
+              Tingnan ang Workers
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
