@@ -82,6 +82,8 @@ export default function HWDashboard() {
     declined:        { label: 'Declined',            bg: '#fef2f2', color: '#dc2626' },
   }
 
+  const actionCount = offers.filter(o => o.status === 'agreed' || o.status === 'countered').length
+
   if (loading) return (
     <div style={{ minHeight:'100vh', background:'#faf8f5', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif', color:'#6b7280' }}>
       Loading...
@@ -217,12 +219,13 @@ export default function HWDashboard() {
       <div style={{ position:'fixed', bottom:0, left:0, right:0, background:'#fff', borderTop:'1px solid #f3f4f6', display:'flex' }}>
         {([
           { id:'browse', icon:'🔍', label:'Browse' },
-          { id:'offers', icon:'📋', label:'My Offers' },
+          { id:'offers', icon:'📋', label:'My Offers', badge: actionCount },
           { id:'postjob', icon:'📝', label:'Post Job' },
         ] as const).map((t) => (
-          <button key={t.id} onClick={() => handleTabChange(t.id)} style={{ flex:1, padding:'10px 4px 9px', display:'flex', flexDirection:'column', alignItems:'center', gap:'3px', border:'none', background:'transparent', cursor:'pointer' }}>
+          <button key={t.id} onClick={() => handleTabChange(t.id)} style={{ flex:1, padding:'10px 4px 9px', display:'flex', flexDirection:'column', alignItems:'center', gap:'3px', border:'none', background:'transparent', cursor:'pointer', position:'relative' }}>
             <span style={{ fontSize:'1.1rem' }}>{t.icon}</span>
             <span style={{ fontSize:'.57rem', fontWeight: tab === t.id ? 700 : 600, color: tab === t.id ? '#1a6b3c' : '#6b7280' }}>{t.label}</span>
+            {(t as any).badge > 0 && <span style={{ position:'absolute', top:'6px', right:'18px', background:'#dc2626', color:'#fff', borderRadius:'50%', width:'16px', height:'16px', fontSize:'9px', fontWeight:900, display:'flex', alignItems:'center', justifyContent:'center' }}>{(t as any).badge}</span>}
           </button>
         ))}
       </div>
