@@ -122,6 +122,12 @@ export default function PartnerDashboard() {
     setSaving(true)
     setSaveMsg('')
     const { supabase } = await import('../../../lib/supabase')
+    // Check if mobile already exists
+    const { data: existing } = await supabase.from('profiles').select('id').eq('mobile', mobile).single()
+    if (existing) {
+      setSaveMsg('ERROR: Ang mobile number na ito ay rehistrado na. Gamitin ang ibang numero.')
+      setSaving(false); return
+    }
     const full_name = `${pangalan} ${apelyido}`
     const { data: profile, error: profileError } = await supabase.from('profiles').insert({
       full_name, mobile, city: province, role: 'kasambahay', verified: false
@@ -158,19 +164,16 @@ export default function PartnerDashboard() {
       .single()
 
     // Send confirmation SMS to worker
+    // Send SMS in background - non-blocking
     if (newKb?.id) {
-      await fetch('/api/send-sms', {
+      fetch('/api/send-sms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event: 'worker_added',
-          kasambahayId: newKb.id,
-          token,
-        })
+        body: JSON.stringify({ event: 'worker_added', kasambahayId: newKb.id, token })
       }).catch(() => {})
     }
 
-    setSaveMsg('Na-save na! Makakatanggap ng text message si ' + pangalan + '.')
+    setSaveMsg('Na-save na si ' + pangalan + '! Makakatanggap siya ng text message para i-confirm ang kanyang profile.')
     setSaving(false)
     setWorkerForm({ apelyido: '', pangalan: '', mobile: '', province: '', skills: [], setup: 'Kahit alin', civil_status: '', num_children: '0', availability: '', availability_custom: '', photo: null, has_nbi: false, govt_id_types: [] })
 
@@ -381,7 +384,7 @@ export default function PartnerDashboard() {
             </div>
 
             {saveMsg && (
-              <div style={{ background: saveMsg.includes('Na-save') ? 'rgba(26,107,60,.2)' : 'rgba(220,38,38,.1)', border: `1px solid ${saveMsg.includes('Na-save') ? 'rgba(26,107,60,.3)' : 'rgba(220,38,38,.3)'}`, borderRadius: '9px', padding: '10px 13px', fontSize: '13px', color: saveMsg.includes('Na-save') ? '#6ee7b7' : '#f87171', marginBottom: '12px', lineHeight: 1.5 }}>
+              <div style={{ background: saveMsg.includes('Na-save') ? '#f0fdf4' : '#fef2f2', border: `1px solid ${saveMsg.includes('Na-save') ? '#bbf7d0' : '#fecaca'}`, borderRadius: '9px', padding: '12px 14px', fontSize: '14px', fontWeight: 600, color: saveMsg.includes('Na-save') ? '#166534' : '#dc2626', marginBottom: '12px', lineHeight: 1.5 }}>
                 {saveMsg}
               </div>
             )}
