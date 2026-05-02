@@ -223,8 +223,8 @@ export default function HWDashboard() {
                         {!offer.fare_countered && !offer.estimated_arrival ? <span>Walang detalye ng counter.</span> : null}
                       </div>
                       <div style={{ display:'flex', gap:'8px', marginTop:'10px' }}>
-                        <button onClick={() => router.push('/pay/' + offer.id)} style={{ flex:1, padding:'9px', borderRadius:'9px', background:'#1a6b3c', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'12px', fontWeight:700, cursor:'pointer' }}>Tanggapin</button>
-                        <button style={{ flex:1, padding:'9px', borderRadius:'9px', background:'transparent', border:'1.5px solid #fde8c0', color:'#92400e', fontFamily:'sans-serif', fontSize:'12px', fontWeight:600, cursor:'pointer' }}>I-decline</button>
+                        <button onClick={() => router.push('/pay/' + offer.id)} style={{ flex:1, padding:'9px', borderRadius:'9px', background:'#1a6b3c', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'12px', fontWeight:700, cursor:'pointer' }}>Accept Counter</button>
+                        <button onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.from('offers').update({ status: 'pending', fare_countered: null, estimated_arrival: null }).eq('id', offer.id); window.location.reload() }} style={{ flex:1, padding:'9px', borderRadius:'9px', background:'transparent', border:'1.5px solid #fde8c0', color:'#92400e', fontFamily:'sans-serif', fontSize:'12px', fontWeight:600, cursor:'pointer' }}>Decline</button>
                       </div>
                     </div>
                   )}

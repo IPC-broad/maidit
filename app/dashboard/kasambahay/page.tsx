@@ -72,6 +72,7 @@ export default function KBDashboard() {
     paid:            { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
     active:          { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
     hired:           { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
+    countered:       { label: 'Counter offer — naghihintay ng sagot', bg: '#fef3e2', color: '#c9943a' },
     declined:        { label: 'May Na-hire Na',             bg: '#fef2f2', color: '#dc2626' },
   }
 
