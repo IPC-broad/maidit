@@ -186,16 +186,16 @@ export default function HWDashboard() {
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'8px' }}>
                     <div>
                       <div style={{ fontWeight:700, fontSize:'14px', marginBottom:'2px' }}>{kbName}</div>
-                      <div style={{ fontSize:'11px', color:'#9ca3af' }}>{new Date(offer.created_at).toLocaleDateString('fil-PH', { month:'short', day:'numeric', year:'numeric' })}</div>
+                      <div style={{ fontSize:'11px', color:'#1a6b3c', fontWeight:700 }}>{new Date(offer.created_at).toLocaleDateString('fil-PH', { month:'short', day:'numeric', year:'numeric' })}</div>
                     </div>
                     <span style={{ fontSize:'10px', fontWeight:700, padding:'4px 10px', borderRadius:'50px', background:st.bg, color:st.color, whiteSpace:'nowrap' as const }}>{st.label}</span>
                   </div>
                   <div style={{ background:'#faf8f5', borderRadius:'10px', padding:'10px 12px', marginBottom:'10px' }}>
                     <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
-                      <div><div style={{ fontSize:'10px', color:'#9ca3af', marginBottom:'2px' }}>Salary</div><div style={{ fontFamily:'serif', fontSize:'16px', fontWeight:900, color:'#1a6b3c' }}>₱{offer.salary?.toLocaleString()}<span style={{ fontSize:'10px', fontWeight:400, color:'#9ca3af' }}>/buwan</span></div></div>
-                      <div><div style={{ fontSize:'10px', color:'#9ca3af', marginBottom:'2px' }}>Location</div><div style={{ fontSize:'13px', fontWeight:700 }}>{offer.city || '—'}</div></div>
-                      <div><div style={{ fontSize:'10px', color:'#9ca3af', marginBottom:'2px' }}>Setup</div><div style={{ fontSize:'13px', fontWeight:700 }}>{offer.setup || '—'}</div></div>
-                      <div><div style={{ fontSize:'10px', color:'#9ca3af', marginBottom:'2px' }}>Scope</div><div style={{ fontSize:'12px', fontWeight:600, lineHeight:1.4 }}>{offer.scope?.join(', ') || '—'}</div></div>
+                      <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Salary</div><div style={{ fontFamily:'serif', fontSize:'16px', fontWeight:900, color:'#1a6b3c' }}>₱{offer.salary?.toLocaleString()}<span style={{ fontSize:'10px', fontWeight:400, color:'#9ca3af' }}>/buwan</span></div></div>
+                      <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Location</div><div style={{ fontSize:'13px', fontWeight:700 }}>{offer.city || '—'}</div></div>
+                      <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Setup</div><div style={{ fontSize:'13px', fontWeight:700 }}>{offer.setup || '—'}</div></div>
+                      <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Scope</div><div style={{ fontSize:'12px', fontWeight:600, lineHeight:1.4 }}>{offer.scope?.join(', ') || '—'}</div></div>
                     </div>
                   </div>
                   {offer.fare_estimate && (
