@@ -64,9 +64,9 @@ export default function ConfirmWorkerPage() {
     <div style={s.wrap}>
       <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🎉</div>
       <h1 style={{ fontFamily: 'serif', fontSize: '1.5rem', fontWeight: 900, color: '#1a6b3c', marginBottom: '8px' }}>Salamat, {firstName}!</h1>
-      <p style={{ fontSize: '.84rem', color: '#4b5563', lineHeight: 1.7, marginBottom: '20px' }}>Na-confirm mo na ang iyong profile sa MaidIt.<br/>Available ka na para sa mga homeowner.</p>
+      <p style={{ fontSize: '.84rem', color: '#4b5563', lineHeight: 1.7, marginBottom: '20px' }}>Na-confirm mo na ang iyong profile sa MaidIt!<br/>Pwede ka nang makakuha ng job offers mula sa mga naghahanap ng kasambahay.</p>
       <div style={{ ...s.card, background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
-        <div style={{ fontSize: '.72rem', color: '#166534', lineHeight: 1.7 }}>✅ Makikita na ng mga homeowner ang iyong profile.<br/>Makakakuha ka ng text kapag may nag-offer sa iyo.</div>
+        <div style={{ fontSize: '.72rem', color: '#166534', lineHeight: 1.7 }}>✅ Makikita na ng mga homeowner ang iyong profile.<br/>Mag-aabiso kami sa iyo kapag may nagpadala ng job offer.</div>
       </div>
     </div>
   )
@@ -92,12 +92,12 @@ export default function ConfirmWorkerPage() {
       </div>
       <div style={{ ...s.card, background: '#fef3e2', border: '1px solid #fde8c0' }}>
         <div style={{ fontSize: '.78rem', color: '#92400e', lineHeight: 1.7 }}>
-          Sa pag-confirm, sumasang-ayon ka na ang iyong profile ay makikita ng mga homeowner sa MaidIt para sa trabahong kasambahay.
+          Sa pagconfirm, ikaw ay sumasang-ayon na ang iyong profile ay makikita ng mga naghahanap ng kasambahay at ikaw ay pwede maofferan ng trabaho.
         </div>
       </div>
       <div style={{ maxWidth: '340px', width: '100%' }}>
         <button style={{ ...s.btn, opacity: status === 'confirming' ? .6 : 1 }} onClick={handleConfirm} disabled={status === 'confirming'}>
-          {status === 'confirming' ? 'Nagko-confirm...' : '✅ Oo, gusto kong maging available'}
+          {status === 'confirming' ? 'Nagko-confirm...' : '✅ Oo, ako ay naghahanap ng mapapasukang trabaho'}
         </button>
         <button style={s.btnOutline} onClick={() => window.location.href = '/'}>Hindi, salamat</button>
       </div>
