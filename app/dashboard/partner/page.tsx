@@ -69,7 +69,7 @@ export default function PartnerDashboard() {
         .eq('partner_id', partnerData.id).order('due_at', { ascending: false })
       setPayouts(payoutsData || [])
       const { data: workersData } = await supabase.from('kasambahay')
-        .select('*, profiles(*)').eq('referred_by', partnerData.id).order('created_at', { ascending: false })
+        .select('*, profiles(*)').eq('referred_by', partnerData.id)
       setWorkers(workersData || [])
       setLoading(false)
     }
@@ -181,7 +181,7 @@ export default function PartnerDashboard() {
     setWorkerForm({ apelyido: '', pangalan: '', mobile: '', province: '', skills: [], setup: 'Kahit alin', civil_status: '', num_children: '0', availability: '', availability_custom: '', photo: null, has_nbi: false, govt_id_types: [] })
 
     const { supabase: sb2 } = await import('../../../lib/supabase')
-    const { data: workersData } = await sb2.from('kasambahay').select('*, profiles(*)').eq('referred_by', partner.id).order('created_at', { ascending: false })
+    const { data: workersData } = await sb2.from('kasambahay').select('*, profiles(*)').eq('referred_by', partner.id)
     setWorkers(workersData || [])
     setTab('workers')
   }
@@ -526,7 +526,7 @@ export default function PartnerDashboard() {
               <strong>{savedName}</strong> ay naidagdag na sa iyong pool.<br/>
               Makakatanggap siya ng SMS para i-confirm ang kanyang profile.
             </div>
-            <button onClick={async () => { setShowSuccess(false); const { supabase } = await import('../../../lib/supabase'); const { data: workersData } = await supabase.from('kasambahay').select('*, profiles(*)').eq('referred_by', partner.id).order('created_at', { ascending: false }); setWorkers(workersData || []); setTab('workers') }} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: '#1a6b3c', border: 'none', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>
+            <button onClick={async () => { setShowSuccess(false); const { supabase } = await import('../../../lib/supabase'); const { data: workersData } = await supabase.from('kasambahay').select('*, profiles(*)').eq('referred_by', partner.id); setWorkers(workersData || []); setTab('workers') }} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: '#1a6b3c', border: 'none', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>
               Tingnan ang Workers
             </button>
           </div>
