@@ -146,7 +146,7 @@ export default function PostJobPage() {
           One-time activation fee 🎯
         </div>
         <div style={{ fontSize: '.76rem', color: '#6b7280', marginBottom: '20px', lineHeight: 1.6 }}>
-          Pay once to post your job and receive applicants within the day.
+          Pay once to post your job and send up to 10 job offers to kasambahay.
         </div>
 
         {/* Amount card */}
@@ -156,7 +156,7 @@ export default function PostJobPage() {
           </div>
           <div style={{ fontFamily: 'serif', fontSize: '2.8rem', fontWeight: 900, color: '#fff', marginBottom: '4px' }}>₱499</div>
           <div style={{ fontSize: '.7rem', color: 'rgba(255,255,255,.6)' }}>
-            One-time · Up to 10 job offers included
+            One-time · 1 job post + 10 offer credits
           </div>
         </div>
 
@@ -165,7 +165,7 @@ export default function PostJobPage() {
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '10px' }}>What's included</div>
           {[
             { icon: '📋', text: '1 active job listing posted to all kasambahay' },
-            { icon: '👥', text: 'Receive up to 10 applicants' },
+            { icon: '👥', text: 'Send up to 10 job offers to kasambahay' },
             { icon: '💬', text: 'Send job offers directly to kasambahay' },
             { icon: '🛡️', text: 'MaidIt support throughout hiring' },
           ].map((item, i) => (
@@ -261,7 +261,7 @@ export default function PostJobPage() {
           Find a trusted kasambahay
         </div>
         <div style={{ fontSize: '.78rem', color: '#6b7280', marginBottom: '20px', lineHeight: 1.6 }}>
-          Post in 2 minutes · Get applicants within the day
+          Post in 2 minutes · Send offers to kasambahay directly
         </div>
 
         {error && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '9px', padding: '10px 13px', fontSize: '.78rem', color: '#dc2626', marginBottom: '12px' }}>{error}</div>}
