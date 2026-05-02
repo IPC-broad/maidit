@@ -201,7 +201,7 @@ export default function PartnerDashboard() {
       cursor: 'pointer', borderBottom: `2px solid ${active ? '#c9943a' : 'transparent'}`
     }),
     card: { background: '#fff', borderRadius: '12px', padding: '13px 14px', marginBottom: '10px', border: '1px solid #ede8e0' },
-    lbl: { display: 'block', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '4px' },
+    lbl: { display: 'block', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#4b5563', marginBottom: '5px' },
     inp: { width: '100%', padding: '11px 12px', border: '1.5px solid #e5e0d8', borderRadius: '10px', fontFamily: 'sans-serif', fontSize: '14px', outline: 'none', background: '#fff', color: '#1a1a1a', boxSizing: 'border-box' as const, marginBottom: '10px' },
     sel: { width: '100%', padding: '11px 12px', border: '1.5px solid #e5e0d8', borderRadius: '10px', fontFamily: 'sans-serif', fontSize: '14px', outline: 'none', background: '#fff', color: '#1a1a1a', boxSizing: 'border-box' as const, marginBottom: '10px' },
     submitBtn: { width: '100%', padding: '13px', borderRadius: '11px', border: 'none', background: '#c9943a', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '8px' },
@@ -225,15 +225,16 @@ export default function PartnerDashboard() {
       {/* HEADER */}
       <div style={{ background: '#fff', borderBottom: '1px solid #ede8e0', padding: '16px 16px 14px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-          <div style={{ fontSize: '11px', color: '#9ca3af' }}>Welcome back</div>
+          <div style={{ fontSize: '12px', color: '#6b7280', fontWeight: 600 }}>Welcome back</div>
           <button onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.auth.signOut(); router.push('/login') }} style={{ background: '#f9f6f2', border: '1px solid #ede8e0', borderRadius: '8px', padding: '5px 11px', color: '#6b7280', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'sans-serif' }}>Sign out</button>
         </div>
-        <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900 }}>{partner?.profiles?.full_name || 'Partner'}</div>
+        <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 900, color: '#1a1a1a' }}>{partner?.profiles?.full_name || 'Partner'}</div>
+        <div style={{ fontSize: '13px', color: '#c9943a', fontWeight: 600, marginTop: '2px' }}>Kumita sa bawat referral mo</div>
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' as const, marginTop: '6px' }}>
           <span style={{ background: partner?.approved ? 'rgba(26,107,60,.2)' : 'rgba(255,255,255,.08)', border: `1px solid ${partner?.approved ? 'rgba(26,107,60,.3)' : 'rgba(255,255,255,.1)'}`, borderRadius: '50px', padding: '3px 10px', fontSize: '10px', fontWeight: 700, color: partner?.approved ? '#6ee7b7' : 'rgba(255,255,255,.4)' }}>
             {partner?.approved ? '✅ Approved' : '⏳ Pending Approval'} · {partner?.province || partner?.barangay?.split(',').slice(-1)[0]?.trim() || 'PH'}
           </span>
-          {isGold && <span style={{ background: 'rgba(201,148,58,.2)', border: '1px solid rgba(201,148,58,.3)', borderRadius: '50px', padding: '3px 10px', fontSize: '10px', fontWeight: 700, color: '#c9943a' }}>⭐ Gold Partner</span>}
+          {isGold && <span style={{ background: 'rgba(201,148,58,.2)', border: '1px solid rgba(201,148,58,.3)', borderRadius: '50px', padding: '3px 10px', fontSize: '10px', fontWeight: 700, color: '#c9943a' }}>⭐ VIP Partner</span>}
         </div>
 
         {/* REFERRAL CODE */}
@@ -249,7 +250,7 @@ export default function PartnerDashboard() {
             <button onClick={shareSMS} style={{ padding: '6px 12px', borderRadius: '7px', background: 'rgba(37,99,235,.15)', border: '1px solid rgba(37,99,235,.25)', color: '#93c5fd', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>SMS</button>
           </div>
         </div>
-        <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '5px', lineHeight: 1.5 }}>I-share sa mga naghahanap ng trabaho — sila mag-e-enter nito during signup</div>
+        <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '5px', lineHeight: 1.5 }}>I-share ang link na ito sa mga naghahanap ng trabaho bilang kasambahay.</div>
       </div>
 
       {/* STATS */}
@@ -260,8 +261,8 @@ export default function PartnerDashboard() {
           { num: workers.length, lbl: 'Narecruit', color: '#2563eb' },
         ].map((stat, i) => (
           <div key={i} style={{ background: '#fff', padding: '14px 10px', textAlign: 'center' }}>
-            <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 900, color: stat.color, marginBottom: '2px' }}>{stat.num}</div>
-            <div style={{ fontSize: '10px', color: '#9ca3af' }}>{stat.lbl}</div>
+            <div style={{ fontFamily: 'serif', fontSize: '24px', fontWeight: 900, color: stat.color, marginBottom: '3px' }}>{stat.num}</div>
+            <div style={{ fontSize: '12px', color: '#4b5563', fontWeight: 600 }}>{stat.lbl}</div>
           </div>
         ))}
       </div>
@@ -281,7 +282,7 @@ export default function PartnerDashboard() {
       <div style={{ display: 'flex', background: '#fff', borderBottom: '1px solid #ede8e0' }}>
         {(['workers', 'payouts', 'add'] as const).map(t => (
           <button key={t} style={s.tab(tab === t)} onClick={() => setTab(t)}>
-            {t === 'add' ? '+ Mag-add' : t === 'workers' ? 'Workers' : 'Payouts'}
+            {t === 'add' ? '+ Mag-refer' : t === 'workers' ? 'Workers' : 'Payouts'}
           </button>
         ))}
       </div>
@@ -324,8 +325,8 @@ export default function PartnerDashboard() {
                 </div>
               )
             })}
-            <button onClick={() => setTab('add')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'rgba(201,148,58,.12)', border: '1.5px dashed rgba(201,148,58,.3)', color: '#c9943a', fontSize: '13px', fontWeight: 700, cursor: 'pointer', marginTop: '4px', fontFamily: 'sans-serif' }}>
-              + Mag-add ng Worker
+            <button onClick={() => setTab('add')} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#1a6b3c', border: 'none', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginTop: '8px', fontFamily: 'sans-serif' }}>
+              + Mag-refer ng Kasambahay
             </button>
           </>
         )}
