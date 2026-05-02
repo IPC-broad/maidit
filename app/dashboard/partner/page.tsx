@@ -526,7 +526,7 @@ export default function PartnerDashboard() {
               <strong>{savedName}</strong> ay naidagdag na sa iyong pool.<br/>
               Makakatanggap siya ng SMS para i-confirm ang kanyang profile.
             </div>
-            <button onClick={() => { setShowSuccess(false); setTab('workers') }} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: '#1a6b3c', border: 'none', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>
+            <button onClick={async () => { setShowSuccess(false); const { supabase } = await import('../../../lib/supabase'); const { data: workersData } = await supabase.from('kasambahay').select('*, profiles(*)').eq('referred_by', partner.id).order('created_at', { ascending: false }); setWorkers(workersData || []); setTab('workers') }} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: '#1a6b3c', border: 'none', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>
               Tingnan ang Workers
             </button>
           </div>
