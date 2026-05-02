@@ -159,7 +159,7 @@ export default function HWDashboard() {
       {tab === 'offers' && (
         <div style={{ padding:'16px 16px 32px' }}>
           <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, marginBottom:'2px', color:'#111827' }}>Mga Offer Ko</div>
-          <div style={{ fontSize:'.72rem', color:'#6b7280', marginBottom:'14px' }}>{offers.length} offer ang naipadala mo · {credits !== null ? credits + ' credits natitira' : ''}</div>
+          <div style={{ fontSize:'.72rem', color:'#6b7280', marginBottom:'14px' }}>{offers.length} offer ang naipadala mo</div>
           {offersLoading && <div style={{ textAlign:'center', padding:'40px', color:'#6b7280' }}>Loading...</div>}
           {!offersLoading && offers.length === 0 && (
             <div style={{ textAlign:'center', padding:'40px 20px' }}>
