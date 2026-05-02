@@ -52,9 +52,10 @@ export async function POST(req: NextRequest) {
     const kbName = kbProfile?.full_name?.split(' ')[0] || 'Kasambahay'
     const kbMobile = kbProfile?.mobile || ''
     const salary = offer.salary?.toLocaleString()
-    const reviewUrl = 'maidit.vercel.app/offer/review/' + offerId
-    const payUrl = 'maidit.vercel.app/pay/' + offerId
-    const arrivalUrl = 'maidit.vercel.app/arrival/' + offerId
+    const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'maidit.vercel.app').replace(/\/$/, '')
+    const reviewUrl = baseUrl + '/offer/review/' + offerId
+    const payUrl = baseUrl + '/pay/' + offerId
+    const arrivalUrl = baseUrl + '/arrival/' + offerId
 
     const messages: Record<string, { mobile: string; msg: string }[]> = {
       offer_sent: [

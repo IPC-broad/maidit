@@ -89,12 +89,14 @@ export default function OfferReviewPage() {
       await supabase.from('offers').update({
         status: 'countered',
         fare_estimate: fareInput ? parseInt(fareInput) : null,
+        bus_line: busLine || null,
         ...(counterSalary ? { fare_countered: parseInt(counterSalary) } : {}),
         ...(counterDate ? { estimated_arrival: counterDate } : {}),
       }).eq('id', offerId)
     } else {
       await supabase.from('offers').update({
         fare_estimate: fareInput ? parseInt(fareInput) : null,
+        bus_line: busLine || null,
         checklist_confirmed: true,
         status: 'agreed',
         estimated_arrival: counterDate || null,
@@ -150,6 +152,20 @@ export default function OfferReviewPage() {
   )
 
   if (!offer) return <div style={{ minHeight:'100vh', background:'#faf8f5', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif', color:'#6b7280' }}>Hindi mahanap ang offer.</div>
+
+  const closedStatuses = ['agreed', 'payment_pending', 'paid', 'active', 'hired', 'declined']
+  if (closedStatuses.includes(offer.status)) return (
+    <div style={{ minHeight:'100vh', background:'#faf8f5', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'28px', textAlign:'center', fontFamily:'sans-serif' }}>
+      <div style={{ fontSize:'3rem', marginBottom:'16px' }}>{['paid','active','hired'].includes(offer.status) ? '🎉' : '📋'}</div>
+      <h1 style={{ fontFamily:'serif', fontSize:'1.4rem', fontWeight:900, color:['paid','active','hired'].includes(offer.status) ? '#1a6b3c' : '#6b7280', marginBottom:'8px' }}>
+        {['paid','active','hired'].includes(offer.status) ? 'Hired ka na!' : 'Naisumite na ang sagot mo'}
+      </h1>
+      <p style={{ color:'#6b7280', fontSize:'.84rem', lineHeight:1.7, marginBottom:'24px' }}>
+        {['paid','active','hired'].includes(offer.status) ? 'Opisyal ka nang employed.' : 'Hindi na mababago ang offer na ito.'}
+      </p>
+      <button style={{ width:'100%', maxWidth:'300px', padding:'13px', borderRadius:'12px', border:'none', background:'#c9943a', color:'#fff', fontFamily:'sans-serif', fontSize:'.92rem', fontWeight:700, cursor:'pointer' }} onClick={() => router.push('/dashboard/kasambahay')}>Bumalik sa Dashboard</button>
+    </div>
+  )
 
   const hwCity = offer?.homeowners?.profiles?.city || offer?.city || ''
   const showFare = isProvince && (offer?.transport_arrangement === 'full' || offer?.transport_arrangement === 'reimburse')

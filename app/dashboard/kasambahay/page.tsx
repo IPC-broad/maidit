@@ -11,6 +11,7 @@ export default function KBDashboard() {
   const [kb, setKb] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set())
+  const [appliedJobs, setAppliedJobs] = useState<any[]>([])
   const [showProfile, setShowProfile] = useState(false)
 
   useEffect(() => {
@@ -31,7 +32,12 @@ export default function KBDashboard() {
           .eq('kasambahay_id', kbData.id)
         setOffers(offersData || [])
         const { data: apps } = await supabase.from('applications').select('job_id').eq('kasambahay_id', kbData.id)
-        if (apps) setAppliedIds(new Set(apps.map((a: any) => a.job_id)))
+        if (apps) {
+          const ids = apps.map((a: any) => a.job_id)
+          setAppliedIds(new Set(ids))
+          const { data: appliedJobsData } = await supabase.from('jobs').select('*').in('id', ids)
+          setAppliedJobs(appliedJobsData || [])
+        }
       }
       setLoading(false)
     }
@@ -90,7 +96,6 @@ export default function KBDashboard() {
   if (loading) return <div style={{ minHeight: '100vh', background: '#faf8f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif', color: '#9ca3af' }}>Loading...</div>
 
   const pendingOffers = offers.filter(o => o.status === 'pending').length
-  const appliedJobs = jobs.filter(j => appliedIds.has(j.id))
 
   return (
     <div style={s.wrap}>
@@ -191,7 +196,8 @@ export default function KBDashboard() {
                   </>}
                   {offer.status === 'pending' && <button style={s.btn('#c9943a')} onClick={() => router.push(`/offer/review/${offer.id}`)}>Tingnan ang Buong Offer</button>}
                   {offer.status === 'reviewed' && <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#2563eb', textAlign: 'center' }}>Hinihintay ang confirmation ng homeowner.</div>}
-                  {offer.status === 'agreed' && <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center', fontWeight: 600 }}>Hinihintay ang bayad ng homeowner.</div>}
+                  {offer.status === 'countered' && <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center' }}>Naisumite ang iyong counter offer. Hinihintay ang sagot ng homeowner.</div>}
+                  {(offer.status === 'agreed' || offer.status === 'payment_pending') && <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center', fontWeight: 600 }}>Hinihintay ang bayad ng homeowner.</div>}
                   {isHired && <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#166534', fontWeight: 600, textAlign: 'center' }}>HIRED! Inaantay na ang pagdating mo sa lugar ng pagtatrabahuan.</div>}
                   {offer.status === 'counter_declined' && (
                     <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#dc2626', lineHeight: 1.6 }}>
@@ -210,8 +216,8 @@ export default function KBDashboard() {
       {tab === 'applied' && (
         <div style={{ padding: '14px 14px 32px' }}>
           <div style={{ fontFamily: 'serif', fontSize: '17px', fontWeight: 900, marginBottom: '2px' }}>Mga In-applyan Ko</div>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '14px' }}>{appliedIds.size} trabaho ang na-apply mo</div>
-          {appliedIds.size === 0 && <div style={{ textAlign: 'center', padding: '40px 20px' }}><div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>✋</div><div style={{ color: '#9ca3af', fontSize: '13px', lineHeight: 1.7 }}>Wala ka pang na-apply na trabaho.</div></div>}
+          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '14px' }}>{appliedJobs.length} trabaho ang na-apply mo</div>
+          {appliedJobs.length === 0 && <div style={{ textAlign: 'center', padding: '40px 20px' }}><div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>✋</div><div style={{ color: '#9ca3af', fontSize: '13px', lineHeight: 1.7 }}>Wala ka pang na-apply na trabaho.</div></div>}
           {appliedJobs.map((job: any) => (
             <div key={job.id} style={s.card}>
               <div style={{ padding: '13px 14px' }}>
@@ -235,7 +241,7 @@ export default function KBDashboard() {
               </div>
             </div>
           ))}
-          {appliedIds.size > 0 && <button style={{ ...s.btn('#c9943a'), marginTop: '8px' }} onClick={() => setTab('jobs')}>Mag-apply pa ng ibang trabaho</button>}
+          {appliedJobs.length > 0 && <button style={{ ...s.btn('#c9943a'), marginTop: '8px' }} onClick={() => setTab('jobs')}>Mag-apply pa ng ibang trabaho</button>}
         </div>
       )}
 
