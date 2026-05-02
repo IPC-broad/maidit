@@ -16,6 +16,7 @@ export default function OfferReviewPage() {
   const [fareInput, setFareInput] = useState('')
   const [busLine, setBusLine] = useState('')
   const [arrivalDate, setArrivalDate] = useState('')
+  const [arrivalDate, setArrivalDate] = useState('')
   const [isProvince, setIsProvince] = useState(false)
 
   const [checklist, setChecklist] = useState({
@@ -80,6 +81,7 @@ export default function OfferReviewPage() {
       fare_estimate: fareInput ? parseInt(fareInput) : null,
       checklist_confirmed: true,
       status: 'agreed',
+      estimated_arrival: arrivalDate || null,
       estimated_arrival: arrivalDate || null
     }).eq('id', offerId)
     await fetch('/api/send-sms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'offer_agreed', offerId }) }).catch(() => {})
@@ -186,7 +188,7 @@ export default function OfferReviewPage() {
               <div style={s.checkLabel}>{item.label}</div>
             </div>
           ))}
-          {isProvince && (offer.transport_arrangement === 'full' || offer.transport_arrangement === 'reimburse') && (
+          {isProvince && (offer.transport_arrangement === 'full' || offer.transport_arrangement === 'reimburse') && (offer.transport_arrangement === 'full' || offer.transport_arrangement === 'reimburse') && (
             <div style={s.checkLast} onClick={() => tick('transport')}>
               <div style={s.checkbox(checklist.transport)}>
                 {checklist.transport && <span style={{ color:'#fff', fontSize:'.7rem', fontWeight:900 }}>✓</span>}
@@ -198,7 +200,7 @@ export default function OfferReviewPage() {
           )}
         </div>
 
-        {isProvince && (offer.transport_arrangement === 'full' || offer.transport_arrangement === 'reimburse') && (
+        {isProvince && (offer.transport_arrangement === 'full' || offer.transport_arrangement === 'reimburse') && (offer.transport_arrangement === 'full' || offer.transport_arrangement === 'reimburse') && (
           <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:'11px', padding:'13px 14px', marginBottom:'14px' }}>
             <div style={{ fontSize:'.72rem', fontWeight:700, color:'#92400e', marginBottom:'6px' }}>
               Estimated na Pamasahe
@@ -217,6 +219,18 @@ export default function OfferReviewPage() {
             </div>
           </div>
         )}
+
+        <div style={{ background: '#fff', borderRadius: '12px', padding: '14px', border: '1.5px solid #e5e7eb', marginBottom: '14px' }}>
+          <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '8px' }}>Kailan ka makakarating?</div>
+          <div style={{ fontSize: '.78rem', color: '#6b7280', marginBottom: '10px', lineHeight: 1.5 }}>Ilagay ang petsa kung kailan ka makakarating sa bahay ng homeowner.</div>
+          <input
+            type="date"
+            style={{ ...s.input, marginBottom: 0 }}
+            value={arrivalDate}
+            min={new Date().toISOString().split('T')[0]}
+            onChange={e => setArrivalDate(e.target.value)}
+          />
+        </div>
 
         <div style={{ background: '#fff', borderRadius: '12px', padding: '14px', border: '1.5px solid #e5e7eb', marginBottom: '14px' }}>
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '8px' }}>Kailan ka makakarating?</div>
