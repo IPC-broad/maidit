@@ -225,7 +225,7 @@ export default function HWDashboard() {
           <button key={t.id} onClick={() => handleTabChange(t.id)} style={{ flex:1, padding:'10px 4px 9px', display:'flex', flexDirection:'column', alignItems:'center', gap:'3px', border:'none', background:'transparent', cursor:'pointer', position:'relative' }}>
             <span style={{ fontSize:'1.1rem' }}>{t.icon}</span>
             <span style={{ fontSize:'.57rem', fontWeight: tab === t.id ? 700 : 600, color: tab === t.id ? '#1a6b3c' : '#6b7280' }}>{t.label}</span>
-            {(t as any).badge > 0 && <span style={{ position:'absolute', top:'6px', right:'18px', background:'#dc2626', color:'#fff', borderRadius:'50%', width:'16px', height:'16px', fontSize:'9px', fontWeight:900, display:'flex', alignItems:'center', justifyContent:'center' }}>{(t as any).badge}</span>}
+            {(t as any).badge > 0 && tab !== t.id && <span style={{ position:'absolute', top:'4px', right:'calc(50% - 18px)', background:'#dc2626', color:'#fff', borderRadius:'50%', width:'15px', height:'15px', fontSize:'9px', fontWeight:900, display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}>{(t as any).badge}</span>}
           </button>
         ))}
       </div>

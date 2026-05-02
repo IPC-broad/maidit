@@ -120,7 +120,7 @@ export default function KBDashboard() {
           <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, padding: '10px 4px 9px', border: 'none', background: 'none', cursor: 'pointer', borderBottom: `2px solid ${tab === t.id ? '#c9943a' : 'transparent'}`, fontFamily: 'sans-serif', fontSize: '10px', fontWeight: tab === t.id ? 700 : 600, color: tab === t.id ? '#c9943a' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', position: 'relative' }}>
             <span style={{ fontSize: '16px' }}>{t.icon}</span>
             <span>{t.label}</span>
-            {t.id === 'offers' && pendingOffers > 0 && <span style={{ position:'absolute', top:'6px', right:'10px', background:'#dc2626', color:'#fff', borderRadius:'50%', width:'16px', height:'16px', fontSize:'9px', fontWeight:900, display:'flex', alignItems:'center', justifyContent:'center' }}>{pendingOffers}</span>}
+            {t.id === 'offers' && pendingOffers > 0 && tab !== 'offers' && <span style={{ position:'absolute', top:'4px', right:'calc(50% - 18px)', background:'#dc2626', color:'#fff', borderRadius:'50%', width:'15px', height:'15px', fontSize:'9px', fontWeight:900, display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}>{pendingOffers}</span>}
           </button>
         ))}
       </div>
