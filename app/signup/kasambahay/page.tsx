@@ -1,6 +1,8 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+
+type Province = { code: string; name: string }
 
 export default function KasambahaySignup() {
   const router = useRouter()
@@ -14,20 +16,59 @@ export default function KasambahaySignup() {
   const [govtIdTypes, setGovtIdTypes] = useState<string[]>([])
   const toggleGovtId = (id: string) => setGovtIdTypes(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
 
+  // Province dropdown
+  const [provinces, setProvinces] = useState<Province[]>([])
+  const [provSearch, setProvSearch] = useState('')
+  const [provOpen, setProvOpen] = useState(false)
+  const [selProv, setSelProv] = useState<Province | null>(null)
+  const provRef = useRef<HTMLDivElement>(null)
+
+  // Selfie
+  const [selfieData, setSelfieData] = useState<string | null>(null)
+  const selfieRef = useRef<HTMLInputElement>(null)
+
   const [form, setForm] = useState({
     first_name: '',
     last_name: '',
     mobile: '',
     otp: '',
-    email: '',
-    password: '',
-    city: '',
+    birthday: '',
     salary: '',
     setup: 'Stay-in',
     experience: 'Baguhan'
   })
 
   const update = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
+
+  useEffect(() => {
+    fetch('https://psgc.gitlab.io/api/provinces/')
+      .then(r => r.json())
+      .then(data => {
+        const sorted = data.map((p: any) => ({ code: p.code, name: p.name }))
+          .sort((a: Province, b: Province) => a.name.localeCompare(b.name))
+        setProvinces(sorted)
+      }).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (provRef.current && !provRef.current.contains(e.target as Node)) setProvOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const filteredProvs = provinces.filter(p =>
+    p.name.toLowerCase().includes(provSearch.toLowerCase())
+  ).slice(0, 80)
+
+  const handleSelfie = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => setSelfieData(ev.target?.result as string)
+    reader.readAsDataURL(file)
+  }
 
   const startCooldown = () => {
     setCooldown(60)
@@ -39,7 +80,6 @@ export default function KasambahaySignup() {
     }, 1000)
   }
 
-  // Step 1: check if mobile is already registered, then advance
   const checkMobile = async () => {
     if (!form.first_name || !form.last_name || !form.mobile) {
       setError('Punan ang lahat ng fields')
@@ -69,14 +109,9 @@ export default function KasambahaySignup() {
     setStep(2)
   }
 
-  // Step 2: validate profile fields, send OTP, then advance
   const sendOtpAndProceed = async () => {
-    if (!form.email || !form.password || !form.city || !form.salary) {
+    if (!selProv || !form.salary) {
       setError('Punan ang lahat ng fields')
-      return
-    }
-    if (form.password.length < 8) {
-      setError('Password must be at least 8 characters')
       return
     }
     setLoading(true)
@@ -101,7 +136,6 @@ export default function KasambahaySignup() {
     startCooldown()
   }
 
-  // Step 3: resend OTP
   const resendOtp = async () => {
     if (cooldown > 0 || loading) return
     setLoading(true)
@@ -121,7 +155,6 @@ export default function KasambahaySignup() {
     setLoading(false)
   }
 
-  // Step 3: verify OTP then create account
   const verifyAndCreate = async () => {
     if (!form.otp || form.otp.length < 6) {
       setError('Ilagay ang 6-digit code')
@@ -136,9 +169,12 @@ export default function KasambahaySignup() {
 
     const { supabase } = await import('../../../lib/supabase')
 
+    const autoEmail = `kb_${form.mobile}@maidit.app`
+    const autoPassword = Math.random().toString(36).slice(-12)
+
     const { data, error } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password
+      email: autoEmail,
+      password: autoPassword
     })
 
     if (error) {
@@ -147,28 +183,46 @@ export default function KasambahaySignup() {
       return
     }
 
+    const userId = data.user?.id
+
     await supabase.from('profiles').insert({
-      id: data.user?.id,
+      id: userId,
       role: 'kasambahay',
       full_name: `${form.first_name} ${form.last_name}`,
       mobile: form.mobile,
-      city: form.city,
+      city: selProv!.name,
       verified: true,
       verified_via: 'mobile'
     })
 
     await supabase.from('kasambahay').insert({
-      profile_id: data.user?.id,
+      profile_id: userId,
       asking_salary: parseInt(form.salary),
       setup: form.setup,
       has_nbi: hasNbi,
       govt_id_types: govtIdTypes,
       experience: form.experience,
-      province: form.city
+      province: selProv!.name,
+      birthday: form.birthday || null
     })
 
+    if (selfieData && userId) {
+      try {
+        const blob = await fetch(selfieData).then(r => r.blob())
+        const { error: uploadError } = await supabase.storage
+          .from('Selfies')
+          .upload(`${userId}/selfie.png`, blob, { upsert: true, contentType: 'image/png' })
+        if (!uploadError) {
+          const { data: { publicUrl } } = supabase.storage.from('Selfies').getPublicUrl(`${userId}/selfie.png`)
+          await supabase.from('profiles').update({ selfie_url: publicUrl }).eq('id', userId)
+        }
+      } catch {
+        // best-effort
+      }
+    }
+
     setLoading(false)
-    router.push('/signup/kasambahay/selfie')
+    router.push(selfieData ? '/dashboard/kasambahay' : '/signup/kasambahay/selfie')
   }
 
   const s: any = {
@@ -181,6 +235,7 @@ export default function KasambahaySignup() {
     title: { fontWeight:900, fontSize:'1.25rem', marginBottom:'5px', color:'#c9943a' },
     sub: { fontSize:'.78rem', color:'#6b7280', marginBottom:'20px', lineHeight:1.5 },
     lbl: { display:'block', fontSize:'.63rem', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#6b7280', marginBottom:'4px' },
+    hint: { fontSize:'.65rem', color:'#9ca3af', marginBottom:'8px', lineHeight:1.4 },
     input: { width:'100%', padding:'11px 13px', border:'1.5px solid #e5e7eb', borderRadius:'11px', fontFamily:'sans-serif', fontSize:'.88rem', outline:'none', marginBottom:'13px', background:'#fff', color:'#111827' },
     btn: { width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:'#c9943a', color:'#fff', fontFamily:'sans-serif', fontSize:'.92rem', fontWeight:700, cursor:'pointer' },
     err: { background:'#fef2f2', border:'1px solid #fecaca', borderRadius:'9px', padding:'10px 13px', fontSize:'.78rem', color:'#dc2626', marginBottom:'13px' },
@@ -200,7 +255,7 @@ export default function KasambahaySignup() {
 
       {error && <div style={s.err}>⚠️ {error}</div>}
 
-      {/* ── STEP 1: Name + Mobile ── */}
+      {/* ── STEP 1: Name + Mobile + Selfie ── */}
       {step === 1 && (
         <>
           <div style={s.title}>Mag-sign up</div>
@@ -222,6 +277,24 @@ export default function KasambahaySignup() {
             maxLength={11}
           />
 
+          <label style={s.lbl}>Selfie <span style={{ fontWeight:400, color:'#9ca3af', textTransform:'none', letterSpacing:0 }}>(optional)</span></label>
+          <div style={s.hint}>Para maverify ang iyong pagkakilanlan. Hindi ito ipo-post nang walang pahintulot mo.</div>
+
+          {selfieData && (
+            <img src={selfieData} alt="selfie" style={{ width:'100%', maxHeight:'200px', objectFit:'cover', borderRadius:'11px', marginBottom:'12px' }} />
+          )}
+
+          <div
+            onClick={() => selfieRef.current?.click()}
+            style={{ background:'#f9fafb', border:`2px dashed ${selfieData ? '#1a6b3c' : '#d1d5db'}`, borderRadius:'13px', padding:'22px 16px', textAlign:'center', cursor:'pointer', marginBottom:'16px' }}
+          >
+            {selfieData
+              ? <><div style={{ fontSize:'20px', marginBottom:'6px' }}>✅</div><div style={{ fontWeight:700, fontSize:'13px', color:'#1a6b3c' }}>Selfie saved!</div><div style={{ fontSize:'11px', color:'#6b7280', marginTop:'4px' }}>I-tap para palitan</div></>
+              : <><div style={{ fontSize:'30px', marginBottom:'8px' }}>📸</div><div style={{ fontWeight:700, fontSize:'13px', color:'#374151', marginBottom:'3px' }}>I-tap para kumuha ng selfie</div><div style={{ fontSize:'11px', color:'#9ca3af' }}>Malinaw na mukha · Walang filter</div></>
+            }
+          </div>
+          <input ref={selfieRef} type="file" accept="image/*" capture="user" style={{ display:'none' }} onChange={handleSelfie} />
+
           <button
             style={{ ...s.btn, opacity: loading ? .6 : 1 }}
             onClick={checkMobile}
@@ -238,14 +311,50 @@ export default function KasambahaySignup() {
           <div style={s.title}>Karagdagang Impormasyon</div>
           <div style={s.sub}>Kumpleto ang iyong profile para makita ng mga homeowner</div>
 
-          <label style={s.lbl}>Email</label>
-          <input style={s.input} type="email" placeholder="ana@gmail.com" value={form.email} onChange={e => update('email', e.target.value)} />
+          <label style={s.lbl}>Probinsya *</label>
+          <div ref={provRef} style={{ position:'relative', marginBottom:'0' }}>
+            <div
+              onClick={() => setProvOpen(!provOpen)}
+              style={{ width:'100%', padding:'11px 13px', border:`1.5px solid ${selProv ? '#c9943a' : '#e5e7eb'}`, borderRadius:'11px', fontSize:'.88rem', background:'#fff', color: selProv ? '#111827' : '#9ca3af', marginBottom: provOpen ? '0' : '13px', display:'flex', justifyContent:'space-between', alignItems:'center', cursor:'pointer', boxSizing:'border-box' as const }}
+            >
+              <span>{selProv ? selProv.name : 'Piliin ang probinsya'}</span>
+              <span style={{ fontSize:'11px', opacity:.5 }}>▾</span>
+            </div>
+            {provOpen && (
+              <div style={{ background:'#fff', border:'1.5px solid #e5e7eb', borderRadius:'11px', marginBottom:'13px', overflow:'hidden', position:'relative', zIndex:50 }}>
+                <input
+                  autoFocus
+                  style={{ width:'100%', padding:'10px 12px', border:'none', borderBottom:'1px solid #f3f4f6', background:'#faf8f5', color:'#111827', fontSize:'13px', outline:'none', fontFamily:'sans-serif' }}
+                  placeholder="Hanapin ang probinsya..."
+                  value={provSearch}
+                  onChange={e => setProvSearch(e.target.value)}
+                />
+                <div style={{ maxHeight:'190px', overflowY:'auto' }}>
+                  {filteredProvs.length === 0
+                    ? <div style={{ padding:'12px', fontSize:'12px', color:'#9ca3af' }}>Walang nahanap</div>
+                    : filteredProvs.map(p => (
+                      <div
+                        key={p.code}
+                        onClick={() => { setSelProv(p); setProvOpen(false); setProvSearch('') }}
+                        style={{ padding:'10px 13px', cursor:'pointer', fontSize:'13px', color: selProv?.code === p.code ? '#c9943a' : '#111827', background: selProv?.code === p.code ? 'rgba(201,148,58,.08)' : 'transparent', borderBottom:'1px solid #f3f4f6' }}
+                      >
+                        {p.name}
+                      </div>
+                    ))
+                  }
+                </div>
+              </div>
+            )}
+          </div>
 
-          <label style={s.lbl}>Password</label>
-          <input style={s.input} type="password" placeholder="Min. 8 characters" value={form.password} onChange={e => update('password', e.target.value)} />
-
-          <label style={s.lbl}>Lokasyon / Probinsya</label>
-          <input style={s.input} placeholder="Batangas City" value={form.city} onChange={e => update('city', e.target.value)} />
+          <label style={s.lbl}>Kaarawan</label>
+          <div style={s.hint}>Para malaman ng homeowner ang iyong edad</div>
+          <input
+            style={s.input}
+            type="date"
+            value={form.birthday}
+            onChange={e => update('birthday', e.target.value)}
+          />
 
           <label style={s.lbl}>Hinihingi na Sahod (₱)</label>
           <div style={{ position:'relative' }}>
