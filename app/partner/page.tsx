@@ -201,44 +201,48 @@ export default function PartnerPage() {
 
   // ─── LANDING ───
   if (step === 'landing') return (
-    <div style={s.wrap}>
-      <nav style={s.nav}>
+    <div style={{ minHeight: '100vh', background: '#faf8f5', fontFamily: 'sans-serif', color: '#1a1a1a' }}>
+      {/* HEADER */}
+      <nav style={{ background: '#fff', borderBottom: '1px solid #ede8e0', padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky' as const, top: 0, zIndex: 100 }}>
         <div>
-          <span style={{ fontFamily: 'serif', fontSize: '18px', fontWeight: 900 }}>Maid<span style={{ color: '#f0c97a' }}>It</span></span>
-          <span style={{ fontSize: '10px', color: 'rgba(255,255,255,.3)', marginLeft: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Community Partners</span>
+          <span style={{ fontFamily: 'serif', fontSize: '18px', fontWeight: 900 }}>Maid<span style={{ color: '#c9943a' }}>It</span></span>
+          <div style={{ fontSize: '9px', color: '#9ca3af', textTransform: 'uppercase' as const, letterSpacing: '1px', marginTop: '1px' }}>Community Partners</div>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={() => router.push('/login')} style={{ padding: '6px 14px', borderRadius: '8px', background: 'transparent', border: '1.5px solid rgba(255,255,255,.15)', color: 'rgba(255,255,255,.7)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'sans-serif' }}>Login</button>
-          <button onClick={() => setStep('step1')} style={{ padding: '8px 18px', borderRadius: '9px', background: '#c9943a', border: 'none', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>Maging Partner</button>
+          <button onClick={() => router.push('/login')} style={{ padding: '6px 14px', borderRadius: '8px', background: 'transparent', border: '1.5px solid #e5e0d8', color: '#6b7280', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'sans-serif' }}>Login</button>
+          <button onClick={() => setStep('step1')} style={{ padding: '7px 16px', borderRadius: '9px', background: '#c9943a', border: 'none', color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>Maging Partner</button>
         </div>
       </nav>
 
       {/* HERO */}
-      <div style={{ padding: '44px 18px 32px', textAlign: 'center' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(201,148,58,.12)', border: '1px solid rgba(201,148,58,.25)', borderRadius: '50px', padding: '5px 14px', fontSize: '10px', fontWeight: 700, color: '#f0c97a', textTransform: 'uppercase', letterSpacing: '.8px', marginBottom: '18px' }}>Community Partners Program</div>
-        <h1 style={{ fontFamily: 'serif', fontSize: '30px', fontWeight: 900, lineHeight: 1.18, marginBottom: '14px' }}>Kumita habang<br /><em style={{ color: '#f0c97a' }}>tumutulong sa</em><br /><em style={{ color: '#f0c97a' }}>iyong komunidad</em></h1>
-        <p style={{ fontSize: '14px', color: 'rgba(255,255,255,.6)', lineHeight: 1.7, marginBottom: '24px' }}>
-          Mag-refer ng mga naghahanap ng trabaho sa iyong komunidad — kumita ng <strong style={{ color: '#fff' }}>₱1,000</strong> sa bawat successful hire.
+      <div style={{ padding: '40px 20px 32px', textAlign: 'center' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '50px', padding: '5px 14px', fontSize: '10px', fontWeight: 700, color: '#92400e', textTransform: 'uppercase' as const, letterSpacing: '.7px', marginBottom: '20px' }}>Community Partners Program</div>
+        <h1 style={{ fontFamily: 'serif', fontSize: '30px', fontWeight: 900, lineHeight: 1.2, marginBottom: '14px', color: '#1a1a1a' }}>
+          Kumita habang<br /><span style={{ color: '#1a6b3c' }}>tumutulong sa</span><br /><span style={{ color: '#1a6b3c' }}>iyong komunidad</span>
+        </h1>
+        <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.7, marginBottom: '24px', maxWidth: '320px', margin: '0 auto 24px' }}>
+          Mag-refer ng mga naghahanap ng trabaho sa iyong komunidad — kumita ng <strong style={{ color: '#1a1a1a' }}>₱1,000</strong> sa bawat successful hire.
         </p>
-        <button style={{ ...s.goldBtn, maxWidth: '340px' }} onClick={() => setStep('step1')}>Maging Community Partner →</button>
+        <button style={{ padding: '14px 28px', borderRadius: '12px', background: '#c9943a', border: 'none', color: '#fff', fontSize: '15px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif', width: '100%', maxWidth: '320px', display: 'block', margin: '0 auto' }} onClick={() => setStep('step1')}>
+          Maging Community Partner →
+        </button>
       </div>
 
-      {/* EARNINGS */}
-      <div style={{ margin: '0 16px 26px' }}>
-        <div style={{ background: 'rgba(26,107,60,.2)', border: '1px solid rgba(26,107,60,.35)', borderRadius: '16px', overflow: 'hidden' }}>
-          <div style={{ padding: '16px 18px 12px', borderBottom: '1px solid rgba(255,255,255,.07)' }}>
-            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '.7px', marginBottom: '10px' }}>Kita Mo Per Hire</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
-              <span style={{ fontFamily: 'serif', fontSize: '38px', fontWeight: 900, color: '#6ee7b7', lineHeight: 1 }}>₱1,000</span>
-              <span style={{ fontSize: '13px', color: 'rgba(255,255,255,.5)' }}>bawat kasambahay na ma-hire</span>
+      {/* EARNINGS CARD */}
+      <div style={{ margin: '0 16px 28px' }}>
+        <div style={{ background: '#1a6b3c', borderRadius: '16px', overflow: 'hidden' }}>
+          <div style={{ padding: '18px 20px 14px', borderBottom: '1px solid rgba(255,255,255,.12)' }}>
+            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.6)', textTransform: 'uppercase' as const, letterSpacing: '.7px', marginBottom: '10px' }}>KITA MO PER HIRE</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '6px' }}>
+              <span style={{ fontFamily: 'serif', fontSize: '44px', fontWeight: 900, color: '#fff', lineHeight: 1 }}>₱1,000</span>
             </div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,.4)' }}>Walang limit — mas maraming ma-refer, mas malaki ang kita.</div>
+            <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.75)' }}>bawat kasambahay na ma-hire</div>
           </div>
-          <div style={{ padding: '8px 18px 6px', fontSize: '10px', color: 'rgba(255,255,255,.3)', textTransform: 'uppercase', letterSpacing: '.6px', borderBottom: '1px solid rgba(255,255,255,.07)' }}>Halimbawa</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'rgba(255,255,255,.07)' }}>
+          <div style={{ padding: '7px 20px 6px', fontSize: '10px', color: 'rgba(255,255,255,.4)', textTransform: 'uppercase' as const, letterSpacing: '.6px', borderBottom: '1px solid rgba(255,255,255,.1)' }}>Halimbawa</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'rgba(255,255,255,.1)' }}>
             {[{ l: '5 hires / buwan', v: '₱5,000' }, { l: '20 hires / buwan', v: '₱20,000' }].map((item, i) => (
-              <div key={i} style={{ background: 'rgba(26,107,60,.15)', padding: '14px 16px' }}>
-                <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.4)', marginBottom: '4px' }}>{item.l}</div>
+              <div key={i} style={{ background: 'rgba(0,0,0,.18)', padding: '14px 18px' }}>
+                <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.5)', marginBottom: '5px' }}>{item.l}</div>
                 <div style={{ fontFamily: 'serif', fontSize: '24px', fontWeight: 900, color: '#6ee7b7' }}>{item.v}</div>
               </div>
             ))}
@@ -246,50 +250,33 @@ export default function PartnerPage() {
         </div>
       </div>
 
-      {/* WHO */}
-      <div style={{ padding: '0 16px 24px' }}>
-        <div style={{ fontFamily: 'serif', fontSize: '19px', fontWeight: 900, marginBottom: '4px' }}>Para kanino ito?</div>
-        <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.45)', marginBottom: '16px' }}>Karamihan ng aming mga partners ay:</div>
-        {[
-          { icon: '🏘️', title: 'Barangay officials at community leaders', sub: 'May malawak na network sa komunidad' },
-          { icon: '⛪', title: 'Church at parish leaders', sub: 'Kilala at pinagkakatiwalaan sa kanilang lugar' },
-          { icon: '👨‍👩‍👧‍👦', title: 'Pamilya at kaibigan ng mga kasambahay', sub: 'Nakakakilala ng maraming naghahanap ng trabaho' },
-          { icon: '🏫', title: 'Training centers at paaralan', sub: 'Nagre-refer ng mga graduates at trainees' },
-        ].map((item, i) => (
-          <div key={i} style={{ ...s.card, display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '9px' }}>
-            <div style={{ fontSize: '22px', flexShrink: 0 }}>{item.icon}</div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '2px' }}>{item.title}</div>
-              <div style={{ fontSize: '12px', color: 'rgba(255,255,255,.45)', lineHeight: 1.5 }}>{item.sub}</div>
+      {/* 3 FEATURE CARDS */}
+      <div style={{ padding: '0 16px 28px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}>
+          {[
+            { icon: '🔗', title: 'Madali lang', sub: 'I-share lang ang iyong referral link sa mga kakilalang naghahanap ng trabaho. Libre at walang bayad.' },
+            { icon: '💼', title: 'May Job Offer', sub: '₱1,000 ang kitain mo sa bawat kasambahay na na-hire mula sa iyong referral.' },
+            { icon: '♾️', title: 'Kumita Palagi', sub: 'Walang limit sa referrals. Mas maraming ma-refer, mas malaki ang kita mo buwan-buwan.' },
+          ].map((card, i) => (
+            <div key={i} style={{ background: '#fff', borderRadius: '13px', padding: '16px', border: '1px solid #ede8e0', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#fef3e2', border: '1px solid #fde8c0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>{card.icon}</div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '15px', color: '#1a1a1a', marginBottom: '4px' }}>{card.title}</div>
+                <div style={{ fontSize: '13px', color: '#6b7280', lineHeight: 1.6 }}>{card.sub}</div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      {/* HOW */}
-      <div style={{ padding: '0 16px 32px' }}>
-        <div style={{ fontFamily: 'serif', fontSize: '19px', fontWeight: 900, marginBottom: '4px' }}>Paano ito gumagana?</div>
-        <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.45)', marginBottom: '16px' }}>3 hakbang lang</div>
-        {[
-          { n: '1', bg: '#2563eb', title: 'Mag-sign up — libre at mabilis', sub: 'Pangalan, mobile, at selfie lang — tapos may referral link ka na agad.' },
-          { n: '2', bg: '#c9943a', title: 'Mag-refer ng kakilala', sub: 'I-share ang referral link sa mga naghahanap ng trabaho sa iyong komunidad.' },
-          { n: '3', bg: '#1a6b3c', title: 'Kumita kapag na-hire ang referral mo', sub: '₱1,000 sa bawat successful hire — sa iyong GCash o Maya.' },
-        ].map((item, i) => (
-          <div key={i} style={{ display: 'flex', gap: '14px', padding: '13px 0', borderBottom: i < 2 ? '1px solid rgba(255,255,255,.06)' : 'none' }}>
-            <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: item.bg, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 900, flexShrink: 0, marginTop: '1px' }}>{item.n}</div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '3px' }}>{item.title}</div>
-              <div style={{ fontSize: '12px', color: 'rgba(255,255,255,.5)', lineHeight: 1.55 }}>{item.sub}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* CTA BOTTOM */}
-      <div style={{ background: 'rgba(201,148,58,.1)', border: '1px solid rgba(201,148,58,.2)', borderRadius: '16px', padding: '22px 18px', margin: '0 16px 40px', textAlign: 'center' }}>
-        <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, marginBottom: '6px' }}>Handa ka na bang sumali?</div>
-        <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.5)', marginBottom: '16px', lineHeight: 1.6 }}>Libre. 2 minuto lang. May referral link ka agad.</div>
-        <button style={s.goldBtn} onClick={() => setStep('step1')}>Maging Community Partner →</button>
+      {/* FOOTER BANNER */}
+      <div style={{ background: '#c9943a', padding: '28px 20px', textAlign: 'center' }}>
+        <div style={{ fontSize: '16px', fontWeight: 700, color: '#fff', lineHeight: 1.6, maxWidth: '300px', margin: '0 auto 18px' }}>
+          Mas maraming referrals, mas maraming kita! Tuloy-tulong tayong tumulong sa ating komunidad.
+        </div>
+        <button style={{ padding: '12px 28px', borderRadius: '11px', background: '#fff', border: 'none', color: '#c9943a', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }} onClick={() => setStep('step1')}>
+          Maging Partner Ngayon →
+        </button>
       </div>
     </div>
   )
