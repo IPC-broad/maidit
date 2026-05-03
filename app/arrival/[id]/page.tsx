@@ -22,7 +22,7 @@ export default function ArrivalPage() {
 
       const { data } = await supabase
         .from('offers')
-        .select('*, kasambahay_profile:profiles!offers_kasambahay_id_fkey(full_name, mobile)')
+        .select('*, kasambahay:kasambahay_id(referred_by, profiles(full_name, mobile))')
         .eq('id', offerId)
         .single()
 
@@ -55,31 +55,24 @@ export default function ArrivalPage() {
       trial_ends_at: day30
     }).eq('id', offerId)
 
-    if (offer.application_id) {
-      const { data: application } = await supabase
-        .from('applications')
-        .select('referror_id')
-        .eq('id', offer.application_id)
-        .single()
-
-      if (application?.referror_id) {
-        await supabase.from('payouts').insert({
-          partner_id: application.referror_id,
-          offer_id: offerId,
-          amount: 600,
-          type: 'arrival',
-          status: 'pending',
-          due_at: now
-        })
-        await supabase.from('payouts').insert({
-          partner_id: application.referror_id,
-          offer_id: offerId,
-          amount: 400,
-          type: 'day30',
-          status: 'scheduled',
-          due_at: day30
-        })
-      }
+    const referrorId = offer.kasambahay?.referred_by
+    if (referrorId) {
+      await supabase.from('payouts').insert({
+        partner_id: referrorId,
+        offer_id: offerId,
+        amount: 600,
+        type: 'arrival',
+        status: 'pending',
+        due_at: now
+      })
+      await supabase.from('payouts').insert({
+        partner_id: referrorId,
+        offer_id: offerId,
+        amount: 400,
+        type: 'day30',
+        status: 'scheduled',
+        due_at: day30
+      })
     }
 
     await fetch('/api/send-sms', {
@@ -95,7 +88,7 @@ export default function ArrivalPage() {
   const s: any = {
     wrap: { minHeight: '100vh', background: '#f9fafb', fontFamily: 'sans-serif', color: '#111827' },
     head: { background: '#0d1117', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '10px' },
-    back: { background: 'none', border: 'none', color: 'rgba(255,255,255,.5)', fontSize: '1rem', cursor: 'pointer', padding: 0 },
+    back: { background: 'none', border: 'none', color: 'rgba(255,255,255,.85)', fontSize: '1rem', cursor: 'pointer', padding: 0 },
     body: { padding: '20px 18px 40px' },
     card: { background: '#fff', borderRadius: '12px', padding: '16px', border: '1.5px solid #e5e7eb', marginBottom: '14px' },
     btn: { width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', marginBottom: '10px' },
@@ -141,7 +134,7 @@ export default function ArrivalPage() {
     </div>
   )
 
-  const kbName = offer?.kasambahay_profile?.full_name || 'your kasambahay'
+  const kbName = offer?.kasambahay?.profiles?.full_name || 'your kasambahay'
 
   return (
     <div style={s.wrap}>
