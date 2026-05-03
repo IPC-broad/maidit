@@ -217,12 +217,13 @@ export default function PartnerPage() {
       {/* HERO CARD — contained, rounded, two-column */}
       <div style={{ margin: '14px 14px 0', background: '#faf8f5', borderRadius: '20px', border: '1.5px solid #e8e2d9', overflow: 'hidden' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: '230px' }}>
-          {/* Left — illustration */}
-          <div style={{ background: 'linear-gradient(160deg, #fef7e8 0%, #fde8c0 100%)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '18px 10px 0', position: 'relative', overflow: 'hidden' }}>
-            <span style={{ position: 'absolute', top: '10px', left: '12px', fontSize: '13px', color: '#c9943a', opacity: .55, fontWeight: 900 }}>✦</span>
-            <span style={{ position: 'absolute', top: '22px', right: '10px', fontSize: '9px', color: '#1a6b3c', opacity: .5, fontWeight: 900 }}>✦</span>
-            <span style={{ position: 'absolute', bottom: '38%', right: '16px', fontSize: '7px', color: '#c9943a', opacity: .4, fontWeight: 900 }}>✦</span>
-            <div style={{ fontSize: '72px', lineHeight: 1, filter: 'drop-shadow(0 4px 8px rgba(0,0,0,.1))' }}>👨‍👩‍👧</div>
+          {/* Left — photo */}
+          <div style={{ position: 'relative', overflow: 'hidden' }}>
+            <img
+              src="https://images.unsplash.com/photo-1609220136736-443140cffec6?w=500"
+              alt="Filipino family"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '18px 0 0 18px' }}
+            />
           </div>
           {/* Right — text */}
           <div style={{ padding: '20px 16px 20px 14px', display: 'flex', flexDirection: 'column' as const, justifyContent: 'center' }}>
