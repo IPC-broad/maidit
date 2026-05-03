@@ -302,7 +302,7 @@ export default function PostJobPage() {
         </select>
 
         <label style={s.lbl}>Area / Barangay</label>
-        <input style={s.inp} placeholder="e.g. Teachers Village" onChange={e => update('area', e.target.value)} />
+        <input style={s.inp} placeholder="e.g. Teachers Village" value={form.area} onChange={e => update('area', e.target.value)} />
 
         <label style={s.lbl}>Household</label>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
