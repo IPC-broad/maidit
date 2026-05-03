@@ -27,7 +27,7 @@ export default function PayPage() {
         .single()
 
       if (!data) { router.push('/dashboard/homeowner'); return }
-      if (data.status === 'paid' || data.status === 'payment_pending') {
+      if (['paid', 'payment_pending', 'active', 'hired'].includes(data.status)) {
         setStep('already')
       }
       setOffer(data)
@@ -105,7 +105,7 @@ export default function PayPage() {
   if (step === 'confirm') return (
     <div style={s.wrap}>
       <div style={s.head}>
-        <span style={{ fontFamily: 'serif', fontSize: '1rem', fontWeight: 900, color: '#1a1a1a' }}>Confirm Payment</span>
+        <span style={{ fontFamily: 'serif', fontSize: '1rem', fontWeight: 900, color: '#fff' }}>Confirm Payment</span>
       </div>
       <div style={s.body}>
         <div style={{ fontFamily: 'serif', fontSize: '1.1rem', fontWeight: 900, marginBottom: '6px' }}>
