@@ -59,6 +59,7 @@ export default function SendOfferPage({ params }: any) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
     const { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
+    if (!hw) { setSubmitting(false); setError('Homeowner profile not found. Please contact support.'); return }
     const household = {
       adults: parseInt(form.adults) || 0,
       seniors: parseInt(form.seniors) || 0,
