@@ -56,6 +56,13 @@ export default function OfferConfirmPage() {
     setAction('done')
   }
 
+  const formatStartDate = (val: any) => {
+    if (!val) return 'Hindi pa natukoy'
+    const d = new Date(val)
+    if (isNaN(d.getTime()) || d.getFullYear() < 2000) return 'Hindi pa natukoy'
+    return d.toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })
+  }
+
   const handleDecline = async () => {
     const { supabase } = await import('../../../../lib/supabase')
     await supabase.from('offers').update({ status: 'declined' }).eq('id', offerId)
@@ -109,6 +116,17 @@ export default function OfferConfirmPage() {
     </div>
   )
 
+  const closedStatuses = ['agreed', 'payment_pending', 'paid', 'active', 'hired', 'declined']
+  if (closedStatuses.includes(offer.status)) return (
+    <div style={{ minHeight:'100vh', background:'#f9fafb', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'28px', textAlign:'center', fontFamily:'sans-serif' }}>
+      <div style={{ fontSize:'2.5rem', marginBottom:'16px' }}>{ ['paid','active','hired'].includes(offer.status) ? '🎉' : '📋' }</div>
+      <h1 style={{ fontFamily:'serif', fontSize:'1.3rem', fontWeight:900, color: ['paid','active','hired'].includes(offer.status) ? '#1a6b3c' : '#6b7280', marginBottom:'8px' }}>
+        { ['paid','active','hired'].includes(offer.status) ? 'Hired!' : offer.status === 'agreed' ? 'Waiting for payment' : 'Offer closed' }
+      </h1>
+      <button style={{ ...s.btnOutline, maxWidth:'300px', marginTop:'16px' }} onClick={() => router.push('/dashboard/homeowner')}>Back to Dashboard</button>
+    </div>
+  )
+
   const kbName = offer?.kasambahay?.profiles?.full_name?.split(' ')[0]
   const kbProvince = offer?.kasambahay?.province || offer?.kasambahay?.profiles?.city
   const hasTransport = offer?.transport_arrangement !== null
@@ -141,9 +159,7 @@ export default function OfferConfirmPage() {
           </div>
           <div style={s.row}>
             <span style={s.rowLabel}>Start Date</span>
-            <span style={s.rowValue}>
-              {new Date(offer.start_date).toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric' })}
-            </span>
+            <span style={s.rowValue}>{formatStartDate(offer.start_date)}</span>
           </div>
           <div style={s.row}>
             <span style={s.rowLabel}>Setup</span>
