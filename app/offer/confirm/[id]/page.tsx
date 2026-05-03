@@ -72,7 +72,7 @@ export default function OfferConfirmPage() {
   const s: any = {
     wrap: { minHeight:'100vh', background:'#f9fafb', fontFamily:'sans-serif', color:'#111827' },
     head: { background:'#0d1117', padding:'14px 18px', display:'flex', alignItems:'center', gap:'10px' },
-    back: { background:'none', border:'none', color:'rgba(255,255,255,.5)', fontSize:'1rem', cursor:'pointer', padding:0 },
+    back: { background:'none', border:'none', color:'rgba(255,255,255,.85)', fontSize:'1rem', cursor:'pointer', padding:0 },
     body: { padding:'20px 18px 40px' },
     card: { background:'#fff', borderRadius:'12px', padding:'14px', border:'1.5px solid #e5e7eb', marginBottom:'14px' },
     cardTitle: { fontSize:'.65rem', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#6b7280', marginBottom:'10px' },
