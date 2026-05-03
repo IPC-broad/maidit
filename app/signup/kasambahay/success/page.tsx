@@ -7,7 +7,7 @@ export default function Success() {
       <p style={{ color:'#4b5563', fontSize:'.84rem', lineHeight:1.7, marginBottom:'24px' }}>
         Magiging live na ang iyong profile.<br/>Check your email to verify your account.
       </p>
-      <Link href="/dashboard/kasambahay" style={{ width:'100%', maxWidth:'320px', padding:'13px 28px', borderRadius:'12px', background:'#c9943a', color:'#1a1a1a', fontWeight:700, textDecoration:'none', fontSize:'.92rem', display:'block', marginBottom:'12px' }}>
+      <Link href="/dashboard/kasambahay" style={{ width:'100%', maxWidth:'320px', padding:'13px 28px', borderRadius:'12px', background:'#c9943a', color:'#fff', fontWeight:700, textDecoration:'none', fontSize:'.92rem', display:'block', marginBottom:'12px' }}>
         Pumunta sa Dashboard →
       </Link>
       <Link href="/" style={{ fontSize:'.78rem', color:'#9ca3af', textDecoration:'none' }}>
