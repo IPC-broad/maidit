@@ -11,6 +11,7 @@ export default function SendOfferPage({ params }: any) {
   const [form, setForm] = useState({
     salary: '',
     urgency: 'Kailangan na (ASAP)',
+    start_date: '',
     scope: [] as string[],
     setup: 'Stay-in',
     city: 'Quezon City',
@@ -68,6 +69,7 @@ export default function SendOfferPage({ params }: any) {
       kasambahay_id: kasambahayId,
       salary: parseInt(form.salary),
       urgency: form.urgency,
+      start_date: form.start_date || null,
       scope: form.scope,
       setup: form.setup,
       city: form.city,
@@ -138,6 +140,9 @@ export default function SendOfferPage({ params }: any) {
         <select style={s.sel} value={form.urgency} onChange={e => setForm(f => ({ ...f, urgency: e.target.value }))}>
           <option>Kailangan na (ASAP)</option><option>Sa loob ng ilang araw</option><option>Sa susunod na linggo</option><option>Pwede pag-usapan</option>
         </select>
+
+        <label style={s.lbl}>Simula ng Trabaho (Start Date)</label>
+        <input style={s.inp} type="date" value={form.start_date} min={new Date().toISOString().split('T')[0]} onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))} />
 
         <label style={s.lbl}>Setup</label>
         <select style={s.sel} value={form.setup} onChange={e => setForm(f => ({ ...f, setup: e.target.value }))}>
