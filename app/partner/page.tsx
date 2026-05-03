@@ -214,19 +214,19 @@ export default function PartnerPage() {
         </div>
       </nav>
 
-      {/* HERO CARD — contained, rounded, two-column */}
+      {/* HERO CARD — stacks on mobile, side-by-side on desktop */}
       <div style={{ margin: '14px 14px 0', background: '#faf8f5', borderRadius: '20px', border: '1.5px solid #e8e2d9', overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: '230px' }}>
-          {/* Left — photo */}
-          <div style={{ position: 'relative', overflow: 'hidden' }}>
+        <div className="flex flex-col sm:grid sm:grid-cols-2 sm:min-h-[230px]">
+          {/* Top / Left — photo */}
+          <div className="h-[220px] sm:h-auto overflow-hidden">
             <img
               src="https://xlagwtsrjbylhxfozoem.supabase.co/storage/v1/object/public/assets/ChatGPT%20Image%20May%203,%202026%20at%2008_38_45%20PM.png"
               alt="Filipino family"
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', minHeight: '280px', borderRadius: '12px 0 0 12px' }}
+              className="w-full h-full object-cover block"
             />
           </div>
-          {/* Right — text */}
-          <div style={{ padding: '20px 16px 20px 14px', display: 'flex', flexDirection: 'column' as const, justifyContent: 'center' }}>
+          {/* Bottom / Right — text */}
+          <div className="bg-white sm:bg-transparent" style={{ padding: '20px 16px 20px 14px', display: 'flex', flexDirection: 'column' as const, justifyContent: 'center' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', background: '#1a6b3c', borderRadius: '50px', padding: '4px 10px', fontSize: '8px', fontWeight: 700, color: '#fff', textTransform: 'uppercase' as const, letterSpacing: '.5px', marginBottom: '11px', alignSelf: 'flex-start' as const }}>Community Partner</div>
             <h1 style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, lineHeight: 1.2, marginBottom: '9px', color: '#1a1a1a' }}>
               Kumita habang<br />
