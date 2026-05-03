@@ -62,11 +62,11 @@ export default function SelfieCapture() {
       const path = `${user.id}/selfie.png`
 
       const { error: uploadError } = await supabase.storage
-        .from('selfies')
+        .from('Selfies')
         .upload(path, blob, { upsert: true, contentType: 'image/png' })
 
       if (!uploadError) {
-        const { data: { publicUrl } } = supabase.storage.from('selfies').getPublicUrl(path)
+        const { data: { publicUrl } } = supabase.storage.from('Selfies').getPublicUrl(path)
         await supabase.from('profiles').update({ selfie_url: publicUrl }).eq('id', user.id)
       }
     } catch {
