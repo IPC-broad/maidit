@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import { supabase } from '../../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
 export default function HomeownerSignup() {
@@ -20,8 +19,10 @@ export default function HomeownerSignup() {
   }))
 
   const handleSignup = async () => {
+    if (form.password.length < 8) { setError('Password must be at least 8 characters'); return }
     setLoading(true)
     setError('')
+    const { supabase } = await import('../../../lib/supabase')
     const { data, error } = await supabase.auth.signUp({
       email: form.email, password: form.password
     })
@@ -63,30 +64,30 @@ export default function HomeownerSignup() {
   const chip = (label: string, key: string, val: string) => ({
     padding:'8px 14px', borderRadius:'50px', cursor:'pointer', fontFamily:'sans-serif',
     fontSize:'.78rem', fontWeight:600, border:'1.5px solid',
-    borderColor: form[key as keyof typeof form] === val ? '#1a6b3c' : 'rgba(255,255,255,.15)',
-    background: form[key as keyof typeof form] === val ? 'rgba(26,107,60,.2)' : 'transparent',
-    color: form[key as keyof typeof form] === val ? '#6ee7b7' : 'rgba(255,255,255,.5)'
+    borderColor: form[key as keyof typeof form] === val ? '#1a6b3c' : '#d1d5db',
+    background: form[key as keyof typeof form] === val ? '#f0fdf4' : '#fff',
+    color: form[key as keyof typeof form] === val ? '#166534' : '#6b7280'
   })
 
   const scopeBtn = (label: string) => ({
     padding:'10px', borderRadius:'10px', cursor:'pointer', fontFamily:'sans-serif',
     fontSize:'.78rem', fontWeight:600, border:'1.5px solid', textAlign:'left' as const,
-    borderColor: form.scope.includes(label) ? '#1a6b3c' : 'rgba(255,255,255,.15)',
-    background: form.scope.includes(label) ? 'rgba(26,107,60,.15)' : 'transparent',
-    color: form.scope.includes(label) ? '#6ee7b7' : 'rgba(255,255,255,.5)'
+    borderColor: form.scope.includes(label) ? '#1a6b3c' : '#d1d5db',
+    background: form.scope.includes(label) ? '#f0fdf4' : '#fff',
+    color: form.scope.includes(label) ? '#166534' : '#6b7280'
   })
 
   return (
     <div style={s.wrap}>
       <div style={s.toprow}>
         <button style={s.back} onClick={() => step > 1 ? setStep(step - 1) : router.push('/')}>← Back</button>
-        <span style={{ fontSize:'.72rem', color:'rgba(255,255,255,.35)' }}>Step {step} of 3</span>
+        <span style={{ fontSize:'.72rem', color:'#9ca3af' }}>Step {step} of 3</span>
       </div>
 
       <div style={s.bar}>
         {[1,2,3].map(i => (
           <div key={i} style={{ flex:1, height:'4px', borderRadius:'2px',
-            background: i <= step ? '#1a6b3c' : 'rgba(255,255,255,.1)' }}/>
+            background: i <= step ? '#1a6b3c' : '#e5e7eb' }}/>
         ))}
       </div>
 
