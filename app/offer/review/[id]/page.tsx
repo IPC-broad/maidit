@@ -17,14 +17,15 @@ export default function OfferReviewPage() {
   const [isProvince, setIsProvince] = useState(false)
   const [counterSalary, setCounterSalary] = useState('')
   const [counterDate, setCounterDate] = useState('')
+  const [transportCountered, setTransportCountered] = useState('')
 
   const [checklist, setChecklist] = useState({
     salary: true,
-    location: false,
-    scope: false,
+    location: true,
+    scope: true,
     start_date: true,
-    setup: false,
-    transport: false,
+    setup: true,
+    transport: true,
   })
 
   const metro = ['Quezon City','Makati','Pasig','Taguig','Manila','Mandaluyong','Marikina','Paranaque','Las Pinas','Muntinlupa','Caloocan','Malabon','Navotas','Valenzuela','Pasay','Pateros','San Juan']
@@ -48,38 +49,38 @@ export default function OfferReviewPage() {
     init()
   }, [offerId])
 
-  const isCounter = (!checklist.salary && counterSalary) || (!checklist.start_date && counterDate)
-
-  const fareRequired = () => isProvince &&
-    (offer?.transport_arrangement === 'full' || offer?.transport_arrangement === 'reimburse') &&
-    !fareInput
-
-  const allRequired = () => {
-    if (!checklist.location || !checklist.scope || !checklist.setup) return false
-    if (isProvince && (offer?.transport_arrangement === 'full' || offer?.transport_arrangement === 'reimburse') && !checklist.transport) return false
-    return true
+  const hasValidDate = (val: any) => {
+    if (!val) return false
+    const d = new Date(val)
+    return !isNaN(d.getTime()) && d.getFullYear() >= 2000
   }
 
+  const isCounter = (!checklist.salary && !!counterSalary) ||
+    (!checklist.start_date && !!counterDate) ||
+    (!checklist.transport && !!transportCountered)
+
   const formatDate = (val: any) => {
-    if (!val) return 'Hindi pa natukoy'
     const d = new Date(val)
-    if (d.getFullYear() < 2000) return 'Hindi pa natukoy'
     return d.toLocaleDateString('fil-PH', { month: 'long', day: 'numeric', year: 'numeric' })
   }
 
   const transportLabel = (t: string) => {
-    if (t === 'full') return 'Ang amo ang magbabayad sa pamasahe. Ilagay ang estimate ng pamasahe kung magkano aabutin.'
-    if (t === 'reimburse') return 'Ikaw muna ang magbabayad ng pamasahe pero babayaran ito o irereimburse ng amo pagdating mo sa trabaho.'
+    if (t === 'full') return 'Amo ang sasagot sa pamasahe'
+    if (t === 'reimburse') return 'Ako muna ang sasagot pero irereimburse ng amo pagdating ko'
     return 'Ikaw ang magbabayad ng sarili mong pamasahe'
   }
 
   const tick = (k: string) => setChecklist(c => ({ ...c, [k]: !c[k as keyof typeof c] }))
 
   const handleSubmit = async () => {
-    if (!allRequired()) { setError('Pakicheck ang lahat ng required na item'); return }
-    if (fareRequired()) { setError('Pakilagay ang iyong estimated na pamasahe'); return }
+    if (isProvince && !checklist.transport && !transportCountered) {
+      setError('Pakipili ang gusto mong transport arrangement'); return
+    }
     if (!checklist.salary && !counterSalary) { setError('Pakilagay ang gusto mong sweldo'); return }
     if (!checklist.start_date && !counterDate) { setError('Pakilagay ang petsa ng iyong pagdating'); return }
+    const fareNeeded = isProvince && checklist.transport &&
+      (offer?.transport_arrangement === 'full' || offer?.transport_arrangement === 'reimburse') && !fareInput
+    if (fareNeeded) { setError('Pakilagay ang iyong estimated na pamasahe'); return }
 
     setSubmitting(true)
     setError('')
@@ -92,6 +93,7 @@ export default function OfferReviewPage() {
         bus_line: busLine || null,
         ...(counterSalary ? { fare_countered: parseInt(counterSalary) } : {}),
         ...(counterDate ? { estimated_arrival: counterDate } : {}),
+        ...(transportCountered ? { transport_countered: transportCountered } : {}),
       }).eq('id', offerId)
     } else {
       await supabase.from('offers').update({
@@ -115,6 +117,18 @@ export default function OfferReviewPage() {
     router.push('/dashboard/kasambahay')
   }
 
+  const toggleBox = (checked: boolean) => ({
+    width: '22px', height: '22px', borderRadius: '6px', flexShrink: 0 as const, marginTop: '1px',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+    background: checked ? '#16a34a' : '#ef4444',
+  })
+
+  const toggleStatus = (checked: boolean) => ({
+    fontSize: '.7rem', fontWeight: 700 as const,
+    color: checked ? '#16a34a' : '#ef4444',
+    marginTop: '3px',
+  })
+
   const s: any = {
     wrap: { minHeight:'100vh', background:'#faf8f5', fontFamily:'sans-serif', color:'#111827' },
     head: { background:'#fff', borderBottom:'1px solid #ede8e0', padding:'14px 18px', display:'flex', alignItems:'center', gap:'10px' },
@@ -122,15 +136,14 @@ export default function OfferReviewPage() {
     body: { padding:'20px 18px 40px' },
     card: { background:'#fff', borderRadius:'12px', padding:'14px', border:'1.5px solid #e5e7eb', marginBottom:'14px' },
     cardTitle: { fontSize:'.65rem', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#9ca3af', marginBottom:'10px' },
-    check: { display:'flex', gap:'11px', alignItems:'flex-start', padding:'10px 0', borderBottom:'1px solid #f3f4f6', cursor:'pointer' },
-    checkLast: { display:'flex', gap:'11px', alignItems:'flex-start', padding:'10px 0', cursor:'pointer' },
-    checkbox: (checked: boolean, color: string = '#c9943a') => ({ width:'20px', height:'20px', borderRadius:'5px', border: checked ? 'none' : '2px solid #d1d5db', background: checked ? color : '#fff', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', marginTop:'1px' }),
+    row: { display:'flex', gap:'11px', alignItems:'flex-start', padding:'10px 0', borderBottom:'1px solid #f3f4f6' },
+    rowLast: { display:'flex', gap:'11px', alignItems:'flex-start', padding:'10px 0' },
     checkLabel: { fontSize:'.82rem', color:'#374151', lineHeight:1.5 },
     input: { width:'100%', padding:'9px 11px', border:'1.5px solid #fde8c0', borderRadius:'9px', fontFamily:'sans-serif', fontSize:'.84rem', outline:'none', background:'#fff', color:'#111827', boxSizing:'border-box' as const, marginTop:'4px' },
     err: { background:'#fef2f2', border:'1px solid #fecaca', borderRadius:'9px', padding:'10px 13px', fontSize:'.78rem', color:'#dc2626', marginBottom:'13px' },
     btn: (bg: string) => ({ width:'100%', padding:'13px', borderRadius:'12px', border:'none', background: bg, color:'#fff', fontFamily:'sans-serif', fontSize:'.92rem', fontWeight:700, cursor:'pointer', marginBottom:'8px' }),
     btnOutline: { width:'100%', padding:'11px', borderRadius:'12px', border:'1.5px solid #fecaca', background:'transparent', color:'#dc2626', fontFamily:'sans-serif', fontSize:'.82rem', fontWeight:600, cursor:'pointer' },
-    counterBox: { marginLeft:'30px', marginTop:'8px', background:'#fef3e2', borderRadius:'10px', padding:'10px 12px' },
+    counterBox: { marginTop:'8px', background:'#fff7ed', border:'1px solid #fed7aa', borderRadius:'10px', padding:'10px 12px' },
     counterLabel: { fontSize:'.68rem', fontWeight:700, color:'#92400e', marginBottom:'6px' },
   }
 
@@ -168,7 +181,9 @@ export default function OfferReviewPage() {
   )
 
   const hwCity = offer?.homeowners?.profiles?.city || offer?.city || ''
-  const showFare = isProvince && (offer?.transport_arrangement === 'full' || offer?.transport_arrangement === 'reimburse')
+  const showFare = isProvince && checklist.transport &&
+    (offer?.transport_arrangement === 'full' || offer?.transport_arrangement === 'reimburse')
+  const showStartDate = hasValidDate(offer?.start_date)
 
   return (
     <div style={s.wrap}>
@@ -184,17 +199,18 @@ export default function OfferReviewPage() {
         {error && <div style={s.err}>⚠️ {error}</div>}
 
         <div style={s.card}>
-          <div style={s.cardTitle}>Pakicheck ang bawat item para makumpirma</div>
+          <div style={s.cardTitle}>I-toggle ang bawat item — berde kung sang-ayon, pula kung hindi</div>
 
           {/* SALARY */}
-          <div style={s.check}>
-            <div style={s.checkbox(checklist.salary)} onClick={() => { tick('salary'); if (checklist.salary) setCounterSalary('') }}>
-              {checklist.salary && <span style={{ color:'#fff', fontSize:'.7rem', fontWeight:900 }}>✓</span>}
+          <div style={s.row}>
+            <div style={toggleBox(checklist.salary)} onClick={() => { tick('salary'); if (checklist.salary) setCounterSalary('') }}>
+              <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.salary ? '✓' : '✗'}</span>
             </div>
             <div style={{ flex: 1 }}>
               <div style={s.checkLabel} onClick={() => { tick('salary'); if (checklist.salary) setCounterSalary('') }}>
-                Sweldo: <strong>₱{offer.salary?.toLocaleString()}/buwan</strong> — Sumasang-ayon ako
+                Sweldo: <strong>₱{offer.salary?.toLocaleString()}/buwan</strong>
               </div>
+              <div style={toggleStatus(checklist.salary)}>{checklist.salary ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}</div>
               {!checklist.salary && (
                 <div style={s.counterBox}>
                   <div style={s.counterLabel}>Ano ang gusto mong sweldo?</div>
@@ -210,53 +226,113 @@ export default function OfferReviewPage() {
           </div>
 
           {/* LOCATION */}
-          <div style={s.check} onClick={() => tick('location')}>
-            <div style={s.checkbox(checklist.location)}>{checklist.location && <span style={{ color:'#fff', fontSize:'.7rem', fontWeight:900 }}>✓</span>}</div>
-            <div style={s.checkLabel}>Lugar ng pagtatrabahuan: <strong>{hwCity}</strong> — Sumasang-ayon ako</div>
+          <div style={s.row} onClick={() => tick('location')}>
+            <div style={toggleBox(checklist.location)}>
+              <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.location ? '✓' : '✗'}</span>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={s.checkLabel}>Lugar ng pagtatrabahuan: <strong>{hwCity}</strong></div>
+              <div style={toggleStatus(checklist.location)}>{checklist.location ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}</div>
+            </div>
           </div>
 
           {/* SCOPE */}
-          <div style={s.check} onClick={() => tick('scope')}>
-            <div style={s.checkbox(checklist.scope)}>{checklist.scope && <span style={{ color:'#fff', fontSize:'.7rem', fontWeight:900 }}>✓</span>}</div>
-            <div style={s.checkLabel}>Mga gawaing bahay: <strong>{offer.scope?.join(', ')}</strong> — Kaya ko ito</div>
-          </div>
-
-          {/* START DATE */}
-          <div style={s.check}>
-            <div style={s.checkbox(checklist.start_date)} onClick={() => { tick('start_date'); if (checklist.start_date) setCounterDate('') }}>
-              {checklist.start_date && <span style={{ color:'#fff', fontSize:'.7rem', fontWeight:900 }}>✓</span>}
+          <div style={s.row} onClick={() => tick('scope')}>
+            <div style={toggleBox(checklist.scope)}>
+              <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.scope ? '✓' : '✗'}</span>
             </div>
             <div style={{ flex: 1 }}>
-              <div style={s.checkLabel} onClick={() => { tick('start_date'); if (checklist.start_date) setCounterDate('') }}>
-                Simula ng trabaho: <strong>{formatDate(offer.start_date)}</strong> — Sang-ayon ako
-              </div>
-              {!checklist.start_date && (
-                <div style={s.counterBox}>
-                  <div style={s.counterLabel}>Kailan ka makakarating?</div>
-                  <div style={{ fontSize:'.72rem', color:'#78350f', marginBottom:'6px' }}>Piliin ang petsa ng iyong pagdating:</div>
-                  <input style={s.input} type="date" value={counterDate} min={new Date().toISOString().split('T')[0]} onChange={e => setCounterDate(e.target.value)} />
-                  <div style={{ fontSize:'.65rem', color:'#c9943a', marginTop:'5px' }}>Ito ay magiging counter offer sa start date.</div>
-                </div>
-              )}
+              <div style={s.checkLabel}>Mga gawaing bahay: <strong>{offer.scope?.join(', ')}</strong></div>
+              <div style={toggleStatus(checklist.scope)}>{checklist.scope ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}</div>
             </div>
           </div>
 
+          {/* START DATE — only when a valid date exists */}
+          {showStartDate && (
+            <div style={s.row}>
+              <div style={toggleBox(checklist.start_date)} onClick={() => { tick('start_date'); if (checklist.start_date) setCounterDate('') }}>
+                <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.start_date ? '✓' : '✗'}</span>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={s.checkLabel} onClick={() => { tick('start_date'); if (checklist.start_date) setCounterDate('') }}>
+                  Simula ng trabaho: <strong>{formatDate(offer.start_date)}</strong>
+                </div>
+                <div style={toggleStatus(checklist.start_date)} onClick={() => { tick('start_date'); if (checklist.start_date) setCounterDate('') }}>
+                  {checklist.start_date ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}
+                </div>
+                {!checklist.start_date && (
+                  <div style={s.counterBox}>
+                    <div style={s.counterLabel}>Kailan ka makakarating?</div>
+                    <div style={{ fontSize:'.72rem', color:'#78350f', marginBottom:'6px' }}>Piliin ang petsa ng iyong pagdating:</div>
+                    <input style={s.input} type="date" value={counterDate} min={new Date().toISOString().split('T')[0]} onChange={e => setCounterDate(e.target.value)} />
+                    <div style={{ fontSize:'.65rem', color:'#c9943a', marginTop:'5px' }}>Ito ay magiging counter offer sa start date.</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* SETUP */}
-          <div style={isProvince ? s.check : s.checkLast} onClick={() => tick('setup')}>
-            <div style={s.checkbox(checklist.setup)}>{checklist.setup && <span style={{ color:'#fff', fontSize:'.7rem', fontWeight:900 }}>✓</span>}</div>
-            <div style={s.checkLabel}>Setup: <strong>{offer.setup}</strong> — Sumasang-ayon ako</div>
+          <div style={isProvince ? s.row : s.rowLast} onClick={() => tick('setup')}>
+            <div style={toggleBox(checklist.setup)}>
+              <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.setup ? '✓' : '✗'}</span>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={s.checkLabel}>Setup: <strong>{offer.setup}</strong></div>
+              <div style={toggleStatus(checklist.setup)}>{checklist.setup ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}</div>
+            </div>
           </div>
 
           {/* TRANSPORT */}
           {isProvince && (
-            <div style={s.checkLast} onClick={() => tick('transport')}>
-              <div style={s.checkbox(checklist.transport, '#1a6b3c')}>{checklist.transport && <span style={{ color:'#fff', fontSize:'.7rem', fontWeight:900 }}>✓</span>}</div>
-              <div style={s.checkLabel}>Transportasyon: {transportLabel(offer.transport_arrangement)} — Naiintindihan ko</div>
+            <div style={s.rowLast}>
+              <div style={toggleBox(checklist.transport)} onClick={() => { tick('transport'); if (checklist.transport) setTransportCountered('') }}>
+                <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.transport ? '✓' : '✗'}</span>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={s.checkLabel} onClick={() => { tick('transport'); if (checklist.transport) setTransportCountered('') }}>
+                  Transportasyon: <strong>{transportLabel(offer.transport_arrangement)}</strong>
+                </div>
+                <div style={toggleStatus(checklist.transport)} onClick={() => { tick('transport'); if (checklist.transport) setTransportCountered('') }}>
+                  {checklist.transport ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}
+                </div>
+                {!checklist.transport && (
+                  <div style={s.counterBox}>
+                    <div style={s.counterLabel}>Anong arrangement ang gusto mo?</div>
+                    {[
+                      { val: 'full', label: 'Amo ang magbabayad ng pamasahe' },
+                      { val: 'reimburse', label: 'Ako muna ang magbabayad pero irereimburse ng amo pagdating ko' },
+                    ].map((opt, i, arr) => (
+                      <div
+                        key={opt.val}
+                        style={{ display:'flex', alignItems:'flex-start', gap:'8px', padding:'7px 0', borderBottom: i < arr.length - 1 ? '1px solid #fee2e2' : 'none', cursor:'pointer' }}
+                        onClick={() => setTransportCountered(opt.val)}
+                      >
+                        <div style={{
+                          width:'16px', height:'16px', borderRadius:'50%', border:'2px solid', flexShrink:0, marginTop:'1px',
+                          borderColor: transportCountered === opt.val ? '#1a6b3c' : '#d1d5db',
+                          background: transportCountered === opt.val ? '#1a6b3c' : '#fff',
+                          display:'flex', alignItems:'center', justifyContent:'center',
+                        }}>
+                          {transportCountered === opt.val && <div style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#fff' }} />}
+                        </div>
+                        <span style={{ fontSize:'.76rem', color:'#374151', lineHeight:1.4 }}>{opt.label}</span>
+                      </div>
+                    ))}
+                    {transportCountered && (
+                      <div style={{ marginTop:'8px' }}>
+                        <label style={{ fontSize:'.63rem', fontWeight:700, color:'#6b7280', textTransform:'uppercase' as const, letterSpacing:'.5px' }}>Estimated Pamasahe (₱)</label>
+                        <input style={{ ...s.input, border:'1.5px solid #fde8c0' }} type="number" placeholder="Halimbawa: 380" value={fareInput} onChange={e => setFareInput(e.target.value)} />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
 
-        {/* FARE ESTIMATE - only when employer pays/reimburses */}
+        {/* FARE ESTIMATE — when transport is agreed and employer pays */}
         {showFare && (
           <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:'11px', padding:'13px 14px', marginBottom:'14px' }}>
             <div style={{ fontSize:'.72rem', fontWeight:700, color:'#92400e', marginBottom:'6px' }}>Estimated na Pamasahe</div>
@@ -277,7 +353,8 @@ export default function OfferReviewPage() {
           <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:'10px', padding:'11px 13px', marginBottom:'14px', fontSize:'.78rem', color:'#92400e', lineHeight:1.6 }}>
             <strong>Counter Offer mo:</strong><br/>
             {!checklist.salary && counterSalary && <>Sweldo: ₱{parseInt(counterSalary).toLocaleString()}/buwan<br/></>}
-            {!checklist.start_date && counterDate && <>Simula: {formatDate(counterDate)}</>}
+            {!checklist.start_date && counterDate && <>Simula: {formatDate(counterDate)}<br/></>}
+            {!checklist.transport && transportCountered && <>Transport: {transportCountered === 'full' ? 'Amo ang magbabayad' : 'Reimburse pagdating'}</>}
           </div>
         )}
 
