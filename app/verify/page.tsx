@@ -17,7 +17,6 @@ export default function VerifyPage() {
     setLoading(true)
     setError('')
     const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
     if (!user) { setError('Not logged in'); setLoading(false); return }
     const { error } = await supabase.auth.resend({ type: 'signup', email: user.email ?? '' })
     if (error) { setError(error.message); setLoading(false); return }
@@ -46,7 +45,7 @@ export default function VerifyPage() {
     if (otp !== sentOtp) { setError('Wrong code. Please try again.'); return }
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+    if (!user) { setLoading(false); return }
     await supabase.from('profiles').update({ verified: true, verified_via: 'mobile' }).eq('id', user.id)
     setLoading(false)
     setStep('done')
@@ -55,7 +54,6 @@ export default function VerifyPage() {
 
   const goToDashboard = async () => {
     const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
     if (!user) { router.push('/'); return }
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
     if (profile?.role === 'kasambahay') router.push('/dashboard/kasambahay')
@@ -63,7 +61,7 @@ export default function VerifyPage() {
   }
 
   const w = { minHeight:'100vh', background:'#faf8f5', padding:'24px 20px', fontFamily:'sans-serif', color:'#111827' }
-  const btn = { width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:'#1a6b3c', color:'#111827', fontFamily:'sans-serif', fontSize:'.92rem', fontWeight:700, cursor:'pointer', marginTop:'8px' }
+  const btn = { width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'.92rem', fontWeight:700, cursor:'pointer', marginTop:'8px' }
   const inp = { width:'100%', padding:'11px 13px', border:'1.5px solid #e5e7eb', borderRadius:'11px', background:'#ffffff', color:'#111827', fontFamily:'sans-serif', fontSize:'.88rem', outline:'none', marginBottom:'13px' }
   const card = { background:'#ffffff', border:'1.5px solid #e5e7eb', borderRadius:'14px', padding:'16px', marginBottom:'12px', cursor:'pointer', display:'flex', gap:'13px', alignItems:'center' }
   const cardSel = { background:'rgba(26,107,60,.15)', border:'1.5px solid #1a6b3c' }
