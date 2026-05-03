@@ -64,8 +64,9 @@ export default function HWDashboard() {
     if (filter === 'Lahat') return true
     if (filter === 'Stay-in') return p.setup === 'Stay-in'
     if (filter === 'Stay-out') return p.setup === 'Stay-out'
-    if (filter === 'Metro Manila') return !p.province || p.province === 'Quezon City' || p.province === 'Makati'
-    if (filter === 'Province') return p.province && p.province !== 'Quezon City' && p.province !== 'Makati'
+    const metro = ['Quezon City','Makati','Pasig','Taguig','Manila','Mandaluyong','Marikina','Paranaque','Las Pinas','Muntinlupa','Caloocan','Malabon','Navotas','Valenzuela','Pasay','Pateros','San Juan']
+    if (filter === 'Metro Manila') return !p.province || metro.includes(p.province)
+    if (filter === 'Province') return p.province && !metro.includes(p.province)
     return true
   }).filter(p => !passed[p.id])
 
@@ -84,7 +85,9 @@ export default function HWDashboard() {
     active:          { label: 'Hired',                  bg: '#f0fdf4', color: '#1a6b3c' },
     hired:           { label: 'Hired',                  bg: '#f0fdf4', color: '#1a6b3c' },
     countered:       { label: 'Counter offer received',          bg: '#fef3e2', color: '#c9943a' },
-    declined:        { label: 'Declined',            bg: '#fef2f2', color: '#dc2626' },
+    fare_countered:  { label: 'Fare countered — awaiting reply',  bg: '#fffbeb', color: '#92400e' },
+    counter_declined:{ label: 'Counter declined',                 bg: '#fef2f2', color: '#dc2626' },
+    declined:        { label: 'Declined',                         bg: '#fef2f2', color: '#dc2626' },
   }
 
   const actionCount = offers.filter(o => o.status === 'agreed' || o.status === 'countered').length
@@ -106,13 +109,13 @@ export default function HWDashboard() {
       </div>
 
       {actionCount > 0 && tab !== 'offers' && (
-          <div style={{ background: "#c9943a", borderRadius: "12px", padding: "12px 14px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => handleTabChange("offers")}>
+          <div style={{ margin: "0 16px 12px", background: "#c9943a", borderRadius: "12px", padding: "12px 14px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => handleTabChange("offers")}>
             <span style={{ fontSize: "20px" }}>📨</span>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: "13px", fontWeight: 700, color: "#fff" }}>{actionCount} offer {actionCount === 1 ? "needs" : "need"} your attention!</div>
               <div style={{ fontSize: "11px", color: "rgba(255,255,255,.8)", marginTop: "1px" }}>Tap to review accepted or countered offers.</div>
             </div>
-            <span style={{ color: "#fff", fontSize: "14px" }}>to</span>
+            <span style={{ color: "#fff", fontSize: "14px" }}>→</span>
           </div>
         )}
 
