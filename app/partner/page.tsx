@@ -220,9 +220,9 @@ export default function PartnerPage() {
           {/* Left — photo */}
           <div style={{ position: 'relative', overflow: 'hidden' }}>
             <img
-              src="https://images.unsplash.com/photo-1609220136736-443140cffec6?w=600&auto=format&fit=crop"
+              src="https://xlagwtsrjbylhxfozoem.supabase.co/storage/v1/object/public/assets/ChatGPT%20Image%20May%203,%202026%20at%2008_38_45%20PM.png"
               alt="Filipino family"
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '12px 0 0 12px' }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', minHeight: '280px', borderRadius: '12px 0 0 12px' }}
             />
           </div>
           {/* Right — text */}
