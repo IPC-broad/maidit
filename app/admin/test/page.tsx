@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-const STATUSES = ['pending', 'reviewed', 'agreed', 'payment_pending', 'paid', 'active', 'hired', 'declined', 'countered', 'fare_pending']
+const STATUSES = ['pending', 'reviewed', 'agreed', 'payment_pending', 'paid', 'active', 'hired', 'declined', 'countered', 'counter_declined', 'fare_pending', 'fare_countered']
 const PAY_STATUSES = ['agreed', 'payment_pending', 'paid']
 
 const statusColors: Record<string, string> = {
@@ -14,7 +14,9 @@ const statusColors: Record<string, string> = {
   hired: '#1a6b3c',
   declined: '#dc2626',
   countered: '#c9943a',
+  counter_declined: '#dc2626',
   fare_pending: '#92400e',
+  fare_countered: '#92400e',
 }
 
 export default function AdminTestPanel() {
