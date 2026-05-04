@@ -13,6 +13,7 @@ export default function KBDashboard() {
   const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set())
   const [appliedJobs, setAppliedJobs] = useState<any[]>([])
   const [showProfile, setShowProfile] = useState(false)
+  const [actioning, setActioning] = useState<string | null>(null)
 
   useEffect(() => {
     const init = async () => {
@@ -79,7 +80,7 @@ export default function KBDashboard() {
     active:          { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
     hired:           { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
     countered:       { label: 'Counter offer — naghihintay ng sagot', bg: '#fef3e2', color: '#c9943a' },
-    counter_declined: { label: 'Hindi tinanggap ang counter', bg: '#fef2f2', color: '#dc2626' },
+    counter_declined: { label: 'Counter Offer Declined', bg: '#fef2f2', color: '#dc2626' },
     declined:        { label: 'May Na-hire Na',             bg: '#fef2f2', color: '#dc2626' },
   }
 
@@ -191,6 +192,8 @@ export default function KBDashboard() {
             const st = offerStatusMap[offer.status] || { label: offer.status, bg: '#f3f4f6', color: '#6b7280' }
             const isHired = ['paid','active','hired'].includes(offer.status)
             const isClosed = offer.status === 'declined'
+            const isCounterDeclined = offer.status === 'counter_declined'
+            const offerExpired = isCounterDeclined && Date.now() - new Date(offer.created_at).getTime() > 48 * 60 * 60 * 1000
             return (
               <div key={offer.id} style={s.card}>
                 <div style={{ padding: '13px 14px' }}>
@@ -215,11 +218,46 @@ export default function KBDashboard() {
                   {offer.status === 'countered' && <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center' }}>Naisumite ang iyong counter offer. Hinihintay ang sagot ng homeowner.</div>}
                   {(offer.status === 'agreed' || offer.status === 'payment_pending') && <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center', fontWeight: 600 }}>Hinihintay ang bayad ng homeowner.</div>}
                   {isHired && <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#166534', fontWeight: 600, textAlign: 'center' }}>HIRED! Inaantay na ang pagdating mo sa lugar ng pagtatrabahuan.</div>}
-                  {offer.status === 'counter_declined' && (
-                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#dc2626', lineHeight: 1.6 }}>
-                      Hindi tinanggap ang iyong counter offer.<br/>
-                      <button onClick={() => router.push('/offer/review/' + offer.id)} style={{ marginTop: '6px', width: '100%', padding: '8px', borderRadius: '8px', background: '#c9943a', border: 'none', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>Tingnan ang Origihinal na Job Offer</button>
-                    </div>
+                  {isCounterDeclined && (
+                    <>
+                      <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '11px 13px', fontSize: '12px', color: '#78350f', lineHeight: 1.75, marginBottom: '10px' }}>
+                        Ang iyong mga proposed na pagbabago sa offer ay hindi tinanggap ng homeowner.
+                        <br /><br />
+                        Ang orihinal na offer ay nananatiling valid hanggang 48 oras mula nang ito ay unang ipadala. Maaari mo pa itong tanggapin o tanggihan.
+                      </div>
+                      {offerExpired ? (
+                        <div style={{ background: '#f3f4f6', borderRadius: '9px', padding: '10px 12px', fontSize: '12px', color: '#6b7280', textAlign: 'center' as const }}>
+                          Nag-expire na ang offer.
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
+                          <button
+                            disabled={actioning === offer.id}
+                            style={{ ...s.btn('#1a6b3c'), opacity: actioning === offer.id ? .6 : 1 }}
+                            onClick={async () => {
+                              setActioning(offer.id)
+                              const { supabase } = await import('../../../lib/supabase')
+                              await supabase.from('offers').update({ status: 'agreed', fare_agreed: offer.fare_estimate }).eq('id', offer.id)
+                              window.location.reload()
+                            }}
+                          >
+                            {actioning === offer.id ? 'Processing...' : 'Tanggapin ang Orihinal na Offer'}
+                          </button>
+                          <button
+                            disabled={actioning === offer.id}
+                            style={{ width: '100%', padding: '11px', borderRadius: '10px', background: 'transparent', border: '1.5px solid #fecaca', color: '#dc2626', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: actioning === offer.id ? .6 : 1 }}
+                            onClick={async () => {
+                              setActioning(offer.id)
+                              const { supabase } = await import('../../../lib/supabase')
+                              await supabase.from('offers').update({ status: 'declined' }).eq('id', offer.id)
+                              window.location.reload()
+                            }}
+                          >
+                            Tanggihan ang Offer
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
                   {isClosed && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#dc2626', textAlign: 'center' }}>Nakahanap na ng kasambahay ang pamilyang ito.</div>}
                 </div>
