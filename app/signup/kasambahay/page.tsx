@@ -26,13 +26,18 @@ export default function KasambahaySignup() {
   // Selfie
   const [selfieData, setSelfieData] = useState<string | null>(null)
   const selfieRef = useRef<HTMLInputElement>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
+  }, [])
 
   const [form, setForm] = useState({
     first_name: '',
     last_name: '',
     mobile: '',
     otp: '',
-    birthday: '',
+    age: '',
     salary: '',
     setup: 'Stay-in',
     experience: 'Baguhan'
@@ -117,23 +122,23 @@ export default function KasambahaySignup() {
     setLoading(true)
     setError('')
 
-    const res = await fetch('/api/send-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mobile: form.mobile })
-    })
-    const data = await res.json()
-
-    if (!res.ok) {
-      setError(data.error || 'Hindi mapadala ang SMS. Subukan ulit.')
-      setLoading(false)
-      return
+    try {
+      const res = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: form.mobile })
+      })
+      const data = await res.json()
+      if (res.ok && data.otp) {
+        setSentOtp(data.otp)
+        startCooldown()
+      }
+    } catch {
+      // SMS failure — proceed to Step 3 anyway (dev bypass available)
     }
 
-    setSentOtp(data.otp)
     setLoading(false)
     setStep(3)
-    startCooldown()
   }
 
   const resendOtp = async () => {
@@ -155,15 +160,7 @@ export default function KasambahaySignup() {
     setLoading(false)
   }
 
-  const verifyAndCreate = async () => {
-    if (!form.otp || form.otp.length < 6) {
-      setError('Ilagay ang 6-digit code')
-      return
-    }
-    if (form.otp !== sentOtp) {
-      setError('Maling code. Subukan ulit.')
-      return
-    }
+  const createAccount = async () => {
     setError('')
     setLoading(true)
 
@@ -203,7 +200,7 @@ export default function KasambahaySignup() {
       govt_id_types: govtIdTypes,
       experience: form.experience,
       province: selProv!.name,
-      birthday: form.birthday || null
+      age: form.age ? parseInt(form.age) : null
     })
 
     if (selfieData && userId) {
@@ -225,13 +222,25 @@ export default function KasambahaySignup() {
     router.push(selfieData ? '/dashboard/kasambahay' : '/signup/kasambahay/selfie')
   }
 
+  const verifyAndCreate = async () => {
+    if (!form.otp || form.otp.length < 6) {
+      setError('Ilagay ang 6-digit code')
+      return
+    }
+    if (form.otp !== sentOtp) {
+      setError('Maling code. Subukan ulit.')
+      return
+    }
+    await createAccount()
+  }
+
   const s: any = {
     wrap: { minHeight:'100vh', background:'#faf8f5', padding:'24px 20px', fontFamily:'sans-serif', color:'#111827' },
     toprow: { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'16px' },
     back: { background:'none', border:'none', fontSize:'1rem', color:'#6b7280', cursor:'pointer', padding:0 },
     stepnum: { fontSize:'.72rem', color:'#9ca3af' },
     bar: { display:'flex', gap:'4px', marginBottom:'22px' },
-    seg: (active: boolean) => ({ flex:1, height:'4px', borderRadius:'2px', background: active ? '#c9943a' : '#e5e7eb' }),
+    seg: (active: boolean) => ({ flex:1, height:'4px', borderRadius:'2px', background: active ? '#1a6b3c' : '#e5e7eb' }),
     title: { fontWeight:900, fontSize:'1.25rem', marginBottom:'5px', color:'#c9943a' },
     sub: { fontSize:'.78rem', color:'#6b7280', marginBottom:'20px', lineHeight:1.5 },
     lbl: { display:'block', fontSize:'.63rem', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#6b7280', marginBottom:'4px' },
@@ -255,53 +264,125 @@ export default function KasambahaySignup() {
 
       {error && <div style={s.err}>⚠️ {error}</div>}
 
-      {/* ── STEP 1: Name + Mobile + Selfie ── */}
+      {/* ── STEP 1 ── */}
       {step === 1 && (
         <>
-          <div style={s.title}>Mag-sign up</div>
-          <div style={s.sub}>Ilagay ang iyong pangalan at mobile number para makapagsimula</div>
-
-          <label style={s.lbl}>Pangalan</label>
-          <input style={s.input} placeholder="Ana" value={form.first_name} onChange={e => update('first_name', e.target.value)} />
-
-          <label style={s.lbl}>Apelyido</label>
-          <input style={s.input} placeholder="Santos" value={form.last_name} onChange={e => update('last_name', e.target.value)} />
-
-          <label style={s.lbl}>Mobile Number</label>
-          <input
-            style={s.input}
-            placeholder="09XXXXXXXXX"
-            value={form.mobile}
-            onChange={e => update('mobile', e.target.value.replace(/\D/g,'').slice(0,11))}
-            inputMode="numeric"
-            maxLength={11}
-          />
-
-          <label style={s.lbl}>Selfie <span style={{ fontWeight:400, color:'#9ca3af', textTransform:'none', letterSpacing:0 }}>(optional)</span></label>
-          <div style={s.hint}>Para maverify ang iyong pagkakilanlan. Hindi ito ipo-post nang walang pahintulot mo.</div>
-
-          {selfieData && (
-            <img src={selfieData} alt="selfie" style={{ width:'100%', maxHeight:'200px', objectFit:'cover', borderRadius:'11px', marginBottom:'12px' }} />
-          )}
-
-          <div
-            onClick={() => selfieRef.current?.click()}
-            style={{ background:'#f9fafb', border:`2px dashed ${selfieData ? '#1a6b3c' : '#d1d5db'}`, borderRadius:'13px', padding:'22px 16px', textAlign:'center', cursor:'pointer', marginBottom:'16px' }}
-          >
-            {selfieData
-              ? <><div style={{ fontSize:'20px', marginBottom:'6px' }}>✅</div><div style={{ fontWeight:700, fontSize:'13px', color:'#1a6b3c' }}>Selfie saved!</div><div style={{ fontSize:'11px', color:'#6b7280', marginTop:'4px' }}>I-tap para palitan</div></>
-              : <><div style={{ fontSize:'30px', marginBottom:'8px' }}>📸</div><div style={{ fontWeight:700, fontSize:'13px', color:'#374151', marginBottom:'3px' }}>I-tap para kumuha ng selfie</div><div style={{ fontSize:'11px', color:'#9ca3af' }}>Malinaw na mukha · Walang filter</div></>
-            }
+          {/* Hero card */}
+          <div style={{ background:'#faf8f5', borderRadius:'16px', border:'1.5px solid #e8e2d9', overflow:'hidden', marginBottom:'20px' }}>
+            <div style={{ display:'grid', gridTemplateColumns:'3fr 2fr' }}>
+              {/* Left: copy */}
+              <div style={{ padding:'18px 12px 18px 16px', display:'flex', flexDirection:'column' as const, justifyContent:'center' }}>
+                <h1 style={{ fontFamily:'serif', fontSize:'1.25rem', fontWeight:900, color:'#c9943a', marginBottom:'5px', lineHeight:1.2 }}>Mag-sign up</h1>
+                <p style={{ fontSize:'.7rem', color:'#6b7280', marginBottom:'13px', lineHeight:1.5 }}>Ilagay ang iyong detalye para makapagsimula.</p>
+                <div style={{ display:'flex', flexDirection:'column' as const, gap:'9px' }}>
+                  <div style={{ display:'flex', gap:'8px', alignItems:'flex-start' }}>
+                    <div style={{ width:'22px', height:'22px', borderRadius:'6px', background:'#f0fdf4', border:'1px solid #bbf7d0', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'12px' }}>🛡️</div>
+                    <div>
+                      <div style={{ fontSize:'.7rem', fontWeight:700, color:'#1a6b3c', lineHeight:1.3 }}>Ligtas at madali lang!</div>
+                      <div style={{ fontSize:'.62rem', color:'#9ca3af', lineHeight:1.4 }}>Protektado ang iyong impormasyon.</div>
+                    </div>
+                  </div>
+                  <div style={{ display:'flex', gap:'8px', alignItems:'flex-start' }}>
+                    <div style={{ width:'22px', height:'22px', borderRadius:'6px', background:'#fef3e2', border:'1px solid #fde8c0', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'12px' }}>👥</div>
+                    <div>
+                      <div style={{ fontSize:'.7rem', fontWeight:700, color:'#c9943a', lineHeight:1.3 }}>Trabaho na angkop sa iyo. Sweldo na tama.</div>
+                      <div style={{ fontSize:'.62rem', color:'#9ca3af', lineHeight:1.4 }}>Libreng mag-sign up. Walang bayad.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Right: photo */}
+              <div style={{ overflow:'hidden' }}>
+                <img
+                  src="https://xlagwtsrjbylhxfozoem.supabase.co/storage/v1/object/public/assets/preview.webp"
+                  alt="Kasambahay"
+                  style={{ width:'100%', height:'100%', minHeight:'200px', objectFit:'cover', display:'block' }}
+                />
+              </div>
+            </div>
           </div>
-          <input ref={selfieRef} type="file" accept="image/*" capture="user" style={{ display:'none' }} onChange={handleSelfie} />
+
+          {/* Pangalan */}
+          <label style={s.lbl}>Pangalan</label>
+          <div style={{ position:'relative' }}>
+            <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', fontSize:'14px', lineHeight:1, pointerEvents:'none' }}>👤</span>
+            <input style={{ ...s.input, paddingLeft:'38px' }} placeholder="Ana" value={form.first_name} onChange={e => update('first_name', e.target.value)} />
+          </div>
+
+          {/* Apelyido */}
+          <label style={s.lbl}>Apelyido</label>
+          <div style={{ position:'relative' }}>
+            <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', fontSize:'14px', lineHeight:1, pointerEvents:'none' }}>👤</span>
+            <input style={{ ...s.input, paddingLeft:'38px' }} placeholder="Santos" value={form.last_name} onChange={e => update('last_name', e.target.value)} />
+          </div>
+
+          {/* Mobile Number */}
+          <label style={s.lbl}>Mobile Number</label>
+          <div style={{ position:'relative' }}>
+            <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', fontSize:'14px', lineHeight:1, pointerEvents:'none' }}>📱</span>
+            <input
+              style={{ ...s.input, paddingLeft:'38px' }}
+              placeholder="09XXXXXXXXX"
+              value={form.mobile}
+              onChange={e => update('mobile', e.target.value.replace(/\D/g,'').slice(0,11))}
+              inputMode="numeric"
+              maxLength={11}
+            />
+          </div>
+
+          {/* Selfie */}
+          <div style={{ marginBottom:'16px' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'5px', marginBottom:'5px' }}>
+              <span style={{ fontSize:'.63rem', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#1a6b3c' }}>SELFIE</span>
+              <span style={{ fontSize:'.63rem', fontWeight:700, color:'#1a6b3c' }}>(required)</span>
+            </div>
+            <p style={{ fontSize:'.67rem', color:'#6b7280', lineHeight:1.55, marginBottom:'10px' }}>
+              Makakatulong ito para makita ka ng employers at mas mapili ka agad. Ipapakita lang ito sa verified employers. Hindi ipo-post publicly.
+            </p>
+
+            {selfieData && (
+              <img src={selfieData} alt="selfie" style={{ width:'100%', maxHeight:'200px', objectFit:'cover', borderRadius:'11px', marginBottom:'10px' }} />
+            )}
+
+            <div
+              onClick={() => selfieRef.current?.click()}
+              style={{ background: selfieData ? '#f0fdf4' : '#fff', border:`2px dashed #1a6b3c`, borderRadius:'13px', padding:'20px 16px', textAlign:'center' as const, cursor:'pointer' }}
+            >
+              {selfieData ? (
+                <>
+                  <div style={{ fontSize:'20px', marginBottom:'5px' }}>✅</div>
+                  <div style={{ fontWeight:700, fontSize:'13px', color:'#1a6b3c' }}>Selfie saved!</div>
+                  <div style={{ fontSize:'11px', color:'#6b7280', marginTop:'3px' }}>I-tap para palitan</div>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize:'28px', marginBottom:'7px' }}>📷</div>
+                  <div style={{ fontWeight:700, fontSize:'13px', color:'#1a6b3c', marginBottom:'3px' }}>I-tap para kumuha ng selfie</div>
+                  <div style={{ fontSize:'11px', color:'#9ca3af' }}>Malinaw na mukha · Walang filter · Good lighting</div>
+                </>
+              )}
+            </div>
+            <input
+              ref={selfieRef}
+              type="file"
+              accept="image/*"
+              capture={isMobile ? 'user' : undefined}
+              style={{ display:'none' }}
+              onChange={handleSelfie}
+            />
+          </div>
 
           <button
             style={{ ...s.btn, opacity: loading ? .6 : 1 }}
             onClick={checkMobile}
             disabled={loading}
           >
-            {loading ? 'Checking...' : 'Susunod →'}
+            {loading ? 'Checking...' : 'Magpatuloy →'}
           </button>
+
+          <div style={{ textAlign:'center' as const, marginTop:'12px', fontSize:'.7rem', color:'#9ca3af', display:'flex', alignItems:'center', justifyContent:'center', gap:'5px' }}>
+            🔒 Hindi namin ibinibigay ang iyong number sa iba.
+          </div>
         </>
       )}
 
@@ -347,13 +428,17 @@ export default function KasambahaySignup() {
             )}
           </div>
 
-          <label style={s.lbl}>Kaarawan</label>
+          <label style={s.lbl}>Edad</label>
           <div style={s.hint}>Para malaman ng homeowner ang iyong edad</div>
           <input
             style={s.input}
-            type="date"
-            value={form.birthday}
-            onChange={e => update('birthday', e.target.value)}
+            type="number"
+            placeholder="25"
+            min={18}
+            max={65}
+            value={form.age}
+            onChange={e => update('age', e.target.value)}
+            inputMode="numeric"
           />
 
           <label style={s.lbl}>Hinihingi na Sahod (₱)</label>
@@ -434,14 +519,25 @@ export default function KasambahaySignup() {
         <>
           <div style={s.title}>I-verify ang number mo</div>
           <div style={s.sub}>
-            Nagpadala kami ng 6-digit code sa{' '}
-            <strong style={{ color:'#111827' }}>{form.mobile}</strong>
+            {sentOtp
+              ? <>Nagpadala kami ng 6-digit code sa <strong style={{ color:'#111827' }}>{form.mobile}</strong></>
+              : <>Hindi napadala ang SMS sa <strong style={{ color:'#111827' }}>{form.mobile}</strong>. Subukan ulit o gamitin ang dev bypass sa ibaba.</>
+            }
           </div>
 
-          {process.env.NEXT_PUBLIC_DEV_MODE === 'true' && sentOtp && (
-            <div style={{ background:'#1e1b4b', border:'2px dashed #6366f1', borderRadius:'10px', padding:'10px 13px', marginBottom:'13px', fontFamily:'monospace' }}>
-              <div style={{ fontSize:'10px', fontWeight:800, color:'#a5b4fc', letterSpacing:'1px', marginBottom:'4px' }}>⚠️ DEV ONLY — OTP CODE</div>
-              <div style={{ fontSize:'1.4rem', fontWeight:900, color:'#fff', letterSpacing:'8px' }}>{sentOtp}</div>
+          {process.env.NEXT_PUBLIC_DEV_MODE === 'true' && (
+            <div style={{ background:'#1e1b4b', border:'2px dashed #6366f1', borderRadius:'10px', padding:'12px 13px', marginBottom:'13px' }}>
+              <div style={{ fontSize:'10px', fontWeight:800, color:'#a5b4fc', letterSpacing:'1px', marginBottom:'8px', fontFamily:'monospace' }}>⚠️ DEV MODE</div>
+              {sentOtp && (
+                <div style={{ fontFamily:'monospace', fontSize:'1.3rem', fontWeight:900, color:'#fff', letterSpacing:'8px', marginBottom:'10px' }}>{sentOtp}</div>
+              )}
+              <button
+                style={{ width:'100%', padding:'10px', borderRadius:'9px', background:'rgba(99,102,241,.25)', border:'1.5px solid #6366f1', color:'#a5b4fc', fontFamily:'sans-serif', fontSize:'.82rem', fontWeight:700, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? .6 : 1 }}
+                onClick={createAccount}
+                disabled={loading}
+              >
+                {loading ? 'Ginagawa...' : 'I-skip ang OTP (Dev Mode) →'}
+              </button>
             </div>
           )}
 
