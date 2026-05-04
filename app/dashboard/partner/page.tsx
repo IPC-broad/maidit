@@ -32,6 +32,7 @@ export default function PartnerDashboard() {
   const [partner, setPartner] = useState<any>(null)
   const [payouts, setPayouts] = useState<Payout[]>([])
   const [workers, setWorkers] = useState<Worker[]>([])
+  const [workerOffers, setWorkerOffers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
@@ -63,6 +64,14 @@ export default function PartnerDashboard() {
       const { data: workersData } = await supabase.from('kasambahay')
         .select('*, profiles(*)').eq('referred_by', partnerData.id)
       setWorkers(workersData || [])
+      const workerIds = (workersData || []).map((w: any) => w.id)
+      if (workerIds.length > 0) {
+        const { data: offersData } = await supabase
+          .from('offers').select('id, kasambahay_id, status')
+          .in('kasambahay_id', workerIds)
+          .in('status', ['pending', 'countered', 'agreed'])
+        setWorkerOffers(offersData || [])
+      }
       setLoading(false)
     }
     init()
@@ -154,6 +163,8 @@ export default function PartnerDashboard() {
   const totalPending = payouts.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0)
   const isGold = partner?.tier === 'gold'
   const hiredCount = workers.filter(w => w.status === 'hired').length
+  const workersWithPendingOffer = workers.filter(w => workerOffers.some(o => o.kasambahay_id === w.id))
+
   const newlyConfirmed = workers.filter(w => {
     if (w.status !== 'available') return false
     if (!w.confirmed_at) return false
@@ -204,6 +215,15 @@ export default function PartnerDashboard() {
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: "13px", fontWeight: 700, color: "#fff" }}>{newlyConfirmed} bagong referral na nagconfirm!</div>
               <div style={{ fontSize: "11px", color: "rgba(255,255,255,.85)", marginTop: "1px" }}>Makikita na sila ng mga homeowner. Tap para tingnan.</div>
+            </div>
+          </div>
+        )}
+        {workersWithPendingOffer.length > 0 && (
+          <div style={{ background: "#fef3e2", border: "1px solid #fde8c0", borderRadius: "12px", padding: "12px 14px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => setTab("workers")}>
+            <span style={{ fontSize: "20px" }}>📨</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: "13px", fontWeight: 700, color: "#92400e" }}>{workersWithPendingOffer.length} referral mo may natanggap na job offer!</div>
+              <div style={{ fontSize: "11px", color: "#b45309", marginTop: "1px" }}>Tulungan silang sagutin ito para makuha mo ang iyong kita.</div>
             </div>
           </div>
         )}
@@ -312,9 +332,10 @@ export default function PartnerDashboard() {
               </div>
             ) : workers.map((w: any) => {
               const st = statusLabel[w.status] || statusLabel.draft
+              const hasOffer = workerOffers.some(o => o.kasambahay_id === w.id)
               return (
                 <div key={w.id} style={{ background: '#fff', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px', border: '1px solid #ede8e0' }}>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: w.status === 'pending_confirmation' ? '10px' : '0' }}>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: (w.status === 'pending_confirmation' || hasOffer) ? '10px' : '0' }}>
                     <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#fef3e2', border: '2px solid #fde8c0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>👩</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: '15px', color: '#111827' }}>{w.profiles?.full_name}</div>
@@ -334,6 +355,11 @@ export default function PartnerDashboard() {
                       <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: st.bg, color: st.color, whiteSpace: 'nowrap' as const, border: `1px solid ${st.color}30` }}>{st.label}</span>
                     </div>
                   </div>
+                  {hasOffer && (
+                    <div style={{ background: '#e0f7fa', border: '1px solid #b2ebf2', borderRadius: '8px', padding: '7px 10px', fontSize: '12px', color: '#006064', fontWeight: 700 }}>
+                      📨 May Job Offer na natanggap
+                    </div>
+                  )}
                   {w.status === 'pending_confirmation' && (
                     <div style={{ background: '#fef3e2', borderRadius: '8px', padding: '7px 10px', fontSize: '12px', color: '#92400e' }}>
                       📱 Naghhintay ng reply sa text message
@@ -516,8 +542,7 @@ export default function PartnerDashboard() {
             <div style={{ fontSize: '3rem', marginBottom: '12px' }}>✅</div>
             <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, color: '#1a6b3c', marginBottom: '8px' }}>Na-save na!</div>
             <div style={{ fontSize: '14px', color: '#374151', lineHeight: 1.6, marginBottom: '20px' }}>
-              <strong>{savedName}</strong> ay naidagdag na sa iyong pool.<br/>
-              Makakatanggap siya ng SMS para i-confirm ang kanyang profile.
+              Si <strong>{savedName}</strong> ay naidagdag na. Kapag natanggap niya ang SMS confirmation at nag-confirm, makikita na siya ng mga homeowner.
             </div>
             <button onClick={async () => {
               setShowSuccess(false)

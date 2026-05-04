@@ -31,6 +31,9 @@ export default function ConfirmWorkerPage() {
     await supabase.from('kasambahay')
       .update({ status: 'available', confirmed_at: new Date().toISOString() })
       .eq('confirm_token', token)
+    if (worker?.id) {
+      fetch('/api/send-sms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'referral_confirmed', kasambahayId: worker.id }) }).catch(() => {})
+    }
     setStatus('done')
   }
 

@@ -30,6 +30,8 @@ export default function KasambahaySignup() {
 
   useEffect(() => {
     setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
+    const ref = new URLSearchParams(window.location.search).get('ref')
+    if (ref) localStorage.setItem('maidit_ref', ref)
   }, [])
 
   const [form, setForm] = useState({
@@ -192,6 +194,14 @@ export default function KasambahaySignup() {
       verified_via: 'mobile'
     })
 
+    const refCode = localStorage.getItem('maidit_ref')
+    let referredBy: string | null = null
+    if (refCode) {
+      const { data: partnerMatch } = await supabase.from('partners').select('id').eq('referral_code', refCode).single()
+      if (partnerMatch?.id) referredBy = partnerMatch.id
+      localStorage.removeItem('maidit_ref')
+    }
+
     await supabase.from('kasambahay').insert({
       profile_id: userId,
       asking_salary: parseInt(form.salary),
@@ -200,7 +210,8 @@ export default function KasambahaySignup() {
       govt_id_types: govtIdTypes,
       experience: form.experience,
       province: selProv!.name,
-      age: form.age ? parseInt(form.age) : null
+      age: form.age ? parseInt(form.age) : null,
+      ...(referredBy ? { referred_by: referredBy } : {})
     })
 
     if (selfieData && userId) {

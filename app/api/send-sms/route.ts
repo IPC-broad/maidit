@@ -22,12 +22,26 @@ async function sendSMS(mobile: string, message: string) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { event, offerId } = await req.json()
+    const { event, offerId, partnerId, kasambahayId } = await req.json()
     const { createClient } = await import('@supabase/supabase-js')
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
+
+    if (event === 'referral_confirmed') {
+      if (!kasambahayId) return NextResponse.json({ error: 'Missing kasambahayId' }, { status: 400 })
+      const { data: kb } = await supabase.from('kasambahay').select('*, profiles(full_name)').eq('id', kasambahayId).single()
+      if (!kb?.referred_by) return NextResponse.json({ success: true, sent: 0 })
+      const { data: partnerRow } = await supabase.from('partners').select('profile_id').eq('id', kb.referred_by).single()
+      if (!partnerRow?.profile_id) return NextResponse.json({ success: true, sent: 0 })
+      const { data: partnerProfile } = await supabase.from('profiles').select('mobile').eq('id', partnerRow.profile_id).single()
+      if (!partnerProfile?.mobile) return NextResponse.json({ success: true, sent: 0 })
+      const kbFirstName = kb.profiles?.full_name?.split(' ')[0] || 'Kasambahay'
+      const msg = `🎉 Magandang balita! Si ${kbFirstName} na iyong referral ay nagconfirm na ng kanyang profile sa MaidIt. Makikita na siya ng mga homeowner. Abangan ang iyong kita kapag na-hire siya! - MaidIt`
+      await sendSMS(partnerProfile.mobile, msg).catch(() => {})
+      return NextResponse.json({ success: true, sent: 1, failed: 0 })
+    }
 
     const { data: offer, error } = await supabase
       .from('offers')
@@ -75,6 +89,17 @@ export async function POST(req: NextRequest) {
       arrival_confirmed: [
         { mobile: kbMobile, msg: 'Hi ' + kbName + '! ' + hwName + ' confirmed your arrival. Your 30-day trial has started. Good luck on your first day!' }
       ]
+    }
+
+    if (event === 'referral_offer_received') {
+      if (!partnerId) return NextResponse.json({ error: 'Missing partnerId' }, { status: 400 })
+      const { data: partnerRow } = await supabase.from('partners').select('profile_id').eq('id', partnerId).single()
+      if (!partnerRow?.profile_id) return NextResponse.json({ success: true, sent: 0 })
+      const { data: partnerProfile } = await supabase.from('profiles').select('mobile').eq('id', partnerRow.profile_id).single()
+      if (!partnerProfile?.mobile) return NextResponse.json({ success: true, sent: 0 })
+      const msg = `Magandang balita! Si ${kbName} na iyong referral ay nakatanggap ng job offer sa MaidIt. Tulungan mo siyang sagutin ito para makuha mo ang iyong kita! - MaidIt`
+      await sendSMS(partnerProfile.mobile, msg).catch(() => {})
+      return NextResponse.json({ success: true, sent: 1, failed: 0 })
     }
 
     const toSend = messages[event]
