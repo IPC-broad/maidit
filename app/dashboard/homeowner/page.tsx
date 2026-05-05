@@ -24,8 +24,15 @@ export default function HWDashboard() {
       setProfiles(data || [])
       const { data: hw } = user ? await supabase.from('homeowners').select('id').eq('profile_id', user.id).single() : { data: null }
       if (hw) {
-        const { data: offersData } = await supabase.from('offers').select('id, status').eq('homeowner_id', hw.id)
+        const { data: offersData } = await supabase.from('offers').select('id, status, kasambahay_id').eq('homeowner_id', hw.id)
         setOffers(offersData || [])
+        const offeredMap: Record<string, boolean> = {}
+        for (const o of offersData || []) {
+          if (['pending','reviewed','agreed','payment_pending','paid','active','hired','countered'].includes(o.status)) {
+            offeredMap[o.kasambahay_id] = true
+          }
+        }
+        setOffered(offeredMap)
       }
       setLoading(false)
     }
@@ -141,6 +148,7 @@ export default function HWDashboard() {
                   <div style={{ flex:1 }}>
                     <div style={{ fontWeight:700, fontSize:'.9rem', color:'#111827' }}>
                       {kb.profiles?.full_name?.split(' ')[0]} {kb.profiles?.full_name?.split(' ')[1]?.[0]}.
+                      {kb.age && <span style={{ fontSize:'.72rem', fontWeight:500, color:'#9ca3af', marginLeft:'5px' }}>{kb.age} taong gulang</span>}
                     </div>
                     <div style={{ fontSize:'.68rem', color:'#6b7280' }}>{kb.province || kb.profiles?.city} · {kb.setup}</div>
                   </div>
