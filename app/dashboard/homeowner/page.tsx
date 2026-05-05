@@ -12,7 +12,7 @@ export default function HWDashboard() {
   const [offersLoading, setOffersLoading] = useState(false)
   const [applicantsLoading, setApplicantsLoading] = useState(false)
   const [currentUser, setCurrentUser] = useState<any>(null)
-  const [filter, setFilter] = useState('Lahat')
+  const [filter, setFilter] = useState('All')
   const [passed, setPassed] = useState<Record<string, boolean>>({})
   const [offered, setOffered] = useState<Record<string, boolean>>({})
   const [offersLoaded, setOffersLoaded] = useState(false)
@@ -99,11 +99,11 @@ export default function HWDashboard() {
     if (t === 'applicants') loadApplicants()
   }
 
-  const filters = ['Lahat', 'Stay-in', 'Stay-out', 'Metro Manila', 'Province']
+  const filters = ['All', 'Stay-in', 'Stay-out', 'Metro Manila', 'Province']
 
   const filtered = profiles.filter(p => {
     if (!p.profiles) return false
-    if (filter === 'Lahat') return true
+    if (filter === 'All') return true
     if (filter === 'Stay-in') return p.setup === 'Stay-in'
     if (filter === 'Stay-out') return p.setup === 'Stay-out'
     const metro = ['Quezon City','Makati','Pasig','Taguig','Manila','Mandaluyong','Marikina','Paranaque','Las Pinas','Muntinlupa','Caloocan','Malabon','Navotas','Valenzuela','Pasay','Pateros','San Juan']
@@ -165,8 +165,8 @@ export default function HWDashboard() {
         <div style={{ margin:'10px 16px 0', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:'12px', padding:'11px 14px', display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => handleTabChange('applicants')}>
           <span style={{ fontSize:'18px' }}>✋</span>
           <div style={{ flex:1 }}>
-            <div style={{ fontSize:'13px', fontWeight:700, color:'#1e40af' }}>{applicantCount} nag-apply sa iyong job posting!</div>
-            <div style={{ fontSize:'11px', color:'#3b82f6', marginTop:'1px' }}>I-tap para tingnan at mag-send ng offer.</div>
+            <div style={{ fontSize:'13px', fontWeight:700, color:'#1e40af' }}>{applicantCount} applied to your job posting!</div>
+            <div style={{ fontSize:'11px', color:'#3b82f6', marginTop:'1px' }}>Tap to review and send offers.</div>
           </div>
           <span style={{ color:'#3b82f6', fontSize:'14px' }}>→</span>
         </div>
@@ -194,7 +194,7 @@ export default function HWDashboard() {
                   <div style={{ flex:1 }}>
                     <div style={{ fontWeight:700, fontSize:'.9rem', color:'#111827' }}>
                       {kb.profiles?.full_name?.split(' ')[0]} {kb.profiles?.full_name?.split(' ')[1]?.[0]}.
-                      {kb.age && <span style={{ fontSize:'.72rem', fontWeight:500, color:'#9ca3af', marginLeft:'5px' }}>{kb.age} taong gulang</span>}
+                      {kb.age && <span style={{ fontSize:'.72rem', fontWeight:500, color:'#9ca3af', marginLeft:'5px' }}>{kb.age} yrs old</span>}
                     </div>
                     <div style={{ fontSize:'.68rem', color:'#6b7280' }}>{kb.province || kb.profiles?.city} · {kb.setup}</div>
                   </div>
@@ -260,7 +260,7 @@ export default function HWDashboard() {
                   </div>
                   <div style={{ background:'#faf8f5', borderRadius:'10px', padding:'10px 12px', marginBottom:'10px' }}>
                     <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
-                      <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Salary</div><div style={{ fontFamily:'serif', fontSize:'16px', fontWeight:900, color:'#1a6b3c' }}>₱{offer.salary?.toLocaleString()}<span style={{ fontSize:'10px', fontWeight:400, color:'#9ca3af' }}>/buwan</span></div></div>
+                      <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Salary</div><div style={{ fontFamily:'serif', fontSize:'16px', fontWeight:900, color:'#1a6b3c' }}>₱{offer.salary?.toLocaleString()}<span style={{ fontSize:'10px', fontWeight:400, color:'#9ca3af' }}>/month</span></div></div>
                       <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Location</div><div style={{ fontSize:'13px', fontWeight:700 }}>{offer.city || '—'}</div></div>
                       <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Setup</div><div style={{ fontSize:'13px', fontWeight:700 }}>{offer.setup || '—'}</div></div>
                       <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Scope</div><div style={{ fontSize:'12px', fontWeight:600, lineHeight:1.4 }}>{offer.scope?.join(', ') || '—'}</div></div>
@@ -268,16 +268,16 @@ export default function HWDashboard() {
                   </div>
                   {offer.fare_estimate && (
                     <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:'9px', padding:'9px 12px', fontSize:'12px', color:'#92400e', marginBottom:'10px' }}>
-                      Fare estimate ng kasambahay: <strong>₱{offer.fare_estimate?.toLocaleString()}</strong>
+                      Kasambahay's fare estimate: <strong>₱{offer.fare_estimate?.toLocaleString()}</strong>
                     </div>
                   )}
                   {offer.status === 'countered' && (
                     <div style={{ background:'#fef3e2', border:'1px solid #fde8c0', borderRadius:'9px', padding:'11px 13px', marginBottom:'10px' }}>
-                      <div style={{ fontSize:'12px', fontWeight:700, color:'#92400e', marginBottom:'6px' }}>Counter Offer ng kasambahay:</div>
+                      <div style={{ fontSize:'12px', fontWeight:700, color:'#92400e', marginBottom:'6px' }}>Kasambahay's counter offer:</div>
                       <div style={{ fontSize:'13px', color:'#374151', lineHeight:1.7 }}>
-                        {offer.fare_countered ? <span>Sweldo: <strong>₱{offer.fare_countered?.toLocaleString()}/buwan</strong><br/></span> : null}
+                        {offer.fare_countered ? <span>Salary: <strong>₱{offer.fare_countered?.toLocaleString()}/month</strong><br/></span> : null}
                         {offer.estimated_arrival ? <span>Start date: <strong>{new Date(offer.estimated_arrival).toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric' })}</strong></span> : null}
-                        {!offer.fare_countered && !offer.estimated_arrival ? <span>Walang detalye ng counter.</span> : null}
+                        {!offer.fare_countered && !offer.estimated_arrival ? <span>No counter details provided.</span> : null}
                       </div>
                       <div style={{ display:'flex', gap:'8px', marginTop:'10px' }}>
                         <button onClick={() => router.push('/pay/' + offer.id)} style={{ flex:1, padding:'9px', borderRadius:'9px', background:'#1a6b3c', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'12px', fontWeight:700, cursor:'pointer' }}>Accept Counter</button>
@@ -305,13 +305,13 @@ export default function HWDashboard() {
 
       {tab === 'applicants' && (
         <div style={{ padding:'16px 16px 32px' }}>
-          <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, marginBottom:'2px', color:'#111827' }}>Mga Nag-apply</div>
-          <div style={{ fontSize:'.72rem', color:'#6b7280', marginBottom:'14px' }}>{applicants.length} aplikante sa iyong job posting</div>
+          <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, marginBottom:'2px', color:'#111827' }}>Applicants</div>
+          <div style={{ fontSize:'.72rem', color:'#6b7280', marginBottom:'14px' }}>{applicants.length} applicant{applicants.length !== 1 ? 's' : ''} on your job posting</div>
           {applicantsLoading && <div style={{ textAlign:'center', padding:'40px', color:'#6b7280' }}>Loading...</div>}
           {!applicantsLoading && applicants.length === 0 && (
             <div style={{ textAlign:'center', padding:'40px 20px' }}>
               <div style={{ fontSize:'2.5rem', marginBottom:'12px' }}>✋</div>
-              <div style={{ color:'#6b7280', fontSize:'.84rem', lineHeight:1.7 }}>Wala pang nag-apply sa iyong job posting.</div>
+              <div style={{ color:'#6b7280', fontSize:'.84rem', lineHeight:1.7 }}>No one has applied to your job posting yet.</div>
               <button onClick={() => router.push('/dashboard/homeowner/post-job')} style={{ marginTop:'16px', padding:'10px 20px', borderRadius:'10px', background:'#c9943a', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'.84rem', fontWeight:700, cursor:'pointer' }}>Post a Job</button>
             </div>
           )}
@@ -326,7 +326,7 @@ export default function HWDashboard() {
                     <div style={{ flex:1 }}>
                       <div style={{ fontWeight:700, fontSize:'14px', color:'#111827' }}>
                         {kbName.split(' ')[0]} {kbName.split(' ')[1]?.[0]}.
-                        {kb?.age && <span style={{ fontSize:'11px', fontWeight:500, color:'#9ca3af', marginLeft:'5px' }}>{kb.age} taong gulang</span>}
+                        {kb?.age && <span style={{ fontSize:'11px', fontWeight:500, color:'#9ca3af', marginLeft:'5px' }}>{kb.age} yrs old</span>}
                       </div>
                       <div style={{ fontSize:'11px', color:'#6b7280', marginTop:'1px' }}>{kb?.province} · {kb?.setup}</div>
                     </div>
@@ -354,7 +354,7 @@ export default function HWDashboard() {
                       style={{ width:'100%', padding:'10px', borderRadius:'9px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'13px', fontWeight:700, cursor:'pointer' }}
                       onClick={() => router.push(`/offer/send/${kb?.id}`)}
                     >
-                      Mag-send ng Offer →
+                      Send Offer →
                     </button>
                   )}
                 </div>

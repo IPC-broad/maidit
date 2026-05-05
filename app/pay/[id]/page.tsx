@@ -149,12 +149,26 @@ export default function PayPage() {
         <div style={{ fontSize: '.76rem', color: '#6b7280', marginBottom: '20px', lineHeight: 1.6 }}>
           Activate your hire of <strong>{kbName}</strong> with a one-time fee.
         </div>
-        <div style={{ ...s.card, background: '#1a6b3c', border: 'none', textAlign: 'center' as const, padding: '22px' }}>
-          <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '1px', color: 'rgba(255,255,255,.35)', marginBottom: '6px' }}>
-            Hire Protection Fee
+        <div style={s.card}>
+          <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#6b7280', marginBottom: '12px' }}>Pricing Breakdown</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f3f4f6' }}>
+            <span style={{ fontSize: '.82rem', color: '#374151' }}>Hiring Fee</span>
+            <span style={{ textDecoration: 'line-through', color: '#9ca3af', fontSize: '.82rem' }}>₱2,500</span>
           </div>
-          <div style={{ fontFamily: 'serif', fontSize: '2.6rem', fontWeight: 900, color: '#fff', marginBottom: '4px' }}>₱2,001</div>
-          <div style={{ fontSize: '.7rem', color: 'rgba(255,255,255,.35)' }}>One-time · 30-day rematch included</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f3f4f6' }}>
+            <span style={{ fontSize: '.82rem', color: '#374151' }}>Subscription credit</span>
+            <span style={{ fontSize: '.82rem', color: '#1a6b3c', fontWeight: 700 }}>−₱499</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0 4px' }}>
+            <span style={{ fontSize: '.88rem', fontWeight: 700, color: '#111827' }}>You pay today</span>
+            <span style={{ fontSize: '24px', fontWeight: 900, color: '#1a6b3c', fontFamily: 'serif' }}>₱2,001</span>
+          </div>
+        </div>
+        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '11px', padding: '11px 14px', marginBottom: '14px' }}>
+          <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.6 }}>
+            ✅ Your ₱499 subscription fee has been applied as a credit toward your hiring fee.<br/>
+            <span style={{ marginTop: '4px', display: 'block' }}>This is a one-time hiring fee per kasambahay hired.</span>
+          </div>
         </div>
         <div style={s.card}>
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#6b7280', marginBottom: '10px' }}>What's included</div>

@@ -15,7 +15,7 @@ export default function PostJobPage() {
   const [form, setForm] = useState({
     salary: '',
     start_date: '',
-    urgency: 'Kailangan na (ASAP)',
+    urgency: 'ASAP',
     custom_date: '',
     setup: 'Stay-in',
     day_off: 'Every Sunday',
@@ -194,6 +194,9 @@ export default function PostJobPage() {
         <button style={s.btnAmber} onClick={() => { setStep('confirm'); window.open(PAYMONGO_LINK, '_blank') }}>
           Pay ₱499 via PayMongo →
         </button>
+        <div style={{ fontSize: '.7rem', color: '#6b7280', textAlign: 'center' as const, marginTop: '-4px', marginBottom: '14px', lineHeight: 1.6 }}>
+          💡 Your ₱499 subscription is deductible from the ₱2,500 hiring fee. You only pay ₱2,001 when you hire.
+        </div>
         <button style={s.btnOutline} onClick={() => router.push('/dashboard/homeowner')}>
           Pay later
         </button>
@@ -339,12 +342,12 @@ export default function PostJobPage() {
           <option>To be discussed</option>
         </select>
 
-        <label style={s.lbl}>Kailan kailangan?</label>
+        <label style={s.lbl}>When do you need help?</label>
         <select style={s.inp} value={form.urgency} onChange={e => update('urgency', e.target.value)}>
-          <option>Kailangan na (ASAP)</option>
-          <option>Sa loob ng ilang araw</option>
-          <option>Sa susunod na linggo</option>
-          <option>Pwede pag-usapan</option>
+          <option>ASAP</option>
+          <option>Within a few days</option>
+          <option>Next week</option>
+          <option>Flexible / To be discussed</option>
         </select>
 
         <label style={s.lbl}>Monthly Salary (₱)</label>
