@@ -7,15 +7,19 @@ export default function SelfieCapture() {
   const router = useRouter()
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   const [photo, setPhoto] = useState<string | null>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [uploading, setUploading] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(true)
 
   useEffect(() => {
-    startCamera()
-    return () => { stopCamera() }
+    const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    setIsMobile(mobile)
+    if (mobile) startCamera()
+    return () => stopCamera()
   }, [])
 
   const startCamera = async () => {
@@ -52,9 +56,26 @@ export default function SelfieCapture() {
     stopCamera()
   }
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      canvas.width = img.width
+      canvas.height = img.height
+      canvas.getContext('2d')!.drawImage(img, 0, 0)
+      setPhoto(canvas.toDataURL('image/jpeg', 0.85))
+      URL.revokeObjectURL(url)
+    }
+    img.src = url
+  }
+
   const retake = () => {
     setPhoto(null)
-    startCamera()
+    if (isMobile) startCamera()
   }
 
   const savePhoto = async () => {
@@ -87,71 +108,85 @@ export default function SelfieCapture() {
       <div className="w-full max-w-md">
 
         <h1 className="text-xl font-bold text-center mb-2">
-          Kumuha ng selfie.
+          {isMobile ? 'Kumuha ng selfie.' : 'Mag-upload ng litrato.'}
         </h1>
         <p className="text-sm text-gray-500 text-center mb-6">
           Ito ay ipapakita sa mga homeowner para makilala ka nila.
         </p>
 
-        {cameraError ? (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-4 text-center">
-            <div className="text-3xl mb-3">📷</div>
-            <p className="text-sm text-red-700 mb-4">{cameraError}</p>
-            <button
-              onClick={startCamera}
-              className="bg-[#1a6b3c] text-white px-5 py-2 rounded-xl text-sm font-semibold"
-            >
-              Subukan Ulit
-            </button>
-          </div>
-        ) : (
-          <div className="bg-black rounded-2xl overflow-hidden mb-4">
-            {!photo ? (
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full h-[320px] object-cover"
-              />
-            ) : (
-              <img
-                src={photo}
-                alt="Selfie"
-                className="w-full h-[320px] object-cover"
-              />
-            )}
-          </div>
-        )}
-
         <canvas ref={canvasRef} className="hidden" />
 
-        {!cameraError && (
+        {/* MOBILE: camera flow */}
+        {isMobile && (
           <>
-            {!photo ? (
-              <button
-                onClick={capturePhoto}
-                className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold"
-              >
-                Kunan ng Selfie
-              </button>
-            ) : (
-              <div className="space-y-2">
-                <button
-                  onClick={savePhoto}
-                  disabled={uploading}
-                  className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold disabled:opacity-60"
-                >
-                  {uploading ? 'Sine-save...' : 'Gamitin ang picture na ito →'}
-                </button>
-                <button
-                  onClick={retake}
-                  disabled={uploading}
-                  className="w-full text-sm text-gray-500 py-2"
-                >
-                  Ulitin
+            {cameraError ? (
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-4 text-center">
+                <div className="text-3xl mb-3">📷</div>
+                <p className="text-sm text-red-700 mb-4">{cameraError}</p>
+                <button onClick={startCamera} className="bg-[#1a6b3c] text-white px-5 py-2 rounded-xl text-sm font-semibold">
+                  Subukan Ulit
                 </button>
               </div>
+            ) : (
+              <div className="bg-black rounded-2xl overflow-hidden mb-4">
+                {!photo ? (
+                  <video ref={videoRef} autoPlay playsInline muted className="w-full h-[320px] object-cover" />
+                ) : (
+                  <img src={photo} alt="Selfie" className="w-full h-[320px] object-cover" />
+                )}
+              </div>
+            )}
+
+            {!cameraError && (
+              <>
+                {!photo ? (
+                  <button onClick={capturePhoto} className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold">
+                    Kunan ng Selfie
+                  </button>
+                ) : (
+                  <div className="space-y-2">
+                    <button onClick={savePhoto} disabled={uploading} className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold disabled:opacity-60">
+                      {uploading ? 'Sine-save...' : 'Gamitin ang picture na ito →'}
+                    </button>
+                    <button onClick={retake} disabled={uploading} className="w-full text-sm text-gray-500 py-2">
+                      Ulitin
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
+
+        {/* DESKTOP: file upload flow */}
+        {!isMobile && (
+          <>
+            {!photo ? (
+              <>
+                <div
+                  onClick={() => fileRef.current?.click()}
+                  className="border-2 border-dashed border-[#1a6b3c] rounded-2xl p-10 mb-4 text-center cursor-pointer bg-white hover:bg-green-50 transition-colors"
+                >
+                  <div className="text-4xl mb-3">📷</div>
+                  <div className="font-bold text-sm text-[#1a6b3c] mb-1">I-click para pumili ng litrato</div>
+                  <div className="text-xs text-gray-400">JPG, PNG o HEIC · Max 10MB</div>
+                </div>
+                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+              </>
+            ) : (
+              <>
+                <div className="rounded-2xl overflow-hidden mb-4">
+                  <img src={photo} alt="Preview" className="w-full h-[320px] object-cover" />
+                </div>
+                <div className="space-y-2">
+                  <button onClick={savePhoto} disabled={uploading} className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold disabled:opacity-60">
+                    {uploading ? 'Sine-save...' : 'Gamitin ang litratong ito →'}
+                  </button>
+                  <button onClick={retake} disabled={uploading} className="w-full text-sm text-gray-500 py-2">
+                    Pumili ng ibang litrato
+                  </button>
+                </div>
+              </>
             )}
           </>
         )}
