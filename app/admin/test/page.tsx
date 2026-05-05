@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react'
 
 const STATUSES = ['pending', 'reviewed', 'agreed', 'payment_pending', 'paid', 'active', 'hired', 'declined', 'countered', 'counter_declined', 'fare_pending', 'fare_countered']
-const PAY_STATUSES = ['agreed', 'payment_pending', 'paid']
 
 const statusColors: Record<string, string> = {
   pending: '#c9943a',
@@ -19,8 +18,18 @@ const statusColors: Record<string, string> = {
   fare_countered: '#92400e',
 }
 
+const workerStatusColors: Record<string, string> = {
+  pending_confirmation: '#c9943a',
+  pending: '#c9943a',
+  draft: '#6b7280',
+  available: '#2563eb',
+  hired: '#1a6b3c',
+}
+
 export default function AdminTestPanel() {
   const [offers, setOffers] = useState<any[]>([])
+  const [referredWorkers, setReferredWorkers] = useState<any[]>([])
+  const [partners, setPartners] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState<string | null>(null)
   const [msg, setMsg] = useState('')
@@ -28,12 +37,25 @@ export default function AdminTestPanel() {
   const load = async () => {
     setLoading(true)
     const { supabase } = await import('../../../lib/supabase')
-    const { data } = await supabase
-      .from('offers')
-      .select('*, kasambahay:kasambahay_id(*, profiles(full_name)), homeowner:homeowner_id(*, profiles(full_name))')
-      .order('created_at', { ascending: false })
-      .limit(20)
-    setOffers(data || [])
+    const [{ data: offersData }, { data: workersData }, { data: partnersData }] = await Promise.all([
+      supabase
+        .from('offers')
+        .select('*, kasambahay:kasambahay_id(*, profiles(full_name)), homeowner:homeowner_id(*, profiles(full_name))')
+        .order('created_at', { ascending: false })
+        .limit(20),
+      supabase
+        .from('kasambahay')
+        .select('*, profiles(*), partner:referred_by(*, profiles(*))')
+        .not('referred_by', 'is', null)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('partners')
+        .select('*, profiles(*)')
+        .order('created_at', { ascending: false }),
+    ])
+    setOffers(offersData || [])
+    setReferredWorkers(workersData || [])
+    setPartners(partnersData || [])
     setLoading(false)
   }
 
@@ -43,7 +65,18 @@ export default function AdminTestPanel() {
     setUpdating(offerId + status)
     const { supabase } = await import('../../../lib/supabase')
     await supabase.from('offers').update({ status }).eq('id', offerId)
-    setMsg('Updated to ' + status)
+    setMsg('Updated offer to ' + status)
+    setTimeout(() => setMsg(''), 2000)
+    await load()
+    setUpdating(null)
+  }
+
+  const updateWorkerStatus = async (workerId: string, status: string) => {
+    setUpdating(workerId + status)
+    const { supabase } = await import('../../../lib/supabase')
+    const extra = status === 'available' ? { confirmed_at: new Date().toISOString() } : {}
+    await supabase.from('kasambahay').update({ status, ...extra }).eq('id', workerId)
+    setMsg('Worker updated to ' + status)
     setTimeout(() => setMsg(''), 2000)
     await load()
     setUpdating(null)
@@ -59,8 +92,9 @@ export default function AdminTestPanel() {
   const s: any = {
     wrap: { minHeight: '100vh', background: '#faf8f5', fontFamily: 'sans-serif', padding: '20px 16px' },
     card: { background: '#fff', borderRadius: '12px', border: '1px solid #ede8e0', padding: '14px', marginBottom: '12px' },
-    badge: (status: string) => ({ fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '50px', background: statusColors[status] + '20', color: statusColors[status], border: '1px solid ' + statusColors[status] + '40' }),
+    badge: (color: string) => ({ fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '50px', background: color + '20', color, border: '1px solid ' + color + '40' }),
     btn: (active: boolean, color: string) => ({ padding: '5px 10px', borderRadius: '6px', border: '1.5px solid ' + color + '40', background: active ? color : '#fff', color: active ? '#fff' : color, fontFamily: 'sans-serif', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }),
+    secTitle: { fontFamily: 'serif', fontSize: '16px', fontWeight: 900, marginBottom: '10px', marginTop: '4px' },
   }
 
   return (
@@ -82,7 +116,8 @@ export default function AdminTestPanel() {
         </div>
       </div>
 
-      <div style={{ fontFamily: 'serif', fontSize: '16px', fontWeight: 900, marginBottom: '10px' }}>Recent Offers ({offers.length})</div>
+      {/* ── OFFERS ── */}
+      <div style={s.secTitle}>Recent Offers ({offers.length})</div>
 
       {loading && <div style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>Loading...</div>}
 
@@ -97,7 +132,7 @@ export default function AdminTestPanel() {
                 <div style={{ fontSize: '11px', color: '#9ca3af' }}>by {hwName} · ₱{offer.salary?.toLocaleString()}/mo · {offer.city}</div>
                 <div style={{ fontSize: '10px', color: '#9ca3af', marginTop: '2px' }}>{offer.id}</div>
               </div>
-              <span style={s.badge(offer.status)}>{offer.status}</span>
+              <span style={s.badge(statusColors[offer.status] || '#6b7280')}>{offer.status}</span>
             </div>
             <div style={{ fontSize: '11px', fontWeight: 600, color: '#6b7280', marginBottom: '6px' }}>Change status:</div>
             <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
@@ -111,6 +146,89 @@ export default function AdminTestPanel() {
                   {updating === offer.id + st ? '...' : st}
                 </button>
               ))}
+            </div>
+          </div>
+        )
+      })}
+
+      {/* ── REFERRED KASAMBAHAY ── */}
+      <div style={{ ...s.secTitle, marginTop: '24px' }}>👥 Referred Kasambahay ({referredWorkers.length})</div>
+
+      {!loading && referredWorkers.length === 0 && (
+        <div style={{ ...s.card, color: '#9ca3af', fontSize: '13px', textAlign: 'center' }}>Walang referred kasambahay pa.</div>
+      )}
+
+      {referredWorkers.map(w => {
+        const wName = w.profiles?.full_name || 'Unknown'
+        const wMobile = w.profiles?.mobile || '—'
+        const partnerName = w.partner?.profiles?.full_name || '—'
+        const wColor = workerStatusColors[w.status] || '#6b7280'
+        const confirmed = w.status !== 'pending_confirmation' && w.status !== 'pending' && w.status !== 'draft'
+        return (
+          <div key={w.id} style={s.card}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '14px' }}>{wName}</div>
+                <div style={{ fontSize: '11px', color: '#9ca3af' }}>{wMobile} · {w.province}</div>
+                <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '3px' }}>
+                  Referred by: <strong>{partnerName}</strong>
+                </div>
+                <div style={{ fontSize: '11px', marginTop: '3px' }}>
+                  Confirmed: <span style={{ fontWeight: 700, color: confirmed ? '#1a6b3c' : '#dc2626' }}>{confirmed ? 'Yes' : 'No'}</span>
+                </div>
+                <div style={{ fontSize: '10px', color: '#9ca3af', marginTop: '2px' }}>{w.id}</div>
+              </div>
+              <span style={s.badge(wColor)}>{w.status}</span>
+            </div>
+            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+              {[
+                { label: 'Set Available', status: 'available', color: '#2563eb' },
+                { label: 'Set Hired', status: 'hired', color: '#1a6b3c' },
+                { label: 'Set Pending', status: 'pending_confirmation', color: '#c9943a' },
+              ].map(({ label, status, color }) => (
+                <button
+                  key={status}
+                  onClick={() => updateWorkerStatus(w.id, status)}
+                  disabled={updating === w.id + status || w.status === status}
+                  style={s.btn(w.status === status, color)}
+                >
+                  {updating === w.id + status ? '...' : label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+
+      {/* ── PARTNERS ── */}
+      <div style={{ ...s.secTitle, marginTop: '24px' }}>🤝 Partners ({partners.length})</div>
+
+      {!loading && partners.length === 0 && (
+        <div style={{ ...s.card, color: '#9ca3af', fontSize: '13px', textAlign: 'center' }}>Walang partners pa.</div>
+      )}
+
+      {partners.map(p => {
+        const pName = p.profiles?.full_name || 'Unknown'
+        const pMobile = p.profiles?.mobile || '—'
+        const totalReferred = referredWorkers.filter(w => w.referred_by === p.id).length
+        const totalHired = referredWorkers.filter(w => w.referred_by === p.id && w.status === 'hired').length
+        const isGold = p.tier === 'gold'
+        return (
+          <div key={p.id} style={s.card}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '14px' }}>{pName}</div>
+                <div style={{ fontSize: '11px', color: '#9ca3af' }}>{pMobile}</div>
+                <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>
+                  Code: <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#c9943a' }}>{p.referral_code || '—'}</span>
+                </div>
+              </div>
+              <span style={s.badge(isGold ? '#c9943a' : '#6b7280')}>{isGold ? '⭐ VIP' : 'Standard'}</span>
+            </div>
+            <div style={{ display: 'flex', gap: '16px', fontSize: '12px', color: '#374151' }}>
+              <div><span style={{ color: '#9ca3af' }}>Referred:</span> <strong>{totalReferred}</strong></div>
+              <div><span style={{ color: '#9ca3af' }}>Hired:</span> <strong style={{ color: '#1a6b3c' }}>{totalHired}</strong></div>
+              <div><span style={{ color: '#9ca3af' }}>Barangay:</span> <strong>{p.barangay || '—'}</strong></div>
             </div>
           </div>
         )
