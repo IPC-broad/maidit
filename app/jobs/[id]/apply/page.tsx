@@ -84,6 +84,11 @@ export default function ApplyPage() {
 
     setSubmitting(false)
     if (appError) { setError(appError.message); return }
+    fetch('/api/send-sms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'new_applicant', jobId })
+    }).catch(() => {})
     setSuccess(true)
   }
 
