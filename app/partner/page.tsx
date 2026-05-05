@@ -21,7 +21,8 @@ export default function PartnerPage() {
   const [step, setStep] = useState<Step>('landing')
 
   // Step 1
-  const [name, setName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [mobile, setMobile] = useState('')
   const [provinces, setProvinces] = useState<Province[]>([])
   const [provSearch, setProvSearch] = useState('')
@@ -77,7 +78,8 @@ export default function PartnerPage() {
   }
 
   const handleStep1 = async () => {
-    if (!name.trim()) { setS1Error('Pakisulat ang iyong pangalan.'); return }
+    if (!firstName.trim() || !lastName.trim()) { setS1Error('Pakisulat ang iyong pangalan at apelyido.'); return }
+    const name = `${firstName.trim()} ${lastName.trim()}`
     if (!mobile || mobile.length !== 11 || !mobile.startsWith('09')) {
       setS1Error('Pakisulat ang tamang 11-digit mobile number na nagsisimula sa 09.'); return
     }
@@ -301,9 +303,18 @@ export default function PartnerPage() {
         <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 900, marginBottom: '6px' }}>Ilang detalye lang 👋</div>
         <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '24px', lineHeight: 1.6 }}>Tapos may referral link ka na agad. Libre at walang bayad.</div>
 
-        <label style={s.lbl}>Buong pangalan *</label>
-        <input style={s.inp} type="text" placeholder="Juan Dela Cruz" value={name}
-          onChange={e => setName(e.target.value.replace(/\b\w/g, c => c.toUpperCase()))} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div>
+            <label style={s.lbl}>Pangalan *</label>
+            <input style={s.inp} type="text" placeholder="Juan" value={firstName}
+              onChange={e => setFirstName(e.target.value.replace(/\b\w/g, c => c.toUpperCase()))} />
+          </div>
+          <div>
+            <label style={s.lbl}>Apelyido *</label>
+            <input style={s.inp} type="text" placeholder="Dela Cruz" value={lastName}
+              onChange={e => setLastName(e.target.value.replace(/\b\w/g, c => c.toUpperCase()))} />
+          </div>
+        </div>
 
         <label style={s.lbl}>Mobile number *</label>
         <input style={s.inp} type="tel" placeholder="09XX XXX XXXX" maxLength={11} value={mobile}
