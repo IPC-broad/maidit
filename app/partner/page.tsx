@@ -120,7 +120,7 @@ export default function PartnerPage() {
 
     setRefCode(code)
     setSubmitting1(false)
-    setStep('reflink')
+    router.push('/dashboard/partner')
   }
 
   const handleStep2 = async () => {
