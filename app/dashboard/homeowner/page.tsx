@@ -103,7 +103,7 @@ export default function HWDashboard() {
 
   const handleTabChange = (t: 'browse' | 'offers' | 'applicants' | 'postjob') => {
     if (t === 'postjob') {
-      if (!currentUser) { router.push('/login?redirect=/dashboard/homeowner/post-job'); return }
+      if (!currentUser) { localStorage.setItem('maidit_intent', 'post_job'); router.push('/login'); return }
       router.push('/dashboard/homeowner/post-job')
       return
     }
@@ -267,7 +267,7 @@ export default function HWDashboard() {
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'8px' }}>
                     <div>
                       <div style={{ fontWeight:700, fontSize:'14px', marginBottom:'2px' }}>{kbName}</div>
-                      <div style={{ fontSize:'11px', color:'#9ca3af' }}>{new Date(offer.created_at).toLocaleDateString('fil-PH', { month:'short', day:'numeric', year:'numeric' })}</div>
+                      <div style={{ fontSize:'11px', color:'#9ca3af' }}>{new Date(offer.created_at).toLocaleDateString('en-PH', { month:'short', day:'numeric', year:'numeric' })}</div>
                     </div>
                     <span style={{ fontSize:'10px', fontWeight:700, padding:'4px 10px', borderRadius:'50px', background:st.bg, color:st.color, whiteSpace:'nowrap' as const }}>{st.label}</span>
                   </div>

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-const PAYMONGO_LINK_499_499 = process.env.NEXT_PUBLIC_PAYMONGO_LINK_499_499 || ''
+const PAYMONGO_LINK_499 = process.env.NEXT_PUBLIC_PAYMONGO_LINK_499 || ''
 
 export default function PostJobPage() {
   const router = useRouter()
