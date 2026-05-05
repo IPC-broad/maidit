@@ -43,7 +43,13 @@ export default function HomeownerSignup() {
     })
 
     setLoading(false)
-    router.push('/signup/homeowner/success')
+    const intent = localStorage.getItem('maidit_intent')
+    if (intent === 'post_job') {
+      localStorage.removeItem('maidit_intent')
+      router.push('/dashboard/homeowner/post-job')
+    } else {
+      router.push('/signup/homeowner/success')
+    }
   }
 
   const s: any = {

@@ -10,7 +10,8 @@ export default function HomeownerEntry() {
     const { supabase } = await import('../../lib/supabase')
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      window.location.href = '/login?redirect=/dashboard/homeowner/post-job'
+      localStorage.setItem('maidit_intent', 'post_job')
+      window.location.href = '/login'
     } else {
       window.location.href = '/dashboard/homeowner/post-job'
     }

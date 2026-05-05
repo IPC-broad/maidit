@@ -26,7 +26,11 @@ function LoginForm() {
         .eq('id', data.user.id)
         .single()
       setLoading(false)
-      const dest = redirectTo || (profile?.role === 'kasambahay' ? '/dashboard/kasambahay' : profile?.role === 'partner' ? '/dashboard/partner' : '/dashboard/homeowner')
+      let dest = redirectTo || (profile?.role === 'kasambahay' ? '/dashboard/kasambahay' : profile?.role === 'partner' ? '/dashboard/partner' : '/dashboard/homeowner')
+      if (profile?.role === 'homeowner' && !redirectTo) {
+        const intent = localStorage.getItem('maidit_intent')
+        if (intent === 'post_job') { localStorage.removeItem('maidit_intent'); dest = '/dashboard/homeowner/post-job' }
+      }
       router.push(dest)
     } catch (e) {
       setError('Something went wrong. Please try again.')
