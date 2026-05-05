@@ -22,12 +22,25 @@ async function sendSMS(mobile: string, message: string) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { event, offerId, partnerId, kasambahayId } = await req.json()
+    const { event, offerId, partnerId, kasambahayId, jobId } = await req.json()
     const { createClient } = await import('@supabase/supabase-js')
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
+
+    if (event === 'new_applicant') {
+      if (!jobId) return NextResponse.json({ error: 'Missing jobId' }, { status: 400 })
+      const { data: jobRow } = await supabase.from('jobs').select('homeowner_id').eq('id', jobId).single()
+      if (!jobRow?.homeowner_id) return NextResponse.json({ success: true, sent: 0 })
+      const { data: hwRow } = await supabase.from('homeowners').select('profile_id').eq('id', jobRow.homeowner_id).single()
+      if (!hwRow?.profile_id) return NextResponse.json({ success: true, sent: 0 })
+      const { data: hwProf } = await supabase.from('profiles').select('mobile').eq('id', hwRow.profile_id).single()
+      if (!hwProf?.mobile) return NextResponse.json({ success: true, sent: 0 })
+      const msg = `May bagong nag-apply sa iyong job posting sa MaidIt! Bisitahin ang iyong dashboard para tingnan: maidit.vercel.app/dashboard/homeowner - MaidIt`
+      await sendSMS(hwProf.mobile, msg).catch(() => {})
+      return NextResponse.json({ success: true, sent: 1, failed: 0 })
+    }
 
     if (event === 'referral_confirmed') {
       if (!kasambahayId) return NextResponse.json({ error: 'Missing kasambahayId' }, { status: 400 })
