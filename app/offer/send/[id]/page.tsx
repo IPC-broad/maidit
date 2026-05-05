@@ -85,6 +85,10 @@ export default function SendOfferPage({ params }: any) {
     const { data: newOffer } = await supabase.from('offers').select('id').eq('kasambahay_id', kasambahayId).eq('status', 'pending').order('created_at', { ascending: false }).limit(1).single()
     if (newOffer?.id) {
       await fetch('/api/send-sms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'offer_sent', offerId: newOffer.id }) }).catch(() => {})
+      const { data: kbRef } = await supabase.from('kasambahay').select('referred_by').eq('id', kasambahayId).single()
+      if (kbRef?.referred_by) {
+        await fetch('/api/send-sms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'referral_offer_received', offerId: newOffer.id, partnerId: kbRef.referred_by }) }).catch(() => {})
+      }
     }
     setSubmitting(false)
     setSuccess(true)

@@ -4,16 +4,20 @@ import { useRouter } from 'next/navigation'
 
 export default function HWDashboard() {
   const router = useRouter()
-  const [tab, setTab] = useState<'browse' | 'offers' | 'postjob'>('browse')
+  const [tab, setTab] = useState<'browse' | 'offers' | 'applicants' | 'postjob'>('browse')
   const [profiles, setProfiles] = useState<any[]>([])
   const [offers, setOffers] = useState<any[]>([])
+  const [applicants, setApplicants] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [offersLoading, setOffersLoading] = useState(false)
+  const [applicantsLoading, setApplicantsLoading] = useState(false)
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [filter, setFilter] = useState('Lahat')
   const [passed, setPassed] = useState<Record<string, boolean>>({})
   const [offered, setOffered] = useState<Record<string, boolean>>({})
   const [offersLoaded, setOffersLoaded] = useState(false)
+  const [applicantsLoaded, setApplicantsLoaded] = useState(false)
+  const [applicantCount, setApplicantCount] = useState(0)
 
   useEffect(() => {
     const init = async () => {
@@ -33,6 +37,13 @@ export default function HWDashboard() {
           }
         }
         setOffered(offeredMap)
+        // Load applicant count from job postings
+        const { data: jobsData } = await supabase.from('jobs').select('id').eq('homeowner_id', hw.id)
+        const jobIds = (jobsData || []).map((j: any) => j.id)
+        if (jobIds.length > 0) {
+          const { data: appsData } = await supabase.from('applications').select('id').in('job_id', jobIds)
+          setApplicantCount((appsData || []).length)
+        }
       }
       setLoading(false)
     }
@@ -58,10 +69,34 @@ export default function HWDashboard() {
     setOffersLoading(false)
   }
 
-  const handleTabChange = (t: 'browse' | 'offers' | 'postjob') => {
+  const loadApplicants = async () => {
+    if (applicantsLoaded) return
+    setApplicantsLoading(true)
+    const { supabase } = await import('../../../lib/supabase')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/login'); return }
+    const { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
+    if (hw) {
+      const { data: jobsData } = await supabase.from('jobs').select('id').eq('homeowner_id', hw.id)
+      const jobIds = (jobsData || []).map((j: any) => j.id)
+      if (jobIds.length > 0) {
+        const { data } = await supabase
+          .from('applications')
+          .select('*, kasambahay:kasambahay_id(*, profiles(full_name, mobile))')
+          .in('job_id', jobIds)
+          .order('created_at', { ascending: false })
+        setApplicants(data || [])
+      }
+    }
+    setApplicantsLoaded(true)
+    setApplicantsLoading(false)
+  }
+
+  const handleTabChange = (t: 'browse' | 'offers' | 'applicants' | 'postjob') => {
     if (t === 'postjob') { router.push('/dashboard/homeowner/post-job'); return }
     setTab(t)
     if (t === 'offers') loadOffers()
+    if (t === 'applicants') loadApplicants()
   }
 
   const filters = ['Lahat', 'Stay-in', 'Stay-out', 'Metro Manila', 'Province']
@@ -83,18 +118,18 @@ export default function HWDashboard() {
   }
 
   const offerStatusMap: Record<string, { label: string; bg: string; color: string }> = {
-    pending:         { label: 'Waiting for kasambahay', bg: '#fef3e2', color: '#c9943a' },
-    reviewed:        { label: 'Kasambahay is reviewing',  bg: '#eff6ff', color: '#2563eb' },
-    fare_pending:    { label: 'Fare estimate received',          bg: '#fffbeb', color: '#92400e' },
-    agreed:          { label: 'Accepted — Pay Now',  bg: '#f0fdf4', color: '#1a6b3c' },
-    payment_pending: { label: 'Processing payment',        bg: '#fffbeb', color: '#92400e' },
-    paid:            { label: 'Hired',                  bg: '#f0fdf4', color: '#1a6b3c' },
-    active:          { label: 'Hired',                  bg: '#f0fdf4', color: '#1a6b3c' },
-    hired:           { label: 'Hired',                  bg: '#f0fdf4', color: '#1a6b3c' },
-    countered:       { label: 'Counter offer received',          bg: '#fef3e2', color: '#c9943a' },
-    fare_countered:  { label: 'Fare countered — awaiting reply',  bg: '#fffbeb', color: '#92400e' },
-    counter_declined:{ label: 'Counter declined',                 bg: '#fef2f2', color: '#dc2626' },
-    declined:        { label: 'Declined',                         bg: '#fef2f2', color: '#dc2626' },
+    pending:          { label: 'Waiting for kasambahay', bg: '#fef3e2', color: '#c9943a' },
+    reviewed:         { label: 'Kasambahay is reviewing', bg: '#eff6ff', color: '#2563eb' },
+    fare_pending:     { label: 'Fare estimate received',  bg: '#fffbeb', color: '#92400e' },
+    agreed:           { label: 'Accepted — Pay Now',      bg: '#f0fdf4', color: '#1a6b3c' },
+    payment_pending:  { label: 'Processing payment',      bg: '#fffbeb', color: '#92400e' },
+    paid:             { label: 'Hired',                   bg: '#f0fdf4', color: '#1a6b3c' },
+    active:           { label: 'Hired',                   bg: '#f0fdf4', color: '#1a6b3c' },
+    hired:            { label: 'Hired',                   bg: '#f0fdf4', color: '#1a6b3c' },
+    countered:        { label: 'Counter offer received',  bg: '#fef3e2', color: '#c9943a' },
+    fare_countered:   { label: 'Fare countered',          bg: '#fffbeb', color: '#92400e' },
+    counter_declined: { label: 'Counter declined',        bg: '#fef2f2', color: '#dc2626' },
+    declined:         { label: 'Declined',                bg: '#fef2f2', color: '#dc2626' },
   }
 
   const actionCount = offers.filter(o => o.status === 'agreed' || o.status === 'countered').length
@@ -116,15 +151,26 @@ export default function HWDashboard() {
       </div>
 
       {actionCount > 0 && tab !== 'offers' && (
-          <div style={{ margin: "0 16px 12px", background: "#c9943a", borderRadius: "12px", padding: "12px 14px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => handleTabChange("offers")}>
-            <span style={{ fontSize: "20px" }}>📨</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: "13px", fontWeight: 700, color: "#fff" }}>{actionCount} offer {actionCount === 1 ? "needs" : "need"} your attention!</div>
-              <div style={{ fontSize: "11px", color: "rgba(255,255,255,.8)", marginTop: "1px" }}>Tap to review accepted or countered offers.</div>
-            </div>
-            <span style={{ color: "#fff", fontSize: "14px" }}>→</span>
+        <div style={{ margin:'12px 16px 0', background:'#c9943a', borderRadius:'12px', padding:'12px 14px', display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => handleTabChange('offers')}>
+          <span style={{ fontSize:'20px' }}>📨</span>
+          <div style={{ flex:1 }}>
+            <div style={{ fontSize:'13px', fontWeight:700, color:'#fff' }}>{actionCount} offer {actionCount === 1 ? 'needs' : 'need'} your attention!</div>
+            <div style={{ fontSize:'11px', color:'rgba(255,255,255,.8)', marginTop:'1px' }}>Tap to review accepted or countered offers.</div>
           </div>
-        )}
+          <span style={{ color:'#fff', fontSize:'14px' }}>→</span>
+        </div>
+      )}
+
+      {applicantCount > 0 && tab !== 'applicants' && (
+        <div style={{ margin:'10px 16px 0', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:'12px', padding:'11px 14px', display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => handleTabChange('applicants')}>
+          <span style={{ fontSize:'18px' }}>✋</span>
+          <div style={{ flex:1 }}>
+            <div style={{ fontSize:'13px', fontWeight:700, color:'#1e40af' }}>{applicantCount} nag-apply sa iyong job posting!</div>
+            <div style={{ fontSize:'11px', color:'#3b82f6', marginTop:'1px' }}>I-tap para tingnan at mag-send ng offer.</div>
+          </div>
+          <span style={{ color:'#3b82f6', fontSize:'14px' }}>→</span>
+        </div>
+      )}
 
       {tab === 'browse' && (
         <>
@@ -208,7 +254,7 @@ export default function HWDashboard() {
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'8px' }}>
                     <div>
                       <div style={{ fontWeight:700, fontSize:'14px', marginBottom:'2px' }}>{kbName}</div>
-                      <div style={{ fontSize:'11px', color:'#1a6b3c', fontWeight:700 }}>{new Date(offer.created_at).toLocaleDateString('fil-PH', { month:'short', day:'numeric', year:'numeric' })}</div>
+                      <div style={{ fontSize:'11px', color:'#9ca3af' }}>{new Date(offer.created_at).toLocaleDateString('fil-PH', { month:'short', day:'numeric', year:'numeric' })}</div>
                     </div>
                     <span style={{ fontSize:'10px', fontWeight:700, padding:'4px 10px', borderRadius:'50px', background:st.bg, color:st.color, whiteSpace:'nowrap' as const }}>{st.label}</span>
                   </div>
@@ -229,7 +275,7 @@ export default function HWDashboard() {
                     <div style={{ background:'#fef3e2', border:'1px solid #fde8c0', borderRadius:'9px', padding:'11px 13px', marginBottom:'10px' }}>
                       <div style={{ fontSize:'12px', fontWeight:700, color:'#92400e', marginBottom:'6px' }}>Counter Offer ng kasambahay:</div>
                       <div style={{ fontSize:'13px', color:'#374151', lineHeight:1.7 }}>
-                        {offer.fare_countered ? <span>Sweldo: <strong>P{offer.fare_countered?.toLocaleString()}/buwan</strong><br/></span> : null}
+                        {offer.fare_countered ? <span>Sweldo: <strong>₱{offer.fare_countered?.toLocaleString()}/buwan</strong><br/></span> : null}
                         {offer.estimated_arrival ? <span>Start date: <strong>{new Date(offer.estimated_arrival).toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric' })}</strong></span> : null}
                         {!offer.fare_countered && !offer.estimated_arrival ? <span>Walang detalye ng counter.</span> : null}
                       </div>
@@ -257,16 +303,78 @@ export default function HWDashboard() {
         </div>
       )}
 
+      {tab === 'applicants' && (
+        <div style={{ padding:'16px 16px 32px' }}>
+          <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, marginBottom:'2px', color:'#111827' }}>Mga Nag-apply</div>
+          <div style={{ fontSize:'.72rem', color:'#6b7280', marginBottom:'14px' }}>{applicants.length} aplikante sa iyong job posting</div>
+          {applicantsLoading && <div style={{ textAlign:'center', padding:'40px', color:'#6b7280' }}>Loading...</div>}
+          {!applicantsLoading && applicants.length === 0 && (
+            <div style={{ textAlign:'center', padding:'40px 20px' }}>
+              <div style={{ fontSize:'2.5rem', marginBottom:'12px' }}>✋</div>
+              <div style={{ color:'#6b7280', fontSize:'.84rem', lineHeight:1.7 }}>Wala pang nag-apply sa iyong job posting.</div>
+              <button onClick={() => router.push('/dashboard/homeowner/post-job')} style={{ marginTop:'16px', padding:'10px 20px', borderRadius:'10px', background:'#c9943a', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'.84rem', fontWeight:700, cursor:'pointer' }}>Post a Job</button>
+            </div>
+          )}
+          {applicants.map((app: any) => {
+            const kb = app.kasambahay
+            const kbName = kb?.profiles?.full_name || 'Kasambahay'
+            return (
+              <div key={app.id} style={{ background:'#fff', borderRadius:'14px', border:'1px solid #ede8e0', overflow:'hidden', marginBottom:'12px' }}>
+                <div style={{ padding:'13px 14px' }}>
+                  <div style={{ display:'flex', gap:'11px', alignItems:'center', marginBottom:'9px' }}>
+                    <div style={{ width:'44px', height:'44px', borderRadius:'50%', background:'#fdf3e3', border:'2px solid #fde8c0', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px', flexShrink:0 }}>👩</div>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontWeight:700, fontSize:'14px', color:'#111827' }}>
+                        {kbName.split(' ')[0]} {kbName.split(' ')[1]?.[0]}.
+                        {kb?.age && <span style={{ fontSize:'11px', fontWeight:500, color:'#9ca3af', marginLeft:'5px' }}>{kb.age} taong gulang</span>}
+                      </div>
+                      <div style={{ fontSize:'11px', color:'#6b7280', marginTop:'1px' }}>{kb?.province} · {kb?.setup}</div>
+                    </div>
+                    <div style={{ textAlign:'right' }}>
+                      <div style={{ fontFamily:'serif', fontSize:'15px', fontWeight:900, color:'#1a6b3c' }}>₱{kb?.asking_salary?.toLocaleString()}</div>
+                      <div style={{ fontSize:'10px', color:'#9ca3af' }}>asking/mo</div>
+                    </div>
+                  </div>
+                  {kb?.skills?.length > 0 && (
+                    <div style={{ display:'flex', gap:'4px', flexWrap:'wrap', marginBottom:'9px' }}>
+                      {kb.skills.map((skill: string) => (
+                        <span key={skill} style={{ fontSize:'.67rem', padding:'3px 7px', borderRadius:'4px', background:'#e8f5ee', color:'#1a6b3c' }}>{skill}</span>
+                      ))}
+                    </div>
+                  )}
+                  {app.fare_estimate && (
+                    <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:'7px', padding:'5px 9px', fontSize:'11px', color:'#92400e', marginBottom:'8px' }}>
+                      🚌 Fare estimate: ₱{app.fare_estimate?.toLocaleString()}
+                    </div>
+                  )}
+                  {offered[kb?.id] ? (
+                    <div style={{ background:'#e8f5ee', border:'1.5px solid rgba(26,107,60,.2)', borderRadius:'9px', padding:'9px', textAlign:'center', fontSize:'.76rem', color:'#1a6b3c', fontWeight:700 }}>Offer sent! Waiting for response</div>
+                  ) : (
+                    <button
+                      style={{ width:'100%', padding:'10px', borderRadius:'9px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'13px', fontWeight:700, cursor:'pointer' }}
+                      onClick={() => router.push(`/offer/send/${kb?.id}`)}
+                    >
+                      Mag-send ng Offer →
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
       <div style={{ position:'fixed', bottom:0, left:0, right:0, background:'#fff', borderTop:'1px solid #f3f4f6', display:'flex' }}>
         {([
-          { id:'browse', icon:'🔍', label:'Browse' },
-          { id:'offers', icon:'📋', label:'My Offers', badge: actionCount },
-          { id:'postjob', icon:'📝', label:'Post Job' },
+          { id:'browse',     icon:'🔍', label:'Browse',     badge: 0 },
+          { id:'offers',     icon:'📋', label:'My Offers',  badge: actionCount },
+          { id:'applicants', icon:'✋', label:'Applicants', badge: applicantCount },
+          { id:'postjob',    icon:'📝', label:'Post Job',   badge: 0 },
         ] as const).map((t) => (
           <button key={t.id} onClick={() => handleTabChange(t.id)} style={{ flex:1, padding:'10px 4px 9px', display:'flex', flexDirection:'column', alignItems:'center', gap:'3px', border:'none', background:'transparent', cursor:'pointer', position:'relative' }}>
             <span style={{ fontSize:'1.1rem' }}>{t.icon}</span>
-            <span style={{ fontSize:'.57rem', fontWeight: tab === t.id ? 700 : 600, color: tab === t.id ? '#1a6b3c' : '#6b7280' }}>{t.label}</span>
-            {(t as any).badge > 0 && tab !== t.id && <span style={{ position:'absolute', top:'4px', right:'calc(50% - 18px)', background:'#dc2626', color:'#fff', borderRadius:'50%', width:'15px', height:'15px', fontSize:'9px', fontWeight:900, display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}>{(t as any).badge}</span>}
+            <span style={{ fontSize:'.52rem', fontWeight: tab === t.id ? 700 : 600, color: tab === t.id ? '#1a6b3c' : '#6b7280' }}>{t.label}</span>
+            {t.badge > 0 && tab !== t.id && <span style={{ position:'absolute', top:'4px', right:'calc(50% - 18px)', background:'#dc2626', color:'#fff', borderRadius:'50%', width:'15px', height:'15px', fontSize:'9px', fontWeight:900, display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}>{t.badge}</span>}
           </button>
         ))}
       </div>

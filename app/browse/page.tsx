@@ -64,16 +64,6 @@ export default function HWDashboard() {
     return true
   }).filter(p => !passed[p.id])
 
-  const calcAge = (birthday: string | null) => {
-    if (!birthday) return null
-    const today = new Date()
-    const dob = new Date(birthday)
-    let age = today.getFullYear() - dob.getFullYear()
-    const m = today.getMonth() - dob.getMonth()
-    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--
-    return age > 0 ? age : null
-  }
-
   const isProvince = (province: string) => {
     const metro = ['Quezon City', 'Makati', 'Pasig', 'Taguig', 'Manila', 'Mandaluyong', 'Marikina']
     return province && !metro.includes(province)
@@ -124,7 +114,6 @@ export default function HWDashboard() {
           <div style={{ padding:'4px 16px 32px', display:'flex', flexDirection:'column', gap:'12px' }}>
             {filtered.length === 0 && <div style={{ textAlign:'center', padding:'40px 20px', color:'#6b7280', fontSize:'.84rem' }}>No profiles found.</div>}
             {filtered.map((kb) => {
-              const age = calcAge(kb.birthday)
               return (
               <div key={kb.id} style={{ background:'#fff', borderRadius:'14px', padding:'13px 14px', boxShadow:'0 2px 8px rgba(0,0,0,.06)', border:'1.5px solid #f3f4f6' }}>
                 <div style={{ display:'flex', gap:'11px', alignItems:'center', marginBottom:'9px' }}>
@@ -132,7 +121,7 @@ export default function HWDashboard() {
                   <div style={{ flex:1 }}>
                     <div style={{ fontWeight:700, fontSize:'.9rem', color:'#111827' }}>
                       {kb.profiles?.full_name?.split(' ')[0]} {kb.profiles?.full_name?.split(' ')[1]?.[0]}.
-                      {age && <span style={{ fontSize:'.72rem', fontWeight:500, color:'#9ca3af', marginLeft:'5px' }}>{age} taong gulang</span>}
+                      {kb.age && <span style={{ fontSize:'.72rem', fontWeight:500, color:'#9ca3af', marginLeft:'5px' }}>{kb.age} taong gulang</span>}
                     </div>
                     <div style={{ fontSize:'.68rem', color:'#6b7280' }}>{kb.province || kb.profiles?.city} · {kb.setup}</div>
                   </div>
