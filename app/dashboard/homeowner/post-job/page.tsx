@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-const PAYMONGO_LINK = process.env.NEXT_PUBLIC_PAYMONGO_LINK || 'https://pm.link/org-9FQv6XBpoCxdDMaMPY8gze3N/bK90nx0'
+const PAYMONGO_LINK_499_499 = process.env.NEXT_PUBLIC_PAYMONGO_LINK_499_499 || ''
 
 export default function PostJobPage() {
   const router = useRouter()
@@ -153,7 +153,7 @@ export default function PostJobPage() {
         >
           {submitting ? 'Posting your job...' : "✅ Yes, I've paid ₱499"}
         </button>
-        <button style={s.btnBlue} onClick={() => window.open(PAYMONGO_LINK, '_blank')}>
+        <button style={s.btnBlue} onClick={() => window.open(PAYMONGO_LINK_499, '_blank')}>
           ↗ Re-open PayMongo
         </button>
         <button style={s.btnOutline} onClick={() => setStep('pay')}>
@@ -223,7 +223,7 @@ export default function PostJobPage() {
           ))}
         </div>
 
-        <button style={s.btnAmber} onClick={() => { setStep('confirm'); window.open(PAYMONGO_LINK, '_blank') }}>
+        <button style={s.btnAmber} onClick={() => { setStep('confirm'); window.open(PAYMONGO_LINK_499, '_blank') }}>
           Pay ₱499 via PayMongo →
         </button>
         <div style={{ fontSize: '.7rem', color: '#6b7280', textAlign: 'center' as const, marginTop: '-4px', marginBottom: '14px', lineHeight: 1.6 }}>

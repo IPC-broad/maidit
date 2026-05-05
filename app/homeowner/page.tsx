@@ -6,8 +6,14 @@ export default function HomeownerEntry() {
     window.location.href = '/browse'
   }
 
-  const handlePostJob = () => {
-    window.location.href = '/dashboard/homeowner/post-job'
+  const handlePostJob = async () => {
+    const { supabase } = await import('../../lib/supabase')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      window.location.href = '/login?redirect=/dashboard/homeowner/post-job'
+    } else {
+      window.location.href = '/dashboard/homeowner/post-job'
+    }
   }
 
   return (
