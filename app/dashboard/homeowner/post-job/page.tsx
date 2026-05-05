@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 const PAYMONGO_LINK = process.env.NEXT_PUBLIC_PAYMONGO_LINK || 'https://pm.link/org-9FQv6XBpoCxdDMaMPY8gze3N/bK90nx0'
@@ -7,7 +7,8 @@ const PAYMONGO_LINK = process.env.NEXT_PUBLIC_PAYMONGO_LINK || 'https://pm.link/
 export default function PostJobPage() {
   const router = useRouter()
 
-  const [loading, setLoading] = useState(false)
+  const [hwId, setHwId] = useState<string | null>(null)
+  const [initLoading, setInitLoading] = useState(true)
   const [error, setError] = useState('')
   const [step, setStep] = useState<'form' | 'review' | 'pay' | 'confirm' | 'done'>('form')
   const [submitting, setSubmitting] = useState(false)
@@ -26,6 +27,23 @@ export default function PostJobPage() {
     pets: 'No'
   })
 
+  useEffect(() => {
+    const init = async () => {
+      const { supabase } = await import('../../../../lib/supabase')
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/login'); return }
+
+      let { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
+      if (!hw) {
+        const { data: created } = await supabase.from('homeowners').insert({ profile_id: user.id }).select('id').single()
+        hw = created
+      }
+      if (hw) setHwId(hw.id)
+      setInitLoading(false)
+    }
+    init()
+  }, [])
+
   const update = (k: string, v: any) => setForm(f => ({ ...f, [k]: v }))
   const toggleScope = (s: string) => setForm(f => ({
     ...f,
@@ -33,19 +51,13 @@ export default function PostJobPage() {
   }))
 
   const handlePost = async () => {
+    if (!hwId) { setError('Could not load your profile. Please refresh and try again.'); return }
     setSubmitting(true)
     setError('')
     const { supabase } = await import('../../../../lib/supabase')
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/login'); return }
-
-    const { data: hw } = await supabase
-      .from('homeowners').select('id').eq('profile_id', user.id).single()
-
-    if (!hw) { setError('Homeowner profile not found.'); setSubmitting(false); return }
 
     const { error } = await supabase.from('jobs').insert({
-      homeowner_id: hw.id,
+      homeowner_id: hwId,
       salary: parseInt(form.salary),
       start_date: form.start_date,
       urgency: form.urgency,
@@ -81,6 +93,23 @@ export default function PostJobPage() {
   }
 
   const scopeItems = ['🧹 All-around Maid','🍳 Tagaluto','🧺 Tagalaba','👶 Yaya','🐕 Taga-alaga ng Pets','👴 Taga-alaga ng Matanda','🚗 Driver','🛒 Pamimili']
+
+  if (initLoading) return (
+    <div style={{ ...s.center, color: '#6b7280' }}>Setting up your profile...</div>
+  )
+
+  if (!hwId) return (
+    <div style={s.center}>
+      <div style={{ fontSize: '2.5rem', marginBottom: '16px' }}>⚠️</div>
+      <h1 style={{ fontFamily: 'serif', fontSize: '1.2rem', fontWeight: 900, color: '#111827', marginBottom: '8px' }}>Profile Incomplete</h1>
+      <p style={{ color: '#6b7280', fontSize: '.84rem', lineHeight: 1.7, marginBottom: '24px' }}>
+        We couldn't set up your homeowner profile. Please sign up first.
+      </p>
+      <button style={{ ...s.btn, maxWidth: '300px' }} onClick={() => router.push('/signup/homeowner')}>
+        Complete Profile →
+      </button>
+    </div>
+  )
 
   // ── DONE ──
   if (step === 'done') return (
@@ -149,7 +178,6 @@ export default function PostJobPage() {
           Pay once to post your job and send up to 10 job offers to qualified candidates.
         </div>
 
-        {/* Amount card */}
         <div style={{ ...s.card, background: '#1a6b3c', border: 'none', textAlign: 'center' as const, padding: '22px' }}>
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '1px', color: 'rgba(255,255,255,.5)', marginBottom: '6px' }}>
             Job Listing Fee
@@ -160,7 +188,12 @@ export default function PostJobPage() {
           </div>
         </div>
 
-        {/* What you get */}
+        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '11px', padding: '12px 14px', marginBottom: '14px' }}>
+          <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.7 }}>
+            💡 <strong>Subscription fee credit:</strong> Your ₱499 will be deducted from the ₱2,500 hiring fee when you hire a kasambahay. You will only pay <strong>₱2,001</strong> at that time.
+          </div>
+        </div>
+
         <div style={s.card}>
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '10px' }}>What's included</div>
           {[
@@ -176,7 +209,6 @@ export default function PostJobPage() {
           ))}
         </div>
 
-        {/* How to pay */}
         <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '11px', padding: '12px 14px', marginBottom: '18px' }}>
           <div style={{ fontSize: '.7rem', fontWeight: 700, color: '#92400e', marginBottom: '6px' }}>How It Works:</div>
           {[
@@ -236,9 +268,15 @@ export default function PostJobPage() {
           ))}
         </div>
 
-        <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '11px', padding: '12px 14px', marginBottom: '18px' }}>
+        <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '11px', padding: '12px 14px', marginBottom: '10px' }}>
           <div style={{ fontSize: '.74rem', color: '#92400e', lineHeight: 1.6 }}>
             💡 Activating this listing costs <strong>₱499</strong> — paid once via PayMongo. Your job goes live immediately after.
+          </div>
+        </div>
+
+        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '11px', padding: '12px 14px', marginBottom: '18px' }}>
+          <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.6 }}>
+            After posting, you can send up to <strong>10 job offers</strong>. Hiring fee is ₱2,500 minus your ₱499 subscription = <strong>₱2,001 net</strong>.
           </div>
         </div>
 

@@ -27,6 +27,13 @@ export default function PayPage() {
         .single()
 
       if (!data) { router.push('/dashboard/homeowner'); return }
+
+      // Ensure homeowner record exists for this user (query by profile_id)
+      const { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
+      if (!hw) {
+        await supabase.from('homeowners').insert({ profile_id: user.id })
+      }
+
       if (['paid', 'payment_pending', 'active', 'hired'].includes(data.status)) {
         setStep('already')
       }
@@ -165,8 +172,8 @@ export default function PayPage() {
           </div>
         </div>
         <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '11px', padding: '11px 14px', marginBottom: '14px' }}>
-          <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.6 }}>
-            ✅ Your ₱499 subscription fee has been applied as a credit toward your hiring fee.<br/>
+          <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.7 }}>
+            ✅ <strong>Subscription fee credit applied:</strong> Your ₱499 subscription has been deducted from the ₱2,500 hiring fee — you only pay ₱2,001 now.<br/>
             <span style={{ marginTop: '4px', display: 'block' }}>This is a one-time hiring fee per kasambahay hired.</span>
           </div>
         </div>

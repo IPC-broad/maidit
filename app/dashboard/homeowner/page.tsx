@@ -26,7 +26,16 @@ export default function HWDashboard() {
       setCurrentUser(user || null)
       const { data } = await supabase.from('kasambahay').select('*, profiles(*)')
       setProfiles(data || [])
-      const { data: hw } = user ? await supabase.from('homeowners').select('id').eq('profile_id', user.id).single() : { data: null }
+      let hw: any = null
+      if (user) {
+        const { data: hwData } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
+        if (!hwData) {
+          const { data: created } = await supabase.from('homeowners').insert({ profile_id: user.id }).select('id').single()
+          hw = created
+        } else {
+          hw = hwData
+        }
+      }
       if (hw) {
         const { data: offersData } = await supabase.from('offers').select('id, status, kasambahay_id').eq('homeowner_id', hw.id)
         setOffers(offersData || [])
@@ -93,7 +102,11 @@ export default function HWDashboard() {
   }
 
   const handleTabChange = (t: 'browse' | 'offers' | 'applicants' | 'postjob') => {
-    if (t === 'postjob') { router.push('/dashboard/homeowner/post-job'); return }
+    if (t === 'postjob') {
+      if (!currentUser) { router.push('/login?redirect=/dashboard/homeowner/post-job'); return }
+      router.push('/dashboard/homeowner/post-job')
+      return
+    }
     setTab(t)
     if (t === 'offers') loadOffers()
     if (t === 'applicants') loadApplicants()
