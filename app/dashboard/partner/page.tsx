@@ -97,7 +97,14 @@ export default function PartnerDashboard() {
   }
 
   const toggleGovtId = (id: string) => {
-    setWorkerForm(f => ({ ...f, govt_id_types: f.govt_id_types.includes(id) ? f.govt_id_types.filter((x: string) => x !== id) : [...f.govt_id_types, id] }))
+    if (id === 'Wala') {
+      setWorkerForm(f => ({ ...f, govt_id_types: f.govt_id_types.includes('Wala') ? [] : ['Wala'] }))
+    } else {
+      setWorkerForm(f => {
+        const without = f.govt_id_types.filter((x: string) => x !== 'Wala')
+        return { ...f, govt_id_types: without.includes(id) ? without.filter((x: string) => x !== id) : [...without, id] }
+      })
+    }
   }
 
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -500,7 +507,7 @@ export default function PartnerDashboard() {
             <div style={{ background: '#fff', border: '1.5px solid #e5e0d8', borderRadius: '12px', padding: '14px', marginBottom: '12px' }}>
               <div style={{ fontSize: '11px', fontWeight: 700, color: '#4b5563', marginBottom: '10px', textTransform: 'uppercase' as const, letterSpacing: '.5px' }}>Mga Dokumento (i-tick kung mayroon)</div>
               <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '10px' }}>
-                {['PhilHealth ID','SSS ID','Postal ID','Passport','UMID'].map((label) => (
+                {['Wala','PhilHealth ID','SSS ID','Postal ID','Passport','UMID','National ID'].map((label) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => toggleGovtId(label)}>
                     <div style={{ width: '20px', height: '20px', borderRadius: '5px', border: '2px solid', borderColor: workerForm.govt_id_types.includes(label) ? '#c9943a' : '#d1d5db', background: workerForm.govt_id_types.includes(label) ? '#c9943a' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       {workerForm.govt_id_types.includes(label) && <span style={{ color: '#fff', fontSize: '11px', fontWeight: 900 }}>✓</span>}

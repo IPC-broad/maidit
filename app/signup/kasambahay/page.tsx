@@ -14,7 +14,16 @@ export default function KasambahaySignup() {
 
   const [hasNbi, setHasNbi] = useState(false)
   const [govtIdTypes, setGovtIdTypes] = useState<string[]>([])
-  const toggleGovtId = (id: string) => setGovtIdTypes(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  const toggleGovtId = (id: string) => {
+    if (id === 'Wala') {
+      setGovtIdTypes(prev => prev.includes('Wala') ? [] : ['Wala'])
+    } else {
+      setGovtIdTypes(prev => {
+        const without = prev.filter(x => x !== 'Wala')
+        return without.includes(id) ? without.filter(x => x !== id) : [...without, id]
+      })
+    }
+  }
 
   // Province dropdown
   const [provinces, setProvinces] = useState<Province[]>([])
@@ -492,7 +501,7 @@ export default function KasambahaySignup() {
           <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
             <div style={{ fontSize:'11px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>MGA DOKUMENTO (i-tick kung mayroon)</div>
             <div style={{ display:'flex', flexDirection:'column' as const, gap:'10px' }}>
-              {['PhilHealth ID','SSS ID','Postal ID','Passport','UMID'].map((label) => (
+              {['Wala','PhilHealth ID','SSS ID','Postal ID','Passport','UMID','National ID'].map((label) => (
                 <div key={label} style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => toggleGovtId(label)}>
                   <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: govtIdTypes.includes(label) ? '#c9943a' : '#d1d5db', background: govtIdTypes.includes(label) ? '#c9943a' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                     {govtIdTypes.includes(label) && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>✓</span>}
