@@ -18,10 +18,18 @@ export default function SelfieCapture() {
   const [faceValid, setFaceValid] = useState<boolean | null>(null)
   const [faceError, setFaceError] = useState<string | null>(null)
 
+  // Pre-load the tiny face detector model as soon as the component mounts so
+  // it is ready by the time the user takes a photo.
   useEffect(() => {
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
     setIsMobile(mobile)
     if (mobile) startCamera()
+
+    import('face-api.js').then(faceapi => {
+      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights'
+      faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL).catch(() => {})
+    }).catch(() => {})
+
     return () => stopCamera()
   }, [])
 
@@ -55,10 +63,9 @@ export default function SelfieCapture() {
     canvas.width = video.videoWidth || 640
     canvas.height = video.videoHeight || 480
     if (ctx) ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
-    setPhoto(dataUrl)
+    setPhoto(canvas.toDataURL('image/jpeg', 0.85))
     stopCamera()
-    validateFace(dataUrl)
+    validateFace(canvas)
   }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,30 +79,33 @@ export default function SelfieCapture() {
       canvas.width = img.width
       canvas.height = img.height
       canvas.getContext('2d')!.drawImage(img, 0, 0)
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
-      setPhoto(dataUrl)
+      setPhoto(canvas.toDataURL('image/jpeg', 0.85))
       URL.revokeObjectURL(url)
-      validateFace(dataUrl)
+      validateFace(canvas)
     }
     img.src = url
   }
 
-  const validateFace = async (dataUrl: string) => {
+  const validateFace = async (canvas: HTMLCanvasElement) => {
     setValidating(true)
     setFaceError(null)
     setFaceValid(null)
     try {
-      const res = await fetch('/api/validate-selfie', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: dataUrl }),
-      })
-      const data = await res.json()
-      setFaceValid(data.valid)
-      if (!data.valid) setFaceError(data.message || 'Hindi malinaw ang mukha. Subukan ulit.')
+      const faceapi = await import('face-api.js')
+      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights'
+      if (!faceapi.nets.tinyFaceDetector.isLoaded) {
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)
+      }
+      const detections = await faceapi.detectAllFaces(
+        canvas,
+        new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.5 })
+      )
+      const found = detections.length > 0
+      setFaceValid(found)
+      if (!found) setFaceError('Hindi malinaw ang mukha. Subukan ulit.')
     } catch {
-      setFaceValid(false)
-      setFaceError('Hindi ma-validate ang photo. Subukan ulit.')
+      // On unexpected error let the user proceed rather than blocking them
+      setFaceValid(true)
     }
     setValidating(false)
   }
