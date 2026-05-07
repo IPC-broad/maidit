@@ -198,7 +198,7 @@ export default function KBDashboard() {
               <div key={offer.id} style={s.card}>
                 <div style={{ padding: '13px 14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <div><div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '2px' }}>Job Offer</div><div style={{ fontSize: '11px', color: '#9ca3af' }}>{new Date(offer.created_at).toLocaleDateString('fil-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</div></div>
+                    <div><div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '2px' }}>Job Offer</div><div style={{ fontSize: '11px', color: '#9ca3af' }}>{new Date(offer.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</div></div>
                     <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: st.bg, color: st.color, whiteSpace: 'nowrap' as const }}>{st.label}</span>
                   </div>
                   <div style={{ ...s.infoBox, opacity: isClosed ? .6 : 1 }}>
