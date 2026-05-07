@@ -14,6 +14,9 @@ export default function SelfieCapture() {
   const [uploading, setUploading] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [isMobile, setIsMobile] = useState(true)
+  const [validating, setValidating] = useState(false)
+  const [faceValid, setFaceValid] = useState<boolean | null>(null)
+  const [faceError, setFaceError] = useState<string | null>(null)
 
   useEffect(() => {
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
@@ -52,8 +55,10 @@ export default function SelfieCapture() {
     canvas.width = video.videoWidth || 640
     canvas.height = video.videoHeight || 480
     if (ctx) ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-    setPhoto(canvas.toDataURL('image/jpeg', 0.85))
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
+    setPhoto(dataUrl)
     stopCamera()
+    validateFace(dataUrl)
   }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,14 +72,38 @@ export default function SelfieCapture() {
       canvas.width = img.width
       canvas.height = img.height
       canvas.getContext('2d')!.drawImage(img, 0, 0)
-      setPhoto(canvas.toDataURL('image/jpeg', 0.85))
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
+      setPhoto(dataUrl)
       URL.revokeObjectURL(url)
+      validateFace(dataUrl)
     }
     img.src = url
   }
 
+  const validateFace = async (dataUrl: string) => {
+    setValidating(true)
+    setFaceError(null)
+    setFaceValid(null)
+    try {
+      const res = await fetch('/api/validate-selfie', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: dataUrl }),
+      })
+      const data = await res.json()
+      setFaceValid(data.valid)
+      if (!data.valid) setFaceError(data.message || 'Hindi malinaw ang mukha. Subukan ulit.')
+    } catch {
+      setFaceValid(false)
+      setFaceError('Hindi ma-validate ang photo. Subukan ulit.')
+    }
+    setValidating(false)
+  }
+
   const retake = () => {
     setPhoto(null)
+    setFaceValid(null)
+    setFaceError(null)
     if (isMobile) startCamera()
   }
 
@@ -145,10 +174,20 @@ export default function SelfieCapture() {
                   </button>
                 ) : (
                   <div className="space-y-2">
-                    <button onClick={savePhoto} disabled={uploading} className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold disabled:opacity-60">
-                      {uploading ? 'Sine-save...' : 'Gamitin ang picture na ito →'}
-                    </button>
-                    <button onClick={retake} disabled={uploading} className="w-full text-sm text-gray-500 py-2">
+                    {validating && (
+                      <div className="text-center text-sm text-gray-500 py-2">Sinusuri ang mukha...</div>
+                    )}
+                    {faceError && (
+                      <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 text-center">
+                        {faceError}
+                      </div>
+                    )}
+                    {faceValid && (
+                      <button onClick={savePhoto} disabled={uploading} className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold disabled:opacity-60">
+                        {uploading ? 'Sine-save...' : 'Gamitin ang picture na ito →'}
+                      </button>
+                    )}
+                    <button onClick={retake} disabled={uploading || validating} className="w-full text-sm text-gray-500 py-2 disabled:opacity-60">
                       Ulitin
                     </button>
                   </div>
@@ -179,10 +218,20 @@ export default function SelfieCapture() {
                   <img src={photo} alt="Preview" className="w-full h-[320px] object-cover" />
                 </div>
                 <div className="space-y-2">
-                  <button onClick={savePhoto} disabled={uploading} className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold disabled:opacity-60">
-                    {uploading ? 'Sine-save...' : 'Gamitin ang litratong ito →'}
-                  </button>
-                  <button onClick={retake} disabled={uploading} className="w-full text-sm text-gray-500 py-2">
+                  {validating && (
+                    <div className="text-center text-sm text-gray-500 py-2">Sinusuri ang mukha...</div>
+                  )}
+                  {faceError && (
+                    <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 text-center">
+                      {faceError}
+                    </div>
+                  )}
+                  {faceValid && (
+                    <button onClick={savePhoto} disabled={uploading} className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold disabled:opacity-60">
+                      {uploading ? 'Sine-save...' : 'Gamitin ang litratong ito →'}
+                    </button>
+                  )}
+                  <button onClick={retake} disabled={uploading || validating} className="w-full text-sm text-gray-500 py-2 disabled:opacity-60">
                     Pumili ng ibang litrato
                   </button>
                 </div>
