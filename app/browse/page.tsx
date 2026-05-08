@@ -62,7 +62,10 @@ export default function BrowsePage() {
   const [passed, setPassed] = useState<Record<string, boolean>>({})
   const [offered, setOffered] = useState<Record<string, boolean>>({})
   const [saved, setSaved] = useState<Record<string, boolean>>({})
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({})
   const [offersLoaded, setOffersLoaded] = useState(false)
+
+  const STORAGE = 'https://xlagwtsrjbylhxfozoem.supabase.co/storage/v1/object/public/Selfies'
 
   useEffect(() => {
     const init = async () => {
@@ -70,7 +73,6 @@ export default function BrowsePage() {
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user || null)
       const { data } = await supabase.from('kasambahay').select('*, profiles(full_name, selfie_url, city)')
-      console.log('[browse] selfie check:', data?.slice(0,3).map((kb: any) => ({ id: kb.id, selfie_url: kb.profiles?.selfie_url, name: kb.profiles?.full_name })))
       setProfiles(data || [])
       setLoading(false)
     }
@@ -236,6 +238,10 @@ export default function BrowsePage() {
                 const skills: string[] = kb.skills || []
                 const visibleSkills = skills.slice(0, 3)
                 const extraSkills = skills.length - 3
+                // selfie_url from DB, or derive from profile_id (path written by selfie page)
+                const selfieUrl = kb.profiles?.selfie_url
+                  || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.jpg` : null)
+                const showPhoto = !!(selfieUrl && !imgErrors[kb.id])
 
                 return (
                   <div key={kb.id} style={{ background:'#fff', borderRadius:'18px', overflow:'hidden', boxShadow:'0 2px 14px rgba(0,0,0,.07)', border:'1.5px solid #f0ece6', position:'relative', display:'flex', flexDirection:'column' }}>
@@ -251,10 +257,11 @@ export default function BrowsePage() {
                     {/* Photo */}
                     <div style={{ paddingTop:'20px', display:'flex', justifyContent:'center' }}>
                       <div style={{ position:'relative' }}>
-                        {kb.profiles?.selfie_url ? (
+                        {showPhoto ? (
                           <img
-                            src={kb.profiles.selfie_url}
+                            src={selfieUrl!}
                             alt={displayName}
+                            onError={() => setImgErrors(prev => ({ ...prev, [kb.id]: true }))}
                             style={{ width:'76px', height:'76px', borderRadius:'50%', objectFit:'cover', border:'3px solid #fff', boxShadow:'0 3px 10px rgba(0,0,0,.14)', display:'block' }}
                           />
                         ) : (
