@@ -139,7 +139,7 @@ export default function SelfieCapture() {
     } catch {
       // best-effort — proceed to dashboard regardless
     }
-    router.push('/dashboard/kasambahay')
+    router.push('/signup/kasambahay/success')
   }
 
   return (

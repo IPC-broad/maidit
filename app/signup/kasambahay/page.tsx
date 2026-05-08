@@ -241,7 +241,7 @@ export default function KasambahaySignup() {
     }
 
     setLoading(false)
-    router.push(selfieData ? '/dashboard/kasambahay' : '/signup/kasambahay/selfie')
+    router.push(selfieData ? '/signup/kasambahay/success' : '/signup/kasambahay/selfie')
   }
 
   const verifyAndCreate = async () => {

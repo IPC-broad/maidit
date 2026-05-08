@@ -72,7 +72,8 @@ export default function BrowsePage() {
       const { supabase } = await import('../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user || null)
-      const { data } = await supabase.from('kasambahay').select('*, profiles(full_name, selfie_url, city)')
+      const { data } = await supabase.from('kasambahay').select('*, profiles!kasambahay_profile_id_fkey(full_name, selfie_url, city)')
+      console.log('[browse] first result:', JSON.stringify(data?.[0]))
       setProfiles(data || [])
       setLoading(false)
     }
