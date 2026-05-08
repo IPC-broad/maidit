@@ -551,24 +551,23 @@ export default function KasambahaySignup() {
         <>
           <div style={s.title}>I-verify ang number mo</div>
           <div style={s.sub}>
-            {sentOtp
-              ? <>Nagpadala kami ng 6-digit code sa <strong style={{ color:'#111827' }}>{form.mobile}</strong></>
-              : <>Hindi napadala ang SMS sa <strong style={{ color:'#111827' }}>{form.mobile}</strong>. Subukan ulit o gamitin ang dev bypass sa ibaba.</>
-            }
+            Nagpadala kami ng 6-digit code sa <strong style={{ color:'#111827' }}>{form.mobile}</strong>. Kung hindi natanggap, normal lang — ang SMS sender name ay nasa approval pa ng Semaphore. Gamitin ang Dev Mode bypass sa itaas.
           </div>
 
           {process.env.NEXT_PUBLIC_DEV_MODE === 'true' && (
-            <div style={{ background:'#1e1b4b', border:'2px dashed #6366f1', borderRadius:'10px', padding:'12px 13px', marginBottom:'13px' }}>
-              <div style={{ fontSize:'10px', fontWeight:800, color:'#a5b4fc', letterSpacing:'1px', marginBottom:'8px', fontFamily:'monospace' }}>⚠️ DEV MODE</div>
+            <div style={{ background:'#fffbeb', border:'2px solid #f59e0b', borderRadius:'10px', padding:'12px 13px', marginBottom:'13px' }}>
+              <div style={{ fontSize:'.74rem', color:'#92400e', lineHeight:1.6, marginBottom:'10px' }}>
+                🔧 <strong>Dev Mode:</strong> Ang SMS verification ay hindi pa available dahil ang Semaphore sender name ay nasa approval pa. I-skip ang OTP para sa testing.
+              </div>
               {sentOtp && (
-                <div style={{ fontFamily:'monospace', fontSize:'1.3rem', fontWeight:900, color:'#fff', letterSpacing:'8px', marginBottom:'10px' }}>{sentOtp}</div>
+                <div style={{ fontFamily:'monospace', fontSize:'1.1rem', fontWeight:900, color:'#92400e', letterSpacing:'6px', marginBottom:'10px' }}>{sentOtp}</div>
               )}
               <button
-                style={{ width:'100%', padding:'10px', borderRadius:'9px', background:'rgba(99,102,241,.25)', border:'1.5px solid #6366f1', color:'#a5b4fc', fontFamily:'sans-serif', fontSize:'.82rem', fontWeight:700, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? .6 : 1 }}
+                style={{ width:'100%', padding:'10px', borderRadius:'9px', background:'#f59e0b', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'.82rem', fontWeight:700, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? .6 : 1 }}
                 onClick={createAccount}
                 disabled={loading}
               >
-                {loading ? 'Ginagawa...' : 'I-skip ang OTP (Dev Mode) →'}
+                {loading ? 'Ginagawa...' : 'I-skip ang OTP (Semaphore Pending Approval) →'}
               </button>
             </div>
           )}
