@@ -241,7 +241,7 @@ export default function BrowsePage() {
                 const extraSkills = skills.length - 3
                 // selfie_url from DB, or derive from profile_id (path written by selfie page)
                 const selfieUrl = kb.profiles?.selfie_url
-                  || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.jpg` : null)
+                  || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
                 const showPhoto = !!(selfieUrl && !imgErrors[kb.id])
 
                 return (
