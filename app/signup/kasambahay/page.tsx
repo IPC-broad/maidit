@@ -227,16 +227,18 @@ export default function KasambahaySignup() {
 
     if (selfieData && userId) {
       try {
+        console.log('[signup] Uploading inline selfie for user:', userId)
         const blob = await fetch(selfieData).then(r => r.blob())
         const { error: uploadError } = await supabase.storage
           .from('Selfies')
           .upload(`${userId}/selfie.png`, blob, { upsert: true, contentType: 'image/png' })
-        if (!uploadError) {
-          const { data: { publicUrl } } = supabase.storage.from('Selfies').getPublicUrl(`${userId}/selfie.png`)
-          await supabase.from('profiles').update({ selfie_url: publicUrl }).eq('id', userId)
-        }
-      } catch {
-        // best-effort
+        console.log('[signup] Upload result:', uploadError ?? 'success')
+        const { data: { publicUrl } } = supabase.storage.from('Selfies').getPublicUrl(`${userId}/selfie.png`)
+        console.log('[signup] Public URL:', publicUrl)
+        const { error: updateError } = await supabase.from('profiles').update({ selfie_url: publicUrl }).eq('id', userId)
+        console.log('[signup] Profile update result:', updateError ?? 'success')
+      } catch (err) {
+        console.error('[signup] Selfie upload error:', err)
       }
     }
 

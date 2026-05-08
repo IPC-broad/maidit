@@ -123,22 +123,35 @@ export default function SelfieCapture() {
     try {
       const { supabase } = await import('../../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
+      if (!user) {
+        console.log('[selfie] No user session — redirecting to login')
+        setUploading(false)
+        router.push('/login')
+        return
+      }
+      console.log('[selfie] Uploading selfie for user:', user.id)
 
       const blob = await fetch(photo).then(r => r.blob())
-      const path = `${user.id}/selfie.jpg`
+      const path = `${user.id}/selfie.png`
 
       const { error: uploadError } = await supabase.storage
         .from('Selfies')
-        .upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
+        .upload(path, blob, { upsert: true, contentType: 'image/png' })
 
-      if (!uploadError) {
-        const { data: { publicUrl } } = supabase.storage.from('Selfies').getPublicUrl(path)
-        await supabase.from('profiles').update({ selfie_url: publicUrl }).eq('id', user.id)
-      }
-    } catch {
-      // best-effort — proceed to dashboard regardless
+      console.log('[selfie] Upload result:', uploadError ?? 'success')
+
+      const { data: { publicUrl } } = supabase.storage.from('Selfies').getPublicUrl(path)
+      console.log('[selfie] Public URL:', publicUrl)
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ selfie_url: publicUrl })
+        .eq('id', user.id)
+      console.log('[selfie] Profile update result:', updateError ?? 'success')
+    } catch (err) {
+      console.error('[selfie] Unexpected error:', err)
     }
+    setUploading(false)
     router.push('/signup/kasambahay/success')
   }
 
