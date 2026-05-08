@@ -51,7 +51,8 @@ export default function KasambahaySignup() {
     age: '',
     salary: '',
     setup: 'Stay-in',
-    experience: 'Baguhan'
+    experience: 'Baguhan',
+    availability: 'Immediate'
   })
 
   const update = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
@@ -220,6 +221,7 @@ export default function KasambahaySignup() {
       experience: form.experience,
       province: selProv!.name,
       age: form.age ? parseInt(form.age) : null,
+      availability: form.availability || 'Immediate',
       ...(referredBy ? { referred_by: referredBy } : {})
     })
 
@@ -487,6 +489,14 @@ export default function KasambahaySignup() {
             <option>3-5 taon</option>
             <option>6-10 taon</option>
             <option>10+ taon</option>
+          </select>
+
+          <label style={s.lbl}>Availability</label>
+          <select style={s.input} value={form.availability} onChange={e => update('availability', e.target.value)}>
+            <option>Immediate</option>
+            <option>Within 1 week</option>
+            <option>Within 2 weeks</option>
+            <option>Within 1 month</option>
           </select>
 
           <div style={{ background:'#fdf3e3', border:'1px solid rgba(201,148,58,.2)', borderRadius:'12px', padding:'13px 15px', marginBottom:'16px' }}>

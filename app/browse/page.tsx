@@ -21,6 +21,7 @@ export default function HWDashboard() {
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user || null)
       const { data } = await supabase.from('kasambahay').select('*, profiles(full_name, selfie_url, city)')
+      console.log('[browse] kasambahay data:', data?.slice(0,3).map((kb: any) => ({ id: kb.id, selfie_url: kb.profiles?.selfie_url, full_name: kb.profiles?.full_name })))
       setProfiles(data || [])
       setLoading(false)
     }
@@ -143,6 +144,11 @@ export default function HWDashboard() {
                   {kb.skills?.map((skill: string) => (
                     <span key={skill} style={{ fontSize:'.67rem', padding:'3px 7px', borderRadius:'4px', background:'#e8f5ee', color:'#1a6b3c' }}>{skill}</span>
                   ))}
+                  {kb.availability && (
+                    <span style={{ fontSize:'.6rem', fontWeight:700, padding:'2px 7px', borderRadius:'4px', background: kb.availability === 'Immediate' ? '#f0fdf4' : '#f9fafb', color: kb.availability === 'Immediate' ? '#166534' : '#6b7280' }}>
+                      {kb.availability === 'Immediate' ? '🟢 Available Now' : `⏱ ${kb.availability}`}
+                    </span>
+                  )}
                 </div>
                 {offered[kb.id] ? (
                   <div style={{ background:'#e8f5ee', border:'1.5px solid rgba(26,107,60,.2)', borderRadius:'9px', padding:'9px', textAlign:'center', fontSize:'.76rem', color:'#1a6b3c', fontWeight:700 }}>Offer sent! Waiting for response</div>
