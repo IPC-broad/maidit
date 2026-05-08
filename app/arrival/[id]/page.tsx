@@ -57,22 +57,37 @@ export default function ArrivalPage() {
 
     const referrorId = offer.kasambahay?.referred_by
     if (referrorId) {
-      await supabase.from('payouts').insert({
-        partner_id: referrorId,
-        offer_id: offerId,
-        amount: 600,
-        type: 'arrival',
-        status: 'pending',
-        due_at: now
-      })
-      await supabase.from('payouts').insert({
-        partner_id: referrorId,
-        offer_id: offerId,
-        amount: 400,
-        type: 'day30',
-        status: 'scheduled',
-        due_at: day30
-      })
+      const { data: partnerData } = await supabase.from('partners').select('tier').eq('id', referrorId).single()
+      const isVip = partnerData?.tier === 'gold'
+      if (isVip) {
+        // VIP: ₱1,000 upfront on arrival
+        await supabase.from('payouts').insert({
+          partner_id: referrorId,
+          offer_id: offerId,
+          amount: 1000,
+          type: 'arrival',
+          status: 'pending',
+          due_at: now
+        })
+      } else {
+        // Standard: ₱600 on arrival + ₱400 after 30 days
+        await supabase.from('payouts').insert({
+          partner_id: referrorId,
+          offer_id: offerId,
+          amount: 600,
+          type: 'arrival',
+          status: 'pending',
+          due_at: now
+        })
+        await supabase.from('payouts').insert({
+          partner_id: referrorId,
+          offer_id: offerId,
+          amount: 400,
+          type: 'day30',
+          status: 'scheduled',
+          due_at: day30
+        })
+      }
     }
 
     await fetch('/api/send-sms', {
