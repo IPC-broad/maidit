@@ -203,7 +203,11 @@ export default function HWDashboard() {
             {filtered.map((kb) => (
               <div key={kb.id} style={{ background:'#fff', borderRadius:'14px', padding:'13px 14px', boxShadow:'0 2px 8px rgba(0,0,0,.06)', border:'1.5px solid #f3f4f6' }}>
                 <div style={{ display:'flex', gap:'11px', alignItems:'center', marginBottom:'9px' }}>
-                  <div style={{ width:'46px', height:'46px', borderRadius:'50%', background:'#fdf3e3', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.2rem', flexShrink:0, border:'2px solid rgba(201,148,58,.2)' }}>👩</div>
+                  <div style={{ width:'46px', height:'46px', borderRadius:'50%', background:'#fdf3e3', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.2rem', flexShrink:0, border:'2px solid rgba(201,148,58,.2)', overflow:'hidden' }}>
+                    {kb.profiles?.selfie_url
+                      ? <img src={kb.profiles.selfie_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }} />
+                      : '👩'}
+                  </div>
                   <div style={{ flex:1 }}>
                     <div style={{ fontWeight:700, fontSize:'.9rem', color:'#111827' }}>
                       {kb.profiles?.full_name?.split(' ')[0]} {kb.profiles?.full_name?.split(' ')[1]?.[0]}.
@@ -335,7 +339,11 @@ export default function HWDashboard() {
               <div key={app.id} style={{ background:'#fff', borderRadius:'14px', border:'1px solid #ede8e0', overflow:'hidden', marginBottom:'12px' }}>
                 <div style={{ padding:'13px 14px' }}>
                   <div style={{ display:'flex', gap:'11px', alignItems:'center', marginBottom:'9px' }}>
-                    <div style={{ width:'44px', height:'44px', borderRadius:'50%', background:'#fdf3e3', border:'2px solid #fde8c0', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px', flexShrink:0 }}>👩</div>
+                    <div style={{ width:'44px', height:'44px', borderRadius:'50%', background:'#fdf3e3', border:'2px solid #fde8c0', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px', flexShrink:0, overflow:'hidden' }}>
+                      {kb?.profiles?.selfie_url
+                        ? <img src={kb.profiles.selfie_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }} />
+                        : '👩'}
+                    </div>
                     <div style={{ flex:1 }}>
                       <div style={{ fontWeight:700, fontSize:'14px', color:'#111827' }}>
                         {kbName.split(' ')[0]} {kbName.split(' ')[1]?.[0]}.
