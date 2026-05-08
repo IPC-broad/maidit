@@ -59,9 +59,9 @@ export default function PostJobPage() {
     const { error } = await supabase.from('jobs').insert({
       homeowner_id: hwId,
       salary: parseInt(form.salary),
-      start_date: form.start_date,
+      start_date: form.start_date || null,
       urgency: form.urgency,
-      custom_date: form.custom_date,
+      custom_date: form.custom_date || null,
       setup: form.setup,
       day_off: form.day_off,
       city: form.city,
