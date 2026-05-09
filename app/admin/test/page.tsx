@@ -33,6 +33,7 @@ export default function AdminTestPanel() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState<string | null>(null)
   const [msg, setMsg] = useState('')
+  const [balanceInputs, setBalanceInputs] = useState<Record<string, string>>({})
 
   const load = async () => {
     setLoading(true)
@@ -77,6 +78,29 @@ export default function AdminTestPanel() {
     const extra = status === 'available' ? { confirmed_at: new Date().toISOString() } : {}
     await supabase.from('kasambahay').update({ status, ...extra }).eq('id', workerId)
     setMsg('Worker updated to ' + status)
+    setTimeout(() => setMsg(''), 2000)
+    await load()
+    setUpdating(null)
+  }
+
+  const clearFlag = async (partnerId: string) => {
+    setUpdating(partnerId + 'flag')
+    const { supabase } = await import('../../../lib/supabase')
+    await supabase.from('partners').update({ flagged: false, flag_reason: null }).eq('id', partnerId)
+    setMsg('Flag cleared.')
+    setTimeout(() => setMsg(''), 2000)
+    await load()
+    setUpdating(null)
+  }
+
+  const adjustBalance = async (partnerId: string) => {
+    const raw = balanceInputs[partnerId]
+    const amount = parseInt(raw)
+    if (isNaN(amount)) { setMsg('Enter a valid integer (e.g. 500 or -500)'); return }
+    setUpdating(partnerId + 'balance')
+    const { supabase } = await import('../../../lib/supabase')
+    await supabase.from('partners').update({ balance: amount }).eq('id', partnerId)
+    setMsg(`Balance set to ₱${amount}.`)
     setTimeout(() => setMsg(''), 2000)
     await load()
     setUpdating(null)
@@ -213,22 +237,61 @@ export default function AdminTestPanel() {
         const totalReferred = referredWorkers.filter(w => w.referred_by === p.id).length
         const totalHired = referredWorkers.filter(w => w.referred_by === p.id && w.status === 'hired').length
         const isGold = p.tier === 'gold'
+        const balance = p.balance ?? 0
+        const isFlagged = p.flagged === true
         return (
-          <div key={p.id} style={s.card}>
+          <div key={p.id} style={{ ...s.card, border: isFlagged ? '1.5px solid #fecaca' : '1px solid #ede8e0', background: isFlagged ? '#fffafa' : '#fff' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
               <div>
-                <div style={{ fontWeight: 700, fontSize: '14px' }}>{pName}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '1px' }}>
+                  <span style={{ fontWeight: 700, fontSize: '14px' }}>{pName}</span>
+                  {isFlagged && <span style={{ fontSize: '9px', fontWeight: 800, padding: '2px 7px', borderRadius: '50px', background: '#dc2626', color: '#fff' }}>FLAGGED</span>}
+                </div>
                 <div style={{ fontSize: '11px', color: '#9ca3af' }}>{pMobile}</div>
                 <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>
                   Code: <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#c9943a' }}>{p.referral_code || '—'}</span>
                 </div>
+                {isFlagged && p.flag_reason && (
+                  <div style={{ fontSize: '10px', color: '#dc2626', marginTop: '4px', lineHeight: 1.4, maxWidth: '220px' }}>{p.flag_reason}</div>
+                )}
               </div>
-              <span style={s.badge(isGold ? '#c9943a' : '#6b7280')}>{isGold ? '⭐ VIP' : 'Standard'}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                <span style={s.badge(isGold ? '#c9943a' : '#6b7280')}>{isGold ? '⭐ VIP' : 'Standard'}</span>
+                <span style={s.badge(balance < 0 ? '#dc2626' : '#1a6b3c')}>
+                  Balance: {balance < 0 ? `−₱${Math.abs(balance)}` : `₱${balance}`}
+                </span>
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: '16px', fontSize: '12px', color: '#374151' }}>
+            <div style={{ display: 'flex', gap: '16px', fontSize: '12px', color: '#374151', marginBottom: '10px' }}>
               <div><span style={{ color: '#9ca3af' }}>Referred:</span> <strong>{totalReferred}</strong></div>
               <div><span style={{ color: '#9ca3af' }}>Hired:</span> <strong style={{ color: '#1a6b3c' }}>{totalHired}</strong></div>
               <div><span style={{ color: '#9ca3af' }}>Barangay:</span> <strong>{p.barangay || '—'}</strong></div>
+            </div>
+            {/* Admin controls */}
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' as const, alignItems: 'center' }}>
+              {isFlagged && (
+                <button
+                  onClick={() => clearFlag(p.id)}
+                  disabled={updating === p.id + 'flag'}
+                  style={{ padding: '5px 11px', borderRadius: '6px', border: '1.5px solid #dc262640', background: '#fef2f2', color: '#dc2626', fontFamily: 'sans-serif', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  {updating === p.id + 'flag' ? '...' : '✓ Clear Flag'}
+                </button>
+              )}
+              <input
+                type="number"
+                placeholder="Set balance"
+                value={balanceInputs[p.id] ?? ''}
+                onChange={e => setBalanceInputs(prev => ({ ...prev, [p.id]: e.target.value }))}
+                style={{ padding: '5px 8px', borderRadius: '6px', border: '1.5px solid #e5e0d8', fontFamily: 'sans-serif', fontSize: '11px', width: '100px', outline: 'none' }}
+              />
+              <button
+                onClick={() => adjustBalance(p.id)}
+                disabled={updating === p.id + 'balance'}
+                style={{ padding: '5px 11px', borderRadius: '6px', border: '1.5px solid #2563eb40', background: '#eff6ff', color: '#2563eb', fontFamily: 'sans-serif', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+              >
+                {updating === p.id + 'balance' ? '...' : 'Set Balance'}
+              </button>
             </div>
           </div>
         )
