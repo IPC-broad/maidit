@@ -18,6 +18,7 @@ export default function HWDashboard() {
   const [offersLoaded, setOffersLoaded] = useState(false)
   const [applicantsLoaded, setApplicantsLoaded] = useState(false)
   const [applicantCount, setApplicantCount] = useState(0)
+  const [hwMeta, setHwMeta] = useState<any>(null)
 
   useEffect(() => {
     const init = async () => {
@@ -28,13 +29,14 @@ export default function HWDashboard() {
       setProfiles(data || [])
       let hw: any = null
       if (user) {
-        const { data: hwData } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
+        const { data: hwData } = await supabase.from('homeowners').select('id, subscription_credit_used, subscription_expires_at').eq('profile_id', user.id).single()
         if (!hwData) {
-          const { data: created } = await supabase.from('homeowners').insert({ profile_id: user.id }).select('id').single()
+          const { data: created } = await supabase.from('homeowners').insert({ profile_id: user.id }).select('id, subscription_credit_used, subscription_expires_at').single()
           hw = created
         } else {
           hw = hwData
         }
+        setHwMeta(hw)
       }
       if (hw) {
         const { data: offersData } = await supabase.from('offers').select('id, status, kasambahay_id').eq('homeowner_id', hw.id)
@@ -146,6 +148,13 @@ export default function HWDashboard() {
   }
 
   const actionCount = offers.filter(o => o.status === 'agreed' || o.status === 'countered').length
+
+  const creditApplicable =
+    hwMeta &&
+    !hwMeta.subscription_credit_used &&
+    hwMeta.subscription_expires_at &&
+    new Date(hwMeta.subscription_expires_at) > new Date()
+  const hireFee = creditApplicable ? '2,001' : '2,500'
 
   if (loading) return (
     <div style={{ minHeight:'100vh', background:'#faf8f5', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif', color:'#6b7280' }}>
@@ -305,7 +314,7 @@ export default function HWDashboard() {
                   {needsPayment && (
                     <button style={{ width:'100%', padding:'11px', borderRadius:'10px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'13px', fontWeight:700, cursor:'pointer' }}
                       onClick={() => router.push(`/pay/${offer.id}`)}>
-                      Pay ₱2,001 Hire Fee →
+                      Pay ₱{hireFee} Hire Fee →
                     </button>
                   )}
                   {isHired && (

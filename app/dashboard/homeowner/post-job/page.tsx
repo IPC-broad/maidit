@@ -72,8 +72,17 @@ export default function PostJobPage() {
       active: true
     })
 
+    if (error) { setSubmitting(false); setError(error.message); return }
+
+    // Set subscription expiry if not already set (starts 30-day credit window)
+    const { data: hw } = await supabase.from('homeowners').select('id, subscription_expires_at').eq('id', hwId).single()
+    if (hw && !hw.subscription_expires_at) {
+      const exp = new Date()
+      exp.setDate(exp.getDate() + 30)
+      await supabase.from('homeowners').update({ subscription_expires_at: exp.toISOString() }).eq('id', hwId)
+    }
+
     setSubmitting(false)
-    if (error) { setError(error.message); return }
     setStep('done')
   }
 
@@ -190,7 +199,7 @@ export default function PostJobPage() {
 
         <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '11px', padding: '12px 14px', marginBottom: '14px' }}>
           <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.7 }}>
-            💡 <strong>Subscription fee credit:</strong> Your ₱499 will be deducted from the ₱2,500 hiring fee when you hire a kasambahay. You will only pay <strong>₱2,001</strong> at that time.
+            💡 <strong>First hire credit included:</strong> Your ₱499 subscription includes one hiring fee credit valid for 30 days. First hire: <strong>₱2,001</strong>. Subsequent hires within 30 days: ₱2,500.
           </div>
         </div>
 
@@ -227,7 +236,7 @@ export default function PostJobPage() {
           Pay ₱499 via PayMongo →
         </button>
         <div style={{ fontSize: '.7rem', color: '#6b7280', textAlign: 'center' as const, marginTop: '-4px', marginBottom: '14px', lineHeight: 1.6 }}>
-          💡 Your ₱499 subscription is deductible from the ₱2,500 hiring fee. You only pay ₱2,001 when you hire.
+          💡 Your ₱499 subscription includes one hiring fee credit for 30 days. First hire: ₱2,001. Subsequent hires: ₱2,500.
         </div>
         <button style={s.btnOutline} onClick={() => router.push('/dashboard/homeowner')}>
           Pay later
@@ -276,7 +285,7 @@ export default function PostJobPage() {
 
         <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '11px', padding: '12px 14px', marginBottom: '18px' }}>
           <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.6 }}>
-            After posting, you can send up to <strong>10 job offers</strong>. Hiring fee is ₱2,500 minus your ₱499 subscription = <strong>₱2,001 net</strong>.
+            After posting, you can send up to <strong>10 job offers</strong>. Your ₱499 subscription includes one hiring fee credit valid for 30 days — first hire is <strong>₱2,001</strong>, subsequent hires within 30 days are ₱2,500.
           </div>
         </div>
 

@@ -56,7 +56,7 @@ export default function HomeownerEntry() {
               📝 Post a Job and Receive Applicants.
             </div>
             <div className="text-sm text-white/80 leading-relaxed">
-              ₱499 to activate. Includes 1 job listing and up to 10 job offers.
+              Post jobs for ₱499 — includes one hiring fee credit for your first hire.
             </div>
           </button>
 

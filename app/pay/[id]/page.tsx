@@ -11,6 +11,7 @@ export default function PayPage() {
   const offerId = params?.id as string
 
   const [offer, setOffer] = useState<any>(null)
+  const [hwRecord, setHwRecord] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [step, setStep] = useState<'pay' | 'confirm' | 'done' | 'already'>('pay')
   const [submitting, setSubmitting] = useState(false)
@@ -29,10 +30,22 @@ export default function PayPage() {
 
       if (!data) { router.push('/dashboard/homeowner'); return }
 
-      const { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
+      let { data: hw } = await supabase
+        .from('homeowners')
+        .select('id, subscription_credit_used, subscription_expires_at')
+        .eq('profile_id', user.id)
+        .single()
+
       if (!hw) {
-        await supabase.from('homeowners').insert({ profile_id: user.id })
+        const { data: created } = await supabase
+          .from('homeowners')
+          .insert({ profile_id: user.id })
+          .select('id, subscription_credit_used, subscription_expires_at')
+          .single()
+        hw = created
       }
+
+      setHwRecord(hw)
 
       if (['paid', 'payment_pending', 'active', 'hired'].includes(data.status)) {
         setStep('already')
@@ -43,8 +56,16 @@ export default function PayPage() {
     init()
   }, [offerId])
 
+  const now = new Date()
+  const creditApplicable =
+    hwRecord &&
+    !hwRecord.subscription_credit_used &&
+    hwRecord.subscription_expires_at &&
+    new Date(hwRecord.subscription_expires_at) > now
+
   const hasTransport = offer?.transport_service === true
-  const total = hasTransport ? 8001 : 2001
+  const baseFee = creditApplicable ? 2001 : 2500
+  const total = baseFee + (hasTransport ? 6000 : 0)
   const paymongoLink = hasTransport ? PAYMONGO_LINK_8001 : PAYMONGO_LINK
 
   const handleOpenPayMongo = () => {
@@ -56,9 +77,17 @@ export default function PayPage() {
     setSubmitting(true)
     const { supabase } = await import('../../../lib/supabase')
 
-    await supabase.from('offers').update({
-      status: 'payment_pending'
-    }).eq('id', offerId)
+    await supabase.from('offers').update({ status: 'payment_pending' }).eq('id', offerId)
+
+    if (hwRecord?.id) {
+      const updates: any = { subscription_credit_used: true }
+      if (!hwRecord.subscription_expires_at) {
+        const exp = new Date()
+        exp.setDate(exp.getDate() + 30)
+        updates.subscription_expires_at = exp.toISOString()
+      }
+      await supabase.from('homeowners').update(updates).eq('id', hwRecord.id)
+    }
 
     await fetch('/api/send-sms', {
       method: 'POST',
@@ -168,10 +197,12 @@ export default function PayPage() {
             <span style={{ fontSize: '.82rem', color: '#374151' }}>Hiring Fee</span>
             <span style={{ textDecoration: 'line-through', color: '#9ca3af', fontSize: '.82rem' }}>₱2,500</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f3f4f6' }}>
-            <span style={{ fontSize: '.82rem', color: '#374151' }}>Subscription credit</span>
-            <span style={{ fontSize: '.82rem', color: '#1a6b3c', fontWeight: 700 }}>−₱499</span>
-          </div>
+          {creditApplicable && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f3f4f6' }}>
+              <span style={{ fontSize: '.82rem', color: '#374151' }}>First hire credit</span>
+              <span style={{ fontSize: '.82rem', color: '#1a6b3c', fontWeight: 700 }}>−₱499</span>
+            </div>
+          )}
           {hasTransport && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f3f4f6' }}>
               <div>
@@ -187,7 +218,16 @@ export default function PayPage() {
           </div>
         </div>
 
-        {/* Protection note for transport */}
+        {/* Credit applied note */}
+        {creditApplicable && (
+          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '11px', padding: '11px 14px', marginBottom: '14px' }}>
+            <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.7 }}>
+              ✅ <strong>First hire credit applied:</strong> Your ₱499 subscription credit has been deducted — you pay ₱2,001 for this hire. Subsequent hires within 30 days are ₱2,500.
+            </div>
+          </div>
+        )}
+
+        {/* Transport protection note */}
         {hasTransport && (
           <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '11px', padding: '12px 14px', marginBottom: '14px' }}>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
@@ -202,23 +242,13 @@ export default function PayPage() {
           </div>
         )}
 
-        {/* Subscription credit note for standard flow */}
-        {!hasTransport && (
-          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '11px', padding: '11px 14px', marginBottom: '14px' }}>
-            <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.7 }}>
-              ✅ <strong>Subscription fee credit applied:</strong> Your ₱499 subscription has been deducted from the ₱2,500 hiring fee — you only pay ₱2,001 now.<br/>
-              <span style={{ marginTop: '4px', display: 'block' }}>This is a one-time hiring fee per kasambahay hired.</span>
-            </div>
-          </div>
-        )}
-
         <div style={s.card}>
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#6b7280', marginBottom: '10px' }}>What's included</div>
           {[
             { icon: '🛡️', text: '30-day rematch guarantee' },
             { icon: '✅', text: 'Verified kasambahay profile' },
             { icon: '📋', text: 'RA 10361-compliant employment terms' },
-            { icon: '💬', text: 'MaidIt support during trial period' },
+            { icon: '🎁', text: 'One hiring fee credit (₱499) valid for 30 days — applied to your first hire' },
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', gap: '10px', padding: '7px 0', borderBottom: i < 3 ? '1px solid #f3f4f6' : 'none', alignItems: 'flex-start' }}>
               <span style={{ fontSize: '1rem', minWidth: '20px' }}>{item.icon}</span>
