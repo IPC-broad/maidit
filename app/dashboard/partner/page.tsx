@@ -209,13 +209,34 @@ export default function PartnerDashboard() {
             <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, color: '#1a1a1a' }}>Welcome back, {partner?.profiles?.full_name?.split(' ')[0]}! 👋</div>
             <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>Salamat sa pagtulong na makahanap ng maaasahang kasambahay.</div>
           </div>
-          <button onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.auth.signOut(); router.push('/login') }} style={{ background: '#f9f6f2', border: '1px solid #ede8e0', borderRadius: '8px', padding: '7px 13px', color: '#6b7280', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'sans-serif', display: 'flex', alignItems: 'center', gap: '5px' }}>
-            Sign Out
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {partner?.flagged && (
+              <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 9px', borderRadius: '50px', background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}>
+                ⚠️ Flagged
+              </span>
+            )}
+            <button onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.auth.signOut(); router.push('/login') }} style={{ background: '#f9f6f2', border: '1px solid #ede8e0', borderRadius: '8px', padding: '7px 13px', color: '#6b7280', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'sans-serif', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              Sign Out
+            </button>
+          </div>
         </div>
       </div>
 
       <div style={{ padding: '14px 16px' }}>
+        {/* Negative balance warning */}
+        {(partner?.balance ?? 0) < 0 && (
+          <div style={{ background: '#fef2f2', border: '1.5px solid #fecaca', borderRadius: '12px', padding: '12px 14px', marginBottom: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+            <span style={{ fontSize: '20px', flexShrink: 0 }}>⚠️</span>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#dc2626', marginBottom: '2px' }}>
+                Your account has a negative balance of ₱{Math.abs(partner.balance).toLocaleString()}
+              </div>
+              <div style={{ fontSize: '12px', color: '#b91c1c', lineHeight: 1.5 }}>
+                This will be deducted from your next payout. Future payouts are held until this balance is cleared.
+              </div>
+            </div>
+          </div>
+        )}
         {newlyConfirmed > 0 && (
           <div style={{ background: "#c9943a", border: "1px solid #c9943a", borderRadius: "12px", padding: "12px 14px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => setTab("workers")}>
             <span style={{ fontSize: "20px" }}>🎉</span>
@@ -388,29 +409,51 @@ export default function PartnerDashboard() {
               <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '4px' }}>Total kinita</div>
               <div style={{ fontFamily: 'serif', fontSize: '28px', fontWeight: 900, color: '#1a6b3c' }}>₱{totalEarned.toLocaleString()}</div>
               {totalPending > 0 && <div style={{ fontSize: '12px', color: '#c9943a', marginTop: '4px', fontWeight: 600 }}>₱{totalPending.toLocaleString()} pending</div>}
+              {(partner?.balance ?? 0) < 0 && (
+                <div style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px', fontWeight: 700 }}>
+                  Balance: −₱{Math.abs(partner.balance).toLocaleString()} (will be deducted from next payout)
+                </div>
+              )}
               <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>GCash: <strong>{partner?.gcash_number || '—'}</strong></div>
             </div>
             {payouts.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '32px', background: '#fff', borderRadius: '14px', border: '1px solid #ede8e0', color: '#9ca3af', fontSize: '13px' }}>
                 Wala pang payouts. Lalabas ito kapag na-hire na ang iyong workers.
               </div>
-            ) : payouts.map(p => (
-              <div key={p.id} style={{ background: '#fff', borderRadius: '12px', padding: '13px 14px', marginBottom: '8px', border: `1px solid ${p.status === 'pending' ? '#fde8c0' : '#ede8e0'}`, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: p.status === 'paid' ? '#f0fdf4' : '#fef3e2', flexShrink: 0, fontSize: '16px' }}>
-                  {p.status === 'paid' ? '✅' : '⏳'}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: '13px', color: '#111827' }}>{p.offer?.kasambahay_profile?.full_name}</div>
-                  <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '1px' }}>
-                    {p.type === 'arrival' ? 'Arrival payout' : 'Day-30 payout'} · {new Date(p.due_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}
+            ) : payouts.map(p => {
+              const isDebit = p.amount < 0
+              const isHeld = p.status === 'held'
+              const typeLabel: Record<string, string> = {
+                arrival: 'Arrival payout',
+                day30: 'Day-30 payout',
+                clawback: 'Clawback — early departure',
+                balance_clear: 'Balance cleared',
+                arrival_absorbed: 'Arrival (absorbed to balance)',
+              }
+              const borderColor = isDebit ? '#fecaca' : isHeld ? '#e5e7eb' : p.status === 'pending' ? '#fde8c0' : '#ede8e0'
+              const bgColor = isDebit ? '#fef2f2' : p.status === 'paid' ? '#f0fdf4' : '#fef3e2'
+              const icon = isDebit ? '↩️' : isHeld ? '🔒' : p.status === 'paid' ? '✅' : '⏳'
+              const amountColor = isDebit ? '#dc2626' : isHeld ? '#6b7280' : p.status === 'paid' ? '#1a6b3c' : '#c9943a'
+              const amountDisplay = isDebit ? `−₱${Math.abs(p.amount).toLocaleString()}` : `₱${p.amount.toLocaleString()}`
+              return (
+                <div key={p.id} style={{ background: isDebit ? '#fef2f2' : '#fff', borderRadius: '12px', padding: '13px 14px', marginBottom: '8px', border: `1px solid ${borderColor}`, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: bgColor, flexShrink: 0, fontSize: '16px' }}>
+                    {icon}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: '13px', color: isDebit ? '#dc2626' : '#111827' }}>{p.offer?.kasambahay_profile?.full_name}</div>
+                    <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '1px' }}>
+                      {typeLabel[p.type] || p.type} · {new Date(p.due_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}
+                    </div>
+                    {isHeld && <div style={{ fontSize: '10px', color: '#6b7280', marginTop: '2px' }}>Held — clear negative balance first</div>}
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontFamily: 'serif', fontSize: '15px', fontWeight: 900, color: amountColor }}>{amountDisplay}</div>
+                    <div style={{ fontSize: '10px', color: '#9ca3af', marginTop: '1px' }}>{p.status}</div>
                   </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontFamily: 'serif', fontSize: '15px', fontWeight: 900, color: p.status === 'paid' ? '#1a6b3c' : '#c9943a' }}>₱{p.amount.toLocaleString()}</div>
-                  <div style={{ fontSize: '10px', color: '#9ca3af', marginTop: '1px' }}>{p.status}</div>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </>
         )}
 
