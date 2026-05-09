@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 
 const PAYMONGO_LINK = process.env.NEXT_PUBLIC_PAYMONGO_LINK || 'https://pm.link/org-9FQv6XBpoCxdDMaMPY8gze3N/bK90nx0'
+const PAYMONGO_LINK_8001 = process.env.NEXT_PUBLIC_PAYMONGO_LINK_8001 || PAYMONGO_LINK
 
 export default function PayPage() {
   const router = useRouter()
@@ -28,7 +29,6 @@ export default function PayPage() {
 
       if (!data) { router.push('/dashboard/homeowner'); return }
 
-      // Ensure homeowner record exists for this user (query by profile_id)
       const { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
       if (!hw) {
         await supabase.from('homeowners').insert({ profile_id: user.id })
@@ -43,9 +43,13 @@ export default function PayPage() {
     init()
   }, [offerId])
 
+  const hasTransport = offer?.transport_service === true
+  const total = hasTransport ? 8001 : 2001
+  const paymongoLink = hasTransport ? PAYMONGO_LINK_8001 : PAYMONGO_LINK
+
   const handleOpenPayMongo = () => {
     setStep('confirm')
-    window.open(PAYMONGO_LINK, '_blank')
+    window.open(paymongoLink, '_blank')
   }
 
   const handleConfirmPaid = async () => {
@@ -125,13 +129,13 @@ export default function PayPage() {
           <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.8 }}>
             ✅ PayMongo accepts <strong>QRPh</strong><br />
             Scan with GCash, BPI, BDO, UnionBank, or any bank app.<br />
-            Make sure the amount shows <strong>₱2,001.00</strong>.
+            Make sure the amount shows <strong>₱{total.toLocaleString()}.00</strong>.
           </div>
         </div>
         <button style={{ ...s.btn, opacity: submitting ? .6 : 1 }} onClick={handleConfirmPaid} disabled={submitting}>
           {submitting ? 'Verifying...' : "✅ I've Completed Payment"}
         </button>
-        <button style={s.btnBlue} onClick={() => window.open(PAYMONGO_LINK, '_blank')}>
+        <button style={s.btnBlue} onClick={() => window.open(paymongoLink, '_blank')}>
           ↗ Re-open PayMongo
         </button>
         <button style={s.btnOutline} onClick={() => router.push('/dashboard/homeowner')}>
@@ -156,6 +160,8 @@ export default function PayPage() {
         <div style={{ fontSize: '.76rem', color: '#6b7280', marginBottom: '20px', lineHeight: 1.6 }}>
           Activate your hire of <strong>{kbName}</strong> with a one-time fee.
         </div>
+
+        {/* Pricing Breakdown */}
         <div style={s.card}>
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#6b7280', marginBottom: '12px' }}>Pricing Breakdown</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f3f4f6' }}>
@@ -166,17 +172,46 @@ export default function PayPage() {
             <span style={{ fontSize: '.82rem', color: '#374151' }}>Subscription credit</span>
             <span style={{ fontSize: '.82rem', color: '#1a6b3c', fontWeight: 700 }}>−₱499</span>
           </div>
+          {hasTransport && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f3f4f6' }}>
+              <div>
+                <div style={{ fontSize: '.82rem', color: '#374151' }}>🛡️ MaidIt Assisted Travel</div>
+                <div style={{ fontSize: '.68rem', color: '#9ca3af', marginTop: '1px' }}>₱5,500 transport · ₱500 MaidIt fee</div>
+              </div>
+              <span style={{ fontSize: '.82rem', color: '#92400e', fontWeight: 700 }}>+₱6,000</span>
+            </div>
+          )}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0 4px' }}>
             <span style={{ fontSize: '.88rem', fontWeight: 700, color: '#111827' }}>You pay today</span>
-            <span style={{ fontSize: '24px', fontWeight: 900, color: '#1a6b3c', fontFamily: 'serif' }}>₱2,001</span>
+            <span style={{ fontSize: '24px', fontWeight: 900, color: '#1a6b3c', fontFamily: 'serif' }}>₱{total.toLocaleString()}</span>
           </div>
         </div>
-        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '11px', padding: '11px 14px', marginBottom: '14px' }}>
-          <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.7 }}>
-            ✅ <strong>Subscription fee credit applied:</strong> Your ₱499 subscription has been deducted from the ₱2,500 hiring fee — you only pay ₱2,001 now.<br/>
-            <span style={{ marginTop: '4px', display: 'block' }}>This is a one-time hiring fee per kasambahay hired.</span>
+
+        {/* Protection note for transport */}
+        {hasTransport && (
+          <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '11px', padding: '12px 14px', marginBottom: '14px' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1.1rem' }}>🛡️</span>
+              <div>
+                <div style={{ fontSize: '.74rem', fontWeight: 700, color: '#92400e', marginBottom: '4px' }}>Your payment is protected</div>
+                <div style={{ fontSize: '.72rem', color: '#78350f', lineHeight: 1.6 }}>
+                  MaidIt holds the ₱6,000 transport fee in escrow. It is only released to the kasambahay after you confirm she has arrived. If she does not arrive, your ₱6,000 is fully refunded.
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Subscription credit note for standard flow */}
+        {!hasTransport && (
+          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '11px', padding: '11px 14px', marginBottom: '14px' }}>
+            <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.7 }}>
+              ✅ <strong>Subscription fee credit applied:</strong> Your ₱499 subscription has been deducted from the ₱2,500 hiring fee — you only pay ₱2,001 now.<br/>
+              <span style={{ marginTop: '4px', display: 'block' }}>This is a one-time hiring fee per kasambahay hired.</span>
+            </div>
+          </div>
+        )}
+
         <div style={s.card}>
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#6b7280', marginBottom: '10px' }}>What's included</div>
           {[
@@ -191,6 +226,7 @@ export default function PayPage() {
             </div>
           ))}
         </div>
+
         <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '11px', padding: '12px 14px', marginBottom: '18px' }}>
           <div style={{ fontSize: '.7rem', fontWeight: 700, color: '#92400e', marginBottom: '6px' }}>How it works:</div>
           {[
@@ -204,8 +240,9 @@ export default function PayPage() {
             </div>
           ))}
         </div>
+
         <button style={s.btn} onClick={handleOpenPayMongo}>
-          Pay ₱2,001 via PayMongo →
+          Pay ₱{total.toLocaleString()} via PayMongo →
         </button>
         <button style={s.btnOutline} onClick={() => router.push('/dashboard/homeowner')}>
           Pay later

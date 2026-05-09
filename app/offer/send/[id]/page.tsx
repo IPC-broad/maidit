@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 
+const SAMAR_LEYTE = ['Leyte', 'Eastern Samar', 'Western Samar', 'Northern Samar']
+
 export default function SendOfferPage({ params }: any) {
   const router = useRouter()
   const rawParams = useParams()
@@ -19,6 +21,7 @@ export default function SendOfferPage({ params }: any) {
     seniors: '0',
     kids: '0',
     pets: 'Wala',
+    transport_arrangement: 'full',
   })
   const [submitting, setSubmitting] = useState(false)
   const [paying, setPaying] = useState(false)
@@ -65,6 +68,7 @@ export default function SendOfferPage({ params }: any) {
       seniors: parseInt(form.seniors) || 0,
       kids: parseInt(form.kids) || 0,
     }
+    const isTransport = form.transport_arrangement === 'maidit_transport'
     const { error: offerError } = await supabase.from('offers').insert({
       homeowner_id: hw?.id,
       kasambahay_id: kasambahayId,
@@ -77,11 +81,12 @@ export default function SendOfferPage({ params }: any) {
       household,
       pets: form.pets,
       status: 'pending',
+      transport_service: isTransport,
+      transport_fee: isTransport ? 6000 : 0,
     })
     if (offerError) { setSubmitting(false); setError(offerError.message); return }
     const { data: profile } = await supabase.from('profiles').select('job_offer_credits').eq('id', user.id).single()
     await supabase.from('profiles').update({ job_offer_credits: (profile?.job_offer_credits ?? 1) - 1 }).eq('id', user.id)
-    // Get the new offer id
     const { data: newOffer } = await supabase.from('offers').select('id').eq('kasambahay_id', kasambahayId).eq('status', 'pending').order('created_at', { ascending: false }).limit(1).single()
     if (newOffer?.id) {
       await fetch('/api/send-sms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'offer_sent', offerId: newOffer.id }) }).catch(() => {})
@@ -97,6 +102,8 @@ export default function SendOfferPage({ params }: any) {
   const scopeItems = ['All-around Maid','Tagaluto','Tagalaba','Yaya','Taga-alaga ng Pets','Taga-alaga ng Matanda','Driver','Pamimili']
   const toggleScope = (sc: string) => setForm(f => ({ ...f, scope: f.scope.includes(sc) ? f.scope.filter((x: string) => x !== sc) : [...f.scope, sc] }))
 
+  const showMaidItTransport = kb && SAMAR_LEYTE.includes(kb.province)
+
   const s: any = {
     wrap: { minHeight: '100vh', background: '#faf8f5', fontFamily: 'sans-serif', color: '#1a1a1a' },
     head: { background: '#fff', borderBottom: '1px solid #ede8e0', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '10px' },
@@ -108,6 +115,9 @@ export default function SendOfferPage({ params }: any) {
     btnAmber: { width: '100%', padding: '13px', borderRadius: '12px', border: 'none', background: '#c9943a', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '10px' },
     btnOutline: { width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid #ede8e0', background: 'transparent', color: '#6b7280', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 600, cursor: 'pointer' },
     numBtn: (active: boolean) => ({ padding: '8px 14px', borderRadius: '8px', border: active ? '1.5px solid #c9943a' : '1.5px solid #e5e0d8', background: active ? '#fef3e2' : '#fff', color: active ? '#92400e' : '#6b7280', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }),
+    radioCard: (active: boolean) => ({ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '11px 13px', borderRadius: '10px', border: active ? '1.5px solid #1a6b3c' : '1.5px solid #e5e0d8', background: active ? '#f0fdf4' : '#fff', cursor: 'pointer', marginBottom: '7px' }),
+    radioCardAmber: (active: boolean) => ({ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '11px 13px', borderRadius: '10px', border: active ? '1.5px solid #c9943a' : '1.5px solid #e5e0d8', background: active ? '#fffbeb' : '#fff', cursor: 'pointer', marginBottom: '7px' }),
+    radioDot: (active: boolean, amber?: boolean) => ({ width: '16px', height: '16px', borderRadius: '50%', border: active ? `5px solid ${amber ? '#c9943a' : '#1a6b3c'}` : '2px solid #d1d5db', background: '#fff', flexShrink: 0, marginTop: '1px' }),
   }
 
   if (success) return (
@@ -188,10 +198,68 @@ export default function SendOfferPage({ params }: any) {
         </select>
 
         <label style={s.lbl}>Scope of work *</label>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '20px' }}>
           {scopeItems.map(sc => (
             <button key={sc} onClick={() => toggleScope(sc)} style={{ padding: '9px 10px', borderRadius: '9px', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textAlign: 'center' as const, border: form.scope.includes(sc) ? '1.5px solid #c9943a' : '1.5px solid #e5e0d8', background: form.scope.includes(sc) ? '#fef3e2' : '#fff', color: form.scope.includes(sc) ? '#92400e' : '#6b7280' }}>{sc}</button>
           ))}
+        </div>
+
+        {/* Transport Arrangement */}
+        <div style={{ marginBottom: '20px' }}>
+          {/* Section 1: Direct Arrangement */}
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: '#1a1a1a' }}>Transport Arrangement</span>
+              <span style={{ fontSize: '10px', fontWeight: 700, background: '#dcfce7', color: '#166534', borderRadius: '5px', padding: '2px 7px', letterSpacing: '.3px' }}>FREE</span>
+            </div>
+            <p style={{ fontSize: '12px', color: '#6b7280', margin: '0 0 10px', lineHeight: 1.5 }}>You coordinate transport directly with the kasambahay. No additional cost.</p>
+            {[
+              { value: 'full', label: 'I will pay for transport', sub: 'Kasambahay provides fare estimate on review' },
+              { value: 'reimburse', label: 'Kasambahay pays first, I reimburse on arrival' },
+              { value: 'self', label: 'Kasambahay pays her own fare' },
+            ].map(opt => (
+              <div key={opt.value} style={s.radioCard(form.transport_arrangement === opt.value)} onClick={() => setForm(f => ({ ...f, transport_arrangement: opt.value }))}>
+                <div style={s.radioDot(form.transport_arrangement === opt.value)} />
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a' }}>{opt.label}</div>
+                  {opt.sub && <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>{opt.sub}</div>}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Section 2: MaidIt Assisted Travel (Leyte/Samar only) */}
+          {showMaidItTransport && (
+            <div style={{ borderTop: '1.5px dashed #e5e0d8', paddingTop: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#1a1a1a' }}>Protected by MaidIt</span>
+                <span style={{ fontSize: '10px', fontWeight: 700, background: '#fef3e2', color: '#92400e', borderRadius: '5px', padding: '2px 7px', letterSpacing: '.3px' }}>+ ADD-ON · ₱6,000</span>
+              </div>
+              <p style={{ fontSize: '12px', color: '#6b7280', margin: '0 0 10px', lineHeight: 1.5 }}>Optional arrival protection for long-distance provincial hires. Leyte &amp; Samar only.</p>
+              <div style={s.radioCardAmber(form.transport_arrangement === 'maidit_transport')} onClick={() => setForm(f => ({ ...f, transport_arrangement: 'maidit_transport' }))}>
+                <div style={s.radioDot(form.transport_arrangement === 'maidit_transport', true)} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a1a1a', marginBottom: '8px' }}>🛡️ MaidIt Assisted Travel</div>
+                  <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px', marginBottom: '10px' }}>
+                    {[
+                      'Payment released only after confirmed arrival',
+                      'No need to send money directly to anyone',
+                      'If kasambahay does not arrive, your ₱6,000 is returned',
+                    ].map((item, i) => (
+                      <div key={i} style={{ display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
+                        <span style={{ color: '#c9943a', fontWeight: 700, fontSize: '12px', marginTop: '1px' }}>✓</span>
+                        <span style={{ fontSize: '12px', color: '#78350f', lineHeight: 1.4 }}>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 600, background: '#fde8c0', color: '#92400e', borderRadius: '5px', padding: '3px 8px' }}>₱5,500 transport</span>
+                    <span style={{ fontSize: '11px', fontWeight: 600, background: '#fde8c0', color: '#92400e', borderRadius: '5px', padding: '3px 8px' }}>₱500 MaidIt fee</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <button style={{ ...s.btn, opacity: submitting ? .6 : 1 }} onClick={handleSendOffer} disabled={submitting}>{submitting ? 'Sending...' : 'Send Offer →'}</button>
