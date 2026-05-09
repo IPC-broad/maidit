@@ -50,9 +50,11 @@ export default function ArrivalPage() {
     const day30 = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 
     await supabase.from('offers').update({
-      status: 'active',
+      status: 'hired',
       arrived_at: now,
-      trial_ends_at: day30
+      trial_ends_at: day30,
+      rematch_available: true,
+      rematch_expires_at: day30,
     }).eq('id', offerId)
 
     const referrorId = offer.kasambahay?.referred_by

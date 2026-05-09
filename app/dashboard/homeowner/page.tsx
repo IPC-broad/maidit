@@ -138,9 +138,10 @@ export default function HWDashboard() {
     fare_pending:     { label: 'Fare estimate received',  bg: '#fffbeb', color: '#92400e' },
     agreed:           { label: 'Accepted — Pay Now',      bg: '#f0fdf4', color: '#1a6b3c' },
     payment_pending:  { label: 'Processing payment',      bg: '#fffbeb', color: '#92400e' },
-    paid:             { label: 'Hired',                   bg: '#f0fdf4', color: '#1a6b3c' },
-    active:           { label: 'Hired',                   bg: '#f0fdf4', color: '#1a6b3c' },
-    hired:            { label: 'Hired',                   bg: '#f0fdf4', color: '#1a6b3c' },
+    paid:             { label: 'Payment confirmed',        bg: '#f0fdf4', color: '#1a6b3c' },
+    active:           { label: 'Payment confirmed',        bg: '#f0fdf4', color: '#1a6b3c' },
+    hired:            { label: 'Hired ✅',                 bg: '#f0fdf4', color: '#1a6b3c' },
+    departed:         { label: 'Departed — Rematch',       bg: '#fef3e2', color: '#c9943a' },
     countered:        { label: 'Counter offer received',  bg: '#fef3e2', color: '#c9943a' },
     fare_countered:   { label: 'Fare countered',          bg: '#fffbeb', color: '#92400e' },
     counter_declined: { label: 'Counter declined',        bg: '#fef2f2', color: '#dc2626' },
@@ -272,8 +273,21 @@ export default function HWDashboard() {
           {offers.map((offer: any) => {
             const st = offerStatusMap[offer.status] || { label: offer.status, bg: '#f3f4f6', color: '#6b7280' }
             const kbName = offer.kasambahay?.profiles?.full_name || 'Kasambahay'
-            const isHired = ['paid','active','hired'].includes(offer.status)
+            const isPaid = ['paid','active'].includes(offer.status)
+            const isHired = offer.status === 'hired'
             const needsPayment = offer.status === 'agreed'
+            const now = new Date()
+            const rematchWindowOpen = offer.rematch_available === true &&
+              offer.rematch_expires_at && new Date(offer.rematch_expires_at) > now
+            const handleRequestRematch = async () => {
+              if (!window.confirm('Confirm that your kasambahay has departed early. MaidIt will process a rematch and the referral payout will be clawed back from the original partner.')) return
+              await fetch('/api/process-departure', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ offerId: offer.id })
+              })
+              window.location.reload()
+            }
             return (
               <div key={offer.id} style={{ background:'#fff', borderRadius:'13px', border:'1px solid #ede8e0', overflow:'hidden', marginBottom:'12px' }}>
                 <div style={{ padding:'13px 14px' }}>
@@ -317,10 +331,25 @@ export default function HWDashboard() {
                       Pay ₱{hireFee} Hire Fee →
                     </button>
                   )}
-                  {isHired && (
+                  {isPaid && (
                     <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:'9px', padding:'9px 12px', fontSize:'12px', color:'#166534', fontWeight:600, textAlign:'center' }}>
-                      Hired! Waiting for kasambahay arrival.
+                      Payment confirmed — waiting for kasambahay arrival.
                     </div>
+                  )}
+                  {isHired && (
+                    <>
+                      <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:'9px', padding:'9px 12px', fontSize:'12px', color:'#166534', fontWeight:600, textAlign:'center', marginBottom: rematchWindowOpen ? '8px' : '0' }}>
+                        ✅ Hired! {offer.arrived_at ? `Arrived ${new Date(offer.arrived_at).toLocaleDateString('en-PH', { month:'short', day:'numeric' })}` : 'Confirm arrival when kasambahay arrives.'}
+                      </div>
+                      {rematchWindowOpen && (
+                        <button
+                          onClick={handleRequestRematch}
+                          style={{ width:'100%', padding:'9px', borderRadius:'9px', background:'transparent', border:'1.5px solid #fde8c0', color:'#92400e', fontFamily:'sans-serif', fontSize:'12px', fontWeight:600, cursor:'pointer' }}
+                        >
+                          🔄 Request Rematch (within 30 days)
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
