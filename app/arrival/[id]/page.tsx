@@ -57,37 +57,18 @@ export default function ArrivalPage() {
 
     const referrorId = offer.kasambahay?.referred_by
     if (referrorId) {
-      const { data: partnerData } = await supabase.from('partners').select('tier').eq('id', referrorId).single()
-      const isVip = partnerData?.tier === 'gold'
-      if (isVip) {
-        // VIP: ₱1,000 upfront on arrival
-        await supabase.from('payouts').insert({
-          partner_id: referrorId,
-          offer_id: offerId,
-          amount: 1000,
-          type: 'arrival',
-          status: 'pending',
-          due_at: now
-        })
-      } else {
-        // Standard: ₱600 on arrival + ₱400 after 30 days
-        await supabase.from('payouts').insert({
-          partner_id: referrorId,
-          offer_id: offerId,
-          amount: 600,
-          type: 'arrival',
-          status: 'pending',
-          due_at: now
-        })
-        await supabase.from('payouts').insert({
-          partner_id: referrorId,
-          offer_id: offerId,
-          amount: 400,
-          type: 'day30',
-          status: 'scheduled',
-          due_at: day30
-        })
-      }
+      // Check partner balance — hold payout if balance is negative
+      const { data: partnerData } = await supabase.from('partners').select('balance').eq('id', referrorId).single()
+      const partnerBalance = partnerData?.balance ?? 0
+      const payoutStatus = partnerBalance < 0 ? 'held' : 'pending'
+      await supabase.from('payouts').insert({
+        partner_id: referrorId,
+        offer_id: offerId,
+        amount: 500,
+        type: 'arrival',
+        status: payoutStatus,
+        due_at: now
+      })
     }
 
     await fetch('/api/send-sms', {
@@ -169,8 +150,8 @@ export default function ArrivalPage() {
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#6b7280', marginBottom: '12px' }}>What happens next</div>
           {[
             { icon: '✅', title: '30-day trial begins', desc: 'You have 30 days to raise concerns or request a rematch' },
-            { icon: '💸', title: 'Referror paid ₱600', desc: 'Arrival payout released to the community referror' },
-            { icon: '📅', title: 'Day-30 payout scheduled', desc: '₱400 released to referror after successful 30-day trial' },
+            { icon: '💸', title: 'Referror paid ₱500', desc: 'Arrival payout released to the community referror immediately' },
+            { icon: '🔄', title: 'Rematch protection active', desc: 'If kasambahay departs early, MaidIt will arrange a free rematch' },
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', gap: '12px', padding: '10px 0', borderBottom: i < 2 ? '1px solid #f3f4f6' : 'none' }}>
               <div style={{ fontSize: '1.2rem', minWidth: '24px' }}>{item.icon}</div>
