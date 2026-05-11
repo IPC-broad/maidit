@@ -245,7 +245,7 @@ export default function PayPage() {
         <div style={s.card}>
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#6b7280', marginBottom: '10px' }}>What's included</div>
           {[
-            { icon: '🛡️', text: '30-day rematch guarantee' },
+            { icon: '🔄', text: '1 free rematch if the kasambahay does not arrive or leaves within 30 days. Transport for replacement hires is separate.' },
             { icon: '✅', text: 'Verified kasambahay profile' },
             { icon: '📋', text: 'RA 10361-compliant employment terms' },
             { icon: '🎁', text: 'One hiring fee credit (₱499) valid for 30 days — applied to your first hire' },

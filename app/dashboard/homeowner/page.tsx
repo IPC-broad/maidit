@@ -19,6 +19,12 @@ export default function HWDashboard() {
   const [applicantsLoaded, setApplicantsLoaded] = useState(false)
   const [applicantCount, setApplicantCount] = useState(0)
   const [hwMeta, setHwMeta] = useState<any>(null)
+  const [rematchModal, setRematchModal] = useState<string | null>(null)
+  const [rematchQ1, setRematchQ1] = useState('')
+  const [rematchQ2, setRematchQ2] = useState('')
+  const [rematchQ3, setRematchQ3] = useState('')
+  const [rematchSubmitting, setRematchSubmitting] = useState(false)
+  const [rematchDone, setRematchDone] = useState(false)
 
   useEffect(() => {
     const init = async () => {
@@ -141,7 +147,7 @@ export default function HWDashboard() {
     paid:             { label: 'Payment confirmed',        bg: '#f0fdf4', color: '#1a6b3c' },
     active:           { label: 'Payment confirmed',        bg: '#f0fdf4', color: '#1a6b3c' },
     hired:            { label: 'Hired ✅',                 bg: '#f0fdf4', color: '#1a6b3c' },
-    departed:         { label: 'Departed — Rematch',       bg: '#fef3e2', color: '#c9943a' },
+    placement_ended:  { label: 'Placement ended — Rematch', bg: '#fef3e2', color: '#c9943a' },
     countered:        { label: 'Counter offer received',  bg: '#fef3e2', color: '#c9943a' },
     fare_countered:   { label: 'Fare countered',          bg: '#fffbeb', color: '#92400e' },
     counter_declined: { label: 'Counter declined',        bg: '#fef2f2', color: '#dc2626' },
@@ -156,6 +162,19 @@ export default function HWDashboard() {
     hwMeta.subscription_expires_at &&
     new Date(hwMeta.subscription_expires_at) > new Date()
   const hireFee = creditApplicable ? '2,001' : '2,500'
+
+  const handleSubmitRematch = async () => {
+    if (!rematchModal) return
+    setRematchSubmitting(true)
+    const departure_type = rematchQ1 === 'Did not arrive' ? 'no_show' : 'left_within_30d'
+    await fetch('/api/process-departure', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ offerId: rematchModal, departure_type })
+    })
+    setRematchSubmitting(false)
+    setRematchDone(true)
+  }
 
   if (loading) return (
     <div style={{ minHeight:'100vh', background:'#faf8f5', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif', color:'#6b7280' }}>
@@ -279,14 +298,12 @@ export default function HWDashboard() {
             const now = new Date()
             const rematchWindowOpen = offer.rematch_available === true &&
               offer.rematch_expires_at && new Date(offer.rematch_expires_at) > now
-            const handleRequestRematch = async () => {
-              if (!window.confirm('Confirm that your kasambahay has departed early. MaidIt will process a rematch and the referral payout will be clawed back from the original partner.')) return
-              await fetch('/api/process-departure', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ offerId: offer.id })
-              })
-              window.location.reload()
+            const handleRequestRematch = () => {
+              setRematchModal(offer.id)
+              setRematchQ1('')
+              setRematchQ2('')
+              setRematchQ3('')
+              setRematchDone(false)
             }
             return (
               <div key={offer.id} style={{ background:'#fff', borderRadius:'13px', border:'1px solid #ede8e0', overflow:'hidden', marginBottom:'12px' }}>
@@ -420,6 +437,70 @@ export default function HWDashboard() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {rematchModal && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:100, display:'flex', alignItems:'flex-end', justifyContent:'center' }} onClick={() => !rematchSubmitting && setRematchModal(null)}>
+          <div style={{ background:'#fff', borderRadius:'20px 20px 0 0', padding:'24px 20px 36px', width:'100%', maxWidth:'480px', fontFamily:'sans-serif' }} onClick={e => e.stopPropagation()}>
+            {rematchDone ? (
+              <>
+                <div style={{ fontSize:'2rem', textAlign:'center', marginBottom:'12px' }}>🔄</div>
+                <div style={{ fontFamily:'serif', fontSize:'1.2rem', fontWeight:900, color:'#1a6b3c', textAlign:'center', marginBottom:'8px' }}>Rematch Activated</div>
+                <div style={{ fontSize:'.82rem', color:'#374151', lineHeight:1.7, textAlign:'center', marginBottom:'20px' }}>
+                  You have 1 free rematch available. Browse kasambahay to find your replacement — no additional hiring fee. Transport arrangements for replacement are separate.
+                </div>
+                <button style={{ width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'.95rem', fontWeight:700, cursor:'pointer' }}
+                  onClick={() => { setRematchModal(null); window.location.reload() }}>
+                  Browse Kasambahay
+                </button>
+              </>
+            ) : (
+              <>
+                <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, color:'#111827', marginBottom:'4px' }}>Request Rematch</div>
+                <div style={{ fontSize:'.74rem', color:'#6b7280', marginBottom:'18px', lineHeight:1.6 }}>
+                  Confirm that the kasambahay is no longer working with your household. A free rematch is available if the kasambahay did not arrive or left within 30 days.
+                </div>
+
+                <div style={{ fontSize:'.74rem', fontWeight:700, color:'#374151', marginBottom:'8px' }}>What happened?</div>
+                <div style={{ display:'flex', gap:'6px', flexWrap:'wrap', marginBottom:'16px' }}>
+                  {['Did not arrive', 'Left within 30 days', 'Other'].map(opt => (
+                    <button key={opt} onClick={() => setRematchQ1(opt)} style={{ padding:'7px 13px', borderRadius:'50px', border:'1.5px solid', borderColor: rematchQ1 === opt ? '#1a6b3c' : '#e5e7eb', background: rematchQ1 === opt ? '#e8f5ee' : '#fff', color: rematchQ1 === opt ? '#1a6b3c' : '#6b7280', fontFamily:'sans-serif', fontSize:'.75rem', fontWeight:600, cursor:'pointer' }}>
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{ fontSize:'.74rem', fontWeight:700, color:'#374151', marginBottom:'8px' }}>Would you like a replacement?</div>
+                <div style={{ display:'flex', gap:'6px', flexWrap:'wrap', marginBottom:'16px' }}>
+                  {['Yes, as soon as possible', 'Yes, but not immediately', 'No replacement needed'].map(opt => (
+                    <button key={opt} onClick={() => setRematchQ2(opt)} style={{ padding:'7px 13px', borderRadius:'50px', border:'1.5px solid', borderColor: rematchQ2 === opt ? '#1a6b3c' : '#e5e7eb', background: rematchQ2 === opt ? '#e8f5ee' : '#fff', color: rematchQ2 === opt ? '#1a6b3c' : '#6b7280', fontFamily:'sans-serif', fontSize:'.75rem', fontWeight:600, cursor:'pointer' }}>
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{ fontSize:'.74rem', fontWeight:700, color:'#374151', marginBottom:'6px' }}>Anything we should know? <span style={{ fontWeight:400, color:'#9ca3af' }}>(optional)</span></div>
+                <textarea
+                  value={rematchQ3}
+                  onChange={e => setRematchQ3(e.target.value)}
+                  placeholder="Any details that would help us find a better match..."
+                  rows={3}
+                  style={{ width:'100%', padding:'10px 12px', borderRadius:'10px', border:'1.5px solid #e5e7eb', fontFamily:'sans-serif', fontSize:'.8rem', color:'#111827', resize:'none', boxSizing:'border-box', marginBottom:'16px', outline:'none' }}
+                />
+
+                <button
+                  onClick={handleSubmitRematch}
+                  disabled={!rematchQ1 || !rematchQ2 || rematchSubmitting}
+                  style={{ width:'100%', padding:'13px', borderRadius:'12px', border:'none', background: !rematchQ1 || !rematchQ2 ? '#e5e7eb' : '#1a6b3c', color: !rematchQ1 || !rematchQ2 ? '#9ca3af' : '#fff', fontFamily:'sans-serif', fontSize:'.95rem', fontWeight:700, cursor: !rematchQ1 || !rematchQ2 ? 'default' : 'pointer', marginBottom:'8px', opacity: rematchSubmitting ? .6 : 1 }}>
+                  {rematchSubmitting ? 'Submitting...' : 'Confirm Rematch Request'}
+                </button>
+                <button onClick={() => setRematchModal(null)} style={{ width:'100%', padding:'11px', borderRadius:'12px', border:'1.5px solid #e5e7eb', background:'transparent', color:'#6b7280', fontFamily:'sans-serif', fontSize:'.85rem', fontWeight:600, cursor:'pointer' }}>
+                  Cancel
+                </button>
+              </>
+            )}
+          </div>
         </div>
       )}
 

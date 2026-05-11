@@ -459,7 +459,8 @@ export default function PartnerPage() {
           value={note} onChange={e => setNote(e.target.value)} />
 
         <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '10px', padding: '12px 14px', marginBottom: '16px', fontSize: '12px', color: '#78350f', lineHeight: 1.65 }}>
-          Sa pag-submit, sumasang-ayon ka na ang lahat ng transaksyon ay dumaan sa MaidIt platform. Bawal ang hiwalay na placement fee.
+          Sa pag-submit, sumasang-ayon ka na ang lahat ng transaksyon ay dumaan sa MaidIt platform. Bawal ang hiwalay na placement fee.<br /><br />
+          If the kasambahay leaves within 30 days, the ₱500 recruitment fee will be adjusted from your next payout.
         </div>
 
         <button style={{ ...s.goldBtn, opacity: submitting2 ? .6 : 1 }} onClick={handleStep2} disabled={submitting2}>

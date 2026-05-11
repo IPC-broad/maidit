@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
-  const { offerId } = await req.json()
+  const { offerId, departure_type } = await req.json()
   if (!offerId) return NextResponse.json({ error: 'offerId required' }, { status: 400 })
 
   const { createClient } = await import('@supabase/supabase-js')
@@ -21,11 +21,12 @@ export async function POST(req: NextRequest) {
 
   const now = new Date().toISOString()
 
-  // Mark offer as departed with rematch available
+  // Mark offer as placement_ended with rematch available
   await supabase.from('offers').update({
-    status: 'departed',
+    status: 'placement_ended',
     rematch_available: true,
     departed_at: now,
+    departure_type: departure_type ?? null,
   }).eq('id', offerId)
 
   const partnerId = offer.kasambahay?.referred_by
