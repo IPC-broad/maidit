@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 
-const SAMAR_LEYTE = ['Leyte', 'Eastern Samar', 'Western Samar', 'Northern Samar']
+const SAMAR_LEYTE = ['Leyte', 'Eastern Samar', 'Western Samar', 'Northern Samar', 'Southern Leyte']
 
 export default function SendOfferPage({ params }: any) {
   const router = useRouter()
@@ -262,7 +262,9 @@ export default function SendOfferPage({ params }: any) {
           )}
         </div>
 
-        <button style={{ ...s.btn, opacity: submitting ? .6 : 1 }} onClick={handleSendOffer} disabled={submitting}>{submitting ? 'Sending...' : 'Send Offer →'}</button>
+        <button style={{ ...s.btn, opacity: submitting ? .6 : 1 }} onClick={handleSendOffer} disabled={submitting}>
+          {submitting ? 'Sending...' : form.transport_arrangement === 'maidit_transport' ? 'Send Offer with Assisted Travel →' : 'Send Offer →'}
+        </button>
       </div>
 
       {showPaywall && (
