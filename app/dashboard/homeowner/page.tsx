@@ -163,6 +163,12 @@ export default function HWDashboard() {
     new Date(hwMeta.subscription_expires_at) > new Date()
   const hireFee = creditApplicable ? '2,001' : '2,500'
 
+  const toIntl = (mobile: string | undefined) => {
+    if (!mobile) return ''
+    const m = mobile.replace(/\D/g, '')
+    return m.startsWith('0') ? '63' + m.slice(1) : m.startsWith('63') ? m : '63' + m
+  }
+
   const handleSubmitRematch = async () => {
     if (!rematchModal) return
     setRematchSubmitting(true)
@@ -355,9 +361,22 @@ export default function HWDashboard() {
                   )}
                   {isHired && (
                     <>
-                      <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:'9px', padding:'9px 12px', fontSize:'12px', color:'#166534', fontWeight:600, textAlign:'center', marginBottom: rematchWindowOpen ? '8px' : '0' }}>
+                      <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:'9px', padding:'9px 12px', fontSize:'12px', color:'#166534', fontWeight:600, textAlign:'center', marginBottom: '8px' }}>
                         ✅ Hired! {offer.arrived_at ? `Arrived ${new Date(offer.arrived_at).toLocaleDateString('en-PH', { month:'short', day:'numeric' })}` : 'Confirm arrival when kasambahay arrives.'}
                       </div>
+                      {offer.arrived_at && offer.kasambahay?.profiles?.mobile && (
+                        <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:'10px', padding:'12px 14px', marginBottom:'8px' }}>
+                          <div style={{ fontSize:'10px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#166534', marginBottom:'10px' }}>Contact your kasambahay</div>
+                          <div style={{ fontSize:'13px', fontWeight:700, color:'#111827', marginBottom:'2px' }}>{kbName}</div>
+                          <div style={{ fontSize:'13px', color:'#374151', marginBottom:'12px' }}>{offer.kasambahay.profiles.mobile}</div>
+                          <div style={{ display:'flex', gap:'6px', marginBottom:'8px' }}>
+                            <a href={`viber://chat?number=${toIntl(offer.kasambahay.profiles.mobile)}`} style={{ flex:1, padding:'9px', borderRadius:'9px', background:'#7c3aed', color:'#fff', fontFamily:'sans-serif', fontSize:'12px', fontWeight:700, cursor:'pointer', textAlign:'center' as const, textDecoration:'none', display:'block' }}>💬 Viber</a>
+                            <a href={`https://wa.me/${toIntl(offer.kasambahay.profiles.mobile)}`} target="_blank" rel="noreferrer" style={{ flex:1, padding:'9px', borderRadius:'9px', background:'#16a34a', color:'#fff', fontFamily:'sans-serif', fontSize:'12px', fontWeight:700, cursor:'pointer', textAlign:'center' as const, textDecoration:'none', display:'block' }}>💬 WhatsApp</a>
+                            <button onClick={() => navigator.clipboard.writeText(offer.kasambahay.profiles.mobile)} style={{ padding:'9px 12px', borderRadius:'9px', background:'transparent', border:'1.5px solid #e5e7eb', color:'#6b7280', fontFamily:'sans-serif', fontSize:'12px', fontWeight:600, cursor:'pointer' }}>Copy</button>
+                          </div>
+                          <div style={{ fontSize:'10px', color:'#6b7280', lineHeight:1.5 }}>Future hires through MaidIt include rematch protection.</div>
+                        </div>
+                      )}
                       {rematchWindowOpen && (
                         <button
                           onClick={handleRequestRematch}
