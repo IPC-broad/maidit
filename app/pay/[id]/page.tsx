@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 
 const PAYMONGO_LINK = process.env.NEXT_PUBLIC_PAYMONGO_LINK || 'https://pm.link/org-9FQv6XBpoCxdDMaMPY8gze3N/bK90nx0'
-const MAIDIT_WA = process.env.NEXT_PUBLIC_MAIDIT_WHATSAPP || '63XXXXXXXXX'
+const PAYMONGO_LINK_8001 = process.env.NEXT_PUBLIC_PAYMONGO_LINK_8001 || ''
 
 export default function PayPage() {
   const router = useRouter()
@@ -66,7 +66,7 @@ export default function PayPage() {
   const hasTransport = offer?.transport_service === true
   const baseFee = creditApplicable ? 2001 : 2500
   const total = baseFee + (hasTransport ? 6000 : 0)
-  const paymongoLink = PAYMONGO_LINK
+  const paymongoLink = hasTransport ? PAYMONGO_LINK_8001 : PAYMONGO_LINK
 
   const handleOpenPayMongo = () => {
     setStep('confirm')
@@ -158,7 +158,7 @@ export default function PayPage() {
           <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.8 }}>
             ✅ PayMongo accepts <strong>QRPh</strong><br />
             Scan with GCash, BPI, BDO, UnionBank, or any bank app.<br />
-            Make sure the amount shows <strong>₱{(hasTransport ? baseFee : total).toLocaleString()}.00</strong>.
+            Make sure the amount shows <strong>₱{total.toLocaleString()}.00</strong>.
           </div>
         </div>
         <button style={{ ...s.btn, opacity: submitting ? .6 : 1 }} onClick={handleConfirmPaid} disabled={submitting}>
@@ -257,53 +257,22 @@ export default function PayPage() {
           ))}
         </div>
 
-        {hasTransport ? (
-          <>
-            <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '11px', padding: '12px 14px', marginBottom: '18px' }}>
-              <div style={{ fontSize: '.7rem', fontWeight: 700, color: '#92400e', marginBottom: '6px' }}>How it works (2 steps):</div>
-              {[
-                `Pay the ₱${baseFee.toLocaleString()} hiring fee via PayMongo below`,
-                'Contact MaidIt on WhatsApp to arrange the ₱6,000 transport payment',
-                'Your hire is activated once both payments are confirmed',
-              ].map((txt, i) => (
-                <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '4px' }}>
-                  <span style={{ fontSize: '.68rem', fontWeight: 700, color: '#92400e', minWidth: '14px' }}>{i + 1}.</span>
-                  <span style={{ fontSize: '.72rem', color: '#78350f', lineHeight: 1.5 }}>{txt}</span>
-                </div>
-              ))}
+        <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '11px', padding: '12px 14px', marginBottom: '18px' }}>
+          <div style={{ fontSize: '.7rem', fontWeight: 700, color: '#92400e', marginBottom: '6px' }}>How it works:</div>
+          {[
+            'Tap "Pay via PayMongo" — a new tab opens',
+            'Scan the QRPh code with your bank app or GCash',
+            'Come back here and tap "I\'ve paid"',
+          ].map((txt, i) => (
+            <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '4px' }}>
+              <span style={{ fontSize: '.68rem', fontWeight: 700, color: '#92400e', minWidth: '14px' }}>{i + 1}.</span>
+              <span style={{ fontSize: '.72rem', color: '#78350f', lineHeight: 1.5 }}>{txt}</span>
             </div>
-            <a
-              href={`https://wa.me/${MAIDIT_WA}?text=${encodeURIComponent(`I would like to pay for MaidIt Assisted Travel for offer ${offerId}`)}`}
-              target="_blank"
-              rel="noreferrer"
-              style={{ display: 'block', width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: '#16a34a', color: '#fff', fontFamily: 'sans-serif', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', marginBottom: '10px', textAlign: 'center' as const, textDecoration: 'none', boxSizing: 'border-box' as const }}
-            >
-              💬 Contact MaidIt for Transport (₱6,000)
-            </a>
-            <button style={s.btn} onClick={handleOpenPayMongo}>
-              Pay ₱{baseFee.toLocaleString()} Hiring Fee via PayMongo →
-            </button>
-          </>
-        ) : (
-          <>
-            <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '11px', padding: '12px 14px', marginBottom: '18px' }}>
-              <div style={{ fontSize: '.7rem', fontWeight: 700, color: '#92400e', marginBottom: '6px' }}>How it works:</div>
-              {[
-                'Tap "Pay via PayMongo" — a new tab opens',
-                'Scan the QRPh code with your bank app or GCash',
-                'Come back here and tap "I\'ve paid"',
-              ].map((txt, i) => (
-                <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '4px' }}>
-                  <span style={{ fontSize: '.68rem', fontWeight: 700, color: '#92400e', minWidth: '14px' }}>{i + 1}.</span>
-                  <span style={{ fontSize: '.72rem', color: '#78350f', lineHeight: 1.5 }}>{txt}</span>
-                </div>
-              ))}
-            </div>
-            <button style={s.btn} onClick={handleOpenPayMongo}>
-              Pay ₱{total.toLocaleString()} via PayMongo →
-            </button>
-          </>
-        )}
+          ))}
+        </div>
+        <button style={s.btn} onClick={handleOpenPayMongo}>
+          Pay ₱{total.toLocaleString()} via PayMongo →
+        </button>
         <button style={s.btnOutline} onClick={() => router.push('/dashboard/homeowner')}>
           Pay later
         </button>
