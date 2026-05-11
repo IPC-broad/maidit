@@ -2,8 +2,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 
-const PAYMONGO_LINK = process.env.NEXT_PUBLIC_PAYMONGO_LINK || 'https://pm.link/org-9FQv6XBpoCxdDMaMPY8gze3N/bK90nx0'
+const PAYMONGO_LINK      = process.env.NEXT_PUBLIC_PAYMONGO_LINK      || 'https://pm.link/org-9FQv6XBpoCxdDMaMPY8gze3N/bK90nx0'
+const PAYMONGO_LINK_2500 = process.env.NEXT_PUBLIC_PAYMONGO_LINK_2500 || ''
 const PAYMONGO_LINK_8001 = process.env.NEXT_PUBLIC_PAYMONGO_LINK_8001 || ''
+const PAYMONGO_LINK_8500 = process.env.NEXT_PUBLIC_PAYMONGO_LINK_8500 || ''
+const MAIDIT_WA          = process.env.NEXT_PUBLIC_MAIDIT_WHATSAPP    || '63XXXXXXXXX'
 
 export default function PayPage() {
   const router = useRouter()
@@ -65,10 +68,19 @@ export default function PayPage() {
 
   const hasTransport = offer?.transport_service === true
   const baseFee = creditApplicable ? 2001 : 2500
-  const total = baseFee + (hasTransport ? 6000 : 0)
-  const paymongoLink = hasTransport ? PAYMONGO_LINK_8001 : PAYMONGO_LINK
+  const transportFee = hasTransport ? 6000 : 0
+  const total = baseFee + transportFee
+
+  const resolvedLink =
+    !hasTransport && creditApplicable  ? PAYMONGO_LINK      :
+    !hasTransport && !creditApplicable ? PAYMONGO_LINK_2500  :
+     hasTransport && creditApplicable  ? PAYMONGO_LINK_8001  :
+                                         PAYMONGO_LINK_8500
+  const paymongoLink = resolvedLink
+  const paymongoMissing = !resolvedLink
 
   const handleOpenPayMongo = () => {
+    if (!paymongoLink) return
     setStep('confirm')
     window.open(paymongoLink, '_blank')
   }
@@ -164,9 +176,11 @@ export default function PayPage() {
         <button style={{ ...s.btn, opacity: submitting ? .6 : 1 }} onClick={handleConfirmPaid} disabled={submitting}>
           {submitting ? 'Verifying...' : "✅ I've Completed Payment"}
         </button>
-        <button style={s.btnBlue} onClick={() => window.open(paymongoLink, '_blank')}>
-          ↗ Re-open PayMongo
-        </button>
+        {!paymongoMissing && (
+          <button style={s.btnBlue} onClick={() => window.open(paymongoLink, '_blank')}>
+            ↗ Re-open PayMongo
+          </button>
+        )}
         <button style={s.btnOutline} onClick={() => router.push('/dashboard/homeowner')}>
           Pay later
         </button>
@@ -193,12 +207,15 @@ export default function PayPage() {
         {/* Pricing Breakdown */}
         <div style={s.card}>
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#6b7280', marginBottom: '12px' }}>Pricing Breakdown</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f3f4f6' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: creditApplicable ? '1px solid #f3f4f6' : (hasTransport ? '1px solid #f3f4f6' : 'none') }}>
             <span style={{ fontSize: '.82rem', color: '#374151' }}>Hiring Fee</span>
-            <span style={{ textDecoration: 'line-through', color: '#9ca3af', fontSize: '.82rem' }}>₱2,500</span>
+            {creditApplicable
+              ? <span style={{ textDecoration: 'line-through', color: '#9ca3af', fontSize: '.82rem' }}>₱2,500</span>
+              : <span style={{ fontSize: '.82rem', color: '#374151', fontWeight: 600 }}>₱2,500</span>
+            }
           </div>
           {creditApplicable && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #f3f4f6' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: hasTransport ? '1px solid #f3f4f6' : 'none' }}>
               <span style={{ fontSize: '.82rem', color: '#374151' }}>First hire credit</span>
               <span style={{ fontSize: '.82rem', color: '#1a6b3c', fontWeight: 700 }}>−₱499</span>
             </div>
@@ -270,9 +287,27 @@ export default function PayPage() {
             </div>
           ))}
         </div>
-        <button style={s.btn} onClick={handleOpenPayMongo}>
-          Pay ₱{total.toLocaleString()} via PayMongo →
-        </button>
+        {paymongoMissing ? (
+          <>
+            <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '11px', padding: '12px 14px', marginBottom: '10px' }}>
+              <div style={{ fontSize: '.74rem', color: '#dc2626', lineHeight: 1.6 }}>
+                Online payment is temporarily unavailable for this amount. Please contact MaidIt to complete payment.
+              </div>
+            </div>
+            <a
+              href={`https://wa.me/${MAIDIT_WA}?text=${encodeURIComponent(`Hi, I'd like to complete payment of ₱${total.toLocaleString()} for my hire (offer ${offerId}).`)}`}
+              target="_blank"
+              rel="noreferrer"
+              style={{ display: 'block', width: '100%', padding: '14px', borderRadius: '12px', background: '#16a34a', color: '#fff', fontFamily: 'sans-serif', fontSize: '1rem', fontWeight: 700, cursor: 'pointer', marginBottom: '10px', textAlign: 'center' as const, textDecoration: 'none', boxSizing: 'border-box' as const }}
+            >
+              💬 Contact MaidIt to Complete Payment
+            </a>
+          </>
+        ) : (
+          <button style={s.btn} onClick={handleOpenPayMongo}>
+            Pay ₱{total.toLocaleString()} via PayMongo →
+          </button>
+        )}
         <button style={s.btnOutline} onClick={() => router.push('/dashboard/homeowner')}>
           Pay later
         </button>
