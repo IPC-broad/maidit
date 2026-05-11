@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(curl*supabase*)",
+      "Bash(curl*apikey*)",
+      "Bash(curl*Authorization*)",
+      "Bash(cat*.env*)",
+      "Bash(echo*KEY*)",
+      "Bash(printenv*)"
+    ]
+  }
+}
