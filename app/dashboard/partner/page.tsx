@@ -425,6 +425,7 @@ export default function PartnerDashboard() {
               const isHeld = p.status === 'held'
               const typeLabel: Record<string, string> = {
                 arrival: 'Arrival payout',
+                transport: 'Transport assistance payout',
                 day30: 'Day-30 payout',
                 clawback: 'Clawback — early departure',
                 balance_clear: 'Balance cleared',

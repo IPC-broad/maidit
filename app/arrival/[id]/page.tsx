@@ -63,6 +63,7 @@ export default function ArrivalPage() {
       const { data: partnerData } = await supabase.from('partners').select('balance').eq('id', referrorId).single()
       const partnerBalance = partnerData?.balance ?? 0
       const payoutStatus = partnerBalance < 0 ? 'held' : 'pending'
+      // Recruitment fee payout
       await supabase.from('payouts').insert({
         partner_id: referrorId,
         offer_id: offerId,
@@ -71,6 +72,17 @@ export default function ArrivalPage() {
         status: payoutStatus,
         due_at: now
       })
+      // Transport assistance payout (only if MaidIt Assisted Travel was selected)
+      if (offer.transport_service === true) {
+        await supabase.from('payouts').insert({
+          partner_id: referrorId,
+          offer_id: offerId,
+          amount: 500,
+          type: 'transport',
+          status: payoutStatus,
+          due_at: now
+        })
+      }
     }
 
     await fetch('/api/send-sms', {

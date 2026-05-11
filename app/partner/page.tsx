@@ -270,9 +270,9 @@ export default function PartnerPage() {
       {/* 3 FEATURE CARDS — horizontal row */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', padding: '12px 14px 20px' }}>
         {[
-          { icon: '📋', title: 'Madali lang', sub: 'I-share lang ang link mo sa mga naghahanap ng trabaho sa iyong komunidad.' },
-          { icon: '📩', title: 'May Job Offer', sub: 'Kapag may na-hire, makatanggap ka ng ₱1,000.' },
-          { icon: '♾️', title: 'Kumita Palagi', sub: 'Walang limit ang pwede mong kitain. Tuloy-tuloy ang earnings mo!' },
+          { icon: '🌱', title: 'Nakatutulong sa Komunidad', sub: 'Tulungan ang mga naghahanap ng trabaho na makahanap ng mabuting employer at oportunidad.' },
+          { icon: '💸', title: 'Kumikita sa Bawat Hire', sub: 'May kita sa bawat successful hire at dagdag kita para sa transport assistance.' },
+          { icon: '🛡️', title: 'Ligtas at Maayos', sub: 'Verified ang employers at transparent ang payouts sa platform ng MaidIt.' },
         ].map((card, i) => (
           <div key={i} style={{ background: '#fff', borderRadius: '12px', padding: '13px 11px', border: '1px solid #ede8e0', display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
             <div style={{ width: '34px', height: '34px', borderRadius: '9px', background: '#fef3e2', border: '1px solid #fde8c0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px' }}>{card.icon}</div>
