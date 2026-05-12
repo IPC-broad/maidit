@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 const STORAGE = 'https://xlagwtsrjbylhxfozoem.supabase.co/storage/v1/object/public/Selfies'
+const PAYMONGO_LINK_499 = process.env.NEXT_PUBLIC_PAYMONGO_LINK_499 || ''
 
 const METRO = ['Quezon City','Makati','Pasig','Taguig','Manila','Mandaluyong','Marikina','Muntinlupa','Las Piñas','Parañaque','Valenzuela','Caloocan','Malabon','Navotas','Pateros','San Juan']
 
@@ -65,7 +66,9 @@ export default function BrowsePage() {
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({})
   const [offersLoaded, setOffersLoaded] = useState(false)
   const [authModalId, setAuthModalId] = useState<string | null>(null)
+  const [subscribeModalId, setSubscribeModalId] = useState<string | null>(null)
   const [homeownerProvince, setHomeownerProvince] = useState<string | null>(null)
+  const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null)
 
   useEffect(() => {
     const init = async () => {
@@ -73,8 +76,9 @@ export default function BrowsePage() {
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user || null)
       if (user) {
-        const { data: hw } = await supabase.from('homeowners').select('province').eq('profile_id', user.id).single()
+        const { data: hw } = await supabase.from('homeowners').select('province, subscription_expires_at').eq('profile_id', user.id).single()
         setHomeownerProvince(hw?.province || null)
+        setIsSubscribed(!!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date()))
       }
       const { data } = await supabase
         .from('kasambahay')
@@ -230,6 +234,22 @@ export default function BrowsePage() {
             </div>
             <div style={{ flexShrink:0, fontSize:'2.8rem', marginLeft:'14px', lineHeight:1 }}>👩‍🍳</div>
           </div>
+
+          {/* ── SUBSCRIPTION BANNER — for logged-in non-subscribed users ── */}
+          {currentUser && isSubscribed === false && (
+            <div style={{ margin:'12px 16px 0', background:'linear-gradient(135deg, #f0fdf4, #dcfce7)', border:'1.5px solid #bbf7d0', borderRadius:'14px', padding:'14px 16px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
+              <div>
+                <div style={{ fontFamily:'Georgia, serif', fontSize:'.95rem', fontWeight:900, color:'#1a6b3c', marginBottom:'3px' }}>Subscribe to MaidIt</div>
+                <div style={{ fontSize:'.72rem', color:'#166534', lineHeight:1.5 }}>₱499/month · Platform access · 1 hiring fee credit included</div>
+              </div>
+              <button
+                onClick={() => { window.location.href = PAYMONGO_LINK_499 }}
+                style={{ padding:'9px 14px', borderRadius:'9px', background:'#1a6b3c', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'.78rem', fontWeight:700, cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' as const }}
+              >
+                Subscribe ₱499
+              </button>
+            </div>
+          )}
 
           {/* ── SORT ROW ── */}
           <div style={{ padding:'10px 16px 6px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
@@ -387,7 +407,11 @@ export default function BrowsePage() {
                     )}
                     {/* Send Offer */}
                     <button
-                      onClick={() => { if (!currentUser) { setAuthModalId(kb.id) } else { router.push(`/offer/send/${kb.id}`) } }}
+                      onClick={() => {
+                        if (!currentUser) { setAuthModalId(kb.id) }
+                        else if (!isSubscribed) { setSubscribeModalId(kb.id) }
+                        else { router.push(`/offer/send/${kb.id}`) }
+                      }}
                       style={{ width:'100%', padding:'6px 4px', background:'#1a6b3c', color:'#fff', border:'none', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'10px', fontWeight:700, cursor:'pointer', marginBottom:'3px' }}
                     >
                       Send Offer
@@ -477,6 +501,30 @@ export default function BrowsePage() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* ── SUBSCRIBE MODAL ── */}
+      {subscribeModalId && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.55)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
+          <div style={{ background:'#fff', borderRadius:'16px', padding:'24px 20px', maxWidth:'320px', width:'100%' }}>
+            <div style={{ fontFamily:'Georgia, serif', fontSize:'1.15rem', fontWeight:900, color:'#111827', marginBottom:'6px' }}>Subscribe to MaidIt — ₱499/month</div>
+            <p style={{ fontSize:'.82rem', color:'#6b7280', lineHeight:1.6, marginBottom:'20px', margin:'0 0 20px' }}>
+              Get platform access + 1 hiring fee credit (₱499 off your first hire)
+            </p>
+            <button
+              onClick={() => { window.location.href = PAYMONGO_LINK_499 }}
+              style={{ width:'100%', padding:'12px', borderRadius:'10px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'.88rem', fontWeight:700, cursor:'pointer', marginBottom:'10px' }}
+            >
+              Subscribe for ₱499 →
+            </button>
+            <button
+              onClick={() => setSubscribeModalId(null)}
+              style={{ width:'100%', padding:'8px', background:'none', border:'none', fontFamily:'sans-serif', fontSize:'.8rem', color:'#9ca3af', cursor:'pointer' }}
+            >
+              Maybe later
+            </button>
+          </div>
         </div>
       )}
 

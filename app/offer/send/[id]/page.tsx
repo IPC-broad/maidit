@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 
+const PAYMONGO_LINK_499 = process.env.NEXT_PUBLIC_PAYMONGO_LINK_499 || ''
+
 const TRANSPORT_PROVINCES = [
   'Leyte', 'Southern Leyte', 'Samar', 'Eastern Samar', 'Northern Samar', 'Western Samar',
   'Camarines Norte', 'Camarines Sur', 'Albay', 'Sorsogon', 'Catanduanes', 'Masbate',
@@ -27,11 +29,9 @@ export default function SendOfferPage({ params }: any) {
     transport_arrangement: '' as 'direct' | 'maidit_transport' | '',
   })
   const [submitting, setSubmitting] = useState(false)
-  const [paying, setPaying] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [showPaywall, setShowPaywall] = useState(false)
-  const [credits, setCredits] = useState<number | null>(null)
   const [hwProvince, setHwProvince] = useState<string | null>(null)
   const [transportDirectType, setTransportDirectType] = useState<'homeowner_pays' | 'reimburse' | 'kasambahay_pays' | ''>('')
 
@@ -42,24 +42,13 @@ export default function SendOfferPage({ params }: any) {
       if (!user) { router.push('/login'); return }
       const { data: kbData } = await supabase.from('kasambahay').select('*, profiles(full_name, mobile, city)').eq('id', kasambahayId).single()
       setKb(kbData)
-      const { data: profile } = await supabase.from('profiles').select('is_paid, job_offer_credits').eq('id', user.id).single()
-      if (!profile?.is_paid || (profile.job_offer_credits ?? 0) <= 0) setShowPaywall(true)
-      setCredits(profile?.job_offer_credits ?? 0)
-      const { data: hw } = await supabase.from('homeowners').select('province').eq('profile_id', user.id).single()
+      const { data: hw } = await supabase.from('homeowners').select('id, province, subscription_expires_at').eq('profile_id', user.id).single()
+      const subscribed = !!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date())
+      if (!subscribed) setShowPaywall(true)
       setHwProvince(hw?.province || null)
     }
     init()
   }, [kasambahayId])
-
-  const handlePay = async () => {
-    setPaying(true)
-    try {
-      const res = await fetch('/api/pay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kasambahayId }) })
-      const data = await res.json()
-      if (data.checkout_url) { window.location.href = data.checkout_url }
-      else { window.location.href = 'https://pm.link/org-9FQv6XBpoCxdDMaMPY8gze3N/3H88IVz'; setPaying(false) }
-    } catch { window.location.href = 'https://pm.link/org-9FQv6XBpoCxdDMaMPY8gze3N/3H88IVz'; setPaying(false) }
-  }
 
   const handleSendOffer = async () => {
     if (!form.salary || form.scope.length === 0) { setError('Pakipunan ang salary at scope'); return }
@@ -104,8 +93,6 @@ export default function SendOfferPage({ params }: any) {
       transport_direct_type: isTransport ? null : (transportDirectType || null),
     })
     if (offerError) { setSubmitting(false); setError(offerError.message); return }
-    const { data: profile } = await supabase.from('profiles').select('job_offer_credits').eq('id', user.id).single()
-    await supabase.from('profiles').update({ job_offer_credits: (profile?.job_offer_credits ?? 1) - 1 }).eq('id', user.id)
     const { data: newOffer } = await supabase.from('offers').select('id').eq('kasambahay_id', kasambahayId).eq('status', 'pending').order('created_at', { ascending: false }).limit(1).single()
     if (newOffer?.id) {
       await fetch('/api/send-sms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'offer_sent', offerId: newOffer.id }) }).catch(() => {})
@@ -155,8 +142,7 @@ export default function SendOfferPage({ params }: any) {
     <div style={{ ...s.wrap, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px', textAlign: 'center' }}>
       <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✅</div>
       <h1 style={{ fontFamily: 'serif', fontSize: '1.4rem', fontWeight: 900, color: '#1a6b3c', marginBottom: '8px' }}>Offer Sent!</h1>
-      <p style={{ color: '#6b7280', fontSize: '13px', lineHeight: 1.7, marginBottom: '8px' }}>Irereview ng kasambahay ang iyong offer.</p>
-      {credits !== null && <p style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '24px' }}>{Math.max(0, credits - 1)} credits natitira</p>}
+      <p style={{ color: '#6b7280', fontSize: '13px', lineHeight: 1.7, marginBottom: '24px' }}>Irereview ng kasambahay ang iyong offer.</p>
       <button style={{ ...s.btn, maxWidth: '320px' }} onClick={() => router.push('/dashboard/homeowner')}>Back to Dashboard</button>
     </div>
   )
@@ -167,7 +153,6 @@ export default function SendOfferPage({ params }: any) {
         <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: '18px', cursor: 'pointer', padding: 0 }}>←</button>
         <div>
           <div style={{ fontFamily: 'serif', fontSize: '15px', fontWeight: 900 }}>Send Job Offer</div>
-          {credits !== null && !showPaywall && <div style={{ fontSize: '11px', color: '#9ca3af' }}>{credits} credits natitira</div>}
         </div>
       </div>
       <div style={s.body}>
@@ -342,18 +327,10 @@ export default function SendOfferPage({ params }: any) {
       {showPaywall && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', zIndex: 50 }}>
           <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', maxWidth: '340px', width: '100%' }}>
-            <div style={{ fontFamily: 'serif', fontSize: '1.2rem', fontWeight: 900, marginBottom: '6px', color: '#1a1a1a' }}>I-activate ang account mo</div>
-            <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '16px', lineHeight: 1.6 }}>Bayaran ang one-time fee para makapag-send ng job offers.</div>
-            <div style={{ background: '#1a6b3c', borderRadius: '12px', padding: '16px', textAlign: 'center', marginBottom: '14px' }}>
-              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.6)', textTransform: 'uppercase' as const, letterSpacing: '1px', marginBottom: '4px' }}>Activation Fee</div>
-              <div style={{ fontFamily: 'serif', fontSize: '2.5rem', fontWeight: 900, color: '#fff' }}>₱499</div>
-              <div style={{ fontSize: '12px', color: 'rgba(255,255,255,.7)' }}>One-time · 30 days</div>
-            </div>
-            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px', marginBottom: '14px' }}>
-              <div style={{ fontSize: '12px', color: '#166534', lineHeight: 1.8 }}>10 job offer credits · Send offers directly to kasambahay · 499 deducted from final hire fee · Priority visibility</div>
-            </div>
-            <button style={{ ...s.btnAmber, opacity: paying ? .6 : 1 }} onClick={handlePay} disabled={paying}>{paying ? 'Redirecting...' : 'Pay 499 and Continue'}</button>
-            <button style={s.btnOutline} onClick={() => router.push('/dashboard/homeowner')}>Cancel</button>
+            <div style={{ fontFamily: 'serif', fontSize: '1.2rem', fontWeight: 900, marginBottom: '6px', color: '#1a1a1a' }}>Subscribe to MaidIt — ₱499/month</div>
+            <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '20px', lineHeight: 1.6 }}>Get platform access + 1 hiring fee credit (₱499 off your first hire)</div>
+            <button style={s.btn} onClick={() => { window.location.href = PAYMONGO_LINK_499 }}>Subscribe for ₱499 →</button>
+            <button style={s.btnOutline} onClick={() => router.push('/dashboard/homeowner')}>Maybe later</button>
           </div>
         </div>
       )}
