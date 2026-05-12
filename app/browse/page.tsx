@@ -3,8 +3,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 const STORAGE = 'https://xlagwtsrjbylhxfozoem.supabase.co/storage/v1/object/public/Selfies'
-const PAYMONGO_LINK_499 = process.env.NEXT_PUBLIC_PAYMONGO_LINK_499 || ''
-
 const METRO = ['Quezon City','Makati','Pasig','Taguig','Manila','Mandaluyong','Marikina','Muntinlupa','Las Piñas','Parañaque','Valenzuela','Caloocan','Malabon','Navotas','Pateros','San Juan']
 
 const TRANSPORT_PROVINCES = [
@@ -67,6 +65,7 @@ export default function BrowsePage() {
   const [offersLoaded, setOffersLoaded] = useState(false)
   const [authModalId, setAuthModalId] = useState<string | null>(null)
   const [subscribeModalId, setSubscribeModalId] = useState<string | null>(null)
+  const [subscribeLoading, setSubscribeLoading] = useState(false)
   const [homeownerProvince, setHomeownerProvince] = useState<string | null>(null)
   const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null)
 
@@ -106,6 +105,25 @@ export default function BrowsePage() {
     }
     setOffersLoaded(true)
     setOffersLoading(false)
+  }
+
+  const handleSubscribe = async () => {
+    setSubscribeLoading(true)
+    try {
+      const res = await fetch('/api/create-payment-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 49900, description: 'MaidIt Subscription - ₱499' }),
+      })
+      const data = await res.json()
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url
+      } else {
+        setSubscribeLoading(false)
+      }
+    } catch {
+      setSubscribeLoading(false)
+    }
   }
 
   const isProvince = (province: string) => !!(province && !METRO.includes(province))
@@ -243,10 +261,11 @@ export default function BrowsePage() {
                 <div style={{ fontSize:'.72rem', color:'#166534', lineHeight:1.5 }}>₱499/month · Platform access · 1 hiring fee credit included</div>
               </div>
               <button
-                onClick={() => { window.location.href = PAYMONGO_LINK_499 }}
-                style={{ padding:'9px 14px', borderRadius:'9px', background:'#1a6b3c', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'.78rem', fontWeight:700, cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' as const }}
+                onClick={handleSubscribe}
+                disabled={subscribeLoading}
+                style={{ padding:'9px 14px', borderRadius:'9px', background:'#1a6b3c', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'.78rem', fontWeight:700, cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' as const, opacity: subscribeLoading ? .6 : 1 }}
               >
-                Subscribe ₱499
+                {subscribeLoading ? '...' : 'Subscribe ₱499'}
               </button>
             </div>
           )}
@@ -513,10 +532,11 @@ export default function BrowsePage() {
               Get platform access + 1 hiring fee credit (₱499 off your first hire)
             </p>
             <button
-              onClick={() => { window.location.href = PAYMONGO_LINK_499 }}
-              style={{ width:'100%', padding:'12px', borderRadius:'10px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'.88rem', fontWeight:700, cursor:'pointer', marginBottom:'10px' }}
+              onClick={handleSubscribe}
+              disabled={subscribeLoading}
+              style={{ width:'100%', padding:'12px', borderRadius:'10px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'.88rem', fontWeight:700, cursor:'pointer', marginBottom:'10px', opacity: subscribeLoading ? .6 : 1 }}
             >
-              Subscribe for ₱499 →
+              {subscribeLoading ? 'Preparing payment...' : 'Subscribe for ₱499 →'}
             </button>
             <button
               onClick={() => setSubscribeModalId(null)}
