@@ -6,6 +6,11 @@ const STORAGE = 'https://xlagwtsrjbylhxfozoem.supabase.co/storage/v1/object/publ
 
 const METRO = ['Quezon City','Makati','Pasig','Taguig','Manila','Mandaluyong','Marikina','Muntinlupa','Las Piñas','Parañaque','Valenzuela','Caloocan','Malabon','Navotas','Pateros','San Juan']
 
+const TRANSPORT_PROVINCES = [
+  'Leyte', 'Southern Leyte', 'Samar', 'Eastern Samar', 'Northern Samar', 'Western Samar',
+  'Camarines Norte', 'Camarines Sur', 'Albay', 'Sorsogon', 'Catanduanes', 'Masbate',
+]
+
 const IconSearch = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
     <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -59,12 +64,18 @@ export default function BrowsePage() {
   const [saved, setSaved] = useState<Record<string, boolean>>({})
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({})
   const [offersLoaded, setOffersLoaded] = useState(false)
+  const [authModalId, setAuthModalId] = useState<string | null>(null)
+  const [homeownerProvince, setHomeownerProvince] = useState<string | null>(null)
 
   useEffect(() => {
     const init = async () => {
       const { supabase } = await import('../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user || null)
+      if (user) {
+        const { data: hw } = await supabase.from('homeowners').select('province').eq('profile_id', user.id).single()
+        setHomeownerProvince(hw?.province || null)
+      }
       const { data } = await supabase
         .from('kasambahay')
         .select('*, profiles!kasambahay_profile_id_fkey(full_name, selfie_url, city)')
@@ -94,6 +105,13 @@ export default function BrowsePage() {
   }
 
   const isProvince = (province: string) => !!(province && !METRO.includes(province))
+
+  const showTransport = (kbProvince: string) => {
+    if (!kbProvince) return false
+    if (TRANSPORT_PROVINCES.includes(kbProvince)) return true
+    if (homeownerProvince && homeownerProvince !== kbProvince) return true
+    return false
+  }
 
   const filtered = profiles.filter(p => {
     if (!p.profiles) return false
@@ -347,6 +365,13 @@ export default function BrowsePage() {
                       </button>
                     </div>
                     <div style={{ flex:1 }} />
+                    {/* Transport */}
+                    {showTransport(kb.province) && (
+                      <div style={{ display:'flex', alignItems:'center', gap:'3px', justifyContent:'flex-end', marginBottom:'3px' }}>
+                        <span style={{ fontSize:'11px' }}>🚌</span>
+                        <span style={{ fontSize:'8px', fontWeight:700, color:'#c9943a' }}>Transport needed</span>
+                      </div>
+                    )}
                     {/* Salary */}
                     <div style={{ textAlign:'right' as const, marginBottom:'1px' }}>
                       <div style={{ fontFamily:'Georgia, serif', fontSize:'13px', fontWeight:900, color:'#1a6b3c', lineHeight:1.1 }}>
@@ -360,19 +385,19 @@ export default function BrowsePage() {
                         Available:<br />{availLabel}
                       </div>
                     )}
-                    {/* View Profile */}
+                    {/* Send Offer */}
                     <button
-                      onClick={() => { if (!currentUser) { router.push(`/login?redirect=/offer/send/${kb.id}`) } else { router.push(`/offer/send/${kb.id}`) } }}
+                      onClick={() => { if (!currentUser) { setAuthModalId(kb.id) } else { router.push(`/offer/send/${kb.id}`) } }}
                       style={{ width:'100%', padding:'6px 4px', background:'#1a6b3c', color:'#fff', border:'none', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'10px', fontWeight:700, cursor:'pointer', marginBottom:'3px' }}
                     >
-                      View Profile
+                      Send Offer
                     </button>
-                    {/* Skip */}
+                    {/* Pass */}
                     <button
                       onClick={() => setPassed(prev => ({ ...prev, [kb.id]: true }))}
                       style={{ width:'100%', padding:'5px 4px', background:'#fff', color:'#6b7280', border:'1.5px solid #e5e7eb', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'9px', fontWeight:600, cursor:'pointer' }}
                     >
-                      Skip
+                      Pass
                     </button>
                   </div>
                 </div>
@@ -380,22 +405,18 @@ export default function BrowsePage() {
             })}
           </div>
 
-          {/* ── SAFETY SECTION ── */}
-          <div style={{ margin:'0 16px 16px', background:'#fff', borderRadius:'16px', border:'1.5px solid #e5e7eb', padding:'18px 16px' }}>
-            <div style={{ display:'flex', alignItems:'flex-start', gap:'12px', marginBottom:'14px' }}>
-              <div style={{ width:'42px', height:'42px', borderRadius:'11px', background:'#f0fdf4', border:'1px solid #bbf7d0', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.25rem', flexShrink:0 }}>🔒</div>
-              <div>
-                <div style={{ fontWeight:700, fontSize:'15px', color:'#111827', marginBottom:'3px' }}>Safe &amp; Secure Hiring</div>
-                <div style={{ fontSize:'.78rem', color:'#6b7280', lineHeight:1.55 }}>We verify profiles, check IDs, and moderate for your peace of mind.</div>
-              </div>
+          {/* ── CTA STRIP ── */}
+          <div style={{ margin:'0 16px 24px', background:'#fef3e2', border:'1.5px solid #fde8c0', borderRadius:'14px', padding:'14px 16px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
+            <div style={{ fontSize:'.82rem', color:'#78350f', fontWeight:600, lineHeight:1.5 }}>
+              ✨ New helpers join every day.<br />
+              <span style={{ fontWeight:400, color:'#92400e', fontSize:'.76rem' }}>Find your perfect match today.</span>
             </div>
-            <button style={{ width:'100%', padding:'11px', borderRadius:'10px', border:'1.5px solid #1a6b3c', background:'transparent', color:'#1a6b3c', fontFamily:'sans-serif', fontSize:'.82rem', fontWeight:700, cursor:'pointer' }}>
-              Learn how we keep you safe
+            <button
+              onClick={() => router.push('/signup/homeowner')}
+              style={{ padding:'10px 16px', borderRadius:'10px', background:'#c9943a', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'.8rem', fontWeight:700, cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' as const }}
+            >
+              Get Started
             </button>
-          </div>
-
-          <div style={{ textAlign:'center' as const, padding:'0 16px 24px', fontSize:'.78rem', color:'#9ca3af', lineHeight:1.6 }}>
-            ✨ New helpers join every day. More matches coming soon!
           </div>
         </>
       )}
@@ -456,6 +477,36 @@ export default function BrowsePage() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* ── AUTH MODAL ── */}
+      {authModalId && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.55)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
+          <div style={{ background:'#fff', borderRadius:'16px', padding:'24px 20px', maxWidth:'320px', width:'100%' }}>
+            <div style={{ fontFamily:'Georgia, serif', fontSize:'1.15rem', fontWeight:900, color:'#111827', marginBottom:'8px' }}>Sign in to send an offer</div>
+            <p style={{ fontSize:'.82rem', color:'#6b7280', lineHeight:1.6, marginBottom:'20px', margin:'0 0 20px' }}>
+              Join MaidIt to hire trusted kasambahay for your home.
+            </p>
+            <button
+              onClick={() => router.push(`/login?redirect=/offer/send/${authModalId}`)}
+              style={{ width:'100%', padding:'12px', borderRadius:'10px', border:'1.5px solid #1a6b3c', background:'transparent', color:'#1a6b3c', fontFamily:'sans-serif', fontSize:'.88rem', fontWeight:700, cursor:'pointer', marginBottom:'10px' }}
+            >
+              Log In
+            </button>
+            <button
+              onClick={() => router.push('/signup/homeowner')}
+              style={{ width:'100%', padding:'12px', borderRadius:'10px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'.88rem', fontWeight:700, cursor:'pointer', marginBottom:'10px' }}
+            >
+              Sign Up as Homeowner
+            </button>
+            <button
+              onClick={() => setAuthModalId(null)}
+              style={{ width:'100%', padding:'8px', background:'none', border:'none', fontFamily:'sans-serif', fontSize:'.8rem', color:'#9ca3af', cursor:'pointer' }}
+            >
+              Maybe later
+            </button>
+          </div>
         </div>
       )}
 
