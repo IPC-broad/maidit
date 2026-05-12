@@ -33,6 +33,7 @@ export default function SendOfferPage({ params }: any) {
   const [showPaywall, setShowPaywall] = useState(false)
   const [credits, setCredits] = useState<number | null>(null)
   const [hwProvince, setHwProvince] = useState<string | null>(null)
+  const [transportDirectType, setTransportDirectType] = useState<'homeowner_pays' | 'reimburse' | 'kasambahay_pays' | ''>('')
 
   useEffect(() => {
     const init = async () => {
@@ -62,6 +63,9 @@ export default function SendOfferPage({ params }: any) {
 
   const handleSendOffer = async () => {
     if (!form.salary || form.scope.length === 0) { setError('Pakipunan ang salary at scope'); return }
+    if (showMaidItTransport && form.transport_arrangement !== 'maidit_transport' && !transportDirectType) {
+      setError('Please choose how transport will be paid.'); return
+    }
     setSubmitting(true)
     setError('')
     const { supabase } = await import('../../../../lib/supabase')
@@ -89,6 +93,7 @@ export default function SendOfferPage({ params }: any) {
       status: 'pending',
       transport_service: isTransport,
       transport_fee: isTransport ? 6000 : 0,
+      transport_direct_type: isTransport ? null : (transportDirectType || null),
     })
     if (offerError) { setSubmitting(false); setError(offerError.message); return }
     const { data: profile } = await supabase.from('profiles').select('job_offer_credits').eq('id', user.id).single()
@@ -112,6 +117,8 @@ export default function SendOfferPage({ params }: any) {
     TRANSPORT_PROVINCES.includes(kb.province) ||
     (hwProvince && hwProvince !== kb.province)
   )
+  const isDirect = form.transport_arrangement !== 'maidit_transport'
+  const needsDirectType = !!showMaidItTransport && isDirect && !transportDirectType
 
   const s: any = {
     wrap: { minHeight: '100vh', background: '#faf8f5', fontFamily: 'sans-serif', color: '#1a1a1a' },
@@ -224,18 +231,46 @@ export default function SendOfferPage({ params }: any) {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '8px', alignItems: 'stretch' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '8px', alignItems: 'flex-start' }}>
               {/* Left: Direct card */}
               <div
                 onClick={() => setForm(f => ({ ...f, transport_arrangement: 'direct' }))}
                 style={{
                   padding: '14px', borderRadius: '12px', cursor: 'pointer',
-                  border: form.transport_arrangement !== 'maidit_transport' ? '2px solid #1a6b3c' : '1.5px solid #e5e0d8',
-                  background: form.transport_arrangement !== 'maidit_transport' ? '#f0fdf4' : '#fff',
+                  border: isDirect ? '2px solid #1a6b3c' : '1.5px solid #e5e0d8',
+                  background: isDirect ? '#f0fdf4' : '#fff',
                 }}>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a1a1a', marginBottom: '4px' }}>Direct</div>
-                <div style={{ fontSize: '13px', color: '#4b5563', lineHeight: 1.5, marginBottom: '10px' }}>You coordinate transport with the kasambahay directly.</div>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a6b3c' }}>Free</div>
+                <div style={{ fontSize: '13px', color: '#4b5563', lineHeight: 1.5, marginBottom: '6px' }}>You coordinate transport with the kasambahay directly.</div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a6b3c', marginBottom: isDirect ? '10px' : 0 }}>Free</div>
+                {isDirect && (
+                  <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
+                    {([
+                      { value: 'homeowner_pays', label: 'I will pay for transport', sub: 'Kasambahay provides fare estimate on review' },
+                      { value: 'reimburse', label: 'Kasambahay pays first, I reimburse on arrival' },
+                      { value: 'kasambahay_pays', label: 'Kasambahay pays her own fare' },
+                    ] as const).map(opt => (
+                      <div key={opt.value}
+                        onClick={e => { e.stopPropagation(); setTransportDirectType(opt.value) }}
+                        style={{
+                          display: 'flex', gap: '8px', alignItems: 'flex-start', padding: '8px 10px',
+                          borderRadius: '8px', cursor: 'pointer',
+                          border: transportDirectType === opt.value ? '1.5px solid #1a6b3c' : '1.5px solid #d1d5db',
+                          background: transportDirectType === opt.value ? '#f0fdf4' : '#fff',
+                        }}>
+                        <div style={{
+                          width: '14px', height: '14px', borderRadius: '50%', flexShrink: 0, marginTop: '2px',
+                          border: transportDirectType === opt.value ? '4px solid #1a6b3c' : '2px solid #d1d5db',
+                          background: '#fff',
+                        }} />
+                        <div>
+                          <div style={{ fontSize: '12px', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.4 }}>{opt.label}</div>
+                          {'sub' in opt && <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px', lineHeight: 1.4 }}>{opt.sub}</div>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* OR divider */}
@@ -284,7 +319,7 @@ export default function SendOfferPage({ params }: any) {
           </div>
         )}
 
-        <button style={{ ...s.btn, opacity: submitting ? .6 : 1 }} onClick={handleSendOffer} disabled={submitting}>
+        <button style={{ ...s.btn, opacity: submitting || needsDirectType ? .5 : 1 }} onClick={handleSendOffer} disabled={submitting || needsDirectType}>
           {submitting ? 'Sending...' : form.transport_arrangement === 'maidit_transport' ? 'Send Offer with Assisted Travel →' : 'Send Offer →'}
         </button>
       </div>
