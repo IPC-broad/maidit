@@ -86,7 +86,7 @@ export default function AdminTestPanel() {
       },
     },
     {
-      id: 'F', expect: 'status 400',
+      id: 'F', expect: 'status 401',
       label: 'Webhook rejects invalid signature',
       run: async () => {
         const r = await fetch('/api/webhook/paymongo', {
@@ -94,7 +94,7 @@ export default function AdminTestPanel() {
           headers: { 'Content-Type': 'application/json', 'Paymongo-Signature': 't=1234567890,te=invalidsignature,li=invalidsignature' },
           body: JSON.stringify({ data: { attributes: { type: 'link.payment.paid' } } }),
         })
-        return { pass: r.status === 400, detail: `HTTP ${r.status}` }
+        return { pass: r.status === 401, detail: `HTTP ${r.status}` }
       },
     },
   ]
