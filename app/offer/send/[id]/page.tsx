@@ -219,7 +219,7 @@ export default function SendOfferPage({ params }: any) {
             <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '8px' }}>Transport Arrangement</div>
 
             <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '10px 13px', marginBottom: '12px' }}>
-              <div style={{ fontSize: '12px', color: '#166534', lineHeight: 1.6 }}>
+              <div style={{ fontSize: '14px', color: '#166534', lineHeight: 1.6 }}>
                 🚌 This kasambahay is from a provincial area. Choose how transport will be handled.
               </div>
             </div>
@@ -233,14 +233,14 @@ export default function SendOfferPage({ params }: any) {
                   border: form.transport_arrangement !== 'maidit_transport' ? '2px solid #1a6b3c' : '1.5px solid #e5e0d8',
                   background: form.transport_arrangement !== 'maidit_transport' ? '#f0fdf4' : '#fff',
                 }}>
-                <div style={{ fontSize: '12px', fontWeight: 700, color: '#1a1a1a', marginBottom: '4px' }}>Direct</div>
-                <div style={{ fontSize: '10px', color: '#6b7280', lineHeight: 1.5, marginBottom: '10px' }}>You coordinate transport with the kasambahay directly.</div>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: '#1a6b3c' }}>Free</div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a1a1a', marginBottom: '4px' }}>Direct</div>
+                <div style={{ fontSize: '13px', color: '#4b5563', lineHeight: 1.5, marginBottom: '10px' }}>You coordinate transport with the kasambahay directly.</div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a6b3c' }}>Free</div>
               </div>
 
               {/* OR divider */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 2px' }}>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: '#9ca3af' }}>or</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#9ca3af' }}>or</span>
               </div>
 
               {/* Right: MaidIt Assisted Travel card */}
@@ -251,27 +251,34 @@ export default function SendOfferPage({ params }: any) {
                   border: form.transport_arrangement === 'maidit_transport' ? '2px solid #c9943a' : '1.5px solid #e5e0d8',
                   background: form.transport_arrangement === 'maidit_transport' ? '#fffbeb' : '#fff',
                 }}>
-                <div style={{ fontSize: '12px', fontWeight: 700, color: '#1a1a1a', marginBottom: '4px' }}>🛡️ MaidIt Assisted Travel</div>
-                <div style={{ fontSize: '10px', color: '#6b7280', lineHeight: 1.5, marginBottom: '10px' }}>We coordinate transport and guarantee arrival.</div>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: '#c9943a' }}>+₱6,000</div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a1a1a', marginBottom: '4px' }}>🛡️ MaidIt Assisted Travel</div>
+                <div style={{ fontSize: '13px', color: '#4b5563', lineHeight: 1.5, marginBottom: '10px' }}>We coordinate transport and guarantee arrival.</div>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#c9943a' }}>+₱6,000</div>
               </div>
             </div>
 
             {form.transport_arrangement === 'maidit_transport' && (
               <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '11px 13px', marginTop: '10px' }}>
-                <div style={{ fontSize: '12px', color: '#78350f', lineHeight: 1.8 }}>
-                  ✓ Payment released only after confirmed arrival<br />
-                  ✓ No need to send money directly to anyone<br />
-                  ✓ If kasambahay does not arrive, your ₱6,000 is returned
+                <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px', marginBottom: '10px' }}>
+                  {[
+                    'Payment released only after confirmed arrival',
+                    'No need to send money directly to anyone',
+                    'If kasambahay does not arrive, your ₱6,000 is returned',
+                  ].map((item, i) => (
+                    <div key={i} style={{ display: 'flex', gap: '7px', alignItems: 'flex-start' }}>
+                      <span style={{ color: '#c9943a', fontWeight: 700, fontSize: '14px', marginTop: '1px' }}>✓</span>
+                      <span style={{ fontSize: '14px', color: '#374151', lineHeight: 1.5 }}>{item}</span>
+                    </div>
+                  ))}
                 </div>
-                <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 600, background: '#fde8c0', color: '#92400e', borderRadius: '5px', padding: '3px 8px' }}>₱5,500 transport</span>
-                  <span style={{ fontSize: '11px', fontWeight: 600, background: '#fde8c0', color: '#92400e', borderRadius: '5px', padding: '3px 8px' }}>₱500 MaidIt fee</span>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 600, background: '#fde8c0', color: '#92400e', borderRadius: '5px', padding: '3px 8px' }}>₱5,500 transport</span>
+                  <span style={{ fontSize: '12px', fontWeight: 600, background: '#fde8c0', color: '#92400e', borderRadius: '5px', padding: '3px 8px' }}>₱500 MaidIt fee</span>
                 </div>
               </div>
             )}
 
-            <div style={{ fontSize: '11px', color: '#9ca3af', textAlign: 'center' as const, marginTop: '8px', lineHeight: 1.5 }}>
+            <div style={{ fontSize: '13px', color: '#6b7280', textAlign: 'center' as const, marginTop: '8px', lineHeight: 1.5 }}>
               Transport fee is included in the hire fee payment at checkout.
             </div>
           </div>
