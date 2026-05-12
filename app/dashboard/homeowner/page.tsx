@@ -25,6 +25,8 @@ export default function HWDashboard() {
   const [rematchQ3, setRematchQ3] = useState('')
   const [rematchSubmitting, setRematchSubmitting] = useState(false)
   const [rematchDone, setRematchDone] = useState(false)
+  const [cancelModal, setCancelModal] = useState<string | null>(null)
+  const [cancelSubmitting, setCancelSubmitting] = useState(false)
 
   useEffect(() => {
     const init = async () => {
@@ -182,6 +184,24 @@ export default function HWDashboard() {
     setRematchDone(true)
   }
 
+  const handleCancelOffer = async () => {
+    if (!cancelModal) return
+    setCancelSubmitting(true)
+    const { supabase } = await import('../../../lib/supabase')
+    const { data: { session } } = await supabase.auth.getSession()
+    await fetch('/api/cancel-offer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token ?? ''}`,
+      },
+      body: JSON.stringify({ offer_id: cancelModal }),
+    })
+    setCancelSubmitting(false)
+    setOffers(prev => prev.filter((o: any) => o.id !== cancelModal))
+    setCancelModal(null)
+  }
+
   if (loading) return (
     <div style={{ minHeight:'100vh', background:'#faf8f5', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif', color:'#6b7280' }}>
       Loading...
@@ -321,6 +341,15 @@ export default function HWDashboard() {
                     </div>
                     <span style={{ fontSize:'10px', fontWeight:700, padding:'4px 10px', borderRadius:'50px', background:st.bg, color:st.color, whiteSpace:'nowrap' as const }}>{st.label}</span>
                   </div>
+                  {offer.status === 'pending' && (
+                    <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:'8px' }}>
+                      <button
+                        onClick={() => setCancelModal(offer.id)}
+                        style={{ padding:'5px 12px', borderRadius:'8px', border:'1.5px solid #fecaca', background:'transparent', color:'#dc2626', fontFamily:'sans-serif', fontSize:'12px', fontWeight:600, cursor:'pointer' }}>
+                        Cancel Offer
+                      </button>
+                    </div>
+                  )}
                   <div style={{ background:'#faf8f5', borderRadius:'10px', padding:'10px 12px', marginBottom:'10px' }}>
                     <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
                       <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Salary</div><div style={{ fontFamily:'serif', fontSize:'16px', fontWeight:900, color:'#1a6b3c' }}>₱{offer.salary?.toLocaleString()}<span style={{ fontSize:'10px', fontWeight:400, color:'#9ca3af' }}>/month</span></div></div>
@@ -454,6 +483,26 @@ export default function HWDashboard() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {cancelModal && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:100, display:'flex', alignItems:'flex-end', justifyContent:'center' }} onClick={() => !cancelSubmitting && setCancelModal(null)}>
+          <div style={{ background:'#fff', borderRadius:'20px 20px 0 0', padding:'24px 20px 36px', width:'100%', maxWidth:'480px', fontFamily:'sans-serif' }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, color:'#111827', marginBottom:'6px' }}>Cancel this offer?</div>
+            <div style={{ fontSize:'13px', color:'#6b7280', marginBottom:'20px', lineHeight:1.6 }}>
+              Are you sure you want to cancel this offer? The kasambahay will be notified.
+            </div>
+            <button
+              onClick={handleCancelOffer}
+              disabled={cancelSubmitting}
+              style={{ width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:'#dc2626', color:'#fff', fontFamily:'sans-serif', fontSize:'.95rem', fontWeight:700, cursor:'pointer', marginBottom:'8px', opacity: cancelSubmitting ? .6 : 1 }}>
+              {cancelSubmitting ? 'Cancelling...' : 'Yes, Cancel Offer'}
+            </button>
+            <button onClick={() => setCancelModal(null)} style={{ width:'100%', padding:'11px', borderRadius:'12px', border:'1.5px solid #e5e7eb', background:'transparent', color:'#6b7280', fontFamily:'sans-serif', fontSize:'.85rem', fontWeight:600, cursor:'pointer' }}>
+              Keep Offer
+            </button>
+          </div>
         </div>
       )}
 
