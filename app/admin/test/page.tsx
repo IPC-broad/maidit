@@ -94,7 +94,7 @@ export default function AdminTestPanel() {
           headers: { 'Content-Type': 'application/json', 'Paymongo-Signature': 't=1234567890,te=invalidsignature,li=invalidsignature' },
           body: JSON.stringify({ data: { attributes: { type: 'link.payment.paid' } } }),
         })
-        return { pass: r.status === 401, detail: `HTTP ${r.status}` }
+        return { pass: r.status === 401, detail: r.status === 401 ? '✅ Pass (webhook correctly rejected bad signature)' : `❌ Fail (accepted bad signature) — received HTTP ${r.status}` }
       },
     },
   ]

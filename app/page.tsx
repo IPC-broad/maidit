@@ -46,7 +46,7 @@ export default function Home() {
           textDecoration: 'none',
           fontSize: '0.95rem'
         }}>
-          💼 Naghahanap ng Trabaho?
+          💼 Looking for Work?
         </Link>
         <Link href="/login" style={{
           padding: '12px',
