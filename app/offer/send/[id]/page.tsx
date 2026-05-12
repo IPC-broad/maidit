@@ -225,12 +225,6 @@ export default function SendOfferPage({ params }: any) {
           <div style={{ marginBottom: '20px' }}>
             <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '8px' }}>Transport Arrangement</div>
 
-            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '10px 13px', marginBottom: '12px' }}>
-              <div style={{ fontSize: '14px', color: '#166534', lineHeight: 1.6 }}>
-                🚌 This kasambahay is from a provincial area. Choose how transport will be handled.
-              </div>
-            </div>
-
             <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '8px', alignItems: 'flex-start' }}>
               {/* Left: Direct card */}
               <div
