@@ -17,7 +17,7 @@ export default function SendOfferPage({ params }: any) {
   const [kb, setKb] = useState<any>(null)
   const [form, setForm] = useState({
     salary: '',
-    urgency: 'Kailangan na (ASAP)',
+    urgency: 'ASAP',
     start_date: '',
     scope: [] as string[],
     setup: 'Stay-in',
@@ -25,7 +25,7 @@ export default function SendOfferPage({ params }: any) {
     adults: '1',
     seniors: '0',
     kids: '0',
-    pets: 'Wala',
+    pets: 'None',
     transport_arrangement: '' as 'direct' | 'maidit_transport' | '',
   })
   const [submitting, setSubmitting] = useState(false)
@@ -51,7 +51,7 @@ export default function SendOfferPage({ params }: any) {
   }, [kasambahayId])
 
   const handleSendOffer = async () => {
-    if (!form.salary || form.scope.length === 0) { setError('Pakipunan ang salary at scope'); return }
+    if (!form.salary || form.scope.length === 0) { setError('Please fill in the monthly salary and scope of work.'); return }
     if (showTransportSection && showMaidItOption && !form.transport_arrangement) {
       setError('Please choose a transport arrangement.'); return
     }
@@ -105,7 +105,7 @@ export default function SendOfferPage({ params }: any) {
     setSuccess(true)
   }
 
-  const scopeItems = ['All-around Maid','Tagaluto','Tagalaba','Yaya','Taga-alaga ng Pets','Taga-alaga ng Matanda','Driver','Pamimili']
+  const scopeItems = ['All-around Maid','Cook','Laundry','Nanny','Pet Care','Elder Care','Driver','Grocery / Errands']
   const toggleScope = (sc: string) => setForm(f => ({ ...f, scope: f.scope.includes(sc) ? f.scope.filter((x: string) => x !== sc) : [...f.scope, sc] }))
 
   const kbProvince = kb?.province || ''
@@ -142,7 +142,7 @@ export default function SendOfferPage({ params }: any) {
     <div style={{ ...s.wrap, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px', textAlign: 'center' }}>
       <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✅</div>
       <h1 style={{ fontFamily: 'serif', fontSize: '1.4rem', fontWeight: 900, color: '#1a6b3c', marginBottom: '8px' }}>Offer Sent!</h1>
-      <p style={{ color: '#6b7280', fontSize: '13px', lineHeight: 1.7, marginBottom: '24px' }}>Irereview ng kasambahay ang iyong offer.</p>
+      <p style={{ color: '#6b7280', fontSize: '13px', lineHeight: 1.7, marginBottom: '24px' }}>Your offer has been sent. The kasambahay will review it.</p>
       <button style={{ ...s.btn, maxWidth: '320px' }} onClick={() => router.push('/dashboard/homeowner')}>Back to Dashboard</button>
     </div>
   )
@@ -167,12 +167,12 @@ export default function SendOfferPage({ params }: any) {
         <label style={s.lbl}>Monthly Salary (₱) *</label>
         <input style={s.inp} type="number" placeholder="e.g. 9000" value={form.salary} onChange={e => setForm(f => ({ ...f, salary: e.target.value }))} />
 
-        <label style={s.lbl}>Kailan kailangan?</label>
+        <label style={s.lbl}>When do you need them?</label>
         <select style={s.sel} value={form.urgency} onChange={e => setForm(f => ({ ...f, urgency: e.target.value }))}>
-          <option>Kailangan na (ASAP)</option><option>Sa loob ng ilang araw</option><option>Sa susunod na linggo</option><option>Pwede pag-usapan</option>
+          <option>ASAP</option><option>Within a few days</option><option>Next week</option><option>Flexible / To be discussed</option>
         </select>
 
-        <label style={s.lbl}>Simula ng Trabaho (Start Date)</label>
+        <label style={s.lbl}>Start Date</label>
         <input style={s.inp} type="date" value={form.start_date} min={new Date().toISOString().split('T')[0]} onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))} />
 
         <label style={s.lbl}>Setup</label>
@@ -206,11 +206,11 @@ export default function SendOfferPage({ params }: any) {
 
         <label style={s.lbl}>Pets</label>
         <select style={s.sel} value={form.pets} onChange={e => setForm(f => ({ ...f, pets: e.target.value }))}>
-          <option value="Wala">Walang Pets</option>
-          <option value="Aso">Aso</option>
-          <option value="Pusa">Pusa</option>
-          <option value="Aso at Pusa">Aso at Pusa</option>
-          <option value="Iba pa">Iba pa</option>
+          <option value="None">No Pets</option>
+          <option value="Dog">Dog</option>
+          <option value="Cat">Cat</option>
+          <option value="Dog & Cat">Dog &amp; Cat</option>
+          <option value="Others">Others</option>
         </select>
 
         <label style={s.lbl}>Scope of work *</label>

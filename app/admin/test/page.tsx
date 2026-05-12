@@ -35,6 +35,98 @@ export default function AdminTestPanel() {
   const [msg, setMsg] = useState('')
   const [balanceInputs, setBalanceInputs] = useState<Record<string, string>>({})
 
+  type TestResult = { pass: boolean; ms: number; detail?: string } | null
+  const [paymentTests, setPaymentTests] = useState<Record<string, TestResult>>({})
+  const [runningTest, setRunningTest] = useState<string | null>(null)
+
+  const PAYMENT_TESTS = [
+    {
+      id: 'A', expect: '₱2,001',
+      label: 'Subscribed, credit not yet used, no transport',
+      run: async () => {
+        const r = await fetch('/api/create-payment-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: 200100, description: 'Test A - ₱2,001' }) })
+        const d = await r.json()
+        return { pass: !!d.checkout_url, detail: d.checkout_url || d.error }
+      },
+    },
+    {
+      id: 'B', expect: '₱2,500',
+      label: 'Subscribed, credit already used, no transport',
+      run: async () => {
+        const r = await fetch('/api/create-payment-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: 250000, description: 'Test B - ₱2,500' }) })
+        const d = await r.json()
+        return { pass: !!d.checkout_url, detail: d.checkout_url || d.error }
+      },
+    },
+    {
+      id: 'C', expect: '₱8,001',
+      label: 'Subscribed, credit not yet used, with MaidIt transport',
+      run: async () => {
+        const r = await fetch('/api/create-payment-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: 800100, description: 'Test C - ₱8,001' }) })
+        const d = await r.json()
+        return { pass: !!d.checkout_url, detail: d.checkout_url || d.error }
+      },
+    },
+    {
+      id: 'D', expect: '₱8,500',
+      label: 'Subscribed, credit already used, with MaidIt transport',
+      run: async () => {
+        const r = await fetch('/api/create-payment-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: 850000, description: 'Test D - ₱8,500' }) })
+        const d = await r.json()
+        return { pass: !!d.checkout_url, detail: d.checkout_url || d.error }
+      },
+    },
+    {
+      id: 'E', expect: '₱499',
+      label: 'Subscription payment',
+      run: async () => {
+        const r = await fetch('/api/create-payment-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: 49900, description: 'Test E - ₱499 subscription' }) })
+        const d = await r.json()
+        return { pass: !!d.checkout_url, detail: d.checkout_url || d.error }
+      },
+    },
+    {
+      id: 'F', expect: 'status 400',
+      label: 'Webhook rejects invalid signature',
+      run: async () => {
+        const r = await fetch('/api/webhook/paymongo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Paymongo-Signature': 't=1234567890,te=invalidsignature,li=invalidsignature' },
+          body: JSON.stringify({ data: { attributes: { type: 'link.payment.paid' } } }),
+        })
+        return { pass: r.status === 400, detail: `HTTP ${r.status}` }
+      },
+    },
+  ]
+
+  const runPaymentTest = async (testId: string) => {
+    const test = PAYMENT_TESTS.find(t => t.id === testId)
+    if (!test) return
+    setRunningTest(testId)
+    const start = Date.now()
+    try {
+      const result = await test.run()
+      setPaymentTests(prev => ({ ...prev, [testId]: { ...result, ms: Date.now() - start } }))
+    } catch (e: any) {
+      setPaymentTests(prev => ({ ...prev, [testId]: { pass: false, ms: Date.now() - start, detail: String(e?.message) } }))
+    }
+    setRunningTest(null)
+  }
+
+  const runAllPaymentTests = async () => {
+    for (const test of PAYMENT_TESTS) {
+      setRunningTest(test.id)
+      const start = Date.now()
+      try {
+        const result = await test.run()
+        setPaymentTests(prev => ({ ...prev, [test.id]: { ...result, ms: Date.now() - start } }))
+      } catch (e: any) {
+        setPaymentTests(prev => ({ ...prev, [test.id]: { pass: false, ms: Date.now() - start, detail: String(e?.message) } }))
+      }
+      setRunningTest(null)
+    }
+  }
+
   const load = async () => {
     setLoading(true)
     const { supabase } = await import('../../../lib/supabase')
@@ -179,7 +271,7 @@ export default function AdminTestPanel() {
       <div style={{ ...s.secTitle, marginTop: '24px' }}>👥 Referred Kasambahay ({referredWorkers.length})</div>
 
       {!loading && referredWorkers.length === 0 && (
-        <div style={{ ...s.card, color: '#9ca3af', fontSize: '13px', textAlign: 'center' }}>Walang referred kasambahay pa.</div>
+        <div style={{ ...s.card, color: '#9ca3af', fontSize: '13px', textAlign: 'center' }}>No referred kasambahay yet.</div>
       )}
 
       {referredWorkers.map(w => {
@@ -224,11 +316,59 @@ export default function AdminTestPanel() {
         )
       })}
 
+      {/* ── PAYMENT FLOW TESTS ── */}
+      <div style={{ ...s.secTitle, marginTop: '32px' }}>💳 Payment Flow Tests</div>
+      <div style={s.card}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <div style={{ fontSize: '11px', color: '#9ca3af' }}>Results persist until page refresh.</div>
+          <button
+            onClick={runAllPaymentTests}
+            disabled={runningTest !== null}
+            style={{ padding: '7px 14px', borderRadius: '8px', background: runningTest ? '#e5e7eb' : '#1a6b3c', color: runningTest ? '#9ca3af' : '#fff', border: 'none', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, cursor: runningTest ? 'default' : 'pointer' }}
+          >
+            {runningTest ? `Running ${runningTest}…` : 'Run All Tests'}
+          </button>
+        </div>
+        {PAYMENT_TESTS.map(test => {
+          const result = paymentTests[test.id]
+          const isRunning = runningTest === test.id
+          return (
+            <div key={test.id} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '10px 0', borderBottom: test.id !== 'F' ? '1px solid #f3f4f6' : 'none' }}>
+              <div style={{ minWidth: '20px', fontFamily: 'monospace', fontSize: '12px', fontWeight: 700, color: '#6b7280', paddingTop: '2px' }}>{test.id}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: '#111827', marginBottom: '2px' }}>{test.label}</div>
+                <div style={{ fontSize: '10px', color: '#9ca3af', marginBottom: result ? '6px' : 0 }}>expect: {test.expect}</div>
+                {result && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' as const }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: result.pass ? '#1a6b3c' : '#dc2626' }}>
+                      {result.pass ? '✅ Pass' : '❌ Fail'}
+                    </span>
+                    <span style={{ fontSize: '10px', color: '#9ca3af' }}>{result.ms}ms</span>
+                    {result.detail && result.detail.startsWith('http') ? (
+                      <a href={result.detail} target="_blank" rel="noreferrer" style={{ fontSize: '10px', color: '#2563eb', wordBreak: 'break-all' as const, maxWidth: '240px', display: 'block' }}>{result.detail}</a>
+                    ) : result.detail ? (
+                      <span style={{ fontSize: '10px', color: '#6b7280' }}>{result.detail}</span>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => runPaymentTest(test.id)}
+                disabled={runningTest !== null}
+                style={{ padding: '5px 10px', borderRadius: '6px', border: '1.5px solid #e5e7eb', background: '#fff', color: '#374151', fontFamily: 'sans-serif', fontSize: '11px', fontWeight: 700, cursor: runningTest ? 'default' : 'pointer', flexShrink: 0 }}
+              >
+                {isRunning ? '…' : 'Run'}
+              </button>
+            </div>
+          )
+        })}
+      </div>
+
       {/* ── PARTNERS ── */}
       <div style={{ ...s.secTitle, marginTop: '24px' }}>🤝 Partners ({partners.length})</div>
 
       {!loading && partners.length === 0 && (
-        <div style={{ ...s.card, color: '#9ca3af', fontSize: '13px', textAlign: 'center' }}>Walang partners pa.</div>
+        <div style={{ ...s.card, color: '#9ca3af', fontSize: '13px', textAlign: 'center' }}>No partners yet.</div>
       )}
 
       {partners.map(p => {
