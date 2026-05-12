@@ -270,7 +270,7 @@ export default function BrowsePage() {
                 kb.religion,
                 kb.education,
               ].filter(Boolean).join(' · ')
-              const location = [kb.profiles?.city, kb.province].filter(Boolean).join(', ')
+              const location = kb.province || kb.city || kb.profiles?.city || ''
 
               return (
                 <div key={kb.id} style={{ background:'#fff', borderRadius:'16px', border:'1.5px solid #f0ece6', overflow:'hidden', marginBottom:'12px', display:'flex', boxShadow:'0 1px 8px rgba(0,0,0,.06)' }}>
@@ -465,7 +465,7 @@ export default function BrowsePage() {
                   {needsPayment && (
                     <button style={{ width:'100%', padding:'11px', borderRadius:'10px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'13px', fontWeight:700, cursor:'pointer' }}
                       onClick={() => router.push(`/pay/${offer.id}`)}>
-                      Pay Hire Fee — ₱2,001
+                      Proceed to Hire →
                     </button>
                   )}
                   {isHired && (

@@ -351,7 +351,7 @@ export default function HWDashboard() {
                   {needsPayment && (
                     <button style={{ width:'100%', padding:'11px', borderRadius:'10px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'13px', fontWeight:700, cursor:'pointer' }}
                       onClick={() => router.push(`/pay/${offer.id}`)}>
-                      Pay ₱{hireFee} Hire Fee →
+                      Proceed to Hire →
                     </button>
                   )}
                   {(isPaid || isHired) && offer.kasambahay?.profiles?.mobile && (

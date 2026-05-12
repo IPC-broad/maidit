@@ -204,9 +204,10 @@ export default function PayPage() {
             { icon: '🔄', text: '1 free rematch if the kasambahay does not arrive or leaves within 30 days.' },
             { icon: '✅', text: 'Verified kasambahay profile' },
             { icon: '📋', text: 'RA 10361-compliant employment terms' },
+            { icon: '📱', text: 'Direct contact with your kasambahay — Viber/WhatsApp number revealed after payment' },
             { icon: '🎁', text: 'One hiring fee credit (₱499) valid for 30 days — applied to your first hire' },
           ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', gap: '10px', padding: '7px 0', borderBottom: i < 3 ? '1px solid #f3f4f6' : 'none', alignItems: 'flex-start' }}>
+            <div key={i} style={{ display: 'flex', gap: '10px', padding: '7px 0', borderBottom: i < 4 ? '1px solid #f3f4f6' : 'none', alignItems: 'flex-start' }}>
               <span style={{ fontSize: '1rem', minWidth: '20px' }}>{item.icon}</span>
               <span style={{ fontSize: '.78rem', color: '#374151', lineHeight: 1.5 }}>{item.text}</span>
             </div>
@@ -232,9 +233,6 @@ export default function PayPage() {
           </button>
         )}
 
-        <button style={s.btnOutline} onClick={() => router.push('/dashboard/homeowner')}>
-          Pay later
-        </button>
         <div style={{ fontSize: '.67rem', color: '#9ca3af', textAlign: 'center' as const, marginTop: '14px', lineHeight: 1.6 }}>
           Secured by PayMongo · QRPh, GCash, credit card accepted<br />
           Hire activates automatically after payment is confirmed.

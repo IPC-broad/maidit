@@ -95,6 +95,15 @@ export default function ArrivalPage() {
     setDone(true)
   }
 
+  const toIntl = (mobile: string | undefined) => {
+    if (!mobile) return ''
+    const m = mobile.replace(/\D/g, '')
+    return m.startsWith('0') ? '63' + m.slice(1) : m.startsWith('63') ? m : '63' + m
+  }
+
+  const kbMobile = offer?.kasambahay?.profiles?.mobile
+  const kbFullName = offer?.kasambahay?.profiles?.full_name || 'your kasambahay'
+
   const s: any = {
     wrap: { minHeight: '100vh', background: '#f9fafb', fontFamily: 'sans-serif', color: '#111827' },
     head: { background: '#0d1117', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '10px' },
@@ -115,11 +124,22 @@ export default function ArrivalPage() {
       <p style={{ color: '#6b7280', fontSize: '.84rem', lineHeight: 1.7, marginBottom: '8px' }}>
         Your 30-day trial period has started.
       </p>
-      <div style={{ background: '#f0fdf4', border: '1px solid rgba(26,107,60,.2)', borderRadius: '12px', padding: '16px 20px', marginBottom: '24px', maxWidth: '300px' }}>
+      <div style={{ background: '#f0fdf4', border: '1px solid rgba(26,107,60,.2)', borderRadius: '12px', padding: '16px 20px', marginBottom: '16px', maxWidth: '300px', width: '100%' }}>
         <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#6b7280', marginBottom: '4px' }}>Trial ends in</div>
         <div style={{ fontFamily: 'serif', fontSize: '2rem', fontWeight: 900, color: '#1a6b3c' }}>30 days</div>
         <div style={{ fontSize: '.7rem', color: '#6b7280', marginTop: '4px' }}>If issues arise, contact us for a rematch</div>
       </div>
+      {kbMobile && (
+        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '14px 16px', marginBottom: '16px', maxWidth: '300px', width: '100%', textAlign: 'left' as const }}>
+          <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '8px' }}>Contact your kasambahay</div>
+          <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{kbFullName.split(' ')[0]}</div>
+          <div style={{ fontSize: '13px', color: '#374151', marginBottom: '10px' }}>{kbMobile}</div>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <a href={`viber://chat?number=+${toIntl(kbMobile)}`} style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#7c3aed', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Viber</a>
+            <a href={`https://wa.me/${toIntl(kbMobile)}`} target="_blank" rel="noreferrer" style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#16a34a', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 WhatsApp</a>
+          </div>
+        </div>
+      )}
       <button style={{ ...s.btn, maxWidth: '320px' }} onClick={() => router.push('/dashboard/homeowner')}>
         Back to Dashboard
       </button>
@@ -130,14 +150,25 @@ export default function ArrivalPage() {
     <div style={s.center}>
       <div style={{ fontSize: '3rem', marginBottom: '16px' }}>⏱️</div>
       <h1 style={{ fontFamily: 'serif', fontSize: '1.3rem', fontWeight: 900, color: '#111827', marginBottom: '8px' }}>Trial In Progress</h1>
-      <div style={{ background: '#fff', border: '1.5px solid #e5e7eb', borderRadius: '12px', padding: '20px', marginBottom: '20px', maxWidth: '280px' }}>
+      <div style={{ background: '#fff', border: '1.5px solid #e5e7eb', borderRadius: '12px', padding: '20px', marginBottom: '12px', maxWidth: '280px', width: '100%' }}>
         <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#6b7280', marginBottom: '6px' }}>Days remaining</div>
         <div style={{ fontFamily: 'serif', fontSize: '3rem', fontWeight: 900, color: '#1a6b3c', lineHeight: 1 }}>{daysLeft}</div>
         <div style={{ fontSize: '.72rem', color: '#6b7280', marginTop: '6px' }}>of 30-day trial period</div>
       </div>
-      <div style={{ fontSize: '.74rem', color: '#6b7280', lineHeight: 1.7, marginBottom: '24px' }}>
+      <div style={{ fontSize: '.74rem', color: '#6b7280', lineHeight: 1.7, marginBottom: '16px' }}>
         Arrived: {new Date(offer.arrived_at).toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })}
       </div>
+      {kbMobile && (
+        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '14px 16px', marginBottom: '16px', maxWidth: '300px', width: '100%', textAlign: 'left' as const }}>
+          <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '8px' }}>Contact your kasambahay</div>
+          <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{kbFullName.split(' ')[0]}</div>
+          <div style={{ fontSize: '13px', color: '#374151', marginBottom: '10px' }}>{kbMobile}</div>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <a href={`viber://chat?number=+${toIntl(kbMobile)}`} style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#7c3aed', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Viber</a>
+            <a href={`https://wa.me/${toIntl(kbMobile)}`} target="_blank" rel="noreferrer" style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#16a34a', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 WhatsApp</a>
+          </div>
+        </div>
+      )}
       <button style={{ ...s.btnOutline, maxWidth: '320px' }} onClick={() => router.push('/dashboard/homeowner')}>
         Back to Dashboard
       </button>
