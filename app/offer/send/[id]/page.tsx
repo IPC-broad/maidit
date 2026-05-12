@@ -24,7 +24,7 @@ export default function SendOfferPage({ params }: any) {
     seniors: '0',
     kids: '0',
     pets: 'Wala',
-    transport_arrangement: 'direct',
+    transport_arrangement: '' as 'direct' | 'maidit_transport' | '',
   })
   const [submitting, setSubmitting] = useState(false)
   const [paying, setPaying] = useState(false)
@@ -63,9 +63,17 @@ export default function SendOfferPage({ params }: any) {
 
   const handleSendOffer = async () => {
     if (!form.salary || form.scope.length === 0) { setError('Pakipunan ang salary at scope'); return }
-    if (showMaidItTransport && form.transport_arrangement !== 'maidit_transport' && !transportDirectType) {
+    if (showMaidItTransport && !form.transport_arrangement) {
+      setError('Please choose a transport arrangement.'); return
+    }
+    if (showMaidItTransport && form.transport_arrangement === 'direct' && !transportDirectType) {
       setError('Please choose how transport will be paid.'); return
     }
+    console.log('[offer-send]', {
+      transport_arrangement: form.transport_arrangement,
+      transport_service: form.transport_arrangement === 'maidit_transport',
+      transport_direct_type: form.transport_arrangement === 'direct' ? transportDirectType : null,
+    })
     setSubmitting(true)
     setError('')
     const { supabase } = await import('../../../../lib/supabase')
@@ -117,8 +125,12 @@ export default function SendOfferPage({ params }: any) {
     TRANSPORT_PROVINCES.includes(kb.province) ||
     (hwProvince && hwProvince !== kb.province)
   )
-  const isDirect = form.transport_arrangement !== 'maidit_transport'
-  const needsDirectType = !!showMaidItTransport && isDirect && !transportDirectType
+  const isDirect = form.transport_arrangement === 'direct'
+  const isMaidIt = form.transport_arrangement === 'maidit_transport'
+  const transportBlocked = !!showMaidItTransport && (
+    (!isDirect && !isMaidIt) ||
+    (isDirect && !transportDirectType)
+  )
 
   const s: any = {
     wrap: { minHeight: '100vh', background: '#faf8f5', fontFamily: 'sans-serif', color: '#1a1a1a' },
@@ -223,7 +235,7 @@ export default function SendOfferPage({ params }: any) {
         {/* Transport Arrangement — only shown for provincial/inter-province hires */}
         {showMaidItTransport && (
           <div style={{ marginBottom: '20px' }}>
-            <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '8px' }}>Transport Arrangement</div>
+            <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '8px' }}>Transport Arrangement *</div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '8px', alignItems: 'flex-start' }}>
               {/* Left: Direct card */}
@@ -277,44 +289,43 @@ export default function SendOfferPage({ params }: any) {
                 onClick={() => setForm(f => ({ ...f, transport_arrangement: 'maidit_transport' }))}
                 style={{
                   padding: '14px', borderRadius: '12px', cursor: 'pointer',
-                  border: form.transport_arrangement === 'maidit_transport' ? '2px solid #c9943a' : '1.5px solid #e5e0d8',
-                  background: form.transport_arrangement === 'maidit_transport' ? '#fffbeb' : '#fff',
+                  border: isMaidIt ? '2px solid #c9943a' : '1.5px solid #e5e0d8',
+                  background: isMaidIt ? '#fffbeb' : '#fff',
                 }}>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a1a1a', marginBottom: '4px' }}>🛡️ MaidIt Assisted Travel</div>
-                <div style={{ fontSize: '13px', color: '#4b5563', lineHeight: 1.5, marginBottom: '10px' }}>We coordinate transport and guarantee arrival.</div>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: '#c9943a' }}>+₱6,000</div>
+                <div style={{ fontSize: '13px', color: '#4b5563', lineHeight: 1.5, marginBottom: isMaidIt ? '10px' : '0' }}>We coordinate transport and guarantee arrival.</div>
+                {!isMaidIt && <div style={{ fontSize: '13px', fontWeight: 700, color: '#c9943a', marginTop: '6px' }}>+₱6,000</div>}
+                {isMaidIt && (
+                  <>
+                    <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px', marginBottom: '10px' }}>
+                      {[
+                        'Payment released only after confirmed arrival',
+                        'No need to send money directly to anyone',
+                        'If kasambahay does not arrive, your ₱6,000 is returned',
+                      ].map((item, i) => (
+                        <div key={i} style={{ display: 'flex', gap: '7px', alignItems: 'flex-start' }}>
+                          <span style={{ color: '#c9943a', fontWeight: 700, fontSize: '13px', marginTop: '1px' }}>✓</span>
+                          <span style={{ fontSize: '12px', color: '#374151', lineHeight: 1.5 }}>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' as const }}>
+                      <span style={{ fontSize: '11px', fontWeight: 600, background: '#fde8c0', color: '#92400e', borderRadius: '5px', padding: '3px 7px' }}>₱5,500 transport</span>
+                      <span style={{ fontSize: '11px', fontWeight: 600, background: '#fde8c0', color: '#92400e', borderRadius: '5px', padding: '3px 7px' }}>₱500 MaidIt fee</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
-            {form.transport_arrangement === 'maidit_transport' && (
-              <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '11px 13px', marginTop: '10px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px', marginBottom: '10px' }}>
-                  {[
-                    'Payment released only after confirmed arrival',
-                    'No need to send money directly to anyone',
-                    'If kasambahay does not arrive, your ₱6,000 is returned',
-                  ].map((item, i) => (
-                    <div key={i} style={{ display: 'flex', gap: '7px', alignItems: 'flex-start' }}>
-                      <span style={{ color: '#c9943a', fontWeight: 700, fontSize: '14px', marginTop: '1px' }}>✓</span>
-                      <span style={{ fontSize: '14px', color: '#374151', lineHeight: 1.5 }}>{item}</span>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 600, background: '#fde8c0', color: '#92400e', borderRadius: '5px', padding: '3px 8px' }}>₱5,500 transport</span>
-                  <span style={{ fontSize: '12px', fontWeight: 600, background: '#fde8c0', color: '#92400e', borderRadius: '5px', padding: '3px 8px' }}>₱500 MaidIt fee</span>
-                </div>
-              </div>
-            )}
-
-            <div style={{ fontSize: '13px', color: '#6b7280', textAlign: 'center' as const, marginTop: '8px', lineHeight: 1.5 }}>
+            <div style={{ fontSize: '12px', color: '#9ca3af', textAlign: 'center' as const, marginTop: '8px', lineHeight: 1.5 }}>
               Transport fee is included in the hire fee payment at checkout.
             </div>
           </div>
         )}
 
-        <button style={{ ...s.btn, opacity: submitting || needsDirectType ? .5 : 1 }} onClick={handleSendOffer} disabled={submitting || needsDirectType}>
-          {submitting ? 'Sending...' : form.transport_arrangement === 'maidit_transport' ? 'Send Offer with Assisted Travel →' : 'Send Offer →'}
+        <button style={{ ...s.btn, opacity: submitting || transportBlocked ? .5 : 1 }} onClick={handleSendOffer} disabled={submitting || transportBlocked}>
+          {submitting ? 'Sending...' : 'Send Offer →'}
         </button>
       </div>
 
