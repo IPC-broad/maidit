@@ -14,6 +14,8 @@ export async function POST(req: NextRequest) {
   }
 
   const { offer_id } = await req.json()
+  console.log('[test-webhook-trigger] offer_id received:', offer_id)
+  console.log('[test-webhook-trigger] supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
   if (!offer_id) return NextResponse.json({ error: 'offer_id required' }, { status: 400 })
 
   const { data: offer, error } = await supabaseAdmin
@@ -22,7 +24,15 @@ export async function POST(req: NextRequest) {
     .eq('id', offer_id)
     .single()
 
-  if (error || !offer) return NextResponse.json({ error: 'Offer not found' }, { status: 404 })
+  if (error || !offer) {
+    console.log('[test-webhook-trigger] offer not found — searched_id:', offer_id, 'error:', error)
+    return NextResponse.json({
+      error: 'Offer not found',
+      searched_id: offer_id,
+      supabase_url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      supabase_error: error,
+    }, { status: 404 })
+  }
 
   const update: Record<string, any> = { status: 'paid', paid_at: new Date().toISOString() }
   if (offer.transport_service) update.transport_confirmed = true
