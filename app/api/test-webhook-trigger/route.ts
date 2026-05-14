@@ -14,15 +14,21 @@ export async function GET() {
   }
   const { data, error } = await supabaseAdmin
     .from('offers')
-    .select('id, status, amount, transport_service, kasambahay:kasambahay_id(*, profiles(full_name)), homeowner:homeowner_id(*, profiles(full_name))')
+    .select(`
+      id,
+      salary,
+      transport_service,
+      kasambahay:kasambahay_id (
+        profile:profile_id (
+          full_name
+        )
+      )
+    `)
     .eq('status', 'agreed')
     .order('created_at', { ascending: false })
-    .limit(20)
-  if (error) {
-    console.log('[test-webhook-trigger GET] supabase error:', error)
-    return NextResponse.json({ error: 'Failed to fetch offers', supabase_error: error }, { status: 500 })
-  }
-  return NextResponse.json({ offers: data || [] })
+  if (error) console.log('[test-webhook-trigger GET] error:', error)
+  console.log('[test-webhook-trigger GET] agreed offers found:', data?.length ?? 0)
+  return NextResponse.json({ offers: data || [], error: error?.message })
 }
 
 export async function POST(req: NextRequest) {

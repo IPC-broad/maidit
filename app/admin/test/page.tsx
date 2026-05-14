@@ -448,7 +448,7 @@ export default function AdminTestPanel() {
               >
                 <option value=''>Select offer to simulate…</option>
                 {agreedOffers.map(o => {
-                  const kbName = o.kasambahay?.profiles?.full_name || 'Unknown'
+                  const kbName = o.kasambahay?.profile?.full_name || 'Unknown'
                   const amt = o.amount ? `₱${(o.amount / 100).toLocaleString()}` : `₱${o.salary?.toLocaleString()}/mo`
                   const transport = o.transport_service ? ' · 🚌 transport' : ''
                   return <option key={o.id} value={o.id}>{kbName} · {amt}{transport}</option>
@@ -456,7 +456,7 @@ export default function AdminTestPanel() {
               </select>
               {selected && (
                 <div style={{ background: '#faf8f5', border: '1px solid #ede8e0', borderRadius: '9px', padding: '10px 12px', marginBottom: '10px', fontSize: '12px', color: '#374151', lineHeight: 1.7 }}>
-                  <div><strong>Kasambahay:</strong> {selected.kasambahay?.profiles?.full_name || '—'}</div>
+                  <div><strong>Kasambahay:</strong> {selected.kasambahay?.profile?.full_name || '—'}</div>
                   <div><strong>Amount:</strong> {selected.amount ? `₱${(selected.amount / 100).toLocaleString()}` : '—'}</div>
                   <div><strong>Transport:</strong> {selected.transport_service ? 'Yes' : 'No'}</div>
                   <div><strong>Offer ID:</strong> <span style={{ fontFamily: 'monospace', fontSize: '10px' }}>{selected.id}</span></div>
