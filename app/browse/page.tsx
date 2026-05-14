@@ -77,12 +77,28 @@ export default function BrowsePage() {
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user || null)
       if (user) {
-        const { data: hw } = await supabase.from('homeowners').select('province, subscription_expires_at, preferred_setup').eq('profile_id', user.id).single()
-        setHomeownerProvince(hw?.province || null)
-        setIsSubscribed(!!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date()))
-        setLastOfferSetup(hw?.preferred_setup || null)
-        const { data: prof } = await supabase.from('profiles').select('city').eq('id', user.id).single()
+        const { data: hw, error: hwError } = await supabase
+          .from('homeowners')
+          .select('id, subscription_expires_at, subscription_credit_used, preferred_setup')
+          .eq('profile_id', user.id)
+          .single()
+        if (hwError) {
+          console.error('[browse] homeowners query error:', hwError)
+          // Default to unsubscribed so the subscription banner is shown
+          setIsSubscribed(false)
+        } else {
+          setIsSubscribed(!!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date()))
+          setLastOfferSetup(hw?.preferred_setup || null)
+        }
+        const { data: prof, error: profError } = await supabase
+          .from('profiles')
+          .select('city')
+          .eq('id', user.id)
+          .single()
+        if (profError) console.error('[browse] profiles query error:', profError)
         setHomeownerCity(prof?.city || null)
+        // Province comes from profiles.city for metro matching; no province col in homeowners
+        setHomeownerProvince(prof?.city || null)
       }
       const { data } = await supabase
         .from('kasambahay')
