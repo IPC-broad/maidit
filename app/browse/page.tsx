@@ -168,11 +168,11 @@ export default function BrowsePage() {
     const showPhoto = !!(selfieUrl && !imgErrors[kb.id])
     const availLabel = kb.availability === 'Immediate' ? 'Immediate'
       : kb.availability ? kb.availability : null
-    const expLine = [
-      kb.experience ? `${kb.experience} yrs exp` : null,
-      kb.religion,
-      kb.education,
-    ].filter(Boolean).join(' · ')
+    const expRaw = kb.experience
+    const expLabel = (!expRaw || expRaw === 'Baguhan' || expRaw === 0 || expRaw === '0')
+      ? 'No experience yet'
+      : `${expRaw} yrs exp`
+    const expLine = [expLabel, kb.religion, kb.education].filter(Boolean).join(' · ')
     const location = kb.province || kb.city || kb.profiles?.city || ''
 
     return (
@@ -282,16 +282,9 @@ export default function BrowsePage() {
               else if (!isSubscribed) { setSubscribeModalId(kb.id) }
               else { router.push(`/offer/send/${kb.id}`) }
             }}
-            style={{ width:'100%', padding:'6px 4px', background:'#1a6b3c', color:'#fff', border:'none', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'10px', fontWeight:700, cursor:'pointer', marginBottom:'3px' }}
+            style={{ width:'100%', padding:'6px 4px', background:'#1a6b3c', color:'#fff', border:'none', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'10px', fontWeight:700, cursor:'pointer' }}
           >
             Send Offer
-          </button>
-          {/* Pass */}
-          <button
-            onClick={() => setPassed(prev => ({ ...prev, [kb.id]: true }))}
-            style={{ width:'100%', padding:'5px 4px', background:'#fff', color:'#6b7280', border:'1.5px solid #e5e7eb', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'9px', fontWeight:600, cursor:'pointer' }}
-          >
-            Pass
           </button>
         </div>
       </div>
@@ -304,9 +297,9 @@ export default function BrowsePage() {
     </div>
   )
 
-  // For non-logged-in: show first 3 openly, rest blurred
-  const visibleCards = !currentUser ? filtered.slice(0, 3) : filtered
-  const lockedCards  = !currentUser ? filtered.slice(3) : []
+  // For non-logged-in: show first 2 openly, rest blurred
+  const visibleCards = !currentUser ? filtered.slice(0, 2) : filtered
+  const lockedCards  = !currentUser ? filtered.slice(2) : []
 
   return (
     <div style={{ minHeight:'100vh', background:'#f4f6f8', fontFamily:'sans-serif', paddingBottom:'80px' }}>
@@ -385,20 +378,22 @@ export default function BrowsePage() {
             </div>
           </div>
 
-          {/* ── MATCHES BANNER ── */}
-          <div style={{ margin:'14px 16px 0', background:'linear-gradient(135deg, #fef3e2 0%, #fffdf9 100%)', border:'1.5px solid #fde8c0', borderRadius:'16px', padding:'14px 16px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-            <div style={{ flex:1 }}>
-              <div style={{ display:'flex', alignItems:'center', gap:'7px', marginBottom:'5px', flexWrap:'wrap' as const }}>
-                <span style={{ fontSize:'1.1rem' }}>⭐</span>
-                <span style={{ fontFamily:'Georgia, serif', fontSize:'1rem', fontWeight:900, color:'#1a1a1a' }}>Your Matches</span>
-                <span style={{ fontSize:'.6rem', fontWeight:700, background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0', borderRadius:'50px', padding:'2px 8px' }}>Personalized for you</span>
+          {/* ── MATCHES BANNER — logged-in only ── */}
+          {currentUser && (
+            <div style={{ margin:'14px 16px 0', background:'linear-gradient(135deg, #fef3e2 0%, #fffdf9 100%)', border:'1.5px solid #fde8c0', borderRadius:'16px', padding:'14px 16px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <div style={{ flex:1 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:'7px', marginBottom:'5px', flexWrap:'wrap' as const }}>
+                  <span style={{ fontSize:'1.1rem' }}>⭐</span>
+                  <span style={{ fontFamily:'Georgia, serif', fontSize:'1rem', fontWeight:900, color:'#1a1a1a' }}>Your Matches</span>
+                  <span style={{ fontSize:'.6rem', fontWeight:700, background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0', borderRadius:'50px', padding:'2px 8px' }}>Personalized for you</span>
+                </div>
+                <p style={{ fontSize:'.74rem', color:'#78350f', margin:0, lineHeight:1.55 }}>
+                  These are top matches based on your needs. More great matches are available!
+                </p>
               </div>
-              <p style={{ fontSize:'.74rem', color:'#78350f', margin:0, lineHeight:1.55 }}>
-                These are top matches based on your needs. More great matches are available!
-              </p>
+              <div style={{ flexShrink:0, fontSize:'2.8rem', marginLeft:'14px', lineHeight:1 }}>👩‍🍳</div>
             </div>
-            <div style={{ flexShrink:0, fontSize:'2.8rem', marginLeft:'14px', lineHeight:1 }}>👩‍🍳</div>
-          </div>
+          )}
 
           {/* ── SUBSCRIPTION BANNER — for logged-in non-subscribed users ── */}
           {currentUser && isSubscribed === false && (
