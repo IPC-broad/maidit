@@ -108,10 +108,9 @@ export default function BrowsePage() {
     const { data, error, status, statusText } = await supabase
       .from('kasambahay')
       .select(`
-        id, province, setup, asking_salary, skills, experience,
-        availability, has_govt_id, selfie_url, profile_id, age,
-        religion, education, video_intro, created_at, status,
-        transport_direct_type,
+        id, profile_id, asking_salary, setup, skills, experience,
+        province, available_from, selfie_url, status, availability,
+        has_govt_id, age, facebook_url,
         profile:profile_id (
           full_name, selfie_url, city
         )
@@ -239,9 +238,9 @@ export default function BrowsePage() {
     if (sortBy === 'best') {
       const diff = scoreCard(b) - scoreCard(a)
       if (diff !== 0) return diff
-      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+      return (b.asking_salary || 0) - (a.asking_salary || 0)
     }
-    if (sortBy === 'newest') return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+    if (sortBy === 'newest') return (b.asking_salary || 0) - (a.asking_salary || 0)
     if (sortBy === 'salary-asc') return (a.asking_salary || 0) - (b.asking_salary || 0)
     if (sortBy === 'salary-desc') return (b.asking_salary || 0) - (a.asking_salary || 0)
     return 0
@@ -265,7 +264,7 @@ export default function BrowsePage() {
     const expLabel = (!expRaw || expRaw === 'Baguhan' || expRaw === 0 || expRaw === '0')
       ? 'No experience yet'
       : `${expRaw} yrs exp`
-    const expLine = [expLabel, kb.religion, kb.education].filter(Boolean).join(' · ')
+    const expLine = expLabel
     const kbProvince = kb.province || ''
     const location = kbProvince || 'Location not specified'
 
@@ -327,16 +326,11 @@ export default function BrowsePage() {
           {expLine ? (
             <div style={{ fontSize:'10px', color:'#9ca3af', lineHeight:1.4, marginBottom:'4px' }}>{expLine}</div>
           ) : null}
-          {kb.video_intro && (
-            <div style={{ fontSize:'10px', color:'#2563eb', fontWeight:600, display:'flex', alignItems:'center', gap:'3px' }}>
-              <span>▶</span> Watch Video Intro (00:30)
-            </div>
-          )}
         </div>
 
         {/* Actions */}
         <div style={{ width:'84px', flexShrink:0, padding:'10px 8px', display:'flex', flexDirection:'column' as const, alignItems:'stretch', gap:'3px' }}>
-          {kb.govt_id ? (
+          {kb.has_govt_id ? (
             <div style={{ background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:'5px', padding:'2px 5px', textAlign:'center' as const, marginBottom:'2px' }}>
               <span style={{ fontSize:'8px', fontWeight:700, color:'#2563eb' }}>🛡️ ID Verified</span>
             </div>
