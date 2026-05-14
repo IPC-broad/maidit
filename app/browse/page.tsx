@@ -100,9 +100,20 @@ export default function BrowsePage() {
         // Province comes from profiles.city for metro matching; no province col in homeowners
         setHomeownerProvince(prof?.city || null)
       }
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('kasambahay')
-        .select('id, province, city, setup, asking_salary, skills, experience, availability, govt_id, selfie_url, profile_id, roles, role, age, religion, education, video_intro, created_at, profiles!kasambahay_profile_id_fkey(full_name, selfie_url, city)')
+        .select(`
+          id, province, city, setup, asking_salary, skills, experience,
+          availability, has_govt_id, selfie_url, profile_id, role, age,
+          religion, education, video_intro, created_at,
+          profiles:profile_id (
+            full_name, selfie_url, city
+          )
+        `)
+        .eq('status', 'available')
+        .order('created_at', { ascending: false })
+      if (error) console.error('[browse] kasambahay query error:', error)
+      console.log('[browse] kasambahay count:', data?.length)
       setProfiles(data || [])
       setLoading(false)
     }
