@@ -102,7 +102,7 @@ export default function BrowsePage() {
       }
       const { data } = await supabase
         .from('kasambahay')
-        .select('*, profiles!kasambahay_profile_id_fkey(full_name, selfie_url, city)')
+        .select('id, province, city, setup, asking_salary, skills, experience, availability, govt_id, selfie_url, profile_id, roles, role, age, religion, education, video_intro, created_at, profiles!kasambahay_profile_id_fkey(full_name, selfie_url, city)')
       setProfiles(data || [])
       setLoading(false)
     }
@@ -241,7 +241,11 @@ export default function BrowsePage() {
       ? 'No experience yet'
       : `${expRaw} yrs exp`
     const expLine = [expLabel, kb.religion, kb.education].filter(Boolean).join(' · ')
-    const location = kb.province || kb.city || kb.profiles?.city || ''
+    const kbProvince = kb.province || ''
+    const kbCity = kb.city || ''
+    const location = kbProvince && kbCity
+      ? `${kbCity}, ${kbProvince}`
+      : kbProvince || kbCity || 'Location not specified'
 
     return (
       <div key={kb.id} style={{ background:'#fff', borderRadius:'16px', border:'1.5px solid #f0ece6', overflow:'hidden', marginBottom:'12px', display:'flex', boxShadow:'0 1px 8px rgba(0,0,0,.06)' }}>
@@ -282,12 +286,10 @@ export default function BrowsePage() {
             {kb.roles?.join(' and ') || kb.role || 'Kasambahay'}
             {kb.setup ? ` · ${kb.setup}` : ''}
           </div>
-          {location && (
-            <div style={{ fontSize:'11px', color:'#6b7280', marginBottom:'6px', display:'flex', alignItems:'center', gap:'2px' }}>
-              <span>📍</span>
-              <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' as const }}>{location}</span>
-            </div>
-          )}
+          <div style={{ fontSize:'11px', color:'#6b7280', marginBottom:'6px', display:'flex', alignItems:'center', gap:'2px' }}>
+            <span>📍</span>
+            <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' as const }}>{location}</span>
+          </div>
           {visibleSkills.length > 0 && (
             <div style={{ display:'flex', gap:'3px', flexWrap:'wrap' as const, marginBottom:'5px' }}>
               {visibleSkills.map((skill: string) => (
