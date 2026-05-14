@@ -100,20 +100,24 @@ export default function BrowsePage() {
         // Province comes from profiles.city for metro matching; no province col in homeowners
         setHomeownerProvince(prof?.city || null)
       }
-      const { data, error } = await supabase
+      const { data, error, status, statusText } = await supabase
         .from('kasambahay')
         .select(`
           id, province, city, setup, asking_salary, skills, experience,
           availability, has_govt_id, selfie_url, profile_id, role, age,
-          religion, education, video_intro, created_at,
-          profiles:profile_id (
+          religion, education, video_intro, created_at, status,
+          profile:profile_id (
             full_name, selfie_url, city
           )
         `)
-        .in('status', ['available', 'pending_confirmation'])
-        .order('created_at', { ascending: false })
-      if (error) console.error('[browse] kasambahay query error:', error)
-      console.log('[browse] kasambahay count:', data?.length)
+        .limit(20)
+      console.log('[browse] fetch result:', {
+        count: data?.length,
+        error,
+        status,
+        statusText,
+        firstItem: data?.[0]?.id
+      })
       setProfiles(data || [])
       setLoading(false)
     }
@@ -170,12 +174,12 @@ export default function BrowsePage() {
   }
 
   const filtered = profiles.filter(p => {
-    if (!p.profiles) return false
+    if (!p.profile) return false
     if (passed[p.id]) return false
     if (search) {
       const q = search.toLowerCase()
-      const name = (p.profiles?.full_name || '').toLowerCase()
-      const city = (p.profiles?.city || p.city || '').toLowerCase()
+      const name = (p.profile?.full_name || '').toLowerCase()
+      const city = (p.profile?.city || p.city || '').toLowerCase()
       const province = (p.province || '').toLowerCase()
       const skillStr = (p.skills || []).join(' ').toLowerCase()
       const role = (p.role || '').toLowerCase()
@@ -193,7 +197,7 @@ export default function BrowsePage() {
   })
 
   const scoreCard = (kb: any): number => {
-    const selfieUrl = kb.profiles?.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
+    const selfieUrl = kb.profile?.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
     const hasSelfie = !!selfieUrl
     const hasGovtId = !!kb.govt_id
     const hasSkills = !!(kb.skills && kb.skills.length > 0)
@@ -202,7 +206,7 @@ export default function BrowsePage() {
 
     if (currentUser) {
       let score = 0
-      const kbCity = (kb.profiles?.city || kb.city || '').toLowerCase()
+      const kbCity = (kb.profile?.city || kb.city || '').toLowerCase()
       const kbProvince = (kb.province || '').toLowerCase()
       if (homeownerCity && kbCity && kbCity === homeownerCity.toLowerCase()) score += 3
       if (homeownerProvince && kbProvince && kbProvince === homeownerProvince.toLowerCase()) score += 2
@@ -235,7 +239,7 @@ export default function BrowsePage() {
 
   // Renders a single kasambahay card. Used for both visible and blurred sections.
   const renderKBCard = (kb: any) => {
-    const fullName = kb.profiles?.full_name || ''
+    const fullName = kb.profile?.full_name || ''
     const firstName = fullName.split(' ')[0] || ''
     const lastInit = fullName.split(' ')[1]?.[0]
     const displayName = lastInit ? `${firstName} ${lastInit}.` : firstName
@@ -243,7 +247,7 @@ export default function BrowsePage() {
     const skills: string[] = kb.skills || []
     const visibleSkills = skills.slice(0, 3)
     const extraSkills = skills.length - 3
-    const selfieUrl = kb.profiles?.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
+    const selfieUrl = kb.profile?.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
     const showPhoto = !!(selfieUrl && !imgErrors[kb.id])
     const availLabel = kb.availability === 'Immediate' ? 'Immediate'
       : kb.availability ? kb.availability : null
