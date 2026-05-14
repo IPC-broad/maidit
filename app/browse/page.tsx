@@ -99,6 +99,12 @@ export default function BrowsePage() {
       setHomeownerCity(prof?.city || null)
       setHomeownerProvince(prof?.city || null)
     }
+    // Probe: count rows without join to check RLS
+    const { count: rawCount, error: countError } = await supabase
+      .from('kasambahay')
+      .select('id', { count: 'exact', head: true })
+    console.log('[browse] raw count probe:', rawCount, 'countError:', countError)
+
     const { data, error, status, statusText } = await supabase
       .from('kasambahay')
       .select(`
@@ -112,12 +118,14 @@ export default function BrowsePage() {
       .limit(20)
     console.log('[browse] fetch result:', {
       count: data?.length,
+      rawCount,
       error,
       status,
       statusText,
-      firstItem: data?.[0]?.id
+      firstItem: data?.[0]?.id,
+      firstStatus: data?.[0]?.status,
     })
-    setFetchError(error ? `${error.message} (HTTP ${status})` : null)
+    setFetchError(error ? `${error.message} (HTTP ${status})` : (rawCount === 0 ? 'RLS: 0 rows visible' : null))
     setProfiles(data || [])
     setLoading(false)
   }
@@ -406,8 +414,8 @@ export default function BrowsePage() {
 
       {/* ── DEBUG BANNER ── */}
       <div style={{ background: '#1f2937', color: '#d1fae5', fontFamily: 'monospace', fontSize: '11px', padding: '6px 14px', lineHeight: 1.7 }}>
-        <div>Profiles: {profiles.length} · Loading: {loading ? 'yes' : 'no'} · User: {currentUser ? 'yes' : 'no'}</div>
-        {fetchError && <div style={{ color: '#fca5a5' }}>Error: {fetchError}</div>}
+        <div>Profiles: {profiles.length} · Loading: {loading ? 'yes' : 'no'} · User: {currentUser ? currentUser.email?.split('@')[0] : 'none'}</div>
+        {fetchError && <div style={{ color: '#fca5a5' }}>{fetchError}</div>}
       </div>
 
       {tab === 'browse' && (
