@@ -14,6 +14,7 @@ export default function KBDashboard() {
   const [appliedJobs, setAppliedJobs] = useState<any[]>([])
   const [showProfile, setShowProfile] = useState(false)
   const [actioning, setActioning] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     const init = async () => {
@@ -103,6 +104,9 @@ export default function KBDashboard() {
   if (loading) return <div style={{ minHeight: '100vh', background: '#faf8f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif', color: '#9ca3af' }}>Loading...</div>
 
   const pendingOffers = offers.filter(o => o.status === 'pending').length
+  const isHired = offers.some(o => ['hired', 'active', 'paid'].includes(o.status))
+  const referralCode = kb?.referred_by || profile?.id || ''
+  const referralLink = `https://maidit.vercel.app?ref=${referralCode}`
 
   return (
     <div style={s.wrap}>
@@ -155,6 +159,39 @@ export default function KBDashboard() {
         <div style={{ padding: '14px 14px 32px' }}>
           <div style={{ fontFamily: 'serif', fontSize: '17px', fontWeight: 900, marginBottom: '2px' }}>Jobs</div>
           <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '14px' }}>{jobs.length} job{jobs.length !== 1 ? 's' : ''} available</div>
+
+          {isHired && (
+            <div style={{ background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
+              <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '4px' }}>Refer a Friend</div>
+              <div style={{ fontSize: '.82rem', color: '#1a1a1a', fontWeight: 600, marginBottom: '4px' }}>Share your referral link and earn rewards when your friends join MaidIt</div>
+              <div style={{ fontSize: '.72rem', color: '#6b7280', marginBottom: '12px', lineHeight: 1.5 }}>Send your unique link to friends looking for work as a kasambahay.</div>
+              <div style={{ background: '#fff', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '9px 12px', fontSize: '.72rem', fontFamily: 'monospace', color: '#1a6b3c', wordBreak: 'break-all' as const, marginBottom: '10px' }}>
+                {referralLink}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '7px' }}>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(referralLink).then(() => {
+                      setCopied(true)
+                      setTimeout(() => setCopied(false), 2500)
+                    })
+                  }}
+                  style={{ width: '100%', padding: '11px', borderRadius: '10px', border: 'none', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  {copied ? '✅ Copied!' : '📋 Copy Link'}
+                </button>
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ width: '100%', padding: '11px', borderRadius: '10px', border: 'none', background: '#1877f2', color: '#fff', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: 'pointer', textAlign: 'center' as const, textDecoration: 'none', display: 'block', boxSizing: 'border-box' as const }}
+                >
+                  Share on Facebook
+                </a>
+              </div>
+            </div>
+          )}
+
           {jobs.length === 0 && (
             <div style={{ textAlign: 'center', padding: '52px 24px 40px' }}>
               <div style={{ fontSize: '3rem', marginBottom: '14px' }}>🧹</div>

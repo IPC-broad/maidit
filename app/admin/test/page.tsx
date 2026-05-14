@@ -44,6 +44,9 @@ export default function AdminTestPanel() {
   const [simulating, setSimulating] = useState(false)
   const [simResult, setSimResult] = useState<{ ok: boolean; msg: string } | null>(null)
 
+  const [reminderRunning, setReminderRunning] = useState(false)
+  const [reminderResult, setReminderResult] = useState<{ processed: number; reminders_sent: number; flagged: number } | null>(null)
+
   const PAYMENT_TESTS = [
     {
       id: 'A', expect: '₱2,001',
@@ -475,6 +478,39 @@ export default function AdminTestPanel() {
         {simResult && (
           <div style={{ marginTop: '10px', padding: '10px 12px', borderRadius: '9px', fontSize: '13px', fontWeight: 600, background: simResult.ok ? '#f0fdf4' : '#fef2f2', color: simResult.ok ? '#1a6b3c' : '#dc2626', border: `1px solid ${simResult.ok ? '#bbf7d0' : '#fecaca'}` }}>
             {simResult.msg}
+          </div>
+        )}
+      </div>
+
+      {/* ── ARRIVAL REMINDERS ── */}
+      <div style={{ ...s.secTitle, marginTop: '32px' }}>⏰ Arrival Reminders</div>
+      <div style={s.card}>
+        <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '12px' }}>
+          Sends Day 5 reminder SMS to homeowner + kasambahay for paid offers with no arrival confirmed. Flags offers at Day 7.
+        </div>
+        <button
+          onClick={async () => {
+            setReminderRunning(true)
+            setReminderResult(null)
+            try {
+              const res = await fetch('/api/arrival-reminders')
+              const data = await res.json()
+              setReminderResult(data)
+            } catch (e: any) {
+              setReminderResult({ processed: 0, reminders_sent: 0, flagged: 0 })
+            }
+            setReminderRunning(false)
+          }}
+          disabled={reminderRunning}
+          style={{ width: '100%', padding: '11px', borderRadius: '10px', background: reminderRunning ? '#e5e7eb' : '#92400e', color: reminderRunning ? '#9ca3af' : '#fff', border: 'none', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: reminderRunning ? 'default' : 'pointer' }}
+        >
+          {reminderRunning ? 'Running…' : 'Test Arrival Reminders'}
+        </button>
+        {reminderResult && (
+          <div style={{ marginTop: '10px', padding: '10px 12px', borderRadius: '9px', background: '#faf8f5', border: '1px solid #ede8e0', fontSize: '13px', color: '#374151', lineHeight: 1.8 }}>
+            <div><strong>Processed:</strong> {reminderResult.processed} paid offers with no arrival</div>
+            <div><strong>Reminders sent:</strong> {reminderResult.reminders_sent}</div>
+            <div><strong>Flagged for admin:</strong> {reminderResult.flagged}</div>
           </div>
         )}
       </div>
