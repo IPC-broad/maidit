@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     }, { status: 404 })
   }
 
-  const update: Record<string, any> = { status: 'paid', paid_at: new Date().toISOString() }
+  const update: Record<string, any> = { status: 'paid' }
   if (offer.transport_service) update.transport_confirmed = true
 
   await supabaseAdmin.from('offers').update(update).eq('id', offer_id)
