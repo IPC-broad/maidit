@@ -39,6 +39,10 @@ export default function AdminTestPanel() {
   const [paymentTests, setPaymentTests] = useState<Record<string, TestResult>>({})
   const [runningTest, setRunningTest] = useState<string | null>(null)
 
+  const [selectedSimOffer, setSelectedSimOffer] = useState('')
+  const [simulating, setSimulating] = useState(false)
+  const [simResult, setSimResult] = useState<{ ok: boolean; msg: string } | null>(null)
+
   const PAYMENT_TESTS = [
     {
       id: 'A', expect: '₱2,001',
@@ -206,6 +210,30 @@ export default function AdminTestPanel() {
     setUpdating(null)
   }
 
+  const simulatePayment = async () => {
+    if (!selectedSimOffer) return
+    setSimulating(true)
+    setSimResult(null)
+    try {
+      const res = await fetch('/api/test-webhook-trigger', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ offer_id: selectedSimOffer }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setSimResult({ ok: true, msg: `✅ Payment simulated — offer is now paid` })
+        setSelectedSimOffer('')
+        await load()
+      } else {
+        setSimResult({ ok: false, msg: `❌ ${data.error || 'Unknown error'}` })
+      }
+    } catch (e: any) {
+      setSimResult({ ok: false, msg: `❌ ${e?.message || 'Fetch failed'}` })
+    }
+    setSimulating(false)
+  }
+
   const giveCredits = async () => {
     const { supabase } = await import('../../../lib/supabase')
     await supabase.from('profiles').update({ is_paid: true, job_offer_credits: 10 }).eq('id', 'bdf1ed22-ebe7-43e4-a718-d396e09878fc')
@@ -370,6 +398,58 @@ export default function AdminTestPanel() {
             </div>
           )
         })}
+      </div>
+
+      {/* ── SIMULATE PAYMENT ── */}
+      <div style={{ ...s.secTitle, marginTop: '32px' }}>🧪 Simulate Payment</div>
+      <div style={s.card}>
+        <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '12px' }}>
+          Instantly marks an <strong style={{ color: '#c9943a' }}>agreed</strong> offer as paid — no real PayMongo transaction.
+        </div>
+        {(() => {
+          const agreedOffers = offers.filter(o => o.status === 'agreed')
+          if (agreedOffers.length === 0) {
+            return <div style={{ fontSize: '13px', color: '#9ca3af', textAlign: 'center', padding: '12px 0' }}>No offers in <strong>agreed</strong> status right now.</div>
+          }
+          const selected = agreedOffers.find(o => o.id === selectedSimOffer)
+          return (
+            <>
+              <select
+                value={selectedSimOffer}
+                onChange={e => { setSelectedSimOffer(e.target.value); setSimResult(null) }}
+                style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #e5e0d8', borderRadius: '10px', fontFamily: 'sans-serif', fontSize: '13px', color: '#1a1a1a', background: '#fff', outline: 'none', marginBottom: '10px' }}
+              >
+                <option value=''>Select offer to simulate…</option>
+                {agreedOffers.map(o => {
+                  const kbName = o.kasambahay?.profiles?.full_name || 'Unknown'
+                  const amt = o.amount ? `₱${(o.amount / 100).toLocaleString()}` : `₱${o.salary?.toLocaleString()}/mo`
+                  const transport = o.transport_service ? ' · 🚌 transport' : ''
+                  return <option key={o.id} value={o.id}>{kbName} · {amt}{transport}</option>
+                })}
+              </select>
+              {selected && (
+                <div style={{ background: '#faf8f5', border: '1px solid #ede8e0', borderRadius: '9px', padding: '10px 12px', marginBottom: '10px', fontSize: '12px', color: '#374151', lineHeight: 1.7 }}>
+                  <div><strong>Kasambahay:</strong> {selected.kasambahay?.profiles?.full_name || '—'}</div>
+                  <div><strong>Amount:</strong> {selected.amount ? `₱${(selected.amount / 100).toLocaleString()}` : '—'}</div>
+                  <div><strong>Transport:</strong> {selected.transport_service ? 'Yes' : 'No'}</div>
+                  <div><strong>Offer ID:</strong> <span style={{ fontFamily: 'monospace', fontSize: '10px' }}>{selected.id}</span></div>
+                </div>
+              )}
+              <button
+                onClick={simulatePayment}
+                disabled={!selectedSimOffer || simulating}
+                style={{ width: '100%', padding: '11px', borderRadius: '10px', background: (!selectedSimOffer || simulating) ? '#e5e7eb' : '#1a6b3c', color: (!selectedSimOffer || simulating) ? '#9ca3af' : '#fff', border: 'none', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: (!selectedSimOffer || simulating) ? 'default' : 'pointer' }}
+              >
+                {simulating ? 'Simulating…' : selected ? `Simulate Payment ${selected.amount ? `₱${(selected.amount / 100).toLocaleString()}` : ''}` : 'Simulate Payment'}
+              </button>
+            </>
+          )
+        })()}
+        {simResult && (
+          <div style={{ marginTop: '10px', padding: '10px 12px', borderRadius: '9px', fontSize: '13px', fontWeight: 600, background: simResult.ok ? '#f0fdf4' : '#fef2f2', color: simResult.ok ? '#1a6b3c' : '#dc2626', border: `1px solid ${simResult.ok ? '#bbf7d0' : '#fecaca'}` }}>
+            {simResult.msg}
+          </div>
+        )}
       </div>
 
       {/* ── PARTNERS ── */}
