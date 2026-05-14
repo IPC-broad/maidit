@@ -70,58 +70,61 @@ export default function BrowsePage() {
   const [lastOfferSetup, setLastOfferSetup] = useState<string | null>(null)
   const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null)
   const [sortBy, setSortBy] = useState<'best' | 'newest' | 'salary-asc' | 'salary-desc'>('best')
+  const [fetchError, setFetchError] = useState<string | null>(null)
+
+  const load = async () => {
+    console.log('[browse] load() called')
+    const { supabase } = await import('../../lib/supabase')
+    const { data: { user } } = await supabase.auth.getUser()
+    setCurrentUser(user || null)
+    if (user) {
+      const { data: hw, error: hwError } = await supabase
+        .from('homeowners')
+        .select('id, subscription_expires_at, subscription_credit_used, preferred_setup')
+        .eq('profile_id', user.id)
+        .single()
+      if (hwError) {
+        console.error('[browse] homeowners query error:', hwError)
+        setIsSubscribed(false)
+      } else {
+        setIsSubscribed(!!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date()))
+        setLastOfferSetup(hw?.preferred_setup || null)
+      }
+      const { data: prof, error: profError } = await supabase
+        .from('profiles')
+        .select('city')
+        .eq('id', user.id)
+        .single()
+      if (profError) console.error('[browse] profiles query error:', profError)
+      setHomeownerCity(prof?.city || null)
+      setHomeownerProvince(prof?.city || null)
+    }
+    const { data, error, status, statusText } = await supabase
+      .from('kasambahay')
+      .select(`
+        id, province, city, setup, asking_salary, skills, experience,
+        availability, has_govt_id, selfie_url, profile_id, role, age,
+        religion, education, video_intro, created_at, status,
+        profile:profile_id (
+          full_name, selfie_url, city
+        )
+      `)
+      .limit(20)
+    console.log('[browse] fetch result:', {
+      count: data?.length,
+      error,
+      status,
+      statusText,
+      firstItem: data?.[0]?.id
+    })
+    setFetchError(error ? `${error.message} (HTTP ${status})` : null)
+    setProfiles(data || [])
+    setLoading(false)
+  }
 
   useEffect(() => {
-    const init = async () => {
-      const { supabase } = await import('../../lib/supabase')
-      const { data: { user } } = await supabase.auth.getUser()
-      setCurrentUser(user || null)
-      if (user) {
-        const { data: hw, error: hwError } = await supabase
-          .from('homeowners')
-          .select('id, subscription_expires_at, subscription_credit_used, preferred_setup')
-          .eq('profile_id', user.id)
-          .single()
-        if (hwError) {
-          console.error('[browse] homeowners query error:', hwError)
-          // Default to unsubscribed so the subscription banner is shown
-          setIsSubscribed(false)
-        } else {
-          setIsSubscribed(!!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date()))
-          setLastOfferSetup(hw?.preferred_setup || null)
-        }
-        const { data: prof, error: profError } = await supabase
-          .from('profiles')
-          .select('city')
-          .eq('id', user.id)
-          .single()
-        if (profError) console.error('[browse] profiles query error:', profError)
-        setHomeownerCity(prof?.city || null)
-        // Province comes from profiles.city for metro matching; no province col in homeowners
-        setHomeownerProvince(prof?.city || null)
-      }
-      const { data, error, status, statusText } = await supabase
-        .from('kasambahay')
-        .select(`
-          id, province, city, setup, asking_salary, skills, experience,
-          availability, has_govt_id, selfie_url, profile_id, role, age,
-          religion, education, video_intro, created_at, status,
-          profile:profile_id (
-            full_name, selfie_url, city
-          )
-        `)
-        .limit(20)
-      console.log('[browse] fetch result:', {
-        count: data?.length,
-        error,
-        status,
-        statusText,
-        firstItem: data?.[0]?.id
-      })
-      setProfiles(data || [])
-      setLoading(false)
-    }
-    init()
+    console.log('[browse] component mounted')
+    load()
   }, [])
 
   const loadOffers = async () => {
@@ -399,6 +402,12 @@ export default function BrowsePage() {
           <button style={{ background:'none', border:'none', cursor:'pointer', color:'#6b7280', display:'flex', padding:0 }}><IconBell /></button>
           <button style={{ background:'none', border:'none', cursor:'pointer', color:'#6b7280', display:'flex', padding:0 }}><IconMenu /></button>
         </div>
+      </div>
+
+      {/* ── DEBUG BANNER ── */}
+      <div style={{ background: '#1f2937', color: '#d1fae5', fontFamily: 'monospace', fontSize: '11px', padding: '6px 14px', lineHeight: 1.7 }}>
+        <div>Profiles: {profiles.length} · Loading: {loading ? 'yes' : 'no'} · User: {currentUser ? 'yes' : 'no'}</div>
+        {fetchError && <div style={{ color: '#fca5a5' }}>Error: {fetchError}</div>}
       </div>
 
       {tab === 'browse' && (
