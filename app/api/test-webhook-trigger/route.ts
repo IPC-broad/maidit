@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 const CREDIT_AMOUNTS = new Set([200100, 800100])
 
@@ -10,13 +16,7 @@ export async function POST(req: NextRequest) {
   const { offer_id } = await req.json()
   if (!offer_id) return NextResponse.json({ error: 'offer_id required' }, { status: 400 })
 
-  const { createClient } = await import('@supabase/supabase-js')
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-
-  const { data: offer, error } = await supabase
+  const { data: offer, error } = await supabaseAdmin
     .from('offers')
     .select('id, status, amount, transport_service, homeowner_id, kasambahay_id')
     .eq('id', offer_id)
@@ -27,10 +27,10 @@ export async function POST(req: NextRequest) {
   const update: Record<string, any> = { status: 'paid', paid_at: new Date().toISOString() }
   if (offer.transport_service) update.transport_confirmed = true
 
-  await supabase.from('offers').update(update).eq('id', offer_id)
+  await supabaseAdmin.from('offers').update(update).eq('id', offer_id)
 
   if (offer.amount && CREDIT_AMOUNTS.has(offer.amount)) {
-    await supabase
+    await supabaseAdmin
       .from('homeowners')
       .update({ subscription_credit_used: true })
       .eq('id', offer.homeowner_id)
