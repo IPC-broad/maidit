@@ -28,6 +28,7 @@ const workerStatusColors: Record<string, string> = {
 
 export default function AdminTestPanel() {
   const [offers, setOffers] = useState<any[]>([])
+  const [agreedOffers, setAgreedOffers] = useState<any[]>([])
   const [referredWorkers, setReferredWorkers] = useState<any[]>([])
   const [partners, setPartners] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -142,7 +143,7 @@ export default function AdminTestPanel() {
   const load = async () => {
     setLoading(true)
     const { supabase } = await import('../../../lib/supabase')
-    const [{ data: offersData }, { data: workersData }, { data: partnersData }] = await Promise.all([
+    const [offersRes, workersRes, partnersRes, agreedRes] = await Promise.all([
       supabase
         .from('offers')
         .select('*, kasambahay:kasambahay_id(*, profiles(full_name)), homeowner:homeowner_id(*, profiles(full_name))')
@@ -157,10 +158,15 @@ export default function AdminTestPanel() {
         .from('partners')
         .select('*, profiles(*)')
         .order('created_at', { ascending: false }),
+      fetch('/api/test-webhook-trigger').then(r => r.json()).catch(e => { console.error('[load] agreed offers fetch error:', e); return { offers: [] } }),
     ])
-    setOffers(offersData || [])
-    setReferredWorkers(workersData || [])
-    setPartners(partnersData || [])
+    if (offersRes.error) console.error('[load] offers query error:', offersRes.error)
+    if (workersRes.error) console.error('[load] workers query error:', workersRes.error)
+    if (partnersRes.error) console.error('[load] partners query error:', partnersRes.error)
+    setOffers(offersRes.data || [])
+    setReferredWorkers(workersRes.data || [])
+    setPartners(partnersRes.data || [])
+    setAgreedOffers(agreedRes.offers || [])
     setLoading(false)
   }
 
@@ -407,7 +413,6 @@ export default function AdminTestPanel() {
           Instantly marks an <strong style={{ color: '#c9943a' }}>agreed</strong> offer as paid — no real PayMongo transaction.
         </div>
         {(() => {
-          const agreedOffers = offers.filter(o => o.status === 'agreed')
           if (agreedOffers.length === 0) {
             return <div style={{ fontSize: '13px', color: '#9ca3af', textAlign: 'center', padding: '12px 0' }}>No offers in <strong>agreed</strong> status right now.</div>
           }

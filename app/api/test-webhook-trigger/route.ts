@@ -8,6 +8,23 @@ const supabaseAdmin = createClient(
 
 const CREDIT_AMOUNTS = new Set([200100, 800100])
 
+export async function GET() {
+  if (process.env.NODE_ENV === 'production' && process.env.TEST_MODE !== 'true') {
+    return NextResponse.json({ error: 'Not available in production' }, { status: 403 })
+  }
+  const { data, error } = await supabaseAdmin
+    .from('offers')
+    .select('id, status, amount, transport_service, kasambahay:kasambahay_id(*, profiles(full_name)), homeowner:homeowner_id(*, profiles(full_name))')
+    .eq('status', 'agreed')
+    .order('created_at', { ascending: false })
+    .limit(20)
+  if (error) {
+    console.log('[test-webhook-trigger GET] supabase error:', error)
+    return NextResponse.json({ error: 'Failed to fetch offers', supabase_error: error }, { status: 500 })
+  }
+  return NextResponse.json({ offers: data || [] })
+}
+
 export async function POST(req: NextRequest) {
   if (process.env.NODE_ENV === 'production' && process.env.TEST_MODE !== 'true') {
     return NextResponse.json({ error: 'Not available in production' }, { status: 403 })
@@ -24,13 +41,12 @@ export async function POST(req: NextRequest) {
     .eq('id', offer_id)
     .single()
 
+  console.log('[test-webhook-trigger] offer lookup:', { data: offer, error, offer_id })
   if (error || !offer) {
-    console.log('[test-webhook-trigger] offer not found — searched_id:', offer_id, 'error:', error)
     return NextResponse.json({
       error: 'Offer not found',
-      searched_id: offer_id,
-      supabase_url: process.env.NEXT_PUBLIC_SUPABASE_URL,
       supabase_error: error,
+      offer_id,
     }, { status: 404 })
   }
 
