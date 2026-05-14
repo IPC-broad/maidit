@@ -63,7 +63,6 @@ export default function BrowsePage() {
   const [saved, setSaved] = useState<Record<string, boolean>>({})
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({})
   const [offersLoaded, setOffersLoaded] = useState(false)
-  const [authModalId, setAuthModalId] = useState<string | null>(null)
   const [subscribeModalId, setSubscribeModalId] = useState<string | null>(null)
   const [subscribeLoading, setSubscribeLoading] = useState(false)
   const [homeownerProvince, setHomeownerProvince] = useState<string | null>(null)
@@ -155,11 +154,159 @@ export default function BrowsePage() {
     return true
   })
 
+  // Renders a single kasambahay card. Used for both visible and blurred sections.
+  const renderKBCard = (kb: any) => {
+    const fullName = kb.profiles?.full_name || ''
+    const firstName = fullName.split(' ')[0] || ''
+    const lastInit = fullName.split(' ')[1]?.[0]
+    const displayName = lastInit ? `${firstName} ${lastInit}.` : firstName
+    const initials = fullName.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase() || '?'
+    const skills: string[] = kb.skills || []
+    const visibleSkills = skills.slice(0, 3)
+    const extraSkills = skills.length - 3
+    const selfieUrl = kb.profiles?.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
+    const showPhoto = !!(selfieUrl && !imgErrors[kb.id])
+    const availLabel = kb.availability === 'Immediate' ? 'Immediate'
+      : kb.availability ? kb.availability : null
+    const expLine = [
+      kb.experience ? `${kb.experience} yrs exp` : null,
+      kb.religion,
+      kb.education,
+    ].filter(Boolean).join(' · ')
+    const location = kb.province || kb.city || kb.profiles?.city || ''
+
+    return (
+      <div key={kb.id} style={{ background:'#fff', borderRadius:'16px', border:'1.5px solid #f0ece6', overflow:'hidden', marginBottom:'12px', display:'flex', boxShadow:'0 1px 8px rgba(0,0,0,.06)' }}>
+
+        {/* Photo */}
+        <div style={{ width:'88px', flexShrink:0, position:'relative', background:'#f3f4f6' }}>
+          {showPhoto ? (
+            <img
+              src={selfieUrl!}
+              alt={displayName}
+              onError={() => setImgErrors(prev => ({ ...prev, [kb.id]: true }))}
+              style={{ width:'88px', height:'130px', objectFit:'cover', objectPosition:'top center', display:'block' }}
+            />
+          ) : (
+            <div style={{ width:'88px', height:'130px', background:'linear-gradient(135deg, #fdf3e3, #fde8c0)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.6rem', fontWeight:800, color:'#c9943a' }}>
+              {initials}
+            </div>
+          )}
+          <div style={{ position:'absolute', bottom:'5px', left:'3px', right:'3px', background:'rgba(26,107,60,.88)', borderRadius:'4px', padding:'2px 4px', display:'flex', alignItems:'center', gap:'2px' }}>
+            <span style={{ color:'#4ade80', fontSize:'7px', lineHeight:1 }}>●</span>
+            <span style={{ color:'#fff', fontSize:'7px', fontWeight:700, lineHeight:1 }}>Selfie Verified</span>
+          </div>
+          {kb.govt_id && (
+            <div style={{ position:'absolute', top:'5px', left:'3px', background:'rgba(201,148,58,.92)', borderRadius:'4px', padding:'2px 5px' }}>
+              <span style={{ color:'#fff', fontSize:'7px', fontWeight:700 }}>⭐ Premium</span>
+            </div>
+          )}
+        </div>
+
+        {/* Info */}
+        <div style={{ flex:1, padding:'10px 8px 10px 10px', minWidth:0, overflow:'hidden' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:'4px', marginBottom:'1px', flexWrap:'wrap' as const }}>
+            <span style={{ fontWeight:800, fontSize:'14px', color:'#111827' }}>{displayName}</span>
+            {kb.age ? <span style={{ fontSize:'12px', color:'#6b7280' }}>, {kb.age}</span> : null}
+            <span style={{ color:'#22c55e', fontSize:'9px' }}>●</span>
+          </div>
+          <div style={{ fontSize:'11px', color:'#6b7280', marginBottom:'4px', lineHeight:1.3 }}>
+            {kb.roles?.join(' and ') || kb.role || 'Kasambahay'}
+            {kb.setup ? ` · ${kb.setup}` : ''}
+          </div>
+          {location && (
+            <div style={{ fontSize:'11px', color:'#6b7280', marginBottom:'6px', display:'flex', alignItems:'center', gap:'2px' }}>
+              <span>📍</span>
+              <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' as const }}>{location}</span>
+            </div>
+          )}
+          {visibleSkills.length > 0 && (
+            <div style={{ display:'flex', gap:'3px', flexWrap:'wrap' as const, marginBottom:'5px' }}>
+              {visibleSkills.map((skill: string) => (
+                <span key={skill} style={{ fontSize:'9px', fontWeight:600, padding:'2px 6px', borderRadius:'5px', background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0' }}>
+                  {skill}
+                </span>
+              ))}
+              {extraSkills > 0 && (
+                <span style={{ fontSize:'9px', padding:'2px 5px', borderRadius:'5px', background:'#f3f4f6', color:'#9ca3af' }}>+{extraSkills}</span>
+              )}
+            </div>
+          )}
+          {expLine ? (
+            <div style={{ fontSize:'10px', color:'#9ca3af', lineHeight:1.4, marginBottom:'4px' }}>{expLine}</div>
+          ) : null}
+          {kb.video_intro && (
+            <div style={{ fontSize:'10px', color:'#2563eb', fontWeight:600, display:'flex', alignItems:'center', gap:'3px' }}>
+              <span>▶</span> Watch Video Intro (00:30)
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div style={{ width:'84px', flexShrink:0, padding:'10px 8px', display:'flex', flexDirection:'column' as const, alignItems:'stretch', gap:'3px' }}>
+          {kb.govt_id ? (
+            <div style={{ background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:'5px', padding:'2px 5px', textAlign:'center' as const, marginBottom:'2px' }}>
+              <span style={{ fontSize:'8px', fontWeight:700, color:'#2563eb' }}>🛡️ ID Verified</span>
+            </div>
+          ) : <div />}
+          <div style={{ display:'flex', justifyContent:'flex-end' }}>
+            <button
+              onClick={() => setSaved(prev => ({ ...prev, [kb.id]: !prev[kb.id] }))}
+              style={{ background:'none', border:'none', cursor:'pointer', padding:'2px', display:'flex' }}
+            >
+              <IconHeart filled={!!saved[kb.id]} />
+            </button>
+          </div>
+          <div style={{ flex:1 }} />
+          {showTransport(kb.province) && (
+            <div style={{ display:'flex', alignItems:'center', gap:'3px', justifyContent:'flex-end', marginBottom:'3px' }}>
+              <span style={{ fontSize:'11px' }}>🚌</span>
+              <span style={{ fontSize:'8px', fontWeight:700, color:'#c9943a' }}>Transport needed</span>
+            </div>
+          )}
+          <div style={{ textAlign:'right' as const, marginBottom:'1px' }}>
+            <div style={{ fontFamily:'Georgia, serif', fontSize:'13px', fontWeight:900, color:'#1a6b3c', lineHeight:1.1 }}>
+              ₱{kb.asking_salary?.toLocaleString()}
+            </div>
+            <div style={{ fontSize:'8px', color:'#9ca3af' }}>/&nbsp;month</div>
+          </div>
+          {availLabel && (
+            <div style={{ fontSize:'8px', color:'#6b7280', textAlign:'right' as const, lineHeight:1.35, marginBottom:'4px' }}>
+              Available:<br />{availLabel}
+            </div>
+          )}
+          {/* Send Offer */}
+          <button
+            onClick={() => {
+              if (!currentUser) { router.push('/signup/homeowner') }
+              else if (!isSubscribed) { setSubscribeModalId(kb.id) }
+              else { router.push(`/offer/send/${kb.id}`) }
+            }}
+            style={{ width:'100%', padding:'6px 4px', background:'#1a6b3c', color:'#fff', border:'none', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'10px', fontWeight:700, cursor:'pointer', marginBottom:'3px' }}
+          >
+            Send Offer
+          </button>
+          {/* Pass */}
+          <button
+            onClick={() => setPassed(prev => ({ ...prev, [kb.id]: true }))}
+            style={{ width:'100%', padding:'5px 4px', background:'#fff', color:'#6b7280', border:'1.5px solid #e5e7eb', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'9px', fontWeight:600, cursor:'pointer' }}
+          >
+            Pass
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   if (loading) return (
     <div style={{ minHeight:'100vh', background:'#f4f6f8', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif', color:'#6b7280' }}>
       Loading...
     </div>
   )
+
+  // For non-logged-in: show first 3 openly, rest blurred
+  const visibleCards = !currentUser ? filtered.slice(0, 3) : filtered
+  const lockedCards  = !currentUser ? filtered.slice(3) : []
 
   return (
     <div style={{ minHeight:'100vh', background:'#f4f6f8', fontFamily:'sans-serif', paddingBottom:'80px' }}>
@@ -291,161 +438,44 @@ export default function BrowsePage() {
                 No matches found.
               </div>
             )}
-            {filtered.map((kb) => {
-              const fullName = kb.profiles?.full_name || ''
-              const firstName = fullName.split(' ')[0] || ''
-              const lastInit = fullName.split(' ')[1]?.[0]
-              const displayName = lastInit ? `${firstName} ${lastInit}.` : firstName
-              const initials = fullName.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase() || '?'
-              const skills: string[] = kb.skills || []
-              const visibleSkills = skills.slice(0, 3)
-              const extraSkills = skills.length - 3
-              const selfieUrl = kb.profiles?.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
-              const showPhoto = !!(selfieUrl && !imgErrors[kb.id])
-              const availLabel = kb.availability === 'Immediate' ? 'Immediate'
-                : kb.availability ? kb.availability : null
-              const expLine = [
-                kb.experience ? `${kb.experience} yrs exp` : null,
-                kb.religion,
-                kb.education,
-              ].filter(Boolean).join(' · ')
-              const location = kb.province || kb.city || kb.profiles?.city || ''
 
-              return (
-                <div key={kb.id} style={{ background:'#fff', borderRadius:'16px', border:'1.5px solid #f0ece6', overflow:'hidden', marginBottom:'12px', display:'flex', boxShadow:'0 1px 8px rgba(0,0,0,.06)' }}>
+            {/* Visible cards (all for logged-in, first 3 for guests) */}
+            {visibleCards.map(renderKBCard)}
 
-                  {/* Photo */}
-                  <div style={{ width:'88px', flexShrink:0, position:'relative', background:'#f3f4f6' }}>
-                    {showPhoto ? (
-                      <img
-                        src={selfieUrl!}
-                        alt={displayName}
-                        onError={() => setImgErrors(prev => ({ ...prev, [kb.id]: true }))}
-                        style={{ width:'88px', height:'130px', objectFit:'cover', objectPosition:'top center', display:'block' }}
-                      />
-                    ) : (
-                      <div style={{ width:'88px', height:'130px', background:'linear-gradient(135deg, #fdf3e3, #fde8c0)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.6rem', fontWeight:800, color:'#c9943a' }}>
-                        {initials}
-                      </div>
-                    )}
-                    {/* Selfie Verified badge */}
-                    <div style={{ position:'absolute', bottom:'5px', left:'3px', right:'3px', background:'rgba(26,107,60,.88)', borderRadius:'4px', padding:'2px 4px', display:'flex', alignItems:'center', gap:'2px' }}>
-                      <span style={{ color:'#4ade80', fontSize:'7px', lineHeight:1 }}>●</span>
-                      <span style={{ color:'#fff', fontSize:'7px', fontWeight:700, lineHeight:1 }}>Selfie Verified</span>
-                    </div>
-                    {/* Premium badge */}
-                    {kb.govt_id && (
-                      <div style={{ position:'absolute', top:'5px', left:'3px', background:'rgba(201,148,58,.92)', borderRadius:'4px', padding:'2px 5px' }}>
-                        <span style={{ color:'#fff', fontSize:'7px', fontWeight:700 }}>⭐ Premium</span>
-                      </div>
-                    )}
-                  </div>
+            {/* Blurred + locked section for non-logged-in guests */}
+            {lockedCards.length > 0 && (
+              <div style={{ position:'relative' }}>
+                {/* Blurred cards underneath */}
+                <div style={{ filter:'blur(6px)', pointerEvents:'none', userSelect:'none' as const }}>
+                  {lockedCards.map(renderKBCard)}
+                </div>
 
-                  {/* Info */}
-                  <div style={{ flex:1, padding:'10px 8px 10px 10px', minWidth:0, overflow:'hidden' }}>
-                    {/* Name + age + dot */}
-                    <div style={{ display:'flex', alignItems:'center', gap:'4px', marginBottom:'1px', flexWrap:'wrap' as const }}>
-                      <span style={{ fontWeight:800, fontSize:'14px', color:'#111827' }}>{displayName}</span>
-                      {kb.age ? <span style={{ fontSize:'12px', color:'#6b7280' }}>, {kb.age}</span> : null}
-                      <span style={{ color:'#22c55e', fontSize:'9px' }}>●</span>
+                {/* Lock overlay */}
+                <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:5 }}>
+                  <div style={{ background:'#fff', borderRadius:'18px', padding:'28px 22px', boxShadow:'0 8px 40px rgba(0,0,0,.18)', textAlign:'center', width:'88%', maxWidth:'300px' }}>
+                    <div style={{ fontSize:'2.2rem', marginBottom:'10px' }}>🔒</div>
+                    <div style={{ fontFamily:'Georgia, serif', fontSize:'1.05rem', fontWeight:900, color:'#111827', marginBottom:'6px' }}>
+                      See all available helpers
                     </div>
-                    {/* Role · setup */}
-                    <div style={{ fontSize:'11px', color:'#6b7280', marginBottom:'4px', lineHeight:1.3 }}>
-                      {kb.roles?.join(' and ') || kb.role || 'Kasambahay'}
-                      {kb.setup ? ` · ${kb.setup}` : ''}
-                    </div>
-                    {/* Location */}
-                    {location && (
-                      <div style={{ fontSize:'11px', color:'#6b7280', marginBottom:'6px', display:'flex', alignItems:'center', gap:'2px' }}>
-                        <span>📍</span>
-                        <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' as const }}>{location}</span>
-                      </div>
-                    )}
-                    {/* Skills */}
-                    {visibleSkills.length > 0 && (
-                      <div style={{ display:'flex', gap:'3px', flexWrap:'wrap' as const, marginBottom:'5px' }}>
-                        {visibleSkills.map((skill: string) => (
-                          <span key={skill} style={{ fontSize:'9px', fontWeight:600, padding:'2px 6px', borderRadius:'5px', background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0' }}>
-                            {skill}
-                          </span>
-                        ))}
-                        {extraSkills > 0 && (
-                          <span style={{ fontSize:'9px', padding:'2px 5px', borderRadius:'5px', background:'#f3f4f6', color:'#9ca3af' }}>+{extraSkills}</span>
-                        )}
-                      </div>
-                    )}
-                    {/* Experience row */}
-                    {expLine ? (
-                      <div style={{ fontSize:'10px', color:'#9ca3af', lineHeight:1.4, marginBottom:'4px' }}>{expLine}</div>
-                    ) : null}
-                    {/* Video intro */}
-                    {kb.video_intro && (
-                      <div style={{ fontSize:'10px', color:'#2563eb', fontWeight:600, display:'flex', alignItems:'center', gap:'3px' }}>
-                        <span>▶</span> Watch Video Intro (00:30)
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div style={{ width:'84px', flexShrink:0, padding:'10px 8px', display:'flex', flexDirection:'column' as const, alignItems:'stretch', gap:'3px' }}>
-                    {/* ID Verified */}
-                    {kb.govt_id ? (
-                      <div style={{ background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:'5px', padding:'2px 5px', textAlign:'center' as const, marginBottom:'2px' }}>
-                        <span style={{ fontSize:'8px', fontWeight:700, color:'#2563eb' }}>🛡️ ID Verified</span>
-                      </div>
-                    ) : <div />}
-                    {/* Heart */}
-                    <div style={{ display:'flex', justifyContent:'flex-end' }}>
-                      <button
-                        onClick={() => setSaved(prev => ({ ...prev, [kb.id]: !prev[kb.id] }))}
-                        style={{ background:'none', border:'none', cursor:'pointer', padding:'2px', display:'flex' }}
-                      >
-                        <IconHeart filled={!!saved[kb.id]} />
-                      </button>
-                    </div>
-                    <div style={{ flex:1 }} />
-                    {/* Transport */}
-                    {showTransport(kb.province) && (
-                      <div style={{ display:'flex', alignItems:'center', gap:'3px', justifyContent:'flex-end', marginBottom:'3px' }}>
-                        <span style={{ fontSize:'11px' }}>🚌</span>
-                        <span style={{ fontSize:'8px', fontWeight:700, color:'#c9943a' }}>Transport needed</span>
-                      </div>
-                    )}
-                    {/* Salary */}
-                    <div style={{ textAlign:'right' as const, marginBottom:'1px' }}>
-                      <div style={{ fontFamily:'Georgia, serif', fontSize:'13px', fontWeight:900, color:'#1a6b3c', lineHeight:1.1 }}>
-                        ₱{kb.asking_salary?.toLocaleString()}
-                      </div>
-                      <div style={{ fontSize:'8px', color:'#9ca3af' }}>/&nbsp;month</div>
-                    </div>
-                    {/* Availability */}
-                    {availLabel && (
-                      <div style={{ fontSize:'8px', color:'#6b7280', textAlign:'right' as const, lineHeight:1.35, marginBottom:'4px' }}>
-                        Available:<br />{availLabel}
-                      </div>
-                    )}
-                    {/* Send Offer */}
+                    <p style={{ fontSize:'.78rem', color:'#6b7280', lineHeight:1.6, margin:'0 0 18px' }}>
+                      Create a free account to view all profiles and send offers
+                    </p>
                     <button
-                      onClick={() => {
-                        if (!currentUser) { setAuthModalId(kb.id) }
-                        else if (!isSubscribed) { setSubscribeModalId(kb.id) }
-                        else { router.push(`/offer/send/${kb.id}`) }
-                      }}
-                      style={{ width:'100%', padding:'6px 4px', background:'#1a6b3c', color:'#fff', border:'none', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'10px', fontWeight:700, cursor:'pointer', marginBottom:'3px' }}
+                      onClick={() => router.push('/signup/homeowner')}
+                      style={{ width:'100%', padding:'11px', borderRadius:'10px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'.86rem', fontWeight:700, cursor:'pointer', marginBottom:'8px' }}
                     >
-                      Send Offer
+                      Sign Up Free →
                     </button>
-                    {/* Pass */}
                     <button
-                      onClick={() => setPassed(prev => ({ ...prev, [kb.id]: true }))}
-                      style={{ width:'100%', padding:'5px 4px', background:'#fff', color:'#6b7280', border:'1.5px solid #e5e7eb', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'9px', fontWeight:600, cursor:'pointer' }}
+                      onClick={() => router.push('/login')}
+                      style={{ width:'100%', padding:'11px', borderRadius:'10px', background:'transparent', color:'#1a6b3c', border:'1.5px solid #1a6b3c', fontFamily:'sans-serif', fontSize:'.86rem', fontWeight:700, cursor:'pointer' }}
                     >
-                      Pass
+                      Log In
                     </button>
                   </div>
                 </div>
-              )
-            })}
+              </div>
+            )}
           </div>
 
           {/* ── CTA STRIP ── */}
@@ -528,7 +558,7 @@ export default function BrowsePage() {
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.55)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
           <div style={{ background:'#fff', borderRadius:'16px', padding:'24px 20px', maxWidth:'320px', width:'100%' }}>
             <div style={{ fontFamily:'Georgia, serif', fontSize:'1.15rem', fontWeight:900, color:'#111827', marginBottom:'6px' }}>Subscribe to MaidIt — ₱499/month</div>
-            <p style={{ fontSize:'.82rem', color:'#6b7280', lineHeight:1.6, marginBottom:'20px', margin:'0 0 20px' }}>
+            <p style={{ fontSize:'.82rem', color:'#6b7280', lineHeight:1.6, margin:'0 0 20px' }}>
               Get platform access + 1 hiring fee credit (₱499 off your first hire)
             </p>
             <button
@@ -540,36 +570,6 @@ export default function BrowsePage() {
             </button>
             <button
               onClick={() => setSubscribeModalId(null)}
-              style={{ width:'100%', padding:'8px', background:'none', border:'none', fontFamily:'sans-serif', fontSize:'.8rem', color:'#9ca3af', cursor:'pointer' }}
-            >
-              Maybe later
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── AUTH MODAL ── */}
-      {authModalId && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.55)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
-          <div style={{ background:'#fff', borderRadius:'16px', padding:'24px 20px', maxWidth:'320px', width:'100%' }}>
-            <div style={{ fontFamily:'Georgia, serif', fontSize:'1.15rem', fontWeight:900, color:'#111827', marginBottom:'8px' }}>Sign in to send an offer</div>
-            <p style={{ fontSize:'.82rem', color:'#6b7280', lineHeight:1.6, marginBottom:'20px', margin:'0 0 20px' }}>
-              Join MaidIt to hire trusted kasambahay for your home.
-            </p>
-            <button
-              onClick={() => router.push(`/login?redirect=/offer/send/${authModalId}`)}
-              style={{ width:'100%', padding:'12px', borderRadius:'10px', border:'1.5px solid #1a6b3c', background:'transparent', color:'#1a6b3c', fontFamily:'sans-serif', fontSize:'.88rem', fontWeight:700, cursor:'pointer', marginBottom:'10px' }}
-            >
-              Log In
-            </button>
-            <button
-              onClick={() => router.push('/signup/homeowner')}
-              style={{ width:'100%', padding:'12px', borderRadius:'10px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'.88rem', fontWeight:700, cursor:'pointer', marginBottom:'10px' }}
-            >
-              Sign Up as Homeowner
-            </button>
-            <button
-              onClick={() => setAuthModalId(null)}
               style={{ width:'100%', padding:'8px', background:'none', border:'none', fontFamily:'sans-serif', fontSize:'.8rem', color:'#9ca3af', cursor:'pointer' }}
             >
               Maybe later

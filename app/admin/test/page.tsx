@@ -89,12 +89,20 @@ export default function AdminTestPanel() {
       id: 'F', expect: 'status 401',
       label: 'Webhook rejects invalid signature',
       run: async () => {
-        const r = await fetch('/api/webhook/paymongo', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Paymongo-Signature': 't=1234567890,te=invalidsignature,li=invalidsignature' },
-          body: JSON.stringify({ data: { attributes: { type: 'link.payment.paid' } } }),
-        })
-        return { pass: r.status === 401, detail: r.status === 401 ? '✅ Pass (webhook correctly rejected bad signature)' : `❌ Fail (accepted bad signature) — received HTTP ${r.status}` }
+        try {
+          const r = await fetch('/api/webhook/paymongo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'paymongo-signature': 'fake_invalid_signature_for_testing' },
+            body: JSON.stringify({ fake: true }),
+          })
+          console.log('[Test F] response status:', r.status)
+          return { pass: r.status === 401, detail: r.status === 401 ? '✅ Pass (webhook correctly rejected bad signature)' : `❌ Fail (accepted bad signature) — received HTTP ${r.status}` }
+        } catch (err: any) {
+          console.log('[Test F] fetch error:', err)
+          const msg = String(err?.message || err)
+          const pass = msg.includes('401')
+          return { pass, detail: pass ? '✅ Pass (webhook correctly rejected bad signature)' : `❌ Fail — fetch threw: ${msg}` }
+        }
       },
     },
   ]

@@ -42,14 +42,27 @@ export default function HomeownerSignup() {
       scope: form.scope
     })
 
-    setLoading(false)
     const intent = localStorage.getItem('maidit_intent')
     if (intent === 'post_job') {
       localStorage.removeItem('maidit_intent')
+      setLoading(false)
       router.push('/dashboard/homeowner/post-job')
-    } else {
-      router.push('/signup/homeowner/success')
+      return
     }
+
+    try {
+      const res = await fetch('/api/create-payment-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 49900, description: 'MaidIt Subscription - ₱499' }),
+      })
+      const data = await res.json()
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url
+        return
+      }
+    } catch {}
+    setLoading(false)
   }
 
   const s: any = {
@@ -148,8 +161,14 @@ export default function HomeownerSignup() {
           ✅ Pay hiring fee only when you successfully hire
         </div>
         <button style={{...s.btn, opacity: loading ? .6 : 1}} onClick={handleSignup} disabled={loading}>
-          {loading ? 'Creating account...' : 'Create Account →'}
+          {loading ? 'Setting up your account...' : 'Create Account →'}
         </button>
+        <div style={{ textAlign:'center', marginTop:'12px' }}>
+          <button style={{ background:'none', border:'none', color:'#9ca3af', fontSize:'.78rem', cursor:'pointer', textDecoration:'underline' }}
+            onClick={() => router.push('/dashboard/homeowner')}>
+            Skip for now →
+          </button>
+        </div>
       </>}
     </div>
   )
