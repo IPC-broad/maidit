@@ -13,6 +13,7 @@ export default function KasambahaySignup() {
   const [cooldown, setCooldown] = useState(0)
 
   const [hasNbi, setHasNbi] = useState(false)
+  const [hasPoliceClearance, setHasPoliceClearance] = useState(false)
   const [govtIdTypes, setGovtIdTypes] = useState<string[]>([])
   const toggleGovtId = (id: string) => {
     if (id === 'Wala') {
@@ -24,6 +25,7 @@ export default function KasambahaySignup() {
       })
     }
   }
+  const hasGovtId = govtIdTypes.length > 0 && !govtIdTypes.includes('Wala')
 
   // Province dropdown
   const [provinces, setProvinces] = useState<Province[]>([])
@@ -218,7 +220,9 @@ export default function KasambahaySignup() {
       asking_salary: parseInt(form.salary),
       setup: form.setup,
       has_nbi: hasNbi,
+      has_police_clearance: hasPoliceClearance,
       govt_id_types: govtIdTypes,
+      has_govt_id: hasGovtId,
       experience: form.experience,
       province: selProv!.name,
       age: form.age ? parseInt(form.age) : null,
@@ -515,7 +519,7 @@ export default function KasambahaySignup() {
           <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
             <div style={{ fontSize:'11px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>MGA DOKUMENTO (i-tick kung mayroon)</div>
             <div style={{ display:'flex', flexDirection:'column' as const, gap:'10px' }}>
-              {['Wala','PhilHealth ID','SSS ID','Postal ID','Passport','UMID','National ID'].map((label) => (
+              {['Wala','Passport','SSS ID','PhilHealth ID','Pag-IBIG ID','Postal ID','Barangay ID','Driver\'s License','PRC ID','Voter\'s ID'].map((label) => (
                 <div key={label} style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => toggleGovtId(label)}>
                   <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: govtIdTypes.includes(label) ? '#c9943a' : '#d1d5db', background: govtIdTypes.includes(label) ? '#c9943a' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                     {govtIdTypes.includes(label) && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>✓</span>}
@@ -523,12 +527,18 @@ export default function KasambahaySignup() {
                   <span style={{ fontSize:'13px', color:'#374151' }}>{label}</span>
                 </div>
               ))}
-              <div style={{ borderTop:'1px solid #f3f4f6', paddingTop:'10px' }}>
+              <div style={{ borderTop:'1px solid #f3f4f6', paddingTop:'10px', display:'flex', flexDirection:'column' as const, gap:'10px' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => setHasNbi(!hasNbi)}>
                   <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: hasNbi ? '#1a6b3c' : '#d1d5db', background: hasNbi ? '#1a6b3c' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                     {hasNbi && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>✓</span>}
                   </div>
-                  <span style={{ fontSize:'13px', color:'#374151' }}>NBI Clearance</span>
+                  <span style={{ fontSize:'13px', color:'#374151' }}>Mayroon akong NBI Clearance</span>
+                </div>
+                <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => setHasPoliceClearance(!hasPoliceClearance)}>
+                  <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: hasPoliceClearance ? '#1a6b3c' : '#d1d5db', background: hasPoliceClearance ? '#1a6b3c' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    {hasPoliceClearance && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>✓</span>}
+                  </div>
+                  <span style={{ fontSize:'13px', color:'#374151' }}>Mayroon akong Police Clearance</span>
                 </div>
               </div>
             </div>

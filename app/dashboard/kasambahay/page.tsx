@@ -14,6 +14,9 @@ export default function KBDashboard() {
   const [appliedJobs, setAppliedJobs] = useState<any[]>([])
   const [showProfile, setShowProfile] = useState(false)
   const [actioning, setActioning] = useState<string | null>(null)
+  const [uploadingId, setUploadingId] = useState(false)
+  const [uploadingClearance, setUploadingClearance] = useState(false)
+  const [uploadMsg, setUploadMsg] = useState('')
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -45,6 +48,28 @@ export default function KBDashboard() {
     }
     init()
   }, [])
+
+  const handleUpload = async (type: 'id' | 'clearance', file: File) => {
+    if (!profile?.id) return
+    const setter = type === 'id' ? setUploadingId : setUploadingClearance
+    setter(true)
+    setUploadMsg('')
+    try {
+      const { supabase } = await import('../../../lib/supabase')
+      const path = `${profile.id}/${type === 'id' ? 'id_photo.jpg' : 'clearance.jpg'}`
+      const { error: upErr } = await supabase.storage.from('Documents').upload(path, file, { upsert: true })
+      if (upErr) throw upErr
+      const { data: { publicUrl } } = supabase.storage.from('Documents').getPublicUrl(path)
+      const field = type === 'id' ? { id_photo_url: publicUrl, has_govt_id: true } : { clearance_url: publicUrl }
+      await supabase.from('kasambahay').update(field).eq('profile_id', profile.id)
+      setKb((prev: any) => ({ ...prev, ...field }))
+      setUploadMsg(type === 'id' ? '✅ ID na-upload!' : '✅ Clearance na-upload!')
+    } catch (e: any) {
+      setUploadMsg('❌ Hindi na-upload. Subukan ulit.')
+    }
+    setter(false)
+    setTimeout(() => setUploadMsg(''), 3000)
+  }
 
   const handleSignOut = async () => {
     const { supabase } = await import('../../../lib/supabase')
@@ -399,6 +424,37 @@ export default function KBDashboard() {
                 </div>
               </div>
             )}
+            {/* Documents section */}
+            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #ede8e0', padding: '14px', marginBottom: '14px' }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '10px' }}>Mga Dokumento</div>
+              <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px', marginBottom: '12px' }}>
+                {[
+                  { label: 'Valid ID', ok: !!kb?.has_govt_id, types: kb?.govt_id_types },
+                  { label: 'NBI Clearance', ok: !!kb?.has_nbi, types: null },
+                  { label: 'Police Clearance', ok: !!kb?.has_police_clearance, types: null },
+                ].map((doc, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <span style={{ fontSize: '12px', color: '#374151' }}>{doc.label}</span>
+                      {doc.types?.length > 0 && <div style={{ fontSize: '10px', color: '#9ca3af' }}>{doc.types.join(', ')}</div>}
+                    </div>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: doc.ok ? '#1a6b3c' : '#9ca3af' }}>{doc.ok ? '✅ Mayroon' : '⏳ Wala pa'}</span>
+                  </div>
+                ))}
+              </div>
+              {uploadMsg && <div style={{ fontSize: '12px', fontWeight: 600, color: uploadMsg.startsWith('✅') ? '#1a6b3c' : '#dc2626', marginBottom: '8px' }}>{uploadMsg}</div>}
+              <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
+                <label style={{ width: '100%', padding: '10px', borderRadius: '9px', border: '1.5px solid #e5e0d8', background: uploadingId ? '#f3f4f6' : '#faf8f5', color: '#374151', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, cursor: uploadingId ? 'default' : 'pointer', textAlign: 'center' as const, display: 'block' }}>
+                  {uploadingId ? 'Nag-u-upload...' : '📎 Mag-upload ng Valid ID'}
+                  <input type="file" accept="image/*,.pdf" style={{ display: 'none' }} disabled={uploadingId} onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload('id', f) }} />
+                </label>
+                <label style={{ width: '100%', padding: '10px', borderRadius: '9px', border: '1.5px solid #e5e0d8', background: uploadingClearance ? '#f3f4f6' : '#faf8f5', color: '#374151', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, cursor: uploadingClearance ? 'default' : 'pointer', textAlign: 'center' as const, display: 'block' }}>
+                  {uploadingClearance ? 'Nag-u-upload...' : '📎 Mag-upload ng NBI/Police Clearance'}
+                  <input type="file" accept="image/*,.pdf" style={{ display: 'none' }} disabled={uploadingClearance} onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload('clearance', f) }} />
+                </label>
+              </div>
+            </div>
+
             <button onClick={() => setShowProfile(false)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid #ede8e0', background: 'transparent', color: '#6b7280', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 600, cursor: 'pointer', marginBottom: '8px' }}>Close</button>
             <button onClick={handleSignOut} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid #fecaca', background: 'transparent', color: '#dc2626', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Sign Out</button>
           </div>
