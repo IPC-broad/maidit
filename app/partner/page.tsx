@@ -314,7 +314,7 @@ export default function PartnerPage() {
       <div style={{ margin: '0 14px 14px', background: '#1a6b3c', borderRadius: '18px', padding: '28px 20px', textAlign: 'center' }}>
         <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 900, color: '#fff', marginBottom: '8px', lineHeight: 1.2 }}>Handa ka na bang kumita?</div>
         <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.75)', lineHeight: 1.65, marginBottom: '18px' }}>
-          Libre ang pag-sign up. Walang bayad hanggang hindi ka pa nakakakuha ng hire.
+          Mag-sign up na ngayon.
         </p>
         <button style={{ padding: '13px 24px', borderRadius: '11px', background: '#c9943a', border: 'none', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }} onClick={() => setStep('step1')}>
           Mag-sign up Ngayon →
