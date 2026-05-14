@@ -235,7 +235,7 @@ export default function PartnerPage() {
               <em style={{ color: '#1a6b3c', fontStyle: 'italic' }}>helping your community 🍃</em>
             </h1>
             <p style={{ fontSize: '15px', color: '#6b7280', lineHeight: 1.65, marginBottom: '13px' }}>
-              Refer job seekers in your community — earn <strong style={{ color: '#1a1a1a' }}>₱1,000</strong> for every successful hire.
+              Kumita ng hanggang <strong style={{ color: '#1a1a1a' }}>₱1,000</strong> sa bawat ma-hire na referral mo.
             </p>
             <button style={{ padding: '10px 14px', borderRadius: '9px', background: '#c9943a', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif', alignSelf: 'flex-start' as const }} onClick={() => setStep('step1')}>
               Become a Community Partner →
@@ -250,8 +250,20 @@ export default function PartnerPage() {
         <div style={{ background: '#1a6b3c', borderRadius: '14px', padding: '15px 14px' }}>
           <div style={{ fontSize: '8px', color: 'rgba(255,255,255,.55)', textTransform: 'uppercase' as const, letterSpacing: '.6px', marginBottom: '8px' }}>EARNINGS PER HIRE</div>
           <div style={{ fontFamily: 'serif', fontSize: '30px', fontWeight: 900, color: '#fff', lineHeight: 1, marginBottom: '5px' }}>₱1,000</div>
-          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,.75)', marginBottom: '8px' }}>per kasambahay hired</div>
-          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.42)', lineHeight: 1.5 }}>No limit — the more you refer, the more you earn.</div>
+          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,.75)', marginBottom: '10px' }}>per kasambahay hired</div>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,.18)', paddingTop: '10px', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,.7)' }}>₱500</span>
+              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,.55)', textAlign: 'right' as const }}>Referral fee</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,.7)' }}>₱500</span>
+              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,.55)', textAlign: 'right' as const }}>Transport assistance fee</span>
+            </div>
+          </div>
+          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.38)', lineHeight: 1.55 }}>
+            Ang transport assistance fee ay para sa mga partner na mag-a-ayos ng transportasyon ng kasambahay mula Leyte, Samar, at Bicol. Hindi mo babayaran ang ticket — ikaw lang ang mag-a-arrange.
+          </div>
         </div>
         {/* Halimbawa */}
         <div style={{ background: '#fff', borderRadius: '14px', padding: '15px 14px', border: '1px solid #ede8e0' }}>
@@ -270,16 +282,43 @@ export default function PartnerPage() {
       {/* 3 FEATURE CARDS — horizontal row */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', padding: '12px 14px 20px' }}>
         {[
-          { icon: '🌱', title: 'Helping Your Community', sub: 'Help job seekers find good employers and opportunities.' },
-          { icon: '💸', title: 'Earn Per Hire', sub: 'Get paid for every successful hire plus additional income for transport assistance.' },
-          { icon: '🛡️', title: 'Safe and Transparent', sub: 'Verified employers and transparent payouts on the MaidIt platform.' },
+          { icon: '🌱', title: 'Tulong sa Komunidad', sub: 'Tulungan ang mga kasambahay sa iyong lugar na makahanap ng magandang employer at oportunidad.' },
+          { icon: '💸', title: 'Kumita sa Bawat Hire', sub: '₱500 referral fee sa bawat hire. Dagdag ₱500 kung ikaw ang nag-ayos ng transportasyon ng kasambahay mula Leyte, Samar, o Bicol.' },
+          { icon: '🛡️', title: 'Ligtas at Transparent', sub: 'Verified ang lahat ng employers sa MaidIt platform. Malinaw ang bawat payout — walang hidden charges.' },
         ].map((card, i) => (
           <div key={i} style={{ background: '#fff', borderRadius: '12px', padding: '13px 11px', border: '1px solid #ede8e0', display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
             <div style={{ width: '34px', height: '34px', borderRadius: '9px', background: '#fef3e2', border: '1px solid #fde8c0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px' }}>{card.icon}</div>
             <div style={{ fontWeight: 700, fontSize: '13px', color: '#1a1a1a', lineHeight: 1.3 }}>{card.title}</div>
-            <div style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.5 }}>{card.sub}</div>
+            <div style={{ fontSize: '11px', color: '#6b7280', lineHeight: 1.5 }}>{card.sub}</div>
           </div>
         ))}
+      </div>
+
+      {/* HOW IT WORKS */}
+      <div style={{ padding: '0 14px 22px' }}>
+        <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.6px', color: '#9ca3af', marginBottom: '14px' }}>Paano gumagana</div>
+        {[
+          { n: 1, txt: 'Mag-sign up bilang Community Partner' },
+          { n: 2, txt: 'I-refer ang mga kasambahay sa iyong lugar' },
+          { n: 3, txt: 'Kumita ng ₱500 pagdating ng kasambahay' },
+          { n: 4, txt: 'Dagdag ₱500 kung ikaw ang nag-handle ng transportasyon (Leyte, Samar, Bicol only)' },
+        ].map(({ n, txt }) => (
+          <div key={n} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '12px' }}>
+            <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: '#1a6b3c', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800, flexShrink: 0 }}>{n}</div>
+            <span style={{ fontSize: '13px', color: '#374151', lineHeight: 1.55, paddingTop: '4px' }}>{txt}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* CTA SECTION */}
+      <div style={{ margin: '0 14px 14px', background: '#1a6b3c', borderRadius: '18px', padding: '28px 20px', textAlign: 'center' }}>
+        <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 900, color: '#fff', marginBottom: '8px', lineHeight: 1.2 }}>Handa ka na bang kumita?</div>
+        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.75)', lineHeight: 1.65, marginBottom: '18px' }}>
+          Libre ang pag-sign up. Walang bayad hanggang hindi ka pa nakakakuha ng hire.
+        </p>
+        <button style={{ padding: '13px 24px', borderRadius: '11px', background: '#c9943a', border: 'none', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }} onClick={() => setStep('step1')}>
+          Mag-sign up Ngayon →
+        </button>
       </div>
 
       {/* FOOTER BANNER */}
