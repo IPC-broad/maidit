@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 
-const PAYMONGO_LINK_499 = process.env.NEXT_PUBLIC_PAYMONGO_LINK_499 || ''
 
 const TRANSPORT_PROVINCES = [
   'Leyte', 'Southern Leyte', 'Samar', 'Eastern Samar', 'Northern Samar', 'Western Samar',
@@ -29,6 +28,7 @@ export default function SendOfferPage({ params }: any) {
     transport_arrangement: '' as 'direct' | 'maidit_transport' | '',
   })
   const [submitting, setSubmitting] = useState(false)
+  const [subscribeLoading, setSubscribeLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [showPaywall, setShowPaywall] = useState(false)
@@ -42,10 +42,9 @@ export default function SendOfferPage({ params }: any) {
       if (!user) { router.push('/login'); return }
       const { data: kbData } = await supabase.from('kasambahay').select('*, profiles(full_name, mobile, city)').eq('id', kasambahayId).single()
       setKb(kbData)
-      const { data: hw } = await supabase.from('homeowners').select('id, province, subscription_expires_at').eq('profile_id', user.id).single()
+      const { data: hw } = await supabase.from('homeowners').select('id, subscription_expires_at').eq('profile_id', user.id).single()
       const subscribed = !!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date())
       if (!subscribed) setShowPaywall(true)
-      setHwProvince(hw?.province || null)
     }
     init()
   }, [kasambahayId])
@@ -329,7 +328,27 @@ export default function SendOfferPage({ params }: any) {
           <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', maxWidth: '340px', width: '100%' }}>
             <div style={{ fontFamily: 'serif', fontSize: '1.2rem', fontWeight: 900, marginBottom: '6px', color: '#1a1a1a' }}>Subscribe to MaidIt — ₱499/month</div>
             <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '20px', lineHeight: 1.6 }}>Get platform access + 1 hiring fee credit (₱499 off your first hire)</div>
-            <button style={s.btn} onClick={() => { window.location.href = PAYMONGO_LINK_499 }}>Subscribe for ₱499 →</button>
+            <button
+              style={{ ...s.btn, opacity: subscribeLoading ? .6 : 1 }}
+              disabled={subscribeLoading}
+              onClick={async () => {
+                setSubscribeLoading(true)
+                const payload = { amount: 49900, description: 'MaidIt Subscription - ₱499' }
+                console.log('[offer/send subscribe] sending amount:', payload.amount)
+                try {
+                  const res = await fetch('/api/create-payment-link', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                  })
+                  const data = await res.json()
+                  if (data.checkout_url) { window.location.href = data.checkout_url }
+                  else setSubscribeLoading(false)
+                } catch { setSubscribeLoading(false) }
+              }}
+            >
+              {subscribeLoading ? 'Preparing payment...' : 'Subscribe for ₱499 →'}
+            </button>
             <button style={s.btnOutline} onClick={() => router.push('/dashboard/homeowner')}>Maybe later</button>
           </div>
         </div>
