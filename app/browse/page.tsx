@@ -115,10 +115,12 @@ export default function BrowsePage() {
   const handleSubscribe = async () => {
     setSubscribeLoading(true)
     try {
+      const payload = { amount: 49900, description: 'MaidIt Subscription - ₱499' }
+      console.log('[handleSubscribe] sending amount:', payload.amount)
       const res = await fetch('/api/create-payment-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 49900, description: 'MaidIt Subscription - ₱499' }),
+        body: JSON.stringify(payload),
       })
       const data = await res.json()
       if (data.checkout_url) {
