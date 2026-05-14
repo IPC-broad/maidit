@@ -22,7 +22,7 @@ export default function ArrivalPage() {
 
       const { data } = await supabase
         .from('offers')
-        .select('*, kasambahay:kasambahay_id(referred_by, profiles(full_name, mobile))')
+        .select('*, kasambahay:kasambahay_id(referred_by, facebook_url, profiles(full_name, mobile))')
         .eq('id', offerId)
         .single()
 
@@ -103,6 +103,7 @@ export default function ArrivalPage() {
 
   const kbMobile = offer?.kasambahay?.profiles?.mobile
   const kbFullName = offer?.kasambahay?.profiles?.full_name || 'your kasambahay'
+  const kbFacebookUrl = offer?.kasambahay?.facebook_url
 
   const s: any = {
     wrap: { minHeight: '100vh', background: '#f9fafb', fontFamily: 'sans-serif', color: '#111827' },
@@ -134,9 +135,9 @@ export default function ArrivalPage() {
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '8px' }}>Contact your kasambahay</div>
           <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{kbFullName.split(' ')[0]}</div>
           <div style={{ fontSize: '13px', color: '#374151', marginBottom: '10px' }}>{kbMobile}</div>
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <a href={`viber://chat?number=+${toIntl(kbMobile)}`} style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#7c3aed', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Viber</a>
-            <a href={`https://wa.me/${toIntl(kbMobile)}`} target="_blank" rel="noreferrer" style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#16a34a', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 WhatsApp</a>
+          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
+            <a href={`sms:+${toIntl(kbMobile)}`} style={{ padding: '10px', borderRadius: '9px', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>📱 Send SMS</a>
+            {kbFacebookUrl && <a href={kbFacebookUrl} target="_blank" rel="noreferrer" style={{ padding: '10px', borderRadius: '9px', background: '#1877f2', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Message on Facebook</a>}
           </div>
         </div>
       )}
@@ -163,9 +164,9 @@ export default function ArrivalPage() {
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '8px' }}>Contact your kasambahay</div>
           <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{kbFullName.split(' ')[0]}</div>
           <div style={{ fontSize: '13px', color: '#374151', marginBottom: '10px' }}>{kbMobile}</div>
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <a href={`viber://chat?number=+${toIntl(kbMobile)}`} style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#7c3aed', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Viber</a>
-            <a href={`https://wa.me/${toIntl(kbMobile)}`} target="_blank" rel="noreferrer" style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#16a34a', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 WhatsApp</a>
+          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
+            <a href={`sms:+${toIntl(kbMobile)}`} style={{ padding: '10px', borderRadius: '9px', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>📱 Send SMS</a>
+            {kbFacebookUrl && <a href={kbFacebookUrl} target="_blank" rel="noreferrer" style={{ padding: '10px', borderRadius: '9px', background: '#1877f2', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Message on Facebook</a>}
           </div>
         </div>
       )}
@@ -207,6 +208,18 @@ export default function ArrivalPage() {
             </div>
           ))}
         </div>
+
+        {kbMobile && (
+          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '14px 16px', marginBottom: '14px', textAlign: 'left' as const }}>
+            <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '8px' }}>Contact your kasambahay</div>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{kbName.split(' ')[0]}</div>
+            <div style={{ fontSize: '13px', color: '#374151', marginBottom: '10px' }}>{kbMobile}</div>
+            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
+              <a href={`sms:+${toIntl(kbMobile)}`} style={{ padding: '10px', borderRadius: '9px', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>📱 Send SMS</a>
+              {kbFacebookUrl && <a href={kbFacebookUrl} target="_blank" rel="noreferrer" style={{ padding: '10px', borderRadius: '9px', background: '#1877f2', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Message on Facebook</a>}
+            </div>
+          </div>
+        )}
 
         <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '11px', padding: '12px 14px', marginBottom: '18px' }}>
           <div style={{ fontSize: '.74rem', color: '#dc2626', lineHeight: 1.6 }}>

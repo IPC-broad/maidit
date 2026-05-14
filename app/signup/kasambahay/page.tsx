@@ -52,7 +52,8 @@ export default function KasambahaySignup() {
     salary: '',
     setup: 'Stay-in',
     experience: 'No experience',
-    availability: 'Immediate'
+    availability: 'Immediate',
+    facebook_url: ''
   })
 
   const update = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
@@ -222,7 +223,8 @@ export default function KasambahaySignup() {
       province: selProv!.name,
       age: form.age ? parseInt(form.age) : null,
       availability: form.availability || 'Immediate',
-      ...(referredBy ? { referred_by: referredBy } : {})
+      ...(referredBy ? { referred_by: referredBy } : {}),
+      ...(form.facebook_url.trim() ? { facebook_url: form.facebook_url.trim() } : {})
     })
 
     if (selfieData && userId) {
@@ -531,6 +533,16 @@ export default function KasambahaySignup() {
               </div>
             </div>
           </div>
+
+          <label style={s.lbl}>Facebook Profile Link <span style={{ fontWeight:400, textTransform:'none' as const, letterSpacing:0 }}>(optional)</span></label>
+          <div style={s.hint}>Helps homeowners contact you on Facebook</div>
+          <input
+            style={s.input}
+            placeholder="https://facebook.com/yourname"
+            value={form.facebook_url}
+            onChange={e => update('facebook_url', e.target.value)}
+            inputMode="url"
+          />
 
           <div style={s.note}>
             📱 We will send a 6-digit verification code to <strong>{form.mobile}</strong> in the next step.
