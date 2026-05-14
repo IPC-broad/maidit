@@ -108,7 +108,7 @@ export default function BrowsePage() {
     const { data, error, status, statusText } = await supabase
       .from('kasambahay')
       .select(`
-        id, province, city, setup, asking_salary, skills, experience,
+        id, province, setup, asking_salary, skills, experience,
         availability, has_govt_id, selfie_url, profile_id, role, age,
         religion, education, video_intro, created_at, status,
         profile:profile_id (
@@ -190,7 +190,7 @@ export default function BrowsePage() {
     if (search) {
       const q = search.toLowerCase()
       const name = (p.profile?.full_name || '').toLowerCase()
-      const city = (p.profile?.city || p.city || '').toLowerCase()
+      const city = (p.profile?.city || p.province || '').toLowerCase()
       const province = (p.province || '').toLowerCase()
       const skillStr = (p.skills || []).join(' ').toLowerCase()
       const role = (p.role || '').toLowerCase()
@@ -217,7 +217,7 @@ export default function BrowsePage() {
 
     if (currentUser) {
       let score = 0
-      const kbCity = (kb.profile?.city || kb.city || '').toLowerCase()
+      const kbCity = (kb.profile?.city || kb.province || '').toLowerCase()
       const kbProvince = (kb.province || '').toLowerCase()
       if (homeownerCity && kbCity && kbCity === homeownerCity.toLowerCase()) score += 3
       if (homeownerProvince && kbProvince && kbProvince === homeownerProvince.toLowerCase()) score += 2
@@ -268,10 +268,7 @@ export default function BrowsePage() {
       : `${expRaw} yrs exp`
     const expLine = [expLabel, kb.religion, kb.education].filter(Boolean).join(' · ')
     const kbProvince = kb.province || ''
-    const kbCity = kb.city || ''
-    const location = kbProvince && kbCity
-      ? `${kbCity}, ${kbProvince}`
-      : kbProvince || kbCity || 'Location not specified'
+    const location = kbProvince || 'Location not specified'
 
     return (
       <div key={kb.id} style={{ background:'#fff', borderRadius:'16px', border:'1.5px solid #f0ece6', overflow:'hidden', marginBottom:'12px', display:'flex', boxShadow:'0 1px 8px rgba(0,0,0,.06)' }}>
