@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 
   const { data: offer, error } = await supabaseAdmin
     .from('offers')
-    .select('id, status, amount, transport_service, homeowner_id, kasambahay_id')
+    .select('id, status, salary, transport_service, homeowner_id, kasambahay_id')
     .eq('id', offer_id)
     .single()
 
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 
   await supabaseAdmin.from('offers').update(update).eq('id', offer_id)
 
-  if (offer.amount && CREDIT_AMOUNTS.has(offer.amount)) {
+  if (offer.salary && CREDIT_AMOUNTS.has(offer.salary)) {
     await supabaseAdmin
       .from('homeowners')
       .update({ subscription_credit_used: true })
