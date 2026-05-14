@@ -51,7 +51,7 @@ export default function KasambahaySignup() {
     age: '',
     salary: '',
     setup: 'Stay-in',
-    experience: 'No experience',
+    experience: 'Baguhan',
     availability: 'Immediate',
     facebook_url: ''
   })
@@ -100,11 +100,11 @@ export default function KasambahaySignup() {
 
   const checkMobile = async () => {
     if (!form.first_name || !form.last_name || !form.mobile) {
-      setError('Please fill in all fields')
+      setError('Punan ang lahat ng fields')
       return
     }
     if (form.mobile.length < 11) {
-      setError('Please enter a valid mobile number (11 digits)')
+      setError('Ilagay ang tamang mobile number (11 digits)')
       return
     }
     setLoading(true)
@@ -118,7 +118,7 @@ export default function KasambahaySignup() {
     const data = await res.json()
 
     if (!res.ok) {
-      setError(data.error || 'Something went wrong. Please try again.')
+      setError(data.error || 'May error. Subukan ulit.')
       setLoading(false)
       return
     }
@@ -129,7 +129,7 @@ export default function KasambahaySignup() {
 
   const sendOtpAndProceed = async () => {
     if (!selProv || !form.salary) {
-      setError('Please fill in all fields')
+      setError('Punan ang lahat ng fields')
       return
     }
     setLoading(true)
@@ -250,11 +250,11 @@ export default function KasambahaySignup() {
 
   const verifyAndCreate = async () => {
     if (!form.otp || form.otp.length < 6) {
-      setError('Please enter the 6-digit code')
+      setError('Ilagay ang 6-digit code')
       return
     }
     if (form.otp !== sentOtp) {
-      setError('Incorrect code. Please try again.')
+      setError('Maling code. Subukan ulit.')
       return
     }
     await createAccount()
@@ -281,7 +281,7 @@ export default function KasambahaySignup() {
     <div style={s.wrap}>
       <div style={s.toprow}>
         <button style={s.back} onClick={() => step > 1 ? setStep(step - 1) : router.push('/')}>← Back</button>
-        <span style={s.stepnum}>Step {step} of 3</span>
+        <span style={s.stepnum}>Hakbang {step} ng 3</span>
       </div>
 
       <div style={s.bar}>
@@ -298,21 +298,21 @@ export default function KasambahaySignup() {
             <div style={{ display:'grid', gridTemplateColumns:'3fr 2fr' }}>
               {/* Left: copy */}
               <div style={{ padding:'18px 12px 18px 16px', display:'flex', flexDirection:'column' as const, justifyContent:'center' }}>
-                <h1 style={{ fontFamily:'serif', fontSize:'1.25rem', fontWeight:900, color:'#c9943a', marginBottom:'5px', lineHeight:1.2 }}>Sign Up</h1>
-                <p style={{ fontSize:'.7rem', color:'#6b7280', marginBottom:'13px', lineHeight:1.5 }}>Enter your details to get started.</p>
+                <h1 style={{ fontFamily:'serif', fontSize:'1.25rem', fontWeight:900, color:'#c9943a', marginBottom:'5px', lineHeight:1.2 }}>Mag-sign up</h1>
+                <p style={{ fontSize:'.7rem', color:'#6b7280', marginBottom:'13px', lineHeight:1.5 }}>Ilagay ang iyong detalye para makapagsimula.</p>
                 <div style={{ display:'flex', flexDirection:'column' as const, gap:'9px' }}>
                   <div style={{ display:'flex', gap:'8px', alignItems:'flex-start' }}>
                     <div style={{ width:'22px', height:'22px', borderRadius:'6px', background:'#f0fdf4', border:'1px solid #bbf7d0', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'12px' }}>🛡️</div>
                     <div>
-                      <div style={{ fontSize:'.7rem', fontWeight:700, color:'#1a6b3c', lineHeight:1.3 }}>Safe and easy!</div>
-                      <div style={{ fontSize:'.62rem', color:'#9ca3af', lineHeight:1.4 }}>Your information is protected.</div>
+                      <div style={{ fontSize:'.7rem', fontWeight:700, color:'#1a6b3c', lineHeight:1.3 }}>Ligtas at madali lang!</div>
+                      <div style={{ fontSize:'.62rem', color:'#9ca3af', lineHeight:1.4 }}>Protektado ang iyong impormasyon.</div>
                     </div>
                   </div>
                   <div style={{ display:'flex', gap:'8px', alignItems:'flex-start' }}>
                     <div style={{ width:'22px', height:'22px', borderRadius:'6px', background:'#fef3e2', border:'1px solid #fde8c0', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'12px' }}>👥</div>
                     <div>
-                      <div style={{ fontSize:'.7rem', fontWeight:700, color:'#c9943a', lineHeight:1.3 }}>Jobs matched to you. Fair salary.</div>
-                      <div style={{ fontSize:'.62rem', color:'#9ca3af', lineHeight:1.4 }}>Free to sign up. No fees.</div>
+                      <div style={{ fontSize:'.7rem', fontWeight:700, color:'#c9943a', lineHeight:1.3 }}>Trabaho na angkop sa iyo. Sweldo na tama.</div>
+                      <div style={{ fontSize:'.62rem', color:'#9ca3af', lineHeight:1.4 }}>Libreng mag-sign up. Walang bayad.</div>
                     </div>
                   </div>
                 </div>
@@ -328,15 +328,15 @@ export default function KasambahaySignup() {
             </div>
           </div>
 
-          {/* First Name */}
-          <label style={s.lbl}>First Name</label>
+          {/* Pangalan */}
+          <label style={s.lbl}>Pangalan</label>
           <div style={{ position:'relative' }}>
             <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', fontSize:'14px', lineHeight:1, pointerEvents:'none' }}>👤</span>
             <input style={{ ...s.input, paddingLeft:'38px' }} placeholder="Ana" value={form.first_name} onChange={e => update('first_name', e.target.value)} />
           </div>
 
-          {/* Last Name */}
-          <label style={s.lbl}>Last Name</label>
+          {/* Apelyido */}
+          <label style={s.lbl}>Apelyido</label>
           <div style={{ position:'relative' }}>
             <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', fontSize:'14px', lineHeight:1, pointerEvents:'none' }}>👤</span>
             <input style={{ ...s.input, paddingLeft:'38px' }} placeholder="Santos" value={form.last_name} onChange={e => update('last_name', e.target.value)} />
@@ -363,7 +363,7 @@ export default function KasambahaySignup() {
               <span style={{ fontSize:'.63rem', fontWeight:700, color:'#1a6b3c' }}>(required)</span>
             </div>
             <p style={{ fontSize:'.67rem', color:'#6b7280', lineHeight:1.55, marginBottom:'10px' }}>
-              This helps employers find and choose you. Only shown to verified employers. Not posted publicly.
+              Makakatulong ito para makita ka ng employers at mas mapili ka agad. Ipapakita lang ito sa verified employers. Hindi ipo-post publicly.
             </p>
 
             {selfieData && (
@@ -378,13 +378,13 @@ export default function KasambahaySignup() {
                 <>
                   <div style={{ fontSize:'20px', marginBottom:'5px' }}>✅</div>
                   <div style={{ fontWeight:700, fontSize:'13px', color:'#1a6b3c' }}>Selfie saved!</div>
-                  <div style={{ fontSize:'11px', color:'#6b7280', marginTop:'3px' }}>Tap to change</div>
+                  <div style={{ fontSize:'11px', color:'#6b7280', marginTop:'3px' }}>I-tap para palitan</div>
                 </>
               ) : (
                 <>
                   <div style={{ fontSize:'28px', marginBottom:'7px' }}>📷</div>
-                  <div style={{ fontWeight:700, fontSize:'13px', color:'#1a6b3c', marginBottom:'3px' }}>Tap to take a selfie</div>
-                  <div style={{ fontSize:'11px', color:'#9ca3af' }}>Clear face · No filter · Good lighting</div>
+                  <div style={{ fontWeight:700, fontSize:'13px', color:'#1a6b3c', marginBottom:'3px' }}>I-tap para kumuha ng selfie</div>
+                  <div style={{ fontSize:'11px', color:'#9ca3af' }}>Malinaw na mukha · Walang filter · Good lighting</div>
                 </>
               )}
             </div>
@@ -403,11 +403,11 @@ export default function KasambahaySignup() {
             onClick={checkMobile}
             disabled={loading}
           >
-            {loading ? 'Checking...' : 'Continue →'}
+            {loading ? 'Checking...' : 'Magpatuloy →'}
           </button>
 
           <div style={{ textAlign:'center' as const, marginTop:'12px', fontSize:'.7rem', color:'#9ca3af', display:'flex', alignItems:'center', justifyContent:'center', gap:'5px' }}>
-            🔒 We never share your number with anyone.
+            🔒 Hindi namin ibinibigay ang iyong number sa iba.
           </div>
         </>
       )}
@@ -415,16 +415,16 @@ export default function KasambahaySignup() {
       {/* ── STEP 2: Profile Details ── */}
       {step === 2 && (
         <>
-          <div style={s.title}>Additional Information</div>
-          <div style={s.sub}>Complete your profile so homeowners can find you</div>
+          <div style={s.title}>Karagdagang Impormasyon</div>
+          <div style={s.sub}>Kumpleto ang iyong profile para makita ng mga homeowner</div>
 
-          <label style={s.lbl}>Province *</label>
+          <label style={s.lbl}>Probinsya *</label>
           <div ref={provRef} style={{ position:'relative', marginBottom:'0' }}>
             <div
               onClick={() => setProvOpen(!provOpen)}
               style={{ width:'100%', padding:'11px 13px', border:`1.5px solid ${selProv ? '#c9943a' : '#e5e7eb'}`, borderRadius:'11px', fontSize:'.88rem', background:'#fff', color: selProv ? '#111827' : '#9ca3af', marginBottom: provOpen ? '0' : '13px', display:'flex', justifyContent:'space-between', alignItems:'center', cursor:'pointer', boxSizing:'border-box' as const }}
             >
-              <span>{selProv ? selProv.name : 'Select your province'}</span>
+              <span>{selProv ? selProv.name : 'Piliin ang probinsya'}</span>
               <span style={{ fontSize:'11px', opacity:.5 }}>▾</span>
             </div>
             {provOpen && (
@@ -432,13 +432,13 @@ export default function KasambahaySignup() {
                 <input
                   autoFocus
                   style={{ width:'100%', padding:'10px 12px', border:'none', borderBottom:'1px solid #f3f4f6', background:'#faf8f5', color:'#111827', fontSize:'13px', outline:'none', fontFamily:'sans-serif' }}
-                  placeholder="Search province..."
+                  placeholder="Hanapin ang probinsya..."
                   value={provSearch}
                   onChange={e => setProvSearch(e.target.value)}
                 />
                 <div style={{ maxHeight:'190px', overflowY:'auto' }}>
                   {filteredProvs.length === 0
-                    ? <div style={{ padding:'12px', fontSize:'12px', color:'#9ca3af' }}>No results found</div>
+                    ? <div style={{ padding:'12px', fontSize:'12px', color:'#9ca3af' }}>Walang nahanap</div>
                     : filteredProvs.map(p => (
                       <div
                         key={p.code}
@@ -454,8 +454,8 @@ export default function KasambahaySignup() {
             )}
           </div>
 
-          <label style={s.lbl}>Age</label>
-          <div style={s.hint}>Shown to homeowners</div>
+          <label style={s.lbl}>Edad</label>
+          <div style={s.hint}>Para malaman ng homeowner ang iyong edad</div>
           <input
             style={s.input}
             type="number"
@@ -467,7 +467,7 @@ export default function KasambahaySignup() {
             inputMode="numeric"
           />
 
-          <label style={s.lbl}>Expected Salary (₱)</label>
+          <label style={s.lbl}>Hinihingi na Sahod (₱)</label>
           <div style={{ position:'relative' }}>
             <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', color:'#6b7280', fontWeight:700 }}>₱</span>
             <input
@@ -483,16 +483,16 @@ export default function KasambahaySignup() {
           <select style={s.input} value={form.setup} onChange={e => update('setup', e.target.value)}>
             <option>Stay-in</option>
             <option>Stay-out</option>
-            <option>Either</option>
+            <option>Kahit alin</option>
           </select>
 
-          <label style={s.lbl}>Experience</label>
+          <label style={s.lbl}>Karanasan</label>
           <select style={s.input} value={form.experience} onChange={e => update('experience', e.target.value)}>
-            <option>No experience</option>
-            <option>1-2 years</option>
-            <option>3-5 years</option>
-            <option>6-10 years</option>
-            <option>10+ years</option>
+            <option>Baguhan</option>
+            <option>1-2 taon</option>
+            <option>3-5 taon</option>
+            <option>6-10 taon</option>
+            <option>10+ taon</option>
           </select>
 
           <label style={s.lbl}>Availability</label>
@@ -504,16 +504,16 @@ export default function KasambahaySignup() {
           </select>
 
           <div style={{ background:'#fdf3e3', border:'1px solid rgba(201,148,58,.2)', borderRadius:'12px', padding:'13px 15px', marginBottom:'16px' }}>
-            <div style={{ fontSize:'.7rem', fontWeight:800, color:'#c9943a', textTransform:'uppercase' as const, letterSpacing:'.5px', marginBottom:'9px' }}>Why MaidIt?</div>
+            <div style={{ fontSize:'.7rem', fontWeight:800, color:'#c9943a', textTransform:'uppercase' as const, letterSpacing:'.5px', marginBottom:'9px' }}>Bakit MaidIt?</div>
             <div style={{ display:'flex', flexDirection:'column' as const, gap:'7px' }}>
-              <div style={{ display:'flex', gap:'8px', fontSize:'.8rem', color:'#111827' }}><span>💼</span><span>Jobs waiting for you</span></div>
-              <div style={{ display:'flex', gap:'8px', fontSize:'.8rem', color:'#111827' }}><span>⚖️</span><span>Fair wages in line with the law</span></div>
-              <div style={{ display:'flex', gap:'8px', fontSize:'.8rem', color:'#111827' }}><span>🆓</span><span>Free — no fee to apply</span></div>
+              <div style={{ display:'flex', gap:'8px', fontSize:'.8rem', color:'#111827' }}><span>💼</span><span>May trabahong naghihintay sa iyo</span></div>
+              <div style={{ display:'flex', gap:'8px', fontSize:'.8rem', color:'#111827' }}><span>⚖️</span><span>Wastong sweldo na naaayon sa batas</span></div>
+              <div style={{ display:'flex', gap:'8px', fontSize:'.8rem', color:'#111827' }}><span>🆓</span><span>Libre — walang babayaran para mag-apply</span></div>
             </div>
           </div>
 
           <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
-            <div style={{ fontSize:'11px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>DOCUMENTS (check if you have)</div>
+            <div style={{ fontSize:'11px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>MGA DOKUMENTO (i-tick kung mayroon)</div>
             <div style={{ display:'flex', flexDirection:'column' as const, gap:'10px' }}>
               {['Wala','PhilHealth ID','SSS ID','Postal ID','Passport','UMID','National ID'].map((label) => (
                 <div key={label} style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => toggleGovtId(label)}>
@@ -534,18 +534,18 @@ export default function KasambahaySignup() {
             </div>
           </div>
 
-          <label style={s.lbl}>Facebook Profile Link <span style={{ fontWeight:400, textTransform:'none' as const, letterSpacing:0 }}>(optional)</span></label>
-          <div style={s.hint}>Helps homeowners contact you on Facebook</div>
+          <label style={s.lbl}>Facebook Profile Link <span style={{ fontWeight:400, textTransform:'none' as const, letterSpacing:0 }}>(kung meron)</span></label>
+          <div style={s.hint}>Para makontak ka ng homeowner sa Facebook</div>
           <input
             style={s.input}
-            placeholder="https://facebook.com/yourname"
+            placeholder="https://facebook.com/iyong-pangalan"
             value={form.facebook_url}
             onChange={e => update('facebook_url', e.target.value)}
             inputMode="url"
           />
 
           <div style={s.note}>
-            📱 We will send a 6-digit verification code to <strong>{form.mobile}</strong> in the next step.
+            📱 Magpapadala kami ng 6-digit verification code sa <strong>{form.mobile}</strong> sa susunod na hakbang.
           </div>
 
           <button
@@ -553,7 +553,7 @@ export default function KasambahaySignup() {
             onClick={sendOtpAndProceed}
             disabled={loading}
           >
-            {loading ? 'Sending code...' : 'Next — Verify Number →'}
+            {loading ? 'Sending code...' : 'Susunod — I-verify ang Number →'}
           </button>
         </>
       )}
@@ -561,15 +561,15 @@ export default function KasambahaySignup() {
       {/* ── STEP 3: OTP Verification ── */}
       {step === 3 && (
         <>
-          <div style={s.title}>Verify Your Number</div>
+          <div style={s.title}>I-verify ang number mo</div>
           <div style={s.sub}>
-            We sent a 6-digit code to <strong style={{ color:'#111827' }}>{form.mobile}</strong>. If not received, this is normal — SMS sender approval is pending. Use Dev Mode bypass above.
+            Nagpadala kami ng 6-digit code sa <strong style={{ color:'#111827' }}>{form.mobile}</strong>. Kung hindi natanggap, normal lang — ang SMS sender name ay nasa approval pa ng Semaphore. Gamitin ang Dev Mode bypass sa itaas.
           </div>
 
           {process.env.NEXT_PUBLIC_DEV_MODE === 'true' && (
             <div style={{ background:'#fffbeb', border:'2px solid #f59e0b', borderRadius:'10px', padding:'12px 13px', marginBottom:'13px' }}>
               <div style={{ fontSize:'.74rem', color:'#92400e', lineHeight:1.6, marginBottom:'10px' }}>
-                🔧 <strong>Dev Mode:</strong> SMS verification is not yet available — Semaphore sender name is pending approval. Skip OTP for testing.
+                🔧 <strong>Dev Mode:</strong> Ang SMS verification ay hindi pa available dahil ang Semaphore sender name ay nasa approval pa. I-skip ang OTP para sa testing.
               </div>
               {sentOtp && (
                 <div style={{ fontFamily:'monospace', fontSize:'1.1rem', fontWeight:900, color:'#92400e', letterSpacing:'6px', marginBottom:'10px' }}>{sentOtp}</div>
@@ -579,7 +579,7 @@ export default function KasambahaySignup() {
                 onClick={createAccount}
                 disabled={loading}
               >
-                {loading ? 'Processing...' : 'Skip OTP (Semaphore Pending Approval) →'}
+                {loading ? 'Ginagawa...' : 'I-skip ang OTP (Semaphore Pending Approval) →'}
               </button>
             </div>
           )}
@@ -599,7 +599,7 @@ export default function KasambahaySignup() {
             onClick={verifyAndCreate}
             disabled={loading || form.otp.length < 6}
           >
-            {loading ? 'Creating account...' : 'Verify and Create Account →'}
+            {loading ? 'Ginagawa...' : 'I-verify at Gumawa ng Account →'}
           </button>
 
           <button
@@ -607,7 +607,7 @@ export default function KasambahaySignup() {
             onClick={resendOtp}
             disabled={cooldown > 0 || loading}
           >
-            {cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend code'}
+            {cooldown > 0 ? `I-resend sa ${cooldown}s` : 'I-resend ang code'}
           </button>
         </>
       )}
