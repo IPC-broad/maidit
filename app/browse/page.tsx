@@ -66,7 +66,10 @@ export default function BrowsePage() {
   const [subscribeModalId, setSubscribeModalId] = useState<string | null>(null)
   const [subscribeLoading, setSubscribeLoading] = useState(false)
   const [homeownerProvince, setHomeownerProvince] = useState<string | null>(null)
+  const [homeownerCity, setHomeownerCity] = useState<string | null>(null)
+  const [lastOfferSetup, setLastOfferSetup] = useState<string | null>(null)
   const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null)
+  const [sortBy, setSortBy] = useState<'best' | 'newest' | 'salary-asc' | 'salary-desc'>('best')
 
   useEffect(() => {
     const init = async () => {
@@ -74,9 +77,12 @@ export default function BrowsePage() {
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user || null)
       if (user) {
-        const { data: hw } = await supabase.from('homeowners').select('province, subscription_expires_at').eq('profile_id', user.id).single()
+        const { data: hw } = await supabase.from('homeowners').select('province, subscription_expires_at, preferred_setup').eq('profile_id', user.id).single()
         setHomeownerProvince(hw?.province || null)
         setIsSubscribed(!!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date()))
+        setLastOfferSetup(hw?.preferred_setup || null)
+        const { data: prof } = await supabase.from('profiles').select('city').eq('id', user.id).single()
+        setHomeownerCity(prof?.city || null)
       }
       const { data } = await supabase
         .from('kasambahay')
@@ -150,8 +156,52 @@ export default function BrowsePage() {
     if (filter === 'Lahat' || filter === 'More') return true
     if (filter === 'Stay-in') return p.setup === 'Stay-in'
     if (filter === 'Stay-out') return p.setup === 'Stay-out'
-    if (filter === 'Nearby') return isProvince(p.province)
+    if (filter === 'Nearby') {
+      if (!currentUser || !homeownerProvince) return false
+      return (p.province || '').toLowerCase() === homeownerProvince.toLowerCase()
+    }
     return true
+  })
+
+  const scoreCard = (kb: any): number => {
+    const selfieUrl = kb.profiles?.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
+    const hasSelfie = !!selfieUrl
+    const hasGovtId = !!kb.govt_id
+    const hasSkills = !!(kb.skills && kb.skills.length > 0)
+    const avail = (kb.availability || '').toLowerCase()
+    const isImmediate = avail === 'immediate' || avail === 'asap'
+
+    if (currentUser) {
+      let score = 0
+      const kbCity = (kb.profiles?.city || kb.city || '').toLowerCase()
+      const kbProvince = (kb.province || '').toLowerCase()
+      if (homeownerCity && kbCity && kbCity === homeownerCity.toLowerCase()) score += 3
+      if (homeownerProvince && kbProvince && kbProvince === homeownerProvince.toLowerCase()) score += 2
+      if (lastOfferSetup && kb.setup && kb.setup.toLowerCase() === lastOfferSetup.toLowerCase()) score += 2
+      if (hasSelfie) score += 1
+      if (hasGovtId) score += 1
+      if (hasSkills) score += 1
+      if (isImmediate) score += 1
+      return score
+    } else {
+      let score = 0
+      if (hasSelfie) score += 2
+      if (hasGovtId) score += 2
+      if (hasSkills) score += 1
+      return score
+    }
+  }
+
+  const filteredAndSorted = [...filtered].sort((a, b) => {
+    if (sortBy === 'best') {
+      const diff = scoreCard(b) - scoreCard(a)
+      if (diff !== 0) return diff
+      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+    }
+    if (sortBy === 'newest') return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+    if (sortBy === 'salary-asc') return (a.asking_salary || 0) - (b.asking_salary || 0)
+    if (sortBy === 'salary-desc') return (b.asking_salary || 0) - (a.asking_salary || 0)
+    return 0
   })
 
   // Renders a single kasambahay card. Used for both visible and blurred sections.
@@ -298,8 +348,8 @@ export default function BrowsePage() {
   )
 
   // For non-logged-in: show first 2 openly, rest blurred
-  const visibleCards = !currentUser ? filtered.slice(0, 2) : filtered
-  const lockedCards  = !currentUser ? filtered.slice(2) : []
+  const visibleCards = !currentUser ? filteredAndSorted.slice(0, 2) : filteredAndSorted
+  const lockedCards  = !currentUser ? filteredAndSorted.slice(2) : []
 
   return (
     <div style={{ minHeight:'100vh', background:'#f4f6f8', fontFamily:'sans-serif', paddingBottom:'80px' }}>
@@ -348,25 +398,28 @@ export default function BrowsePage() {
             {/* Filter pills */}
             <div style={{ display:'flex', gap:'6px', overflowX:'auto' as const, paddingBottom:'14px' }}>
               {([
-                { id:'Lahat',    label:'All Matches', icon:'⭐', amber:true },
-                { id:'Stay-in',  label:'Stay-in',     icon:'🏠', amber:false },
-                { id:'Stay-out', label:'Stay-out',     icon:'🚶', amber:false },
-                { id:'Nearby',   label:'Nearby',       icon:'📍', amber:false },
-                { id:'More',     label:'More Filters', icon:'⚙️', amber:false, dropdown:true },
-              ] as const).map(({ id, label, icon, amber, dropdown }: any) => {
+                { id:'Lahat',    label:'All Matches', icon:'⭐', amber:true,  disabled:false },
+                { id:'Stay-in',  label:'Stay-in',     icon:'🏠', amber:false, disabled:false },
+                { id:'Stay-out', label:'Stay-out',     icon:'🚶', amber:false, disabled:false },
+                { id:'Nearby',   label:'Nearby',       icon:'📍', amber:false, disabled:!currentUser },
+                { id:'More',     label:'More Filters', icon:'⚙️', amber:false, disabled:false, dropdown:true },
+              ] as const).map(({ id, label, icon, amber, disabled, dropdown }: any) => {
                 const active = filter === id
                 return (
                   <button
                     key={id}
-                    onClick={() => setFilter(id)}
+                    disabled={disabled}
+                    title={disabled ? 'Log in to see nearby helpers' : undefined}
+                    onClick={() => { if (!disabled) setFilter(id) }}
                     style={{
                       display:'flex', alignItems:'center', gap:'5px', padding:'7px 14px',
                       borderRadius:'50px', border:'1.5px solid',
                       borderColor: active ? (amber ? '#c9943a' : '#1a6b3c') : '#e5e7eb',
                       background: active ? (amber ? '#fef3e2' : '#f0fdf4') : '#fff',
-                      color: active ? (amber ? '#c9943a' : '#1a6b3c') : '#6b7280',
-                      fontFamily:'sans-serif', fontSize:'.72rem', fontWeight:600, cursor:'pointer',
-                      whiteSpace:'nowrap' as const, flexShrink:0
+                      color: active ? (amber ? '#c9943a' : '#1a6b3c') : (disabled ? '#d1d5db' : '#6b7280'),
+                      fontFamily:'sans-serif', fontSize:'.72rem', fontWeight:600,
+                      cursor: disabled ? 'not-allowed' : 'pointer',
+                      whiteSpace:'nowrap' as const, flexShrink:0, opacity: disabled ? .5 : 1
                     }}
                   >
                     <span style={{ fontSize:'11px' }}>{icon}</span>
@@ -388,7 +441,10 @@ export default function BrowsePage() {
                   <span style={{ fontSize:'.6rem', fontWeight:700, background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0', borderRadius:'50px', padding:'2px 8px' }}>Personalized for you</span>
                 </div>
                 <p style={{ fontSize:'.74rem', color:'#78350f', margin:0, lineHeight:1.55 }}>
-                  These are top matches based on your needs. More great matches are available!
+                  {homeownerCity
+                    ? `Showing ${filteredAndSorted.length} top matches · Based on your location in ${homeownerCity}`
+                    : `Showing ${filteredAndSorted.length} top matches · Complete your profile for better matches`
+                  }
                 </p>
               </div>
               <div style={{ flexShrink:0, fontSize:'2.8rem', marginLeft:'14px', lineHeight:1 }}>👩‍🍳</div>
@@ -414,21 +470,27 @@ export default function BrowsePage() {
 
           {/* ── SORT ROW ── */}
           <div style={{ padding:'10px 16px 6px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-            <div style={{ fontSize:'.72rem', color:'#6b7280', display:'flex', alignItems:'center', gap:'4px' }}>
-              Showing top matches for you
-              <span style={{ fontSize:'12px', color:'#9ca3af' }}>ℹ️</span>
+            <div style={{ fontSize:'.72rem', color:'#6b7280' }}>
+              {filteredAndSorted.length} helper{filteredAndSorted.length !== 1 ? 's' : ''} found
             </div>
-            <div style={{ display:'flex', alignItems:'center', gap:'3px', fontSize:'.72rem', color:'#374151' }}>
-              <span style={{ fontWeight:500 }}>Sort by:</span>
-              <button style={{ background:'none', border:'none', fontFamily:'sans-serif', fontSize:'.72rem', fontWeight:700, color:'#1a6b3c', cursor:'pointer', display:'flex', alignItems:'center', gap:'2px', padding:0 }}>
-                Best Match <span style={{ fontSize:'10px' }}>▾</span>
-              </button>
+            <div style={{ display:'flex', alignItems:'center', gap:'4px', fontSize:'.72rem', color:'#374151' }}>
+              <span style={{ fontWeight:500, color:'#6b7280' }}>Sort:</span>
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value as typeof sortBy)}
+                style={{ background:'none', border:'none', fontFamily:'sans-serif', fontSize:'.72rem', fontWeight:700, color:'#1a6b3c', cursor:'pointer', padding:0, outline:'none' }}
+              >
+                <option value="best">Best Match</option>
+                <option value="newest">Newest</option>
+                <option value="salary-asc">Salary: Low → High</option>
+                <option value="salary-desc">Salary: High → Low</option>
+              </select>
             </div>
           </div>
 
           {/* ── CARDS ── */}
           <div style={{ padding:'0 16px 20px', maxWidth:'900px', margin:'0 auto', width:'100%', boxSizing:'border-box' as const }}>
-            {filtered.length === 0 && (
+            {filteredAndSorted.length === 0 && (
               <div style={{ textAlign:'center', padding:'48px 20px', color:'#9ca3af', fontSize:'.84rem' }}>
                 No matches found.
               </div>
