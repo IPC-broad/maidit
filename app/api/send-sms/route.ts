@@ -9,7 +9,6 @@ async function sendSMS(mobile: string, message: string) {
     apikey: process.env.SEMAPHORE_API_KEY,
     number: mobile,
     message,
-    sendername: 'MaidIt'
   })
   const res = await fetch('https://api.semaphore.co/api/v4/messages', {
     method: 'POST',
