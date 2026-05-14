@@ -30,10 +30,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Not available in production' }, { status: 403 })
   }
 
-  const { offer_id } = await req.json()
-  console.log('[test-webhook-trigger] offer_id received:', offer_id)
+  const body = await req.json()
+  console.log('[test-webhook-trigger] body:', body)
   console.log('[test-webhook-trigger] supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
+
+  // Action: update offer status only (no payment simulation)
+  if (body.action === 'update_status') {
+    const { offer_id, status } = body
+    if (!offer_id || !status) return NextResponse.json({ error: 'offer_id and status required' }, { status: 400 })
+    const { error } = await supabaseAdmin.from('offers').update({ status }).eq('id', offer_id)
+    if (error) {
+      console.log('[test-webhook-trigger] update_status error:', error)
+      return NextResponse.json({ error: 'Update failed', supabase_error: error }, { status: 500 })
+    }
+    return NextResponse.json({ success: true, offer_id, status })
+  }
+
+  const { offer_id } = body
   if (!offer_id) return NextResponse.json({ error: 'offer_id required' }, { status: 400 })
+  console.log('[test-webhook-trigger] offer_id received:', offer_id)
 
   const { data: offer, error } = await supabaseAdmin
     .from('offers')

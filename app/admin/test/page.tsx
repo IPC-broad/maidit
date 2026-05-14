@@ -172,13 +172,32 @@ export default function AdminTestPanel() {
 
   useEffect(() => { load() }, [])
 
+  const loadAgreedOffers = async () => {
+    const res = await fetch('/api/test-webhook-trigger')
+      .then(r => r.json())
+      .catch(e => { console.error('[loadAgreedOffers] error:', e); return { offers: [] } })
+    setAgreedOffers(res.offers || [])
+  }
+
   const updateStatus = async (offerId: string, status: string) => {
     setUpdating(offerId + status)
-    const { supabase } = await import('../../../lib/supabase')
-    await supabase.from('offers').update({ status }).eq('id', offerId)
-    setMsg('Updated offer to ' + status)
-    setTimeout(() => setMsg(''), 2000)
-    await load()
+    const res = await fetch('/api/test-webhook-trigger', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update_status', offer_id: offerId, status }),
+    })
+    const data = await res.json()
+    if (!data.success) {
+      console.error('[updateStatus] failed:', data)
+      setMsg(`❌ Status update failed: ${data.error || 'unknown'}`)
+    } else {
+      setMsg('Updated offer to ' + status)
+      // Update local offers state immediately so the list reflects the change
+      setOffers(prev => prev.map(o => o.id === offerId ? { ...o, status } : o))
+      // Refresh agreed offers dropdown without a full reload
+      await loadAgreedOffers()
+    }
+    setTimeout(() => setMsg(''), 3000)
     setUpdating(null)
   }
 
@@ -230,7 +249,10 @@ export default function AdminTestPanel() {
       if (data.success) {
         setSimResult({ ok: true, msg: `✅ Payment simulated — offer is now paid` })
         setSelectedSimOffer('')
-        await load()
+        // Remove the paid offer from the agreed dropdown immediately
+        setAgreedOffers(prev => prev.filter(o => o.id !== selectedSimOffer))
+        // Refresh the full offers list in the background
+        load()
       } else {
         setSimResult({ ok: false, msg: `❌ ${data.error || 'Unknown error'}` })
       }
