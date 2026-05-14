@@ -110,7 +110,7 @@ export default function BrowsePage() {
             full_name, selfie_url, city
           )
         `)
-        .eq('status', 'available')
+        .in('status', ['available', 'pending_confirmation'])
         .order('created_at', { ascending: false })
       if (error) console.error('[browse] kasambahay query error:', error)
       console.log('[browse] kasambahay count:', data?.length)
