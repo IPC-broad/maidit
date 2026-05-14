@@ -109,8 +109,9 @@ export default function BrowsePage() {
       .from('kasambahay')
       .select(`
         id, province, setup, asking_salary, skills, experience,
-        availability, has_govt_id, selfie_url, profile_id, role, age,
+        availability, has_govt_id, selfie_url, profile_id, age,
         religion, education, video_intro, created_at, status,
+        transport_direct_type,
         profile:profile_id (
           full_name, selfie_url, city
         )
@@ -193,9 +194,7 @@ export default function BrowsePage() {
       const city = (p.profile?.city || p.province || '').toLowerCase()
       const province = (p.province || '').toLowerCase()
       const skillStr = (p.skills || []).join(' ').toLowerCase()
-      const role = (p.role || '').toLowerCase()
-      const roles = (p.roles || []).join(' ').toLowerCase()
-      if (!name.includes(q) && !city.includes(q) && !province.includes(q) && !skillStr.includes(q) && !role.includes(q) && !roles.includes(q)) return false
+      if (!name.includes(q) && !city.includes(q) && !province.includes(q) && !skillStr.includes(q)) return false
     }
     if (filter === 'Lahat' || filter === 'More') return true
     if (filter === 'Stay-in') return p.setup === 'Stay-in'
@@ -306,7 +305,7 @@ export default function BrowsePage() {
             <span style={{ color:'#22c55e', fontSize:'9px' }}>●</span>
           </div>
           <div style={{ fontSize:'11px', color:'#6b7280', marginBottom:'4px', lineHeight:1.3 }}>
-            {kb.roles?.join(' and ') || kb.role || 'Kasambahay'}
+            {'Kasambahay'}
             {kb.setup ? ` · ${kb.setup}` : ''}
           </div>
           <div style={{ fontSize:'11px', color:'#6b7280', marginBottom:'6px', display:'flex', alignItems:'center', gap:'2px' }}>
