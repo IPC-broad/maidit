@@ -9,7 +9,6 @@ export default function KasambahaySignup() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [sentOtp, setSentOtp] = useState('')
   const [cooldown, setCooldown] = useState(0)
 
   const [hasNbi, setHasNbi] = useState(false)
@@ -137,21 +136,18 @@ export default function KasambahaySignup() {
     setLoading(true)
     setError('')
 
-    try {
-      const res = await fetch('/api/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile: form.mobile })
-      })
-      const data = await res.json()
-      if (res.ok && data.otp) {
-        setSentOtp(data.otp)
-        startCooldown()
-      }
-    } catch {
-      // SMS failure — proceed to Step 3 anyway (dev bypass available)
+    const res = await fetch('/api/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile: form.mobile })
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      setError(data.error || 'Hindi napadala ang SMS. Subukan ulit.')
+      setLoading(false)
+      return
     }
-
+    startCooldown()
     setLoading(false)
     setStep(3)
   }
@@ -166,12 +162,7 @@ export default function KasambahaySignup() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mobile: form.mobile })
     })
-    const data = await res.json()
-
-    if (res.ok) {
-      setSentOtp(data.otp)
-      startCooldown()
-    }
+    if (res.ok) startCooldown()
     setLoading(false)
   }
 
@@ -257,8 +248,17 @@ export default function KasambahaySignup() {
       setError('Ilagay ang 6-digit code')
       return
     }
-    if (form.otp !== sentOtp) {
-      setError('Maling code. Subukan ulit.')
+    setLoading(true)
+    setError('')
+    const res = await fetch('/api/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile: form.mobile, code: form.otp })
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      setError(data.error || 'Mali ang code. Subukan ulit.')
+      setLoading(false)
       return
     }
     await createAccount()
@@ -573,43 +573,39 @@ export default function KasambahaySignup() {
         <>
           <div style={s.title}>I-verify ang number mo</div>
           <div style={s.sub}>
-            Nagpadala kami ng 6-digit code sa <strong style={{ color:'#111827' }}>{form.mobile}</strong>. Kung hindi natanggap, normal lang — ang SMS sender name ay nasa approval pa ng Semaphore. Gamitin ang Dev Mode bypass sa itaas.
+            Abangan ang SMS verification. Sa ngayon, i-click ang button sa ibaba para magpatuloy.
           </div>
 
-          {process.env.NEXT_PUBLIC_DEV_MODE === 'true' && (
-            <div style={{ background:'#fffbeb', border:'2px solid #f59e0b', borderRadius:'10px', padding:'12px 13px', marginBottom:'13px' }}>
-              <div style={{ fontSize:'.74rem', color:'#92400e', lineHeight:1.6, marginBottom:'10px' }}>
-                🔧 <strong>Dev Mode:</strong> Ang SMS verification ay hindi pa available dahil ang Semaphore sender name ay nasa approval pa. I-skip ang OTP para sa testing.
-              </div>
-              {sentOtp && (
-                <div style={{ fontFamily:'monospace', fontSize:'1.1rem', fontWeight:900, color:'#92400e', letterSpacing:'6px', marginBottom:'10px' }}>{sentOtp}</div>
-              )}
-              <button
-                style={{ width:'100%', padding:'10px', borderRadius:'9px', background:'#f59e0b', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'.82rem', fontWeight:700, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? .6 : 1 }}
-                onClick={createAccount}
-                disabled={loading}
-              >
-                {loading ? 'Ginagawa...' : 'I-skip ang OTP (Semaphore Pending Approval) →'}
-              </button>
+          <div style={{ background:'#fffbeb', border:'1.5px solid #fde68a', borderRadius:'10px', padding:'12px 13px', marginBottom:'16px' }}>
+            <div style={{ fontSize:'.74rem', color:'#92400e', lineHeight:1.6, marginBottom:'10px' }}>
+              ⏳ Ang SMS verification ay coming soon. I-click ang button sa ibaba para magpatuloy.
             </div>
-          )}
+            <button
+              style={{ width:'100%', padding:'10px', borderRadius:'9px', background:'#c9943a', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'.82rem', fontWeight:700, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? .6 : 1 }}
+              onClick={createAccount}
+              disabled={loading}
+            >
+              {loading ? 'Ginagawa...' : 'Magpatuloy (SMS verification coming soon) →'}
+            </button>
+          </div>
 
-          <label style={s.lbl}>Verification Code</label>
+          <label style={{ ...s.lbl, opacity: .4 }}>Verification Code</label>
           <input
-            style={{ ...s.input, fontSize:'1.3rem', fontWeight:700, textAlign:'center', letterSpacing:'8px' }}
+            style={{ ...s.input, fontSize:'1.3rem', fontWeight:700, textAlign:'center', letterSpacing:'8px', opacity: .4 }}
             placeholder="000000"
             value={form.otp}
             onChange={e => update('otp', e.target.value.replace(/\D/g,'').slice(0,6))}
             maxLength={6}
             inputMode="numeric"
+            disabled
           />
 
           <button
-            style={{ ...s.btn, opacity: (loading || form.otp.length < 6) ? .6 : 1 }}
+            style={{ ...s.btn, opacity: .4 }}
             onClick={verifyAndCreate}
-            disabled={loading || form.otp.length < 6}
+            disabled
           >
-            {loading ? 'Ginagawa...' : 'I-verify at Gumawa ng Account →'}
+            I-verify at Gumawa ng Account →
           </button>
 
           <button
