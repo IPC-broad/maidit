@@ -576,42 +576,44 @@ export default function KasambahaySignup() {
             Nagpadala kami ng 6-digit code sa <strong style={{ color:'#111827' }}>{form.mobile}</strong>. Ilagay ang code sa ibaba.
           </div>
 
-          <label style={s.lbl}>Verification Code</label>
+          <div style={{ background:'#fffbeb', border:'1.5px solid #fde68a', borderRadius:'11px', padding:'12px 14px', marginBottom:'16px' }}>
+            <div style={{ fontSize:'.74rem', color:'#92400e', lineHeight:1.6, marginBottom:'10px' }}>
+              ⏳ Ang SMS verification ay hindi pa available. Mag-a-activate ito kapag naaprubahan na ang aming sender name.
+            </div>
+            <button
+              style={{ width:'100%', padding:'11px', borderRadius:'9px', background:'#c9943a', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'.88rem', fontWeight:700, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? .6 : 1 }}
+              onClick={createAccount}
+              disabled={loading}
+            >
+              {loading ? 'Ginagawa...' : 'Magpatuloy (SMS coming soon) →'}
+            </button>
+          </div>
+
+          <label style={{ ...s.lbl, opacity:.4 }}>Verification Code</label>
           <input
-            style={{ ...s.input, fontSize:'1.3rem', fontWeight:700, textAlign:'center', letterSpacing:'8px' }}
+            style={{ ...s.input, fontSize:'1.3rem', fontWeight:700, textAlign:'center', letterSpacing:'8px', opacity:.4 }}
             placeholder="000000"
             value={form.otp}
             onChange={e => update('otp', e.target.value.replace(/\D/g,'').slice(0,6))}
             maxLength={6}
             inputMode="numeric"
+            disabled
           />
 
           <button
-            style={{ ...s.btn, opacity: (loading || form.otp.length < 6) ? .6 : 1 }}
+            style={{ ...s.btn, opacity:.4 }}
             onClick={verifyAndCreate}
-            disabled={loading || form.otp.length < 6}
+            disabled
           >
-            {loading ? 'Ginagawa...' : 'I-verify at Gumawa ng Account →'}
+            I-verify at Gumawa ng Account →
           </button>
 
           <button
-            style={{ width:'100%', padding:'11px', marginTop:'10px', background:'transparent', border:'1.5px solid #e5e7eb', borderRadius:'12px', fontFamily:'sans-serif', fontSize:'.82rem', color:'#6b7280', cursor: cooldown > 0 ? 'not-allowed' : 'pointer' }}
-            onClick={resendOtp}
-            disabled={cooldown > 0 || loading}
+            style={{ width:'100%', padding:'11px', marginTop:'10px', background:'transparent', border:'1.5px solid #e5e7eb', borderRadius:'12px', fontFamily:'sans-serif', fontSize:'.82rem', color:'#6b7280', cursor:'not-allowed', opacity:.4 }}
+            disabled
           >
-            {cooldown > 0 ? `I-resend sa ${cooldown}s` : 'I-resend ang code'}
+            I-resend ang code
           </button>
-
-          <div style={{ textAlign:'center' as const, marginTop:'16px', paddingTop:'14px', borderTop:'1px solid #f3f4f6' }}>
-            <div style={{ fontSize:'.68rem', color:'#9ca3af', marginBottom:'8px' }}>Hindi natanggap ang SMS?</div>
-            <button
-              style={{ background:'none', border:'none', color:'#9ca3af', fontFamily:'sans-serif', fontSize:'.75rem', cursor: loading ? 'not-allowed' : 'pointer', textDecoration:'underline', opacity: loading ? .6 : 1 }}
-              onClick={createAccount}
-              disabled={loading}
-            >
-              {loading ? 'Ginagawa...' : 'Magpatuloy nang walang verification →'}
-            </button>
-          </div>
         </>
       )}
     </div>
