@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
   const params = new URLSearchParams({
     apikey: process.env.SEMAPHORE_API_KEY,
     number: mobile,
-    message: `Ang iyong MaidIt OTP code ay: ${code}. Huwag ibahagi ito sa kahit sino.`,
+    message: `Hi! Ang iyong MaidIt verification code ay: ${code}\n\nPara sa iyong seguridad, huwag ibahagi ang code na ito sa kahit sino.\nMag-e-expire ito sa loob ng 10 minuto.\n\n- MaidIt Team`,
   })
 
   const res = await fetch('https://api.semaphore.co/api/v4/messages', {
