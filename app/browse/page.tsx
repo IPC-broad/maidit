@@ -70,10 +70,8 @@ export default function BrowsePage() {
   const [lastOfferSetup, setLastOfferSetup] = useState<string | null>(null)
   const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null)
   const [sortBy, setSortBy] = useState<'best' | 'newest' | 'salary-asc' | 'salary-desc'>('best')
-  const [fetchError, setFetchError] = useState<string | null>(null)
 
   const load = async () => {
-    console.log('[browse] load() called')
     const { supabase } = await import('../../lib/supabase')
     const { data: { user } } = await supabase.auth.getUser()
     setCurrentUser(user || null)
@@ -84,28 +82,20 @@ export default function BrowsePage() {
         .eq('profile_id', user.id)
         .single()
       if (hwError) {
-        console.error('[browse] homeowners query error:', hwError)
         setIsSubscribed(false)
       } else {
         setIsSubscribed(!!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date()))
         setLastOfferSetup(hw?.preferred_setup || null)
       }
-      const { data: prof, error: profError } = await supabase
+      const { data: prof } = await supabase
         .from('profiles')
         .select('city')
         .eq('id', user.id)
         .single()
-      if (profError) console.error('[browse] profiles query error:', profError)
       setHomeownerCity(prof?.city || null)
       setHomeownerProvince(prof?.city || null)
     }
-    // Probe: count rows without join to check RLS
-    const { count: rawCount, error: countError } = await supabase
-      .from('kasambahay')
-      .select('id', { count: 'exact', head: true })
-    console.log('[browse] raw count probe:', rawCount, 'countError:', countError)
-
-    const { data, error, status, statusText } = await supabase
+    const { data } = await supabase
       .from('kasambahay')
       .select(`
         id, profile_id, asking_salary, setup, skills, experience,
@@ -116,22 +106,11 @@ export default function BrowsePage() {
         )
       `)
       .limit(20)
-    console.log('[browse] fetch result:', {
-      count: data?.length,
-      rawCount,
-      error,
-      status,
-      statusText,
-      firstItem: data?.[0]?.id,
-      firstStatus: data?.[0]?.status,
-    })
-    setFetchError(error ? `${error.message} (HTTP ${status})` : (rawCount === 0 ? 'RLS: 0 rows visible' : null))
     setProfiles(data || [])
     setLoading(false)
   }
 
   useEffect(() => {
-    console.log('[browse] component mounted')
     load()
   }, [])
 
@@ -400,12 +379,6 @@ export default function BrowsePage() {
           <button style={{ background:'none', border:'none', cursor:'pointer', color:'#6b7280', display:'flex', padding:0 }}><IconBell /></button>
           <button style={{ background:'none', border:'none', cursor:'pointer', color:'#6b7280', display:'flex', padding:0 }}><IconMenu /></button>
         </div>
-      </div>
-
-      {/* ── DEBUG BANNER ── */}
-      <div style={{ background: '#1f2937', color: '#d1fae5', fontFamily: 'monospace', fontSize: '11px', padding: '6px 14px', lineHeight: 1.7 }}>
-        <div>Profiles: {profiles.length} · Loading: {loading ? 'yes' : 'no'} · User: {currentUser ? currentUser.email?.split('@')[0] : 'none'}</div>
-        {fetchError && <div style={{ color: '#fca5a5' }}>{fetchError}</div>}
       </div>
 
       {tab === 'browse' && (
