@@ -48,9 +48,16 @@ export async function POST(req: NextRequest) {
     body: params.toString()
   })
 
-  if (!res.ok) {
-    console.error('[send-otp] Semaphore error:', res.status)
-    return NextResponse.json({ error: 'Hindi napadala ang SMS. Subukan ulit.' }, { status: 500 })
+  const responseText = await res.text()
+  console.log('[send-otp] Semaphore status:', res.status)
+  console.log('[send-otp] Semaphore response:', responseText)
+
+  if (res.status !== 200) {
+    return NextResponse.json({
+      error: 'Hindi napadala ang SMS',
+      semaphore_status: res.status,
+      semaphore_response: responseText
+    }, { status: 500 })
   }
 
   return NextResponse.json({ success: true })
