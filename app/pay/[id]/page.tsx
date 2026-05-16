@@ -14,13 +14,16 @@ export default function PayPage() {
   const [linkError, setLinkError] = useState(false)
   const [step, setStep] = useState<'pay' | 'already'>('pay')
   const [skipLoading, setSkipLoading] = useState(false)
-  const testMode = process.env.NEXT_PUBLIC_TEST_MODE === 'true'
+  const [isTester, setIsTester] = useState(false)
 
   useEffect(() => {
     const init = async () => {
       const { supabase } = await import('../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+
+      const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+      setIsTester(profile?.full_name?.toLowerCase().includes('test') ?? false)
 
       const { data } = await supabase
         .from('offers')
@@ -237,7 +240,7 @@ export default function PayPage() {
           </button>
         )}
 
-        {testMode && (
+        {isTester && (
           <button
             style={{ ...s.btnOutline, marginTop: '8px', opacity: skipLoading ? .6 : 1 }}
             disabled={skipLoading}
