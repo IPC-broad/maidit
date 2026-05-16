@@ -514,7 +514,7 @@ export default function KasambahaySignup() {
           <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
             <div style={{ fontSize:'13px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>KASANAYAN (Skills)</div>
             <div style={{ display:'flex', flexWrap:'wrap' as const, gap:'8px' }}>
-              {['Pagluluto','Paglalaba','Paglilinis','Pag-aalaga ng Bata','Pag-aalaga ng Matanda','Pag-aalaga ng Alagang Hayop','Pamimili','Pagmamaneho'].map(skill => (
+              {['All-Around Maid (Lahat ng gawaing bahay)','Pagluluto','Paglalaba','Paglilinis','Pag-aalaga ng Bata','Pag-aalaga ng Matanda','Pag-aalaga ng Alagang Hayop','Pamimili','Pagmamaneho'].map(skill => (
                 <div
                   key={skill}
                   onClick={() => toggleSkill(skill)}

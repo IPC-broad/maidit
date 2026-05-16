@@ -169,7 +169,7 @@ export default function HomeownerSignup() {
         </div>
         <label style={s.label}>Help Needed</label>
         <div style={s.scopeGrid}>
-          {['🧹 Housekeeping','👶 Yaya','🍳 Cooking','🧺 Laundry','🚗 Driver','👴 Elder Care'].map(v => (
+          {['🏠 All-Around Maid','🧹 Housekeeping','👶 Yaya','🍳 Cooking','🧺 Laundry','🚗 Driver','👴 Elder Care'].map(v => (
             <button key={v} style={scopeBtn(v)} onClick={() => toggleScope(v)}>{v}</button>
           ))}
         </div>

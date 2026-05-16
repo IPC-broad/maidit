@@ -243,8 +243,8 @@ export default function AdminTestPanel() {
         .limit(20),
       supabase
         .from('kasambahay')
-        .select('*, profiles(*), partner:referred_by(*, profiles(*))')
-        .not('referred_by', 'is', null),
+        .select('id, profile_id, province, status, asking_salary, profile:profiles!profile_id(full_name, mobile)')
+        .order('id', { ascending: false }),
       supabase
         .from('partners')
         .select('*, profiles(*)'),
@@ -421,17 +421,16 @@ export default function AdminTestPanel() {
         )
       })}
 
-      {/* ── REFERRED KASAMBAHAY ── */}
-      <div style={{ ...s.secTitle, marginTop: '24px' }}>👥 Referred Kasambahay ({referredWorkers.length})</div>
+      {/* ── KASAMBAHAY ── */}
+      <div style={{ ...s.secTitle, marginTop: '24px' }}>👥 Kasambahay ({referredWorkers.length})</div>
 
       {!loading && referredWorkers.length === 0 && (
-        <div style={{ ...s.card, color: '#9ca3af', fontSize: '13px', textAlign: 'center' }}>No referred kasambahay yet.</div>
+        <div style={{ ...s.card, color: '#9ca3af', fontSize: '13px', textAlign: 'center' }}>No kasambahay yet.</div>
       )}
 
       {referredWorkers.map(w => {
-        const wName = w.profiles?.full_name || 'Unknown'
-        const wMobile = w.profiles?.mobile || '—'
-        const partnerName = w.partner?.profiles?.full_name || '—'
+        const wName = (w.profile as any)?.full_name || 'Unknown'
+        const wMobile = (w.profile as any)?.mobile || '—'
         const wColor = workerStatusColors[w.status] || '#6b7280'
         const confirmed = w.status !== 'pending_confirmation' && w.status !== 'pending' && w.status !== 'draft'
         return (
@@ -440,9 +439,6 @@ export default function AdminTestPanel() {
               <div>
                 <div style={{ fontWeight: 700, fontSize: '14px' }}>{wName}</div>
                 <div style={{ fontSize: '11px', color: '#9ca3af' }}>{wMobile} · {w.province}</div>
-                <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '3px' }}>
-                  Referred by: <strong>{partnerName}</strong>
-                </div>
                 <div style={{ fontSize: '11px', marginTop: '3px' }}>
                   Confirmed: <span style={{ fontWeight: 700, color: confirmed ? '#1a6b3c' : '#dc2626' }}>{confirmed ? 'Yes' : 'No'}</span>
                 </div>
