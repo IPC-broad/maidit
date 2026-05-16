@@ -54,12 +54,9 @@ export default function AdminTestPanel() {
   const PROTECTED_EMAILS = ['test@maidit.com', 'test.kasambahay@maidit.app', 'partner@maidit.com']
 
   const loadProfiles = async () => {
-    const { supabase } = await import('../../../lib/supabase')
-    const { data } = await supabase
-      .from('profiles')
-      .select('id, full_name, mobile, role, created_at, email')
-      .order('created_at', { ascending: false })
-    setProfiles(data || [])
+    const res = await fetch('/api/admin/list-profiles')
+    const data = await res.json()
+    setProfiles(data.profiles || [])
   }
 
   const deleteAccount = async (profileId: string) => {
@@ -596,7 +593,7 @@ export default function AdminTestPanel() {
               {profiles.map((p, i) => {
                 const isProtected = PROTECTED_EMAILS.includes(p.email || '')
                 return (
-                  <tr key={p.id} style={{ background: i % 2 === 0 ? '#fff' : '#faf8f5', opacity: isProtected ? .5 : 1 }}>
+                  <tr key={p.id} style={{ background: i % 2 === 0 ? '#fff' : '#faf8f5' }}>
                     <td style={{ padding: '8px 10px', borderBottom: '1px solid #f3f4f6', fontFamily: 'monospace', color: '#374151' }}>{p.mobile || '—'}</td>
                     <td style={{ padding: '8px 10px', borderBottom: '1px solid #f3f4f6', fontWeight: 600, color: '#111827' }}>{p.full_name || '—'}</td>
                     <td style={{ padding: '8px 10px', borderBottom: '1px solid #f3f4f6' }}>
@@ -606,7 +603,9 @@ export default function AdminTestPanel() {
                     </td>
                     <td style={{ padding: '8px 10px', borderBottom: '1px solid #f3f4f6', color: '#9ca3af', whiteSpace: 'nowrap' as const }}>{new Date(p.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                     <td style={{ padding: '8px 10px', borderBottom: '1px solid #f3f4f6' }}>
-                      {!isProtected && (
+                      {isProtected ? (
+                        <span style={{ fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '50px', background: '#f3f4f6', color: '#9ca3af', border: '1px solid #e5e7eb' }}>Protected</span>
+                      ) : (
                         <button
                           onClick={() => deleteAccount(p.id)}
                           disabled={deletingId === p.id}
