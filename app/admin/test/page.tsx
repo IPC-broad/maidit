@@ -51,12 +51,57 @@ export default function AdminTestPanel() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [deletingAll, setDeletingAll] = useState(false)
 
+  const [homeowners, setHomeowners] = useState<any[]>([])
+  const [subUpdating, setSubUpdating] = useState<string | null>(null)
+
   const PROTECTED_EMAILS = ['test@maidit.com', 'test.kasambahay@maidit.app', 'partner@maidit.com']
 
   const loadProfiles = async () => {
     const res = await fetch('/api/admin/list-profiles')
     const data = await res.json()
     setProfiles(data.profiles || [])
+  }
+
+  const loadHomeowners = async () => {
+    const res = await fetch('/api/admin/list-homeowners')
+    const data = await res.json()
+    setHomeowners(data.homeowners || [])
+  }
+
+  const setSubscription = async (homeownerId: string, subscribed: boolean) => {
+    setSubUpdating(homeownerId + (subscribed ? 'sub' : 'unsub'))
+    const res = await fetch('/api/admin/set-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ homeowner_id: homeownerId, subscribed }),
+    })
+    const data = await res.json()
+    if (data.success) {
+      setMsg(subscribed ? '✅ Subscription activated (30 days)' : '✅ Subscription expired')
+    } else {
+      setMsg(`❌ ${data.error || 'Failed'}`)
+    }
+    setTimeout(() => setMsg(''), 3000)
+    await loadHomeowners()
+    setSubUpdating(null)
+  }
+
+  const toggleCreditUsed = async (homeownerId: string, currentValue: boolean) => {
+    setSubUpdating(homeownerId + 'credit')
+    const res = await fetch('/api/admin/set-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ homeowner_id: homeownerId, subscribed: true, credit_used: !currentValue }),
+    })
+    const data = await res.json()
+    if (data.success) {
+      setMsg(`✅ Credit ${!currentValue ? 'marked used' : 'restored'}`)
+    } else {
+      setMsg(`❌ ${data.error || 'Failed'}`)
+    }
+    setTimeout(() => setMsg(''), 3000)
+    await loadHomeowners()
+    setSubUpdating(null)
   }
 
   const deleteAccount = async (profileId: string) => {
@@ -217,7 +262,7 @@ export default function AdminTestPanel() {
     setLoading(false)
   }
 
-  useEffect(() => { load(); loadProfiles() }, [])
+  useEffect(() => { load(); loadProfiles(); loadHomeowners() }, [])
 
   const loadAgreedOffers = async () => {
     const res = await fetch('/api/test-webhook-trigger')
@@ -625,6 +670,73 @@ export default function AdminTestPanel() {
           </table>
         </div>
       </div>
+
+      {/* ── HOMEOWNER SUBSCRIPTIONS ── */}
+      <div style={{ ...s.secTitle, marginTop: '32px' }}>💳 Homeowner Subscriptions ({homeowners.length})</div>
+
+      {homeowners.length === 0 && !loading && (
+        <div style={{ ...s.card, color: '#9ca3af', fontSize: '13px', textAlign: 'center' }}>No homeowners found.</div>
+      )}
+
+      {homeowners.map(hw => {
+        const name = (hw.profiles as any)?.full_name || 'Unknown'
+        const mobile = (hw.profiles as any)?.mobile || '—'
+        const expires = hw.subscription_expires_at ? new Date(hw.subscription_expires_at) : null
+        const isSubscribed = expires && expires > new Date()
+        const creditUsed = hw.subscription_credit_used === true
+        const expiresLabel = expires
+          ? expires.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
+          : '—'
+        const isBusy = (k: string) => subUpdating === hw.id + k
+        return (
+          <div key={hw.id} style={s.card}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '14px' }}>{name}</div>
+                <div style={{ fontSize: '11px', color: '#9ca3af' }}>{mobile}</div>
+                <div style={{ fontSize: '10px', color: '#9ca3af', marginTop: '2px', fontFamily: 'monospace' }}>{hw.id}</div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                {isSubscribed ? (
+                  <span style={{ fontSize: '10px', fontWeight: 700, padding: '3px 9px', borderRadius: '50px', background: '#f0fdf4', color: '#1a6b3c', border: '1px solid #bbf7d0' }}>
+                    Subscribed · exp {expiresLabel}
+                  </span>
+                ) : (
+                  <span style={{ fontSize: '10px', fontWeight: 700, padding: '3px 9px', borderRadius: '50px', background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}>
+                    Unsubscribed
+                  </span>
+                )}
+                <span style={{ fontSize: '10px', fontWeight: 700, padding: '3px 9px', borderRadius: '50px', background: creditUsed ? '#fef3e2' : '#f3f4f6', color: creditUsed ? '#92400e' : '#9ca3af', border: `1px solid ${creditUsed ? '#fde68a' : '#e5e7eb'}` }}>
+                  Credit: {creditUsed ? 'Used' : 'Available'}
+                </span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' as const }}>
+              <button
+                onClick={() => setSubscription(hw.id, true)}
+                disabled={!!subUpdating}
+                style={{ padding: '5px 11px', borderRadius: '6px', border: '1.5px solid #1a6b3c40', background: isSubscribed ? '#1a6b3c' : '#f0fdf4', color: isSubscribed ? '#fff' : '#1a6b3c', fontFamily: 'sans-serif', fontSize: '11px', fontWeight: 700, cursor: subUpdating ? 'default' : 'pointer', opacity: subUpdating ? .6 : 1 }}
+              >
+                {isBusy('sub') ? '…' : 'Set Subscribed'}
+              </button>
+              <button
+                onClick={() => setSubscription(hw.id, false)}
+                disabled={!!subUpdating}
+                style={{ padding: '5px 11px', borderRadius: '6px', border: '1.5px solid #dc262640', background: !isSubscribed ? '#dc2626' : '#fef2f2', color: !isSubscribed ? '#fff' : '#dc2626', fontFamily: 'sans-serif', fontSize: '11px', fontWeight: 700, cursor: subUpdating ? 'default' : 'pointer', opacity: subUpdating ? .6 : 1 }}
+              >
+                {isBusy('unsub') ? '…' : 'Set Unsubscribed'}
+              </button>
+              <button
+                onClick={() => toggleCreditUsed(hw.id, creditUsed)}
+                disabled={!!subUpdating}
+                style={{ padding: '5px 11px', borderRadius: '6px', border: '1.5px solid #c9943a40', background: '#fef3e2', color: '#92400e', fontFamily: 'sans-serif', fontSize: '11px', fontWeight: 700, cursor: subUpdating ? 'default' : 'pointer', opacity: subUpdating ? .6 : 1 }}
+              >
+                {isBusy('credit') ? '…' : creditUsed ? 'Restore Credit' : 'Mark Credit Used'}
+              </button>
+            </div>
+          </div>
+        )
+      })}
 
       {/* ── PARTNERS ── */}
       <div style={{ ...s.secTitle, marginTop: '24px' }}>🤝 Partners ({partners.length})</div>
