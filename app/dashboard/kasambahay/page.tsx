@@ -132,6 +132,9 @@ export default function KBDashboard() {
 
   if (loading) return <div style={{ minHeight: '100vh', background: '#faf8f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif', color: '#9ca3af' }}>Loading...</div>
 
+  const METRO_MANILA = ['Manila','Quezon City','Makati','Pasig','Taguig','Mandaluyong','San Juan','Marikina','Pasay','Parañaque','Las Piñas','Muntinlupa','Caloocan','Malabon','Navotas','Valenzuela','Pateros']
+  const hwLocationLabel = (city: string) => !city ? null : METRO_MANILA.includes(city) ? 'Metro Manila' : city
+
   const pendingOffers = offers.filter(o => o.status === 'pending').length
   const isHired = offers.some(o => ['hired', 'active', 'paid'].includes(o.status))
   const EXPIRE_MS = 72 * 60 * 60 * 1000
@@ -276,13 +279,14 @@ export default function KBDashboard() {
 
           {activeOffers.map((offer: any) => {
             const offerIsHired = ['paid','active','hired'].includes(offer.status)
-            const firstName = offer.homeowner?.profiles?.full_name?.split(' ')[0] || 'Homeowner'
+            const loc = hwLocationLabel(offer.city)
+            const cardHeader = loc ? `Isang pamilya mula sa ${loc} ang may offer sayo` : 'Isang pamilya ang may offer sayo'
             return (
               <div key={offer.id} style={s.card}>
                 <div style={{ padding: '13px 14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '2px' }}>{firstName}</div>
+                      <div style={{ fontWeight: 700, fontSize: '13px', marginBottom: '2px', lineHeight: 1.4 }}>{cardHeader}</div>
                       <div style={{ fontSize: '11px', color: '#9ca3af' }}>{new Date(offer.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
                     </div>
                     {offerIsHired && <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: '#f0fdf4', color: '#1a6b3c' }}>HIRED ✅</span>}
