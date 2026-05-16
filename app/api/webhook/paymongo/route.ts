@@ -74,6 +74,25 @@ export async function POST(req: NextRequest) {
   // ── link.payment.paid (dynamic links with metadata) ──────────────────────────
   if (eventType === 'link.payment.paid') {
     const offerId: string | undefined = eventAttrs?.metadata?.offer_id
+    const metaHomeownerId: string | undefined = eventAttrs?.metadata?.homeowner_id
+    const metaType: string | undefined = eventAttrs?.metadata?.type
+
+    // ── Subscription payment (no offer_id, type === 'subscription') ──
+    if (!offerId && metaType === 'subscription' && metaHomeownerId) {
+      const { createClient } = await import('@supabase/supabase-js')
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+      const exp = new Date()
+      exp.setDate(exp.getDate() + 30)
+      await supabase.from('homeowners')
+        .update({ subscription_expires_at: exp.toISOString(), subscription_credit_used: false })
+        .eq('id', metaHomeownerId)
+      console.log(`[paymongo-webhook] subscription paid — homeowner ${metaHomeownerId} → expires ${exp.toISOString()}`)
+      return NextResponse.json({ received: true, action: 'subscription_activated' })
+    }
+
     if (!offerId) {
       console.log('[paymongo-webhook] link.payment.paid — no offer_id in metadata, amount:', amountCentavos)
       return NextResponse.json({ received: true })

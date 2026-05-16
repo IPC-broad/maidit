@@ -4,7 +4,7 @@ const VALID_AMOUNTS = new Set([49900, 200100, 250000, 800100, 850000])
 
 export async function POST(req: NextRequest) {
   try {
-    const { offer_id, amount, description } = await req.json()
+    const { offer_id, homeowner_id, type, amount, description } = await req.json()
 
     if (!VALID_AMOUNTS.has(amount)) {
       return NextResponse.json({ error: 'Invalid amount' }, { status: 400 })
@@ -17,12 +17,17 @@ export async function POST(req: NextRequest) {
 
     const encoded = Buffer.from(`${secretKey}:`).toString('base64')
 
+    const metadata: Record<string, string> = {}
+    if (offer_id) metadata.offer_id = offer_id
+    if (homeowner_id) metadata.homeowner_id = homeowner_id
+    if (type) metadata.type = type
+
     const body: any = {
       data: {
         attributes: {
           amount,
           description: description || 'MaidIt Hire Fee',
-          ...(offer_id ? { metadata: { offer_id } } : {}),
+          ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
         },
       },
     }

@@ -69,6 +69,7 @@ export default function BrowsePage() {
   const [homeownerCity, setHomeownerCity] = useState<string | null>(null)
   const [lastOfferSetup, setLastOfferSetup] = useState<string | null>(null)
   const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null)
+  const [homeownerDbId, setHomeownerDbId] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<'best' | 'newest' | 'salary-asc' | 'salary-desc'>('best')
 
   const load = async () => {
@@ -86,6 +87,7 @@ export default function BrowsePage() {
       } else {
         setIsSubscribed(!!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date()))
         setLastOfferSetup(hw?.preferred_setup || null)
+        setHomeownerDbId(hw?.id || null)
       }
       const { data: prof } = await supabase
         .from('profiles')
@@ -136,12 +138,15 @@ export default function BrowsePage() {
   const handleSubscribe = async () => {
     setSubscribeLoading(true)
     try {
-      const payload = { amount: 49900, description: 'MaidIt Subscription - ₱499' }
-      console.log('[handleSubscribe] sending amount:', payload.amount)
       const res = await fetch('/api/create-payment-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          amount: 49900,
+          description: 'MaidIt Subscription - ₱499',
+          homeowner_id: homeownerDbId,
+          type: 'subscription',
+        }),
       })
       const data = await res.json()
       if (data.checkout_url) {
@@ -344,8 +349,8 @@ export default function BrowsePage() {
           <button
             onClick={() => {
               if (!currentUser) { router.push('/signup/homeowner') }
-              else if (!isSubscribed) { setSubscribeModalId(kb.id) }
-              else { router.push(`/offer/send/${kb.id}`) }
+              else if (isSubscribed) { router.push(`/offer/send/${kb.id}`) }
+              else { setSubscribeModalId(kb.id) }
             }}
             style={{ width:'100%', padding:'6px 4px', background:'#1a6b3c', color:'#fff', border:'none', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'10px', fontWeight:700, cursor:'pointer' }}
           >
@@ -463,23 +468,6 @@ export default function BrowsePage() {
                 </p>
               </div>
               <div style={{ flexShrink:0, fontSize:'2.8rem', marginLeft:'14px', lineHeight:1 }}>👩‍🍳</div>
-            </div>
-          )}
-
-          {/* ── SUBSCRIPTION BANNER — for logged-in non-subscribed users ── */}
-          {currentUser && isSubscribed === false && (
-            <div style={{ margin:'12px 16px 0', background:'linear-gradient(135deg, #f0fdf4, #dcfce7)', border:'1.5px solid #bbf7d0', borderRadius:'14px', padding:'14px 16px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
-              <div>
-                <div style={{ fontFamily:'Georgia, serif', fontSize:'.95rem', fontWeight:900, color:'#1a6b3c', marginBottom:'3px' }}>Subscribe to MaidIt</div>
-                <div style={{ fontSize:'.72rem', color:'#166534', lineHeight:1.5 }}>₱499/month · Platform access · 1 hiring fee credit included</div>
-              </div>
-              <button
-                onClick={handleSubscribe}
-                disabled={subscribeLoading}
-                style={{ padding:'9px 14px', borderRadius:'9px', background:'#1a6b3c', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'.78rem', fontWeight:700, cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' as const, opacity: subscribeLoading ? .6 : 1 }}
-              >
-                {subscribeLoading ? '...' : 'Subscribe ₱499'}
-              </button>
             </div>
           )}
 
@@ -629,22 +617,22 @@ export default function BrowsePage() {
       {subscribeModalId && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.55)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
           <div style={{ background:'#fff', borderRadius:'16px', padding:'24px 20px', maxWidth:'320px', width:'100%' }}>
-            <div style={{ fontFamily:'Georgia, serif', fontSize:'1.15rem', fontWeight:900, color:'#111827', marginBottom:'6px' }}>Subscribe to MaidIt — ₱499/month</div>
+            <div style={{ fontFamily:'Georgia, serif', fontSize:'1.15rem', fontWeight:900, color:'#111827', marginBottom:'6px' }}>I-unlock ang pagpapadala ng offer</div>
             <p style={{ fontSize:'.82rem', color:'#6b7280', lineHeight:1.6, margin:'0 0 20px' }}>
-              Get platform access + 1 hiring fee credit (₱499 off your first hire)
+              Mag-subscribe sa MaidIt para makapag-send ng offer at makuha ang ₱499 hiring fee credit sa iyong unang hire.
             </p>
             <button
               onClick={handleSubscribe}
               disabled={subscribeLoading}
               style={{ width:'100%', padding:'12px', borderRadius:'10px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'.88rem', fontWeight:700, cursor:'pointer', marginBottom:'10px', opacity: subscribeLoading ? .6 : 1 }}
             >
-              {subscribeLoading ? 'Preparing payment...' : 'Subscribe for ₱499 →'}
+              {subscribeLoading ? 'Preparing payment...' : 'Mag-subscribe ng ₱499 →'}
             </button>
             <button
               onClick={() => setSubscribeModalId(null)}
               style={{ width:'100%', padding:'8px', background:'none', border:'none', fontFamily:'sans-serif', fontSize:'.8rem', color:'#9ca3af', cursor:'pointer' }}
             >
-              Maybe later
+              Bumalik sa browse
             </button>
           </div>
         </div>

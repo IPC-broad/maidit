@@ -71,6 +71,8 @@ export default function PayPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             offer_id: offerId,
+            homeowner_id: hw?.id,
+            type: 'hire',
             amount,
             description: `MaidIt Hire Fee — Offer ${offerId}`,
           }),

@@ -1,15 +1,19 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { provinces } from '../../../lib/ph-locations'
+
+const provinceList = Object.keys(provinces)
 
 export default function HomeownerSignup() {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
   const [form, setForm] = useState({
     full_name: '', mobile: '', email: '',
-    password: '', city: 'Quezon City',
+    password: '', province: 'Metro Manila (NCR)', city: 'Quezon City',
     setup: 'Stay-in', scope: [] as string[]
   })
 
@@ -17,6 +21,11 @@ export default function HomeownerSignup() {
   const toggleScope = (s: string) => setForm(f => ({
     ...f, scope: f.scope.includes(s) ? f.scope.filter(x => x !== s) : [...f.scope, s]
   }))
+
+  const handleProvinceChange = (prov: string) => {
+    const cities = provinces[prov] || []
+    setForm(f => ({ ...f, province: prov, city: cities[0] || '' }))
+  }
 
   const handleSignup = async () => {
     if (form.password.length < 8) { setError('Password must be at least 8 characters'); return }
@@ -33,13 +42,13 @@ export default function HomeownerSignup() {
       role: 'homeowner',
       full_name: form.full_name,
       mobile: form.mobile,
-      city: form.city
+      city: form.city,
     })
 
     await supabase.from('homeowners').insert({
       profile_id: data.user?.id,
       preferred_setup: form.setup,
-      scope: form.scope
+      scope: form.scope,
     })
 
     const intent = localStorage.getItem('maidit_intent')
@@ -50,19 +59,9 @@ export default function HomeownerSignup() {
       return
     }
 
-    try {
-      const res = await fetch('/api/create-payment-link', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 49900, description: 'MaidIt Subscription - ₱499' }),
-      })
-      const data = await res.json()
-      if (data.checkout_url) {
-        window.location.href = data.checkout_url
-        return
-      }
-    } catch {}
     setLoading(false)
+    setSuccess(true)
+    setTimeout(() => router.push('/browse'), 2200)
   }
 
   const s: any = {
@@ -72,10 +71,10 @@ export default function HomeownerSignup() {
     title: { fontWeight:900, fontSize:'1.3rem', marginBottom:'4px', color:'#111827' },
     sub: { fontSize:'.76rem', color:'#6b7280', marginBottom:'20px' },
     label: { display:'block', fontSize:'.63rem', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#6b7280', marginBottom:'4px' },
-    input: { width:'100%', padding:'11px 13px', border:'1.5px solid #e5e7eb', borderRadius:'11px', background:'#fff', color:'#111827', fontFamily:'sans-serif', fontSize:'.88rem', outline:'none', marginBottom:'13px' },
+    input: { width:'100%', padding:'11px 13px', border:'1.5px solid #e5e7eb', borderRadius:'11px', background:'#fff', color:'#111827', fontFamily:'sans-serif', fontSize:'.88rem', outline:'none', marginBottom:'13px', boxSizing:'border-box' as const },
     btn: { width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'.92rem', fontWeight:700, cursor:'pointer', marginTop:'6px' },
     bar: { display:'flex', gap:'4px', marginBottom:'20px' },
-    err: { background:'rgba(220,38,38,.1)', border:'1px solid rgba(220,38,38,.3)', borderRadius:'9px', padding:'10px 13px', fontSize:'.78rem', color:'#fca5a5', marginBottom:'12px' },
+    err: { background:'rgba(220,38,38,.1)', border:'1px solid rgba(220,38,38,.3)', borderRadius:'9px', padding:'10px 13px', fontSize:'.78rem', color:'#dc2626', marginBottom:'12px' },
     chipWrap: { display:'flex', gap:'8px', flexWrap:'wrap' as const, marginBottom:'13px' },
     scopeGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px', marginBottom:'13px' }
   }
@@ -95,6 +94,17 @@ export default function HomeownerSignup() {
     background: form.scope.includes(label) ? '#f0fdf4' : '#fff',
     color: form.scope.includes(label) ? '#166534' : '#6b7280'
   })
+
+  if (success) return (
+    <div style={{ minHeight:'100vh', background:'#faf8f5', display:'flex', flexDirection:'column' as const, alignItems:'center', justifyContent:'center', fontFamily:'sans-serif', padding:'32px 24px', textAlign:'center' as const }}>
+      <div style={{ fontSize:'3rem', marginBottom:'16px' }}>🎉</div>
+      <div style={{ fontFamily:'Georgia, serif', fontSize:'1.3rem', fontWeight:900, color:'#1a6b3c', marginBottom:'10px' }}>Account created!</div>
+      <div style={{ fontSize:'.9rem', color:'#374151', lineHeight:1.7, maxWidth:'280px' }}>
+        Maayos! Maaari ka nang tumingin ng mga profile at matches.
+      </div>
+      <div style={{ marginTop:'20px', fontSize:'.78rem', color:'#9ca3af' }}>Taking you to browse…</div>
+    </div>
+  )
 
   return (
     <div style={s.wrap}>
@@ -121,10 +131,13 @@ export default function HomeownerSignup() {
         <input style={s.input} placeholder="09XX XXX XXXX" value={form.mobile} onChange={e => update('mobile', e.target.value)}/>
         <label style={s.label}>Email</label>
         <input style={s.input} type="email" placeholder="maria@gmail.com" value={form.email} onChange={e => update('email', e.target.value)}/>
-        <label style={s.label}>City</label>
+        <label style={s.label}>Province / Region</label>
+        <select style={s.input} value={form.province} onChange={e => handleProvinceChange(e.target.value)}>
+          {provinceList.map(p => <option key={p} value={p}>{p}</option>)}
+        </select>
+        <label style={s.label}>City / Municipality</label>
         <select style={s.input} value={form.city} onChange={e => update('city', e.target.value)}>
-          <option>Quezon City</option><option>Makati</option><option>Pasig</option>
-          <option>Taguig / BGC</option><option>Manila</option><option>Mandaluyong</option>
+          {(provinces[form.province] || []).map(c => <option key={c} value={c}>{c}</option>)}
         </select>
         <button style={s.btn} onClick={() => {
           if (!form.full_name || !form.email) { setError('Please fill in all fields'); return }
@@ -156,16 +169,16 @@ export default function HomeownerSignup() {
         <label style={s.label}>Password</label>
         <input style={s.input} type="password" placeholder="Min. 8 characters" value={form.password} onChange={e => update('password', e.target.value)}/>
         <div style={{ background:'rgba(26,107,60,.1)', border:'1px solid rgba(26,107,60,.2)', borderRadius:'12px', padding:'13px', marginBottom:'14px', fontSize:'.76rem', lineHeight:1.7, color:'#374151' }}>
-          ✅ Browse profiles — free<br/>
-          ✅ Message candidates anytime (₱499/month)<br/>
-          ✅ Pay hiring fee only when you successfully hire
+          ✅ Browse all profiles — free<br/>
+          ✅ Send offers with ₱499/month subscription<br/>
+          ✅ ₱499 credit applied to your first hire
         </div>
         <button style={{...s.btn, opacity: loading ? .6 : 1}} onClick={handleSignup} disabled={loading}>
           {loading ? 'Setting up your account...' : 'Create Account →'}
         </button>
         <div style={{ textAlign:'center', marginTop:'12px' }}>
           <button style={{ background:'none', border:'none', color:'#9ca3af', fontSize:'.78rem', cursor:'pointer', textDecoration:'underline' }}
-            onClick={() => router.push('/dashboard/homeowner')}>
+            onClick={() => router.push('/browse')}>
             Skip for now →
           </button>
         </div>
