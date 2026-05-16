@@ -26,6 +26,10 @@ export default function KasambahaySignup() {
   }
   const hasGovtId = govtIdTypes.length > 0 && !govtIdTypes.includes('Wala')
 
+  const [skills, setSkills] = useState<string[]>([])
+  const toggleSkill = (s: string) =>
+    setSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])
+
   // Province dropdown
   const [provinces, setProvinces] = useState<Province[]>([])
   const [provSearch, setProvSearch] = useState('')
@@ -54,7 +58,9 @@ export default function KasambahaySignup() {
     setup: 'Stay-in',
     experience: 'Baguhan',
     availability: 'Immediate',
-    facebook_url: ''
+    facebook_url: '',
+    civil_status: 'Single',
+    num_children: '0'
   })
 
   const update = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
@@ -218,6 +224,9 @@ export default function KasambahaySignup() {
       province: selProv!.name,
       age: form.age ? parseInt(form.age) : null,
       availability: form.availability || 'Immediate',
+      skills: skills,
+      civil_status: form.civil_status,
+      num_children: form.num_children,
       ...(referredBy ? { referred_by: referredBy } : {}),
       ...(form.facebook_url.trim() ? { facebook_url: form.facebook_url.trim() } : {})
     })
@@ -514,6 +523,47 @@ export default function KasambahaySignup() {
               <div style={{ display:'flex', gap:'8px', fontSize:'.8rem', color:'#111827' }}><span>⚖️</span><span>Wastong sweldo na naaayon sa batas</span></div>
               <div style={{ display:'flex', gap:'8px', fontSize:'.8rem', color:'#111827' }}><span>🆓</span><span>Libre — walang babayaran para mag-apply</span></div>
             </div>
+          </div>
+
+          <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
+            <div style={{ fontSize:'11px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>KASANAYAN (Skills)</div>
+            <div style={{ display:'flex', flexWrap:'wrap' as const, gap:'8px' }}>
+              {['Pagluluto','Paglalaba','Paglilinis','Pag-aalaga ng Bata','Pag-aalaga ng Matanda','Pag-aalaga ng Alagang Hayop','Pamimili','Pagmamaneho'].map(skill => (
+                <div
+                  key={skill}
+                  onClick={() => toggleSkill(skill)}
+                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 11px', borderRadius:'20px', border:`1.5px solid ${skills.includes(skill) ? '#c9943a' : '#e5e7eb'}`, background: skills.includes(skill) ? 'rgba(201,148,58,.1)' : '#fff', cursor:'pointer', fontSize:'12px', color: skills.includes(skill) ? '#c9943a' : '#374151', fontWeight: skills.includes(skill) ? 700 : 400 }}
+                >
+                  {skills.includes(skill) && <span style={{ fontSize:'10px' }}>✓ </span>}
+                  {skill}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
+            <div style={{ fontSize:'11px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>KATAYUAN SA PAMILYA</div>
+
+            <label style={s.lbl}>Civil Status</label>
+            <div style={{ display:'flex', flexWrap:'wrap' as const, gap:'8px', marginBottom:'14px' }}>
+              {[['Single','Single'],['Kasal','Married'],['Hiwalay','Separated'],['Biyuda/Biyudo','Widowed']].map(([val, eng]) => (
+                <div
+                  key={val}
+                  onClick={() => update('civil_status', val)}
+                  style={{ display:'flex', alignItems:'center', gap:'7px', padding:'8px 12px', borderRadius:'20px', border:`1.5px solid ${form.civil_status === val ? '#1a6b3c' : '#e5e7eb'}`, background: form.civil_status === val ? 'rgba(26,107,60,.08)' : '#fff', cursor:'pointer', fontSize:'12px', color: form.civil_status === val ? '#1a6b3c' : '#374151', fontWeight: form.civil_status === val ? 700 : 400 }}
+                >
+                  {form.civil_status === val && <span style={{ fontSize:'10px' }}>✓ </span>}
+                  {val} <span style={{ color:'#9ca3af', fontWeight:400 }}>({eng})</span>
+                </div>
+              ))}
+            </div>
+
+            <label style={s.lbl}>Bilang ng Anak</label>
+            <select style={s.input} value={form.num_children} onChange={e => update('num_children', e.target.value)}>
+              {['0','1','2','3','4','5','6','7','8','9','10+'].map(n => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
           </div>
 
           <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
