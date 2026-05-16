@@ -493,12 +493,13 @@ export default function KasambahaySignup() {
             <option>10+ taon</option>
           </select>
 
-          <label style={s.lbl}>Availability</label>
+          <label style={s.lbl}>Kelan ka pwede magsimula ng trabaho?</label>
           <select style={s.input} value={form.availability} onChange={e => update('availability', e.target.value)}>
-            <option>Immediate</option>
-            <option>Within 1 week</option>
-            <option>Within 2 weeks</option>
-            <option>Within 1 month</option>
+            <option value="Immediate">Pwede na agad</option>
+            <option value="Within 1 week">Sa loob ng 1 linggo</option>
+            <option value="Within 2 weeks">Sa loob ng 2 linggo</option>
+            <option value="Within 1 month">Sa loob ng 1 buwan</option>
+            <option value="Flexible">Flexible</option>
           </select>
 
           <div style={{ background:'#fdf3e3', border:'1px solid rgba(201,148,58,.2)', borderRadius:'12px', padding:'13px 15px', marginBottom:'16px' }}>

@@ -13,7 +13,7 @@ export default function HomeownerSignup() {
   const [success, setSuccess] = useState(false)
   const [form, setForm] = useState({
     full_name: '', mobile: '', email: '',
-    password: '', province: 'Metro Manila (NCR)', city: 'Quezon City',
+    password: '', province: '', city: '',
     setup: 'Stay-in', scope: [] as string[]
   })
 
@@ -23,9 +23,13 @@ export default function HomeownerSignup() {
   }))
 
   const handleProvinceChange = (prov: string) => {
-    const cities = provinces[prov] || []
+    const cities = (provinces as Record<string, string[]>)[prov] || []
     setForm(f => ({ ...f, province: prov, city: cities[0] || '' }))
   }
+
+  const citiesForProvince: string[] = form.province
+    ? ((provinces as Record<string, string[]>)[form.province] || [])
+    : []
 
   const handleSignup = async () => {
     if (form.password.length < 8) { setError('Password must be at least 8 characters'); return }
@@ -133,11 +137,20 @@ export default function HomeownerSignup() {
         <input style={s.input} type="email" placeholder="maria@gmail.com" value={form.email} onChange={e => update('email', e.target.value)}/>
         <label style={s.label}>Province / Region</label>
         <select style={s.input} value={form.province} onChange={e => handleProvinceChange(e.target.value)}>
+          <option value="">— Select province —</option>
           {provinceList.map(p => <option key={p} value={p}>{p}</option>)}
         </select>
         <label style={s.label}>City / Municipality</label>
-        <select style={s.input} value={form.city} onChange={e => update('city', e.target.value)}>
-          {(provinces[form.province] || []).map(c => <option key={c} value={c}>{c}</option>)}
+        <select
+          style={{ ...s.input, color: citiesForProvince.length === 0 ? '#9ca3af' : '#111827', cursor: citiesForProvince.length === 0 ? 'not-allowed' : 'pointer' }}
+          value={form.city}
+          disabled={citiesForProvince.length === 0}
+          onChange={e => update('city', e.target.value)}
+        >
+          {citiesForProvince.length === 0
+            ? <option value="">— Select province first —</option>
+            : citiesForProvince.map(c => <option key={c} value={c}>{c}</option>)
+          }
         </select>
         <button style={s.btn} onClick={() => {
           if (!form.full_name || !form.email) { setError('Please fill in all fields'); return }
