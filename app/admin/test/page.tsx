@@ -678,8 +678,8 @@ export default function AdminTestPanel() {
       )}
 
       {homeowners.map(hw => {
-        const name = (hw.profiles as any)?.full_name || 'Unknown'
-        const mobile = (hw.profiles as any)?.mobile || '—'
+        const name = (hw.profile as any)?.full_name || 'Unknown'
+        const mobile = (hw.profile as any)?.mobile || '—'
         const expires = hw.subscription_expires_at ? new Date(hw.subscription_expires_at) : null
         const isSubscribed = expires && expires > new Date()
         const creditUsed = hw.subscription_credit_used === true
