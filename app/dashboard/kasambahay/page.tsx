@@ -307,13 +307,13 @@ export default function KBDashboard() {
 
                   {offer.status === 'agreed' && (
                     <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center' as const, fontWeight: 600 }}>
-                      Tinanggap mo na ito — naghihintay ng bayad
+                      Tinanggap mo na — naghihintay ng bayad ng homeowner
                     </div>
                   )}
 
                   {offer.status === 'countered' && (
                     <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center' as const }}>
-                      Nag-counter ka — naghihintay ng sagot
+                      Nag-counter ka — naghihintay ng sagot ng homeowner
                     </div>
                   )}
 
