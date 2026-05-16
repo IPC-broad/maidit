@@ -277,17 +277,17 @@ export default function KasambahaySignup() {
     wrap: { minHeight:'100vh', background:'#faf8f5', padding:'24px 20px', fontFamily:'sans-serif', color:'#111827' },
     toprow: { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'16px' },
     back: { background:'none', border:'none', fontSize:'1rem', color:'#6b7280', cursor:'pointer', padding:0 },
-    stepnum: { fontSize:'.72rem', color:'#9ca3af' },
+    stepnum: { fontSize:'13px', color:'#9ca3af' },
     bar: { display:'flex', gap:'4px', marginBottom:'22px' },
     seg: (active: boolean) => ({ flex:1, height:'4px', borderRadius:'2px', background: active ? '#1a6b3c' : '#e5e7eb' }),
-    title: { fontWeight:900, fontSize:'1.25rem', marginBottom:'5px', color:'#c9943a' },
-    sub: { fontSize:'.78rem', color:'#6b7280', marginBottom:'20px', lineHeight:1.5 },
-    lbl: { display:'block', fontSize:'.63rem', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#6b7280', marginBottom:'4px' },
-    hint: { fontSize:'.65rem', color:'#9ca3af', marginBottom:'8px', lineHeight:1.4 },
-    input: { width:'100%', padding:'11px 13px', border:'1.5px solid #e5e7eb', borderRadius:'11px', fontFamily:'sans-serif', fontSize:'.88rem', outline:'none', marginBottom:'13px', background:'#fff', color:'#111827' },
-    btn: { width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:'#c9943a', color:'#fff', fontFamily:'sans-serif', fontSize:'.92rem', fontWeight:700, cursor:'pointer' },
-    err: { background:'#fef2f2', border:'1px solid #fecaca', borderRadius:'9px', padding:'10px 13px', fontSize:'.78rem', color:'#dc2626', marginBottom:'13px' },
-    note: { background:'#fffbeb', border:'1px solid #fde68a', borderRadius:'10px', padding:'11px 13px', marginBottom:'16px', fontSize:'.74rem', color:'#92400e', lineHeight:1.6 }
+    title: { fontWeight:900, fontSize:'22px', marginBottom:'5px', color:'#c9943a' },
+    sub: { fontSize:'14px', color:'#6b7280', marginBottom:'20px', lineHeight:1.5 },
+    lbl: { display:'block', fontSize:'15px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#6b7280', marginBottom:'4px' },
+    hint: { fontSize:'14px', color:'#9ca3af', marginBottom:'8px', lineHeight:1.4 },
+    input: { width:'100%', padding:'11px 13px', border:'1.5px solid #e5e7eb', borderRadius:'11px', fontFamily:'sans-serif', fontSize:'16px', outline:'none', marginBottom:'13px', background:'#fff', color:'#111827' },
+    btn: { width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:'#c9943a', color:'#fff', fontFamily:'sans-serif', fontSize:'16px', fontWeight:700, cursor:'pointer' },
+    err: { background:'#fef2f2', border:'1px solid #fecaca', borderRadius:'9px', padding:'10px 13px', fontSize:'14px', color:'#dc2626', marginBottom:'13px' },
+    note: { background:'#fffbeb', border:'1px solid #fde68a', borderRadius:'10px', padding:'11px 13px', marginBottom:'16px', fontSize:'14px', color:'#92400e', lineHeight:1.6 }
   }
 
   return (
@@ -311,21 +311,21 @@ export default function KasambahaySignup() {
             <div style={{ display:'grid', gridTemplateColumns:'3fr 2fr' }}>
               {/* Left: copy */}
               <div style={{ padding:'18px 12px 18px 16px', display:'flex', flexDirection:'column' as const, justifyContent:'center' }}>
-                <h1 style={{ fontFamily:'serif', fontSize:'1.25rem', fontWeight:900, color:'#c9943a', marginBottom:'5px', lineHeight:1.2 }}>Mag-sign up</h1>
-                <p style={{ fontSize:'.7rem', color:'#6b7280', marginBottom:'13px', lineHeight:1.5 }}>Ilagay ang iyong detalye para makapagsimula.</p>
+                <h1 style={{ fontFamily:'serif', fontSize:'22px', fontWeight:900, color:'#c9943a', marginBottom:'5px', lineHeight:1.2 }}>Mag-sign up</h1>
+                <p style={{ fontSize:'14px', color:'#6b7280', marginBottom:'13px', lineHeight:1.5 }}>Ilagay ang iyong detalye para makapagsimula.</p>
                 <div style={{ display:'flex', flexDirection:'column' as const, gap:'9px' }}>
                   <div style={{ display:'flex', gap:'8px', alignItems:'flex-start' }}>
                     <div style={{ width:'22px', height:'22px', borderRadius:'6px', background:'#f0fdf4', border:'1px solid #bbf7d0', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'12px' }}>🛡️</div>
                     <div>
-                      <div style={{ fontSize:'.7rem', fontWeight:700, color:'#1a6b3c', lineHeight:1.3 }}>Ligtas at madali lang!</div>
-                      <div style={{ fontSize:'.62rem', color:'#9ca3af', lineHeight:1.4 }}>Protektado ang iyong impormasyon.</div>
+                      <div style={{ fontSize:'14px', fontWeight:700, color:'#1a6b3c', lineHeight:1.3 }}>Ligtas at madali lang!</div>
+                      <div style={{ fontSize:'13px', color:'#9ca3af', lineHeight:1.4 }}>Protektado ang iyong impormasyon.</div>
                     </div>
                   </div>
                   <div style={{ display:'flex', gap:'8px', alignItems:'flex-start' }}>
                     <div style={{ width:'22px', height:'22px', borderRadius:'6px', background:'#fef3e2', border:'1px solid #fde8c0', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'12px' }}>👥</div>
                     <div>
-                      <div style={{ fontSize:'.7rem', fontWeight:700, color:'#c9943a', lineHeight:1.3 }}>Trabaho na angkop sa iyo. Sweldo na tama.</div>
-                      <div style={{ fontSize:'.62rem', color:'#9ca3af', lineHeight:1.4 }}>Libreng mag-sign up. Walang bayad.</div>
+                      <div style={{ fontSize:'14px', fontWeight:700, color:'#c9943a', lineHeight:1.3 }}>Trabaho na angkop sa iyo. Sweldo na tama.</div>
+                      <div style={{ fontSize:'13px', color:'#9ca3af', lineHeight:1.4 }}>Libreng mag-sign up. Walang bayad.</div>
                     </div>
                   </div>
                 </div>
@@ -372,10 +372,10 @@ export default function KasambahaySignup() {
           {/* Selfie */}
           <div style={{ marginBottom:'16px' }}>
             <div style={{ display:'flex', alignItems:'center', gap:'5px', marginBottom:'5px' }}>
-              <span style={{ fontSize:'.63rem', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#1a6b3c' }}>SELFIE</span>
-              <span style={{ fontSize:'.63rem', fontWeight:700, color:'#1a6b3c' }}>(required)</span>
+              <span style={{ fontSize:'15px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#1a6b3c' }}>SELFIE</span>
+              <span style={{ fontSize:'15px', fontWeight:700, color:'#1a6b3c' }}>(required)</span>
             </div>
-            <p style={{ fontSize:'.67rem', color:'#6b7280', lineHeight:1.55, marginBottom:'10px' }}>
+            <p style={{ fontSize:'14px', color:'#6b7280', lineHeight:1.55, marginBottom:'10px' }}>
               Makakatulong ito para makita ka ng employers at mas mapili ka agad. Ipapakita lang ito sa verified employers. Hindi ipo-post publicly.
             </p>
 
@@ -390,14 +390,14 @@ export default function KasambahaySignup() {
               {selfieData ? (
                 <>
                   <div style={{ fontSize:'20px', marginBottom:'5px' }}>✅</div>
-                  <div style={{ fontWeight:700, fontSize:'13px', color:'#1a6b3c' }}>Selfie saved!</div>
-                  <div style={{ fontSize:'11px', color:'#6b7280', marginTop:'3px' }}>I-tap para palitan</div>
+                  <div style={{ fontWeight:700, fontSize:'15px', color:'#1a6b3c' }}>Selfie saved!</div>
+                  <div style={{ fontSize:'14px', color:'#6b7280', marginTop:'3px' }}>I-tap para palitan</div>
                 </>
               ) : (
                 <>
                   <div style={{ fontSize:'28px', marginBottom:'7px' }}>📷</div>
-                  <div style={{ fontWeight:700, fontSize:'13px', color:'#1a6b3c', marginBottom:'3px' }}>I-tap para kumuha ng selfie</div>
-                  <div style={{ fontSize:'11px', color:'#9ca3af' }}>Malinaw na mukha · Walang filter · Good lighting</div>
+                  <div style={{ fontWeight:700, fontSize:'15px', color:'#1a6b3c', marginBottom:'3px' }}>I-tap para kumuha ng selfie</div>
+                  <div style={{ fontSize:'14px', color:'#9ca3af' }}>Malinaw na mukha · Walang filter · Good lighting</div>
                 </>
               )}
             </div>
@@ -419,7 +419,7 @@ export default function KasambahaySignup() {
             {loading ? 'Checking...' : 'Magpatuloy →'}
           </button>
 
-          <div style={{ textAlign:'center' as const, marginTop:'12px', fontSize:'.7rem', color:'#9ca3af', display:'flex', alignItems:'center', justifyContent:'center', gap:'5px' }}>
+          <div style={{ textAlign:'center' as const, marginTop:'12px', fontSize:'14px', color:'#9ca3af', display:'flex', alignItems:'center', justifyContent:'center', gap:'5px' }}>
             🔒 Hindi namin ibinibigay ang iyong number sa iba.
           </div>
         </>
@@ -444,19 +444,19 @@ export default function KasambahaySignup() {
               <div style={{ background:'#fff', border:'1.5px solid #e5e7eb', borderRadius:'11px', marginBottom:'13px', overflow:'hidden', position:'relative', zIndex:50 }}>
                 <input
                   autoFocus
-                  style={{ width:'100%', padding:'10px 12px', border:'none', borderBottom:'1px solid #f3f4f6', background:'#faf8f5', color:'#111827', fontSize:'13px', outline:'none', fontFamily:'sans-serif' }}
+                  style={{ width:'100%', padding:'10px 12px', border:'none', borderBottom:'1px solid #f3f4f6', background:'#faf8f5', color:'#111827', fontSize:'16px', outline:'none', fontFamily:'sans-serif' }}
                   placeholder="Hanapin ang probinsya..."
                   value={provSearch}
                   onChange={e => setProvSearch(e.target.value)}
                 />
                 <div style={{ maxHeight:'190px', overflowY:'auto' }}>
                   {filteredProvs.length === 0
-                    ? <div style={{ padding:'12px', fontSize:'12px', color:'#9ca3af' }}>Walang nahanap</div>
+                    ? <div style={{ padding:'12px', fontSize:'15px', color:'#9ca3af' }}>Walang nahanap</div>
                     : filteredProvs.map(p => (
                       <div
                         key={p.code}
                         onClick={() => { setSelProv(p); setProvOpen(false); setProvSearch('') }}
-                        style={{ padding:'10px 13px', cursor:'pointer', fontSize:'13px', color: selProv?.code === p.code ? '#c9943a' : '#111827', background: selProv?.code === p.code ? 'rgba(201,148,58,.08)' : 'transparent', borderBottom:'1px solid #f3f4f6' }}
+                        style={{ padding:'10px 13px', cursor:'pointer', fontSize:'15px', color: selProv?.code === p.code ? '#c9943a' : '#111827', background: selProv?.code === p.code ? 'rgba(201,148,58,.08)' : 'transparent', borderBottom:'1px solid #f3f4f6' }}
                       >
                         {p.name}
                       </div>
@@ -517,22 +517,22 @@ export default function KasambahaySignup() {
           </select>
 
           <div style={{ background:'#fdf3e3', border:'1px solid rgba(201,148,58,.2)', borderRadius:'12px', padding:'13px 15px', marginBottom:'16px' }}>
-            <div style={{ fontSize:'.7rem', fontWeight:800, color:'#c9943a', textTransform:'uppercase' as const, letterSpacing:'.5px', marginBottom:'9px' }}>Bakit MaidIt?</div>
+            <div style={{ fontSize:'14px', fontWeight:800, color:'#c9943a', textTransform:'uppercase' as const, letterSpacing:'.5px', marginBottom:'9px' }}>Bakit MaidIt?</div>
             <div style={{ display:'flex', flexDirection:'column' as const, gap:'7px' }}>
-              <div style={{ display:'flex', gap:'8px', fontSize:'.8rem', color:'#111827' }}><span>💼</span><span>May trabahong naghihintay sa iyo</span></div>
-              <div style={{ display:'flex', gap:'8px', fontSize:'.8rem', color:'#111827' }}><span>⚖️</span><span>Wastong sweldo na naaayon sa batas</span></div>
-              <div style={{ display:'flex', gap:'8px', fontSize:'.8rem', color:'#111827' }}><span>🆓</span><span>Libre — walang babayaran para mag-apply</span></div>
+              <div style={{ display:'flex', gap:'8px', fontSize:'15px', color:'#111827' }}><span>💼</span><span>May trabahong naghihintay sa iyo</span></div>
+              <div style={{ display:'flex', gap:'8px', fontSize:'15px', color:'#111827' }}><span>⚖️</span><span>Wastong sweldo na naaayon sa batas</span></div>
+              <div style={{ display:'flex', gap:'8px', fontSize:'15px', color:'#111827' }}><span>🆓</span><span>Libre — walang babayaran para mag-apply</span></div>
             </div>
           </div>
 
           <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
-            <div style={{ fontSize:'11px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>KASANAYAN (Skills)</div>
+            <div style={{ fontSize:'13px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>KASANAYAN (Skills)</div>
             <div style={{ display:'flex', flexWrap:'wrap' as const, gap:'8px' }}>
               {['Pagluluto','Paglalaba','Paglilinis','Pag-aalaga ng Bata','Pag-aalaga ng Matanda','Pag-aalaga ng Alagang Hayop','Pamimili','Pagmamaneho'].map(skill => (
                 <div
                   key={skill}
                   onClick={() => toggleSkill(skill)}
-                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 11px', borderRadius:'20px', border:`1.5px solid ${skills.includes(skill) ? '#c9943a' : '#e5e7eb'}`, background: skills.includes(skill) ? 'rgba(201,148,58,.1)' : '#fff', cursor:'pointer', fontSize:'12px', color: skills.includes(skill) ? '#c9943a' : '#374151', fontWeight: skills.includes(skill) ? 700 : 400 }}
+                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 11px', borderRadius:'20px', border:`1.5px solid ${skills.includes(skill) ? '#c9943a' : '#e5e7eb'}`, background: skills.includes(skill) ? 'rgba(201,148,58,.1)' : '#fff', cursor:'pointer', fontSize:'15px', color: skills.includes(skill) ? '#c9943a' : '#374151', fontWeight: skills.includes(skill) ? 700 : 400 }}
                 >
                   {skills.includes(skill) && <span style={{ fontSize:'10px' }}>✓ </span>}
                   {skill}
@@ -542,7 +542,7 @@ export default function KasambahaySignup() {
           </div>
 
           <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
-            <div style={{ fontSize:'11px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>KATAYUAN SA PAMILYA</div>
+            <div style={{ fontSize:'13px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>KATAYUAN SA PAMILYA</div>
 
             <label style={s.lbl}>Civil Status</label>
             <div style={{ display:'flex', flexWrap:'wrap' as const, gap:'8px', marginBottom:'14px' }}>
@@ -550,7 +550,7 @@ export default function KasambahaySignup() {
                 <div
                   key={val}
                   onClick={() => update('civil_status', val)}
-                  style={{ display:'flex', alignItems:'center', gap:'7px', padding:'8px 12px', borderRadius:'20px', border:`1.5px solid ${form.civil_status === val ? '#1a6b3c' : '#e5e7eb'}`, background: form.civil_status === val ? 'rgba(26,107,60,.08)' : '#fff', cursor:'pointer', fontSize:'12px', color: form.civil_status === val ? '#1a6b3c' : '#374151', fontWeight: form.civil_status === val ? 700 : 400 }}
+                  style={{ display:'flex', alignItems:'center', gap:'7px', padding:'8px 12px', borderRadius:'20px', border:`1.5px solid ${form.civil_status === val ? '#1a6b3c' : '#e5e7eb'}`, background: form.civil_status === val ? 'rgba(26,107,60,.08)' : '#fff', cursor:'pointer', fontSize:'15px', color: form.civil_status === val ? '#1a6b3c' : '#374151', fontWeight: form.civil_status === val ? 700 : 400 }}
                 >
                   {form.civil_status === val && <span style={{ fontSize:'10px' }}>✓ </span>}
                   {val} <span style={{ color:'#9ca3af', fontWeight:400 }}>({eng})</span>
@@ -567,28 +567,28 @@ export default function KasambahaySignup() {
           </div>
 
           <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
-            <div style={{ fontSize:'11px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>MGA DOKUMENTO (i-tick kung mayroon)</div>
+            <div style={{ fontSize:'13px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>MGA DOKUMENTO (i-tick kung mayroon)</div>
             <div style={{ display:'flex', flexDirection:'column' as const, gap:'10px' }}>
               {['Wala','Passport','SSS ID','PhilHealth ID','Pag-IBIG ID','Postal ID','Barangay ID','Driver\'s License','PRC ID','Voter\'s ID'].map((label) => (
                 <div key={label} style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => toggleGovtId(label)}>
-                  <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: govtIdTypes.includes(label) ? '#c9943a' : '#d1d5db', background: govtIdTypes.includes(label) ? '#c9943a' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                    {govtIdTypes.includes(label) && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>✓</span>}
+                  <div style={{ width:'22px', height:'22px', borderRadius:'5px', border:'2px solid', borderColor: govtIdTypes.includes(label) ? '#c9943a' : '#d1d5db', background: govtIdTypes.includes(label) ? '#c9943a' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    {govtIdTypes.includes(label) && <span style={{ color:'#fff', fontSize:'13px', fontWeight:900 }}>✓</span>}
                   </div>
-                  <span style={{ fontSize:'13px', color:'#374151' }}>{label}</span>
+                  <span style={{ fontSize:'15px', color:'#374151' }}>{label}</span>
                 </div>
               ))}
               <div style={{ borderTop:'1px solid #f3f4f6', paddingTop:'10px', display:'flex', flexDirection:'column' as const, gap:'10px' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => setHasNbi(!hasNbi)}>
-                  <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: hasNbi ? '#1a6b3c' : '#d1d5db', background: hasNbi ? '#1a6b3c' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                    {hasNbi && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>✓</span>}
+                  <div style={{ width:'22px', height:'22px', borderRadius:'5px', border:'2px solid', borderColor: hasNbi ? '#1a6b3c' : '#d1d5db', background: hasNbi ? '#1a6b3c' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    {hasNbi && <span style={{ color:'#fff', fontSize:'13px', fontWeight:900 }}>✓</span>}
                   </div>
-                  <span style={{ fontSize:'13px', color:'#374151' }}>Mayroon akong NBI Clearance</span>
+                  <span style={{ fontSize:'15px', color:'#374151' }}>Mayroon akong NBI Clearance</span>
                 </div>
                 <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => setHasPoliceClearance(!hasPoliceClearance)}>
-                  <div style={{ width:'20px', height:'20px', borderRadius:'5px', border:'2px solid', borderColor: hasPoliceClearance ? '#1a6b3c' : '#d1d5db', background: hasPoliceClearance ? '#1a6b3c' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                    {hasPoliceClearance && <span style={{ color:'#fff', fontSize:'11px', fontWeight:900 }}>✓</span>}
+                  <div style={{ width:'22px', height:'22px', borderRadius:'5px', border:'2px solid', borderColor: hasPoliceClearance ? '#1a6b3c' : '#d1d5db', background: hasPoliceClearance ? '#1a6b3c' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    {hasPoliceClearance && <span style={{ color:'#fff', fontSize:'13px', fontWeight:900 }}>✓</span>}
                   </div>
-                  <span style={{ fontSize:'13px', color:'#374151' }}>Mayroon akong Police Clearance</span>
+                  <span style={{ fontSize:'15px', color:'#374151' }}>Mayroon akong Police Clearance</span>
                 </div>
               </div>
             </div>
@@ -626,18 +626,16 @@ export default function KasambahaySignup() {
             Nagpadala kami ng 6-digit code sa <strong style={{ color:'#111827' }}>{form.mobile}</strong>. Ilagay ang code sa ibaba.
           </div>
 
-          <div style={{ background:'#fffbeb', border:'1.5px solid #fde68a', borderRadius:'11px', padding:'12px 14px', marginBottom:'16px' }}>
-            <div style={{ fontSize:'.74rem', color:'#92400e', lineHeight:1.6, marginBottom:'10px' }}>
-              ⏳ Ang SMS verification ay hindi pa available. Mag-a-activate ito kapag naaprubahan na ang aming sender name.
-            </div>
-            <button
-              style={{ width:'100%', padding:'11px', borderRadius:'9px', background:'#c9943a', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'.88rem', fontWeight:700, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? .6 : 1 }}
-              onClick={createAccount}
-              disabled={loading}
-            >
-              {loading ? 'Ginagawa...' : 'Magpatuloy (SMS coming soon) →'}
-            </button>
-          </div>
+          <p style={{ fontSize:'14px', color:'#92400e', background:'#fffbeb', padding:'10px', borderRadius:'8px', marginBottom:'12px', lineHeight:1.6 }}>
+            ⏳ Ang SMS verification ay hindi pa available. I-click ang button sa ibaba para magpatuloy.
+          </p>
+          <button
+            style={{ width:'100%', padding:'14px', borderRadius:'10px', background:'#c9943a', border:'none', color:'#fff', fontSize:'16px', fontWeight:700, cursor:'pointer', marginBottom:'12px' }}
+            onClick={createAccount}
+            disabled={loading}
+          >
+            {loading ? 'Ginagawa...' : 'Magpatuloy (SMS coming soon) →'}
+          </button>
 
           <label style={{ ...s.lbl, opacity:.4 }}>Verification Code</label>
           <input
@@ -659,7 +657,7 @@ export default function KasambahaySignup() {
           </button>
 
           <button
-            style={{ width:'100%', padding:'11px', marginTop:'10px', background:'transparent', border:'1.5px solid #e5e7eb', borderRadius:'12px', fontFamily:'sans-serif', fontSize:'.82rem', color:'#6b7280', cursor:'not-allowed', opacity:.4 }}
+            style={{ width:'100%', padding:'11px', marginTop:'10px', background:'transparent', border:'1.5px solid #e5e7eb', borderRadius:'12px', fontFamily:'sans-serif', fontSize:'16px', color:'#6b7280', cursor:'not-allowed', opacity:.4 }}
             disabled
           >
             I-resend ang code
