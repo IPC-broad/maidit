@@ -163,13 +163,16 @@ export default function BrowsePage() {
 
   const showTransport = (kbProvince: string) => {
     if (!kbProvince) return false
-    // Never show if kasambahay is in the same province as homeowner
-    if (homeownerProvince && kbProvince === homeownerProvince) return false
-    // Logged-in: show whenever province differs
-    if (currentUser && homeownerProvince && kbProvince !== homeownerProvince) return true
-    // Always flag Leyte/Samar/Bicol provinces (for guests and logged-in without saved province)
-    if (TRANSPORT_PROVINCES.includes(kbProvince)) return true
-    return false
+    if (!currentUser) {
+      // Guests: only flag known long-distance provinces
+      return TRANSPORT_PROVINCES.includes(kbProvince)
+    }
+    if (homeownerProvince) {
+      // Logged-in with known province: any inter-province move needs transport
+      return kbProvince !== homeownerProvince
+    }
+    // Logged-in but no province on file: fall back to known long-distance list
+    return TRANSPORT_PROVINCES.includes(kbProvince)
   }
 
   const filtered = profiles.filter(p => {
