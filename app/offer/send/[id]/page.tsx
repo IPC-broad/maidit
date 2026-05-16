@@ -254,15 +254,43 @@ export default function SendOfferPage({ params }: any) {
               Transport Arrangement{showMaidItOption ? ' *' : ''}
             </div>
 
-            {/* Different province, NOT Leyte/Samar/Bicol — simple notice only */}
+            {/* Different province, NOT Leyte/Samar/Bicol — direct notice + sub-options */}
             {!showMaidItOption && (
-              <div style={{ background: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '12px', padding: '13px 14px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>🚌</span>
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#92400e', marginBottom: '4px' }}>Direct transport arrangement</div>
-                  <div style={{ fontSize: '12px', color: '#78350f', lineHeight: 1.6 }}>
-                    This kasambahay is from another province. You will need to arrange transport directly.
+              <div>
+                <div style={{ background: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '12px', padding: '13px 14px', display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>🚌</span>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#92400e', marginBottom: '4px' }}>Direct transport arrangement</div>
+                    <div style={{ fontSize: '12px', color: '#78350f', lineHeight: 1.6 }}>
+                      This kasambahay is from another province. You will need to arrange transport directly.
+                    </div>
                   </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '7px' }}>
+                  {([
+                    { value: 'homeowner_pays', label: 'I will pay for transport', sub: 'Kasambahay provides fare estimate on review' },
+                    { value: 'reimburse', label: 'Kasambahay pays first, I reimburse on arrival' },
+                    { value: 'kasambahay_pays', label: 'Kasambahay pays her own fare' },
+                  ] as const).map(opt => (
+                    <div key={opt.value}
+                      onClick={() => setTransportDirectType(opt.value)}
+                      style={{
+                        display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '10px 12px',
+                        borderRadius: '10px', cursor: 'pointer',
+                        border: transportDirectType === opt.value ? '1.5px solid #1a6b3c' : '1.5px solid #e5e0d8',
+                        background: transportDirectType === opt.value ? '#f0fdf4' : '#fff',
+                      }}>
+                      <div style={{
+                        width: '15px', height: '15px', borderRadius: '50%', flexShrink: 0, marginTop: '2px',
+                        border: transportDirectType === opt.value ? '5px solid #1a6b3c' : '2px solid #d1d5db',
+                        background: '#fff',
+                      }} />
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.4 }}>{opt.label}</div>
+                        {'sub' in opt && <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px', lineHeight: 1.4 }}>{opt.sub}</div>}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

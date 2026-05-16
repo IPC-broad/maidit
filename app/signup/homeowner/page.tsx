@@ -159,7 +159,7 @@ export default function HomeownerSignup() {
       </>}
 
       {step === 2 && <>
-        <div style={s.title}>Your household</div>
+        <div style={s.title}>What You're Looking For</div>
         <div style={s.sub}>Step 2 of 3 · Helps us find the best match</div>
         <label style={s.label}>Preferred Setup</label>
         <div style={s.chipWrap}>
