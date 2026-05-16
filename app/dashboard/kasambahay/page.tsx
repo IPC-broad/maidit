@@ -130,6 +130,17 @@ export default function KBDashboard() {
 
   const pendingOffers = offers.filter(o => o.status === 'pending').length
   const isHired = offers.some(o => ['hired', 'active', 'paid'].includes(o.status))
+  const EXPIRE_MS = 72 * 60 * 60 * 1000
+  const activeOffers = offers.filter(o => {
+    if (!['pending','agreed','countered','payment_pending','paid','active','hired'].includes(o.status)) return false
+    if (o.status === 'pending' && Date.now() - new Date(o.created_at).getTime() > EXPIRE_MS) return false
+    return true
+  })
+  const pastOffers = offers.filter(o => {
+    if (['declined','cancelled','counter_declined'].includes(o.status)) return true
+    if (o.status === 'pending' && Date.now() - new Date(o.created_at).getTime() > EXPIRE_MS) return true
+    return false
+  })
   const referralCode = kb?.referred_by || profile?.id || ''
   const referralLink = `https://maidit.vercel.app?ref=${referralCode}`
 
@@ -248,99 +259,135 @@ export default function KBDashboard() {
 
       {tab === 'offers' && (
         <div style={{ padding: '14px 14px 32px' }}>
-          <div style={{ fontFamily: 'serif', fontSize: '17px', fontWeight: 900, marginBottom: '2px' }}>Mga Offer Sayo</div>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '14px' }}>{offers.length === 0 ? 'Wala pang Offer.' : `${offers.length} offer ang natanggap mo`}</div>
-          {offers.length === 0 && <div style={{ textAlign: 'center', padding: '40px 20px' }}><div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📭</div><div style={{ color: '#9ca3af', fontSize: '13px', lineHeight: 1.7 }}>Wala ka pang Offer.</div></div>}
-          {offers.map((offer: any) => {
-            const st = offerStatusMap[offer.status] || { label: offer.status, bg: '#f3f4f6', color: '#6b7280' }
-            const isHired = ['paid','active','hired'].includes(offer.status)
-            const isClosed = offer.status === 'declined'
-            const isCounterDeclined = offer.status === 'counter_declined'
-            const offerExpired = isCounterDeclined && Date.now() - new Date(offer.created_at).getTime() > 48 * 60 * 60 * 1000
+
+          {/* ── SECTION 1: Bago at Aktibong Offer ── */}
+          <div style={{ fontFamily: 'serif', fontSize: '17px', fontWeight: 900, marginBottom: '12px' }}>Bago at Aktibong Offer</div>
+
+          {activeOffers.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '40px 20px', marginBottom: '8px' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📭</div>
+              <div style={{ color: '#9ca3af', fontSize: '13px', lineHeight: 1.7 }}>Wala pang Offer</div>
+            </div>
+          )}
+
+          {activeOffers.map((offer: any) => {
+            const offerIsHired = ['paid','active','hired'].includes(offer.status)
+            const firstName = offer.homeowner?.profiles?.full_name?.split(' ')[0] || 'Homeowner'
             return (
               <div key={offer.id} style={s.card}>
                 <div style={{ padding: '13px 14px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <div><div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '2px' }}>Job Offer</div><div style={{ fontSize: '11px', color: '#9ca3af' }}>{new Date(offer.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</div></div>
-                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: st.bg, color: st.color, whiteSpace: 'nowrap' as const }}>{st.label}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '2px' }}>{firstName}</div>
+                      <div style={{ fontSize: '11px', color: '#9ca3af' }}>{new Date(offer.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                    </div>
+                    {offerIsHired && <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: '#f0fdf4', color: '#1a6b3c' }}>HIRED ✅</span>}
                   </div>
-                  <div style={{ ...s.infoBox, opacity: isClosed ? .6 : 1 }}>
+
+                  <div style={s.infoBox}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                      <div><div style={s.lbl10}>Sahod</div><div style={{ fontFamily: 'serif', fontSize: '16px', fontWeight: 900, color: isClosed ? '#6b7280' : '#1a6b3c' }}>₱{offer.salary?.toLocaleString()}<span style={{ fontSize: '10px', fontWeight: 400, color: '#9ca3af' }}>/buwan</span></div></div>
-                      <div><div style={s.lbl10}>Lokasyon</div><div style={{ ...s.val13, color: isClosed ? '#6b7280' : '#1a1a1a' }}>{offer.city || '—'}</div></div>
-                      <div><div style={s.lbl10}>Setup</div><div style={{ ...s.val13, color: isClosed ? '#6b7280' : '#1a1a1a' }}>{offer.setup || '—'}</div></div>
-                      <div><div style={s.lbl10}>Pamilya</div><div style={{ fontSize: '12px', fontWeight: 600, color: isClosed ? '#6b7280' : '#1a1a1a', lineHeight: 1.4 }}>{householdText(offer.household)} · {petsText(offer.pets)}</div></div>
+                      <div><div style={s.lbl10}>Sahod</div><div style={{ fontFamily: 'serif', fontSize: '16px', fontWeight: 900, color: '#1a6b3c' }}>₱{offer.salary?.toLocaleString()}<span style={{ fontSize: '10px', fontWeight: 400, color: '#9ca3af' }}>/buwan</span></div></div>
+                      <div><div style={s.lbl10}>Lokasyon</div><div style={s.val13}>{offer.city || '—'}</div></div>
+                      <div><div style={s.lbl10}>Setup</div><div style={s.val13}>{offer.setup || '—'}</div></div>
                     </div>
                   </div>
-                  {!isClosed && <>
-                    <div style={{ fontSize: '12px', color: '#374151', marginBottom: '4px' }}>Kailangan: <strong>{offer.scope?.join(' · ') || '—'}</strong></div>
-                    <div style={{ fontSize: '12px', color: '#374151', marginBottom: '10px' }}>Kailan: <strong>{urgencyLabel(offer.urgency)}</strong></div>
-                  </>}
-                  {offer.status === 'pending' && <button style={s.btn('#c9943a')} onClick={() => router.push(`/offer/review/${offer.id}`)}>Tingnan ang Buong Offer</button>}
-                  {offer.status === 'reviewed' && <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#2563eb', textAlign: 'center' }}>Hinihintay ang confirmation ng homeowner.</div>}
-                  {offer.status === 'countered' && <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center' }}>Naisumite ang iyong counter offer. Hinihintay ang sagot ng homeowner.</div>}
-                  {(offer.status === 'agreed' || offer.status === 'payment_pending') && <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center', fontWeight: 600 }}>Hinihintay ang bayad ng homeowner.</div>}
-                  {isHired && <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#166534', fontWeight: 600, textAlign: 'center', marginBottom: '10px' }}>HIRED! Inaantay na ang pagdating mo sa lugar ng pagtatrabahuan.</div>}
-                  {isHired && offer.homeowner?.profiles?.mobile && (
-                    <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px' }}>
-                      <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '8px' }}>Contact your employer</div>
-                      {offer.status === 'paid' && (
-                        <div style={{ fontSize: '12px', color: '#166534', marginBottom: '10px', lineHeight: 1.5 }}>Your employer is expecting you. Contact them to coordinate your arrival.</div>
-                      )}
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{offer.homeowner.profiles.full_name?.split(' ')[0] || 'Homeowner'}</div>
-                      <div style={{ fontSize: '13px', color: '#374151', marginBottom: '10px' }}>{offer.homeowner.profiles.mobile}</div>
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <a href={`viber://chat?number=${toIntl(offer.homeowner.profiles.mobile)}`} style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#7c3aed', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, cursor: 'pointer', textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Viber</a>
-                        <a href={`https://wa.me/${toIntl(offer.homeowner.profiles.mobile)}`} target="_blank" rel="noreferrer" style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#16a34a', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, cursor: 'pointer', textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 WhatsApp</a>
-                      </div>
+
+                  {offer.status === 'pending' && (
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        style={{ flex: 1, padding: '11px', borderRadius: '10px', border: 'none', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+                        onClick={() => router.push(`/offer/review/${offer.id}`)}
+                      >
+                        Tanggapin
+                      </button>
+                      <button
+                        disabled={actioning === offer.id}
+                        style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'transparent', border: '1.5px solid #fecaca', color: '#dc2626', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: actioning === offer.id ? 'not-allowed' : 'pointer', opacity: actioning === offer.id ? .6 : 1 }}
+                        onClick={async () => {
+                          setActioning(offer.id)
+                          const { supabase } = await import('../../../lib/supabase')
+                          await supabase.from('offers').update({ status: 'declined' }).eq('id', offer.id)
+                          window.location.reload()
+                        }}
+                      >
+                        Tanggihan
+                      </button>
                     </div>
                   )}
-                  {isCounterDeclined && (
+
+                  {offer.status === 'agreed' && (
+                    <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center' as const, fontWeight: 600 }}>
+                      Tinanggap mo na — naghihintay ng bayad ng homeowner
+                    </div>
+                  )}
+
+                  {offer.status === 'countered' && (
+                    <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center' as const }}>
+                      Nag-counter ka — naghihintay ng sagot ng homeowner
+                    </div>
+                  )}
+
+                  {offer.status === 'payment_pending' && (
+                    <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center' as const, fontWeight: 600 }}>
+                      Naghihintay ng bayad ng homeowner
+                    </div>
+                  )}
+
+                  {offerIsHired && (
                     <>
-                      <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '11px 13px', fontSize: '12px', color: '#78350f', lineHeight: 1.75, marginBottom: '10px' }}>
-                        Ang iyong mga proposed na pagbabago sa offer ay hindi tinanggap ng homeowner.
-                        <br /><br />
-                        Ang orihinal na offer ay nananatiling valid hanggang 48 oras mula nang ito ay unang ipadala. Maaari mo pa itong tanggapin o tanggihan.
+                      <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '10px 12px', fontSize: '13px', color: '#166534', fontWeight: 700, textAlign: 'center' as const, marginBottom: '10px' }}>
+                        💰 Bayad na! Maghanda ka na.
                       </div>
-                      {offerExpired ? (
-                        <div style={{ background: '#f3f4f6', borderRadius: '9px', padding: '10px 12px', fontSize: '12px', color: '#6b7280', textAlign: 'center' as const }}>
-                          Nag-expire na ang offer.
-                        </div>
-                      ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
-                          <button
-                            disabled={actioning === offer.id}
-                            style={{ ...s.btn('#1a6b3c'), opacity: actioning === offer.id ? .6 : 1 }}
-                            onClick={async () => {
-                              setActioning(offer.id)
-                              const { supabase } = await import('../../../lib/supabase')
-                              await supabase.from('offers').update({ status: 'agreed', fare_agreed: offer.fare_estimate }).eq('id', offer.id)
-                              window.location.reload()
-                            }}
-                          >
-                            {actioning === offer.id ? 'Processing...' : 'Tanggapin ang Orihinal na Offer'}
-                          </button>
-                          <button
-                            disabled={actioning === offer.id}
-                            style={{ width: '100%', padding: '11px', borderRadius: '10px', background: 'transparent', border: '1.5px solid #fecaca', color: '#dc2626', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: actioning === offer.id ? .6 : 1 }}
-                            onClick={async () => {
-                              setActioning(offer.id)
-                              const { supabase } = await import('../../../lib/supabase')
-                              await supabase.from('offers').update({ status: 'declined' }).eq('id', offer.id)
-                              window.location.reload()
-                            }}
-                          >
-                            Tanggihan ang Offer
-                          </button>
+                      {offer.homeowner?.profiles?.mobile && (
+                        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px' }}>
+                          <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '6px' }}>I-contact ang employer mo</div>
+                          <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{offer.homeowner.profiles.full_name}</div>
+                          <div style={{ fontSize: '13px', color: '#374151', marginBottom: '10px' }}>{offer.homeowner.profiles.mobile}</div>
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <a href={`viber://chat?number=${toIntl(offer.homeowner.profiles.mobile)}`} style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#7c3aed', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Viber</a>
+                            <a href={`https://wa.me/${toIntl(offer.homeowner.profiles.mobile)}`} target="_blank" rel="noreferrer" style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#16a34a', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 WhatsApp</a>
+                          </div>
                         </div>
                       )}
                     </>
                   )}
-                  {isClosed && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#dc2626', textAlign: 'center' }}>Nakahanap na ng kasambahay ang pamilyang ito.</div>}
                 </div>
               </div>
             )
           })}
+
+          {/* ── SECTION 2: Nakaraang Offer ── */}
+          {pastOffers.length > 0 && (
+            <>
+              <div style={{ fontFamily: 'serif', fontSize: '16px', fontWeight: 900, color: '#9ca3af', marginTop: '28px', marginBottom: '12px' }}>Nakaraang Offer</div>
+              {pastOffers.map((offer: any) => {
+                const isExpiredPending = offer.status === 'pending' && Date.now() - new Date(offer.created_at).getTime() > EXPIRE_MS
+                const pastLabel =
+                  isExpiredPending           ? 'Na-expire na (lumagpas ng 3 araw)'
+                  : offer.status === 'declined'        ? 'Tinanggihan mo'
+                  : offer.status === 'cancelled'       ? 'Nakansela ng homeowner'
+                  : offer.status === 'counter_declined'? 'Di nagkasundo'
+                  : offer.status
+                return (
+                  <div key={offer.id} style={{ ...s.card, opacity: .65 }}>
+                    <div style={{ padding: '12px 14px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: '13px', color: '#6b7280', marginBottom: '2px' }}>{offer.homeowner?.profiles?.full_name?.split(' ')[0] || 'Homeowner'}</div>
+                          <div style={{ fontSize: '11px', color: '#9ca3af' }}>{new Date(offer.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                        </div>
+                        <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: '#f3f4f6', color: '#6b7280', whiteSpace: 'nowrap' as const }}>{pastLabel}</span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                        <div><div style={s.lbl10}>Sahod</div><div style={{ fontSize: '13px', fontWeight: 700, color: '#9ca3af' }}>₱{offer.salary?.toLocaleString()}</div></div>
+                        <div><div style={s.lbl10}>Lokasyon</div><div style={{ fontSize: '13px', fontWeight: 600, color: '#9ca3af' }}>{offer.city || '—'}</div></div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </>
+          )}
         </div>
       )}
 
