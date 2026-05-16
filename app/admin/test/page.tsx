@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-const STATUSES = ['pending', 'reviewed', 'agreed', 'payment_pending', 'paid', 'active', 'hired', 'declined', 'countered', 'counter_declined', 'fare_pending', 'fare_countered']
+const STATUSES = ['pending', 'reviewed', 'agreed', 'payment_pending', 'paid', 'active', 'hired', 'declined', 'cancelled', 'countered', 'counter_declined', 'fare_pending', 'fare_countered']
 
 const statusColors: Record<string, string> = {
   pending: '#c9943a',
@@ -12,6 +12,7 @@ const statusColors: Record<string, string> = {
   active: '#1a6b3c',
   hired: '#1a6b3c',
   declined: '#dc2626',
+  cancelled: '#dc2626',
   countered: '#c9943a',
   counter_declined: '#dc2626',
   fare_pending: '#92400e',
