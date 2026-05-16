@@ -26,23 +26,21 @@ export async function POST(req: NextRequest) {
 
   if (checkOnly) return NextResponse.json({ success: true })
 
-  const code = Math.floor(100000 + Math.random() * 900000).toString()
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
-
-  await supabase.from('otp_codes').insert({ mobile, code, expires_at: expiresAt })
-
   if (!process.env.SEMAPHORE_API_KEY) {
-    console.log(`[send-otp] No API key — OTP for ${mobile}: ${code}`)
+    const fallbackCode = Math.floor(100000 + Math.random() * 900000).toString()
+    const fallbackExpiry = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+    await supabase.from('otp_codes').insert({ mobile, code: fallbackCode, expires_at: fallbackExpiry })
+    console.log(`[send-otp] No API key — OTP for ${mobile}: ${fallbackCode}`)
     return NextResponse.json({ success: true })
   }
 
   const params = new URLSearchParams({
     apikey: process.env.SEMAPHORE_API_KEY,
     number: mobile,
-    message: `Hi! Ang iyong MaidIt verification code ay: ${code}\n\nPara sa iyong seguridad, huwag ibahagi ang code na ito sa kahit sino.\nMag-e-expire ito sa loob ng 10 minuto.\n\n- MaidIt Team`,
+    message: `Hi! Ang iyong MaidIt verification code ay: {otp}\n\nHuwag ibahagi ang code na ito sa kahit sino.\nMag-e-expire ito sa loob ng 10 minuto.\n\n- MaidIt Team`,
   })
 
-  const res = await fetch('https://api.semaphore.co/api/v4/messages', {
+  const res = await fetch('https://api.semaphore.co/api/v4/otp', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: params.toString()
@@ -59,6 +57,19 @@ export async function POST(req: NextRequest) {
       semaphore_response: responseText
     }, { status: 500 })
   }
+
+  let code: string
+  try {
+    const json = JSON.parse(responseText)
+    code = json[0]?.code
+    if (!code) throw new Error('No code in response')
+  } catch {
+    console.error('[send-otp] Failed to parse OTP code from response:', responseText)
+    return NextResponse.json({ error: 'Hindi nakuha ang OTP code.' }, { status: 500 })
+  }
+
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+  await supabase.from('otp_codes').insert({ mobile, code, expires_at: expiresAt })
 
   return NextResponse.json({ success: true })
 }
