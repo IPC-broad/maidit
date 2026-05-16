@@ -332,7 +332,7 @@ export default function HWDashboard() {
               setRematchDone(false)
             }
             return (
-              <div key={offer.id} style={{ background:'#fff', borderRadius:'13px', border: offer.status === 'countered' ? '2px solid #f59e0b' : '1px solid #ede8e0', overflow:'hidden', marginBottom:'12px' }}>
+              <div key={offer.id} style={{ background:'#fff', borderRadius:'13px', border:'1px solid #ede8e0', ...(offer.status === 'countered' ? { borderLeft:'4px solid #dc2626' } : {}), overflow:'hidden', marginBottom:'12px' }}>
                 <div style={{ padding:'13px 14px' }}>
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'8px' }}>
                     <div>
@@ -358,7 +358,7 @@ export default function HWDashboard() {
                       <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Scope</div><div style={{ fontSize:'12px', fontWeight:600, lineHeight:1.4 }}>{offer.scope?.join(', ') || '—'}</div></div>
                     </div>
                   </div>
-                  {offer.fare_estimate && (
+                  {offer.fare_estimate && offer.status !== 'countered' && (
                     <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:'9px', padding:'9px 12px', fontSize:'12px', color:'#92400e', marginBottom:'10px' }}>
                       Kasambahay's fare estimate: <strong>₱{offer.fare_estimate?.toLocaleString()}</strong>
                     </div>
@@ -367,7 +367,7 @@ export default function HWDashboard() {
                     <div style={{ background:'#fff5f5', border:'1.5px solid #fca5a5', borderRadius:'12px', padding:'14px', marginBottom:'12px' }}>
                       <div style={{ fontSize:'13px', fontWeight:800, color:'#dc2626', marginBottom:'12px' }}>⚠️ Counter Offer Received</div>
                       <div style={{ display:'flex', flexDirection:'column' as const, gap:'9px', marginBottom:'14px' }}>
-                        {offer.fare_countered && offer.fare_countered !== offer.salary && (
+                        {offer.fare_countered && offer.fare_countered !== offer.salary ? (
                           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                             <span style={{ fontSize:'12px', color:'#6b7280' }}>Salary</span>
                             <span style={{ fontSize:'12px' }}>
@@ -376,14 +376,16 @@ export default function HWDashboard() {
                               <strong style={{ color:'#dc2626' }}>₱{offer.fare_countered?.toLocaleString()}/mo</strong>
                             </span>
                           </div>
-                        )}
-                        {offer.counter_setup && offer.counter_setup !== offer.setup && (
+                        ) : (
                           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                            <span style={{ fontSize:'12px', color:'#6b7280' }}>Setup</span>
-                            <span style={{ fontSize:'12px' }}>
-                              <span style={{ textDecoration:'line-through', color:'#9ca3af' }}>{offer.setup}</span>
-                              {' → '}
-                              <strong style={{ color:'#dc2626' }}>{offer.counter_setup}</strong>
+                            <span style={{ fontSize:'12px', color:'#6b7280' }}>Salary</span>
+                            <strong style={{ fontSize:'12px', color:'#1a6b3c' }}>₱{offer.salary?.toLocaleString()}/mo (accepted)</strong>
+                          </div>
+                        )}
+                        {offer.fare_estimate > 0 && (
+                          <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:'8px', padding:'8px 10px' }}>
+                            <span style={{ fontSize:'12px', color:'#92400e' }}>
+                              🚌 Kasambahay is requesting <strong>₱{offer.fare_estimate?.toLocaleString()}</strong> for transport
                             </span>
                           </div>
                         )}
@@ -393,24 +395,12 @@ export default function HWDashboard() {
                             <strong style={{ fontSize:'12px' }}>{new Date(offer.estimated_arrival).toLocaleDateString('en-PH', { month:'long', day:'numeric', year:'numeric' })}</strong>
                           </div>
                         )}
-                        {offer.fare_estimate && (
-                          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                            <span style={{ fontSize:'12px', color:'#6b7280' }}>Fare estimate</span>
-                            <strong style={{ fontSize:'12px', color:'#92400e' }}>₱{offer.fare_estimate?.toLocaleString()}</strong>
-                          </div>
-                        )}
-                        {offer.counter_notes && (
-                          <div style={{ background:'#fef2f2', borderRadius:'8px', padding:'8px 10px' }}>
-                            <div style={{ fontSize:'10px', fontWeight:700, color:'#9ca3af', marginBottom:'3px', textTransform:'uppercase' as const, letterSpacing:'.4px' }}>Kasambahay's message</div>
-                            <div style={{ fontSize:'12px', color:'#374151', fontStyle:'italic' }}>"{offer.counter_notes}"</div>
-                          </div>
-                        )}
-                        {!offer.fare_countered && !offer.estimated_arrival && !offer.counter_notes && !offer.fare_estimate && (
+                        {!offer.fare_countered && !offer.fare_estimate && !offer.estimated_arrival && (
                           <div style={{ fontSize:'12px', color:'#6b7280' }}>No specific counter details provided.</div>
                         )}
                       </div>
                       <button
-                        onClick={() => router.push('/pay/' + offer.id)}
+                        onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.from('offers').update({ status: 'agreed' }).eq('id', offer.id); router.push('/pay/' + offer.id) }}
                         style={{ width:'100%', padding:'12px', borderRadius:'10px', background:'#1a6b3c', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'13px', fontWeight:700, cursor:'pointer', marginBottom:'8px' }}
                       >
                         Accept Counter Offer
@@ -419,7 +409,7 @@ export default function HWDashboard() {
                         onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.from('offers').update({ status: 'counter_declined', fare_countered: null }).eq('id', offer.id); window.location.reload() }}
                         style={{ width:'100%', padding:'12px', borderRadius:'10px', background:'transparent', border:'1.5px solid #fecaca', color:'#dc2626', fontFamily:'sans-serif', fontSize:'13px', fontWeight:700, cursor:'pointer' }}
                       >
-                        Decline and Send New Offer
+                        Decline Counter Offer
                       </button>
                     </div>
                   )}
