@@ -297,37 +297,23 @@ export default function KBDashboard() {
                   </div>
 
                   {offer.status === 'pending' && (
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button
-                        style={{ flex: 1, padding: '11px', borderRadius: '10px', border: 'none', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
-                        onClick={() => router.push(`/offer/review/${offer.id}`)}
-                      >
-                        Tanggapin
-                      </button>
-                      <button
-                        disabled={actioning === offer.id}
-                        style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'transparent', border: '1.5px solid #fecaca', color: '#dc2626', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: actioning === offer.id ? 'not-allowed' : 'pointer', opacity: actioning === offer.id ? .6 : 1 }}
-                        onClick={async () => {
-                          setActioning(offer.id)
-                          const { supabase } = await import('../../../lib/supabase')
-                          await supabase.from('offers').update({ status: 'declined' }).eq('id', offer.id)
-                          window.location.reload()
-                        }}
-                      >
-                        Tanggihan
-                      </button>
-                    </div>
+                    <button
+                      style={{ width: '100%', padding: '11px', borderRadius: '10px', border: 'none', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+                      onClick={() => router.push(`/offer/review/${offer.id}`)}
+                    >
+                      Tingnan ang buong offer →
+                    </button>
                   )}
 
                   {offer.status === 'agreed' && (
                     <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center' as const, fontWeight: 600 }}>
-                      Tinanggap mo na — naghihintay ng bayad ng homeowner
+                      Tinanggap mo na ito — naghihintay ng bayad
                     </div>
                   )}
 
                   {offer.status === 'countered' && (
                     <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center' as const }}>
-                      Nag-counter ka — naghihintay ng sagot ng homeowner
+                      Nag-counter ka — naghihintay ng sagot
                     </div>
                   )}
 
