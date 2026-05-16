@@ -18,7 +18,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('homeowners')
-    .select('id, profile_id, subscription_expires_at, subscription_credit_used, profile:profile_id(full_name, mobile)')
+    .select('id, profile_id, subscription_expires_at, subscription_credit_used, profile:profiles!profile_id(full_name, mobile)')
     .order('id', { ascending: false })
 
   if (error) {

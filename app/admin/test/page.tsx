@@ -244,12 +244,10 @@ export default function AdminTestPanel() {
       supabase
         .from('kasambahay')
         .select('*, profiles(*), partner:referred_by(*, profiles(*))')
-        .not('referred_by', 'is', null)
-        .order('id', { ascending: false }),
+        .not('referred_by', 'is', null),
       supabase
         .from('partners')
-        .select('*, profiles(*)')
-        .order('id', { ascending: false }),
+        .select('*, profiles(*)'),
       fetch('/api/test-webhook-trigger').then(r => r.json()).catch(e => { console.error('[load] agreed offers fetch error:', e); return { offers: [] } }),
     ])
     if (offersRes.error) console.error('[load] offers query error:', offersRes.error)
