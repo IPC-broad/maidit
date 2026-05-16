@@ -1,3 +1,6 @@
+// KASAMBAHAY PAGE — All UI text must be in Taglish (Filipino/English mix)
+// DO NOT translate to English during audits
+// Homeowner pages = English, Kasambahay pages = Taglish
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -104,16 +107,17 @@ export default function KBDashboard() {
   }
 
   const offerStatusMap: Record<string, { label: string; bg: string; color: string }> = {
-    pending:         { label: 'Bagong Offer',              bg: '#fef3e2', color: '#c9943a' },
-    reviewed:        { label: 'Hinihintay ang homeowner',  bg: '#eff6ff', color: '#2563eb' },
-    agreed:          { label: 'Hinihintay ang bayad',      bg: '#fffbeb', color: '#92400e' },
-    payment_pending: { label: 'Processing payment',        bg: '#fffbeb', color: '#92400e' },
-    paid:            { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
-    active:          { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
-    hired:           { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
-    countered:       { label: 'Counter offer — naghihintay ng sagot', bg: '#fef3e2', color: '#c9943a' },
-    counter_declined: { label: 'Counter Offer Declined', bg: '#fef2f2', color: '#dc2626' },
-    declined:        { label: 'May Na-hire Na',             bg: '#fef2f2', color: '#dc2626' },
+    pending:          { label: 'May Offer na',                          bg: '#fef3e2', color: '#c9943a' },
+    reviewed:         { label: 'Hinihintay ang homeowner',              bg: '#eff6ff', color: '#2563eb' },
+    agreed:           { label: 'May Tinanggap na Offer',                bg: '#fffbeb', color: '#92400e' },
+    payment_pending:  { label: 'Hinihintay ang bayad',                  bg: '#fffbeb', color: '#92400e' },
+    paid:             { label: 'Bayad na',                              bg: '#f0fdf4', color: '#1a6b3c' },
+    active:           { label: 'Na-hire na',                            bg: '#f0fdf4', color: '#1a6b3c' },
+    hired:            { label: 'Na-hire na',                            bg: '#f0fdf4', color: '#1a6b3c' },
+    countered:        { label: 'Counter offer — naghihintay ng sagot',  bg: '#fef3e2', color: '#c9943a' },
+    counter_declined: { label: 'Di nagkasundo',                         bg: '#fef2f2', color: '#dc2626' },
+    declined:         { label: 'Tinanggihan',                           bg: '#fef2f2', color: '#dc2626' },
+    cancelled:        { label: 'Nakansela',                             bg: '#fef2f2', color: '#dc2626' },
   }
 
   const s: any = {
@@ -495,7 +499,7 @@ export default function KBDashboard() {
             </div>
 
             <button onClick={() => setShowProfile(false)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid #ede8e0', background: 'transparent', color: '#6b7280', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 600, cursor: 'pointer', marginBottom: '8px' }}>Isara</button>
-            <button onClick={handleSignOut} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid #fecaca', background: 'transparent', color: '#dc2626', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Sign Out</button>
+            <button onClick={handleSignOut} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid #fecaca', background: 'transparent', color: '#dc2626', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Mag-Sign Out</button>
           </div>
         </div>
       )}
