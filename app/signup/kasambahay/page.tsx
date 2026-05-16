@@ -134,27 +134,12 @@ export default function KasambahaySignup() {
     setStep(2)
   }
 
-  const sendOtpAndProceed = async () => {
+  const sendOtpAndProceed = () => {
     if (!selProv || !form.salary) {
       setError('Punan ang lahat ng fields')
       return
     }
-    setLoading(true)
     setError('')
-
-    const res = await fetch('/api/send-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mobile: form.mobile })
-    })
-    const data = await res.json()
-    if (!res.ok) {
-      setError(data.error || 'Hindi napadala ang SMS. Subukan ulit.')
-      setLoading(false)
-      return
-    }
-    startCooldown()
-    setLoading(false)
     setStep(3)
   }
 
@@ -621,25 +606,34 @@ export default function KasambahaySignup() {
       {/* ── STEP 3: OTP Verification ── */}
       {step === 3 && (
         <>
-          <div style={s.title}>I-verify ang number mo</div>
-          <div style={s.sub}>
-            Nagpadala kami ng 6-digit code sa <strong style={{ color:'#111827' }}>{form.mobile}</strong>. Ilagay ang code sa ibaba.
+          <div style={s.title}>I-verify ang iyong number</div>
+
+          {/* Bypass — top, most prominent */}
+          <div style={{ background:'#fffbeb', border:'2px solid #f59e0b', borderRadius:'12px', padding:'16px', marginBottom:'20px' }}>
+            <p style={{ fontSize:'15px', color:'#92400e', marginBottom:'14px', lineHeight:1.6 }}>
+              ⏳ Ang SMS verification ay hindi pa available.<br />
+              I-click ang button sa ibaba para magpatuloy.
+            </p>
+            <button
+              style={{ width:'100%', padding:'16px', borderRadius:'10px', background:'#c9943a', border:'none', color:'#fff', fontSize:'17px', fontWeight:700, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? .7 : 1 }}
+              onClick={createAccount}
+              disabled={loading}
+            >
+              {loading ? 'Ginagawa...' : 'Magpatuloy (SMS coming soon) →'}
+            </button>
           </div>
 
-          <p style={{ fontSize:'14px', color:'#92400e', background:'#fffbeb', padding:'10px', borderRadius:'8px', marginBottom:'12px', lineHeight:1.6 }}>
-            ⏳ Ang SMS verification ay hindi pa available. I-click ang button sa ibaba para magpatuloy.
-          </p>
-          <button
-            style={{ width:'100%', padding:'14px', borderRadius:'10px', background:'#c9943a', border:'none', color:'#fff', fontSize:'16px', fontWeight:700, cursor:'pointer', marginBottom:'12px' }}
-            onClick={createAccount}
-            disabled={loading}
-          >
-            {loading ? 'Ginagawa...' : 'Magpatuloy (SMS coming soon) →'}
-          </button>
+          {/* Divider */}
+          <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'20px' }}>
+            <div style={{ flex:1, height:'1px', background:'#e5e7eb' }} />
+            <span style={{ fontSize:'13px', color:'#9ca3af' }}>— o kaya —</span>
+            <div style={{ flex:1, height:'1px', background:'#e5e7eb' }} />
+          </div>
 
+          {/* Grayed OTP section */}
           <label style={{ ...s.lbl, opacity:.4 }}>Verification Code</label>
           <input
-            style={{ ...s.input, fontSize:'1.3rem', fontWeight:700, textAlign:'center', letterSpacing:'8px', opacity:.4 }}
+            style={{ ...s.input, fontSize:'1.3rem', fontWeight:700, textAlign:'center' as const, letterSpacing:'8px', opacity:.4 }}
             placeholder="000000"
             value={form.otp}
             onChange={e => update('otp', e.target.value.replace(/\D/g,'').slice(0,6))}
@@ -648,19 +642,8 @@ export default function KasambahaySignup() {
             disabled
           />
 
-          <button
-            style={{ ...s.btn, opacity:.4 }}
-            onClick={verifyAndCreate}
-            disabled
-          >
+          <button style={{ ...s.btn, opacity:.4 }} onClick={verifyAndCreate} disabled>
             I-verify at Gumawa ng Account →
-          </button>
-
-          <button
-            style={{ width:'100%', padding:'11px', marginTop:'10px', background:'transparent', border:'1.5px solid #e5e7eb', borderRadius:'12px', fontFamily:'sans-serif', fontSize:'16px', color:'#6b7280', cursor:'not-allowed', opacity:.4 }}
-            disabled
-          >
-            I-resend ang code
           </button>
         </>
       )}
