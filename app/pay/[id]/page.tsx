@@ -13,6 +13,8 @@ export default function PayPage() {
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
   const [linkError, setLinkError] = useState(false)
   const [step, setStep] = useState<'pay' | 'already'>('pay')
+  const [skipLoading, setSkipLoading] = useState(false)
+  const testMode = process.env.NEXT_PUBLIC_TEST_MODE === 'true'
 
   useEffect(() => {
     const init = async () => {
@@ -232,6 +234,35 @@ export default function PayPage() {
             onClick={() => { window.location.href = checkoutUrl! }}
           >
             Pay ₱{total.toLocaleString()} via PayMongo →
+          </button>
+        )}
+
+        {testMode && (
+          <button
+            style={{ ...s.btnOutline, marginTop: '8px', opacity: skipLoading ? .6 : 1 }}
+            disabled={skipLoading}
+            onClick={async () => {
+              setSkipLoading(true)
+              try {
+                const res = await fetch('/api/test-webhook-trigger', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ offer_id: offerId, action: 'simulate_payment' }),
+                })
+                const data = await res.json()
+                if (data.success) {
+                  router.push(`/arrival/${offerId}`)
+                } else {
+                  alert(`Simulation failed: ${data.error || 'unknown error'}`)
+                  setSkipLoading(false)
+                }
+              } catch (e: any) {
+                alert(`Error: ${e?.message}`)
+                setSkipLoading(false)
+              }
+            }}
+          >
+            {skipLoading ? 'Processing…' : 'Skip Payment for Testing →'}
           </button>
         )}
 
