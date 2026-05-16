@@ -18,8 +18,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, full_name, mobile, role, created_at, email')
-    .order('created_at', { ascending: false })
+    .select('id, full_name, mobile, role')
 
   if (error) {
     console.error('[list-profiles] Supabase error:', error)
