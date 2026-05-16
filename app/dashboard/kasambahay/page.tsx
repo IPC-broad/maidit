@@ -64,7 +64,7 @@ export default function KBDashboard() {
       await supabase.from('kasambahay').update(field).eq('profile_id', profile.id)
       setKb((prev: any) => ({ ...prev, ...field }))
       setUploadMsg(type === 'id' ? '✅ ID na-upload!' : '✅ Clearance na-upload!')
-    } catch (e: any) {
+    } catch {
       setUploadMsg('❌ Hindi na-upload. Subukan ulit.')
     }
     setter(false)
@@ -79,10 +79,10 @@ export default function KBDashboard() {
 
   const urgencyLabel = (u: string) => {
     if (!u) return '—'
-    if (['Now','ASAP','Kailangan na (ASAP)'].includes(u)) return 'ASAP'
-    if (['1-7 days','Sa loob ng ilang araw'].includes(u)) return 'Within a few days'
-    if (['2 weeks','Sa susunod na linggo'].includes(u)) return 'Next week'
-    if (['Flexible','Pwede pag-usapan'].includes(u)) return 'Flexible'
+    if (['Now','ASAP','Kailangan na (ASAP)'].includes(u)) return 'Kailangan na (ASAP)'
+    if (['1-7 days','Sa loob ng ilang araw'].includes(u)) return 'Sa loob ng ilang araw'
+    if (['2 weeks','Sa susunod na linggo'].includes(u)) return 'Sa susunod na linggo'
+    if (['Flexible','Pwede pag-usapan'].includes(u)) return 'Pwede pag-usapan'
     return u
   }
 
@@ -91,11 +91,11 @@ export default function KBDashboard() {
     const parts = []
     if (h.adults > 0) parts.push(`${h.adults} adult${h.adults > 1 ? 's' : ''}`)
     if (h.seniors > 0) parts.push(`${h.seniors} senior${h.seniors > 1 ? 's' : ''}`)
-    if (h.kids > 0) parts.push(`${h.kids} kid${h.kids > 1 ? 's' : ''}`)
+    if (h.kids > 0) parts.push(`${h.kids} bata`)
     return parts.join(' · ') || '—'
   }
 
-  const petsText = (pets: string) => (!pets || pets === 'No' || pets === 'Wala') ? 'No Pets' : pets
+  const petsText = (pets: string) => (!pets || pets === 'No' || pets === 'Wala') ? 'Walang Pets' : `May ${pets}`
 
   const toIntl = (mobile: string | undefined) => {
     if (!mobile) return ''
@@ -104,16 +104,16 @@ export default function KBDashboard() {
   }
 
   const offerStatusMap: Record<string, { label: string; bg: string; color: string }> = {
-    pending:         { label: 'New Offer',            bg: '#fef3e2', color: '#c9943a' },
-    reviewed:        { label: 'Awaiting homeowner',   bg: '#eff6ff', color: '#2563eb' },
-    agreed:          { label: 'Awaiting payment',     bg: '#fffbeb', color: '#92400e' },
-    payment_pending: { label: 'Processing payment',   bg: '#fffbeb', color: '#92400e' },
-    paid:            { label: 'HIRED',                bg: '#f0fdf4', color: '#1a6b3c' },
-    active:          { label: 'HIRED',                bg: '#f0fdf4', color: '#1a6b3c' },
-    hired:           { label: 'HIRED',                bg: '#f0fdf4', color: '#1a6b3c' },
-    countered:       { label: 'Counter offer sent',   bg: '#fef3e2', color: '#c9943a' },
+    pending:         { label: 'Bagong Offer',              bg: '#fef3e2', color: '#c9943a' },
+    reviewed:        { label: 'Hinihintay ang homeowner',  bg: '#eff6ff', color: '#2563eb' },
+    agreed:          { label: 'Hinihintay ang bayad',      bg: '#fffbeb', color: '#92400e' },
+    payment_pending: { label: 'Processing payment',        bg: '#fffbeb', color: '#92400e' },
+    paid:            { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
+    active:          { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
+    hired:           { label: 'HIRED',         bg: '#f0fdf4', color: '#1a6b3c' },
+    countered:       { label: 'Counter offer — naghihintay ng sagot', bg: '#fef3e2', color: '#c9943a' },
     counter_declined: { label: 'Counter Offer Declined', bg: '#fef2f2', color: '#dc2626' },
-    declined:        { label: 'Position filled',      bg: '#fef2f2', color: '#dc2626' },
+    declined:        { label: 'May Na-hire Na',             bg: '#fef2f2', color: '#dc2626' },
   }
 
   const s: any = {
@@ -147,19 +147,19 @@ export default function KBDashboard() {
             <div style={{ fontFamily: 'serif', fontSize: '16px', fontWeight: 900, color: '#1a1a1a' }}>{profile?.full_name}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#6b7280' }}>
               {kb?.status === 'available' && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />}
-              <span>{kb?.status === 'available' ? 'Available' : kb?.status === 'hired' ? 'Hired' : 'Pending'} · {kb?.province || profile?.city || '—'}</span>
+              <span>{kb?.status === 'available' ? 'Available' : kb?.status === 'hired' ? 'Naka-hire' : 'Pending'} · {kb?.province || profile?.city || '—'}</span>
             </div>
           </div>
         </div>
-        <button onClick={() => setShowProfile(true)} style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '6px 12px', color: '#1a6b3c', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>My Profile</button>
+        <button onClick={() => setShowProfile(true)} style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '6px 12px', color: '#1a6b3c', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>Profile Ko</button>
       </div>
 
       {pendingOffers > 0 && (
         <div style={{ background: '#fef3e2', borderBottom: '1px solid #fde8c0', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => setTab('offers')}>
           <span style={{ fontSize: '18px' }}>💼</span>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#92400e', marginBottom: '1px' }}>New offer</div>
-            <div style={{ fontSize: '12px', color: '#78350f' }}><strong>{pendingOffers} new job offer{pendingOffers > 1 ? 's' : ''}</strong> — tap to view</div>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#92400e', marginBottom: '1px' }}>Bagong offer</div>
+            <div style={{ fontSize: '12px', color: '#78350f' }}><strong>{pendingOffers} bagong job offer</strong> — i-tap para tingnan</div>
           </div>
           <span style={{ color: '#c9943a', fontSize: '14px', fontWeight: 700 }}>→</span>
         </div>
@@ -167,9 +167,9 @@ export default function KBDashboard() {
 
       <div style={{ display: 'flex', background: '#fff', borderBottom: '1px solid #ede8e0' }}>
         {([
-          { id: 'jobs',    icon: '💼', label: 'Jobs',        sub: `${jobs.length} available` },
-          { id: 'offers',  icon: '📩', label: 'Job Offers', sub: pendingOffers > 0 ? `${pendingOffers} new offer${pendingOffers > 1 ? 's' : ''}` : 'View' },
-          { id: 'applied', icon: '✋', label: 'Applied',     sub: 'View status' },
+          { id: 'jobs',    icon: '💼', label: 'Mga Trabaho',         sub: `${jobs.length} available` },
+          { id: 'offers',  icon: '📩', label: 'Mga Offer Sayo',      sub: pendingOffers > 0 ? `${pendingOffers} bagong offer` : 'Tingnan' },
+          { id: 'applied', icon: '✋', label: 'Mga In-applyan',       sub: 'Tingnan ang status' },
         ] as const).map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, padding: '9px 4px 8px', border: 'none', background: 'none', cursor: 'pointer', borderBottom: `2px solid ${tab === t.id ? '#c9943a' : 'transparent'}`, fontFamily: 'sans-serif', color: tab === t.id ? '#c9943a' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px', position: 'relative' }}>
             <span style={{ fontSize: '18px', marginBottom: '1px' }}>{t.icon}</span>
@@ -182,36 +182,29 @@ export default function KBDashboard() {
 
       {tab === 'jobs' && (
         <div style={{ padding: '14px 14px 32px' }}>
-          <div style={{ fontFamily: 'serif', fontSize: '17px', fontWeight: 900, marginBottom: '2px' }}>Jobs</div>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '14px' }}>{jobs.length} job{jobs.length !== 1 ? 's' : ''} available</div>
-
+          <div style={{ fontFamily: 'serif', fontSize: '17px', fontWeight: 900, marginBottom: '2px' }}>Mga Trabaho</div>
+          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '14px' }}>{jobs.length} trabaho ang available</div>
           {isHired && (
             <div style={{ background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
-              <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '4px' }}>Refer a Friend</div>
-              <div style={{ fontSize: '.82rem', color: '#1a1a1a', fontWeight: 600, marginBottom: '4px' }}>Share your referral link and earn rewards when your friends join MaidIt</div>
-              <div style={{ fontSize: '.72rem', color: '#6b7280', marginBottom: '12px', lineHeight: 1.5 }}>Send your unique link to friends looking for work as a kasambahay.</div>
-              <div style={{ background: '#fff', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '9px 12px', fontSize: '.72rem', fontFamily: 'monospace', color: '#1a6b3c', wordBreak: 'break-all' as const, marginBottom: '10px' }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '4px' }}>I-refer ang Kaibigan</div>
+              <div style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 600, marginBottom: '4px' }}>I-share ang iyong referral link at makakuha ng rewards</div>
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '12px', lineHeight: 1.5 }}>Ipadala ang iyong unique link sa mga kaibigan na naghahanap ng trabaho bilang kasambahay.</div>
+              <div style={{ background: '#fff', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', fontFamily: 'monospace', color: '#1a6b3c', wordBreak: 'break-all' as const, marginBottom: '10px' }}>
                 {referralLink}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '7px' }}>
                 <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(referralLink).then(() => {
-                      setCopied(true)
-                      setTimeout(() => setCopied(false), 2500)
-                    })
-                  }}
+                  onClick={() => { navigator.clipboard.writeText(referralLink).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2500) }) }}
                   style={{ width: '100%', padding: '11px', borderRadius: '10px', border: 'none', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
                 >
-                  {copied ? '✅ Copied!' : '📋 Copy Link'}
+                  {copied ? '✅ Nakopya!' : '📋 Kopyahin ang Link'}
                 </button>
                 <a
                   href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`}
-                  target="_blank"
-                  rel="noreferrer"
+                  target="_blank" rel="noreferrer"
                   style={{ width: '100%', padding: '11px', borderRadius: '10px', border: 'none', background: '#1877f2', color: '#fff', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: 'pointer', textAlign: 'center' as const, textDecoration: 'none', display: 'block', boxSizing: 'border-box' as const }}
                 >
-                  Share on Facebook
+                  Share sa Facebook
                 </a>
               </div>
             </div>
@@ -220,8 +213,8 @@ export default function KBDashboard() {
           {jobs.length === 0 && (
             <div style={{ textAlign: 'center', padding: '52px 24px 40px' }}>
               <div style={{ fontSize: '3rem', marginBottom: '14px' }}>🧹</div>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: '#374151', marginBottom: '6px' }}>No jobs available right now.</div>
-              <div style={{ fontSize: '12px', color: '#9ca3af', lineHeight: 1.7 }}>Check back later for new listings.</div>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#374151', marginBottom: '6px' }}>Walang available na trabaho ngayon.</div>
+              <div style={{ fontSize: '12px', color: '#9ca3af', lineHeight: 1.7 }}>Mag-check ulit mamaya para sa mga bagong trabaho.</div>
             </div>
           )}
           {jobs.map((job: any) => (
@@ -230,9 +223,9 @@ export default function KBDashboard() {
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '10px' }}>
                   <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0, border: '2px solid #bbf7d0' }}>🏠</div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '1px' }}>Family in {job.city}</div>
+                    <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '1px' }}>Pamilya sa {job.city}</div>
                     <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '6px' }}>{urgencyLabel(job.urgency)}</div>
-                    <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, color: '#1a6b3c' }}>₱{job.salary?.toLocaleString()}<span style={{ fontSize: '11px', fontWeight: 400, color: '#9ca3af' }}>/month</span></div>
+                    <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, color: '#1a6b3c' }}>₱{job.salary?.toLocaleString()}<span style={{ fontSize: '11px', fontWeight: 400, color: '#9ca3af' }}>/buwan</span></div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '10px' }}>
@@ -241,11 +234,11 @@ export default function KBDashboard() {
                   <span style={s.tag('#eff6ff', '#2563eb')}>{householdText(job.household)}</span>
                   <span style={s.tag('#f3f4f6', '#6b7280')}>{petsText(job.pets)}</span>
                 </div>
-                <div style={{ fontSize: '12px', color: '#374151', marginBottom: '10px' }}>Duties: <strong>{job.scope?.join(' · ') || '—'}</strong></div>
+                <div style={{ fontSize: '12px', color: '#374151', marginBottom: '10px' }}>Kailangan: <strong>{job.scope?.join(' · ') || '—'}</strong></div>
                 {appliedIds.has(job.id) ? (
-                  <div style={{ width: '100%', padding: '10px', borderRadius: '9px', background: '#f0fdf4', border: '1.5px solid #bbf7d0', color: '#1a6b3c', fontSize: '12px', fontWeight: 700, textAlign: 'center' }}>Applied — awaiting response</div>
+                  <div style={{ width: '100%', padding: '10px', borderRadius: '9px', background: '#f0fdf4', border: '1.5px solid #bbf7d0', color: '#1a6b3c', fontSize: '12px', fontWeight: 700, textAlign: 'center' }}>Nag-apply ka na - hintayin ang sagot</div>
                 ) : (
-                  <button style={s.btn('#c9943a')} onClick={() => router.push(`/jobs/${job.id}/apply`)}>Apply — Free</button>
+                  <button style={s.btn('#c9943a')} onClick={() => router.push(`/jobs/${job.id}/apply`)}>Mag-apply - Libre</button>
                 )}
               </div>
             </div>
@@ -255,9 +248,9 @@ export default function KBDashboard() {
 
       {tab === 'offers' && (
         <div style={{ padding: '14px 14px 32px' }}>
-          <div style={{ fontFamily: 'serif', fontSize: '17px', fontWeight: 900, marginBottom: '2px' }}>Job Offers</div>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '14px' }}>{offers.length === 0 ? 'No offers yet.' : `${offers.length} offer${offers.length !== 1 ? 's' : ''} received`}</div>
-          {offers.length === 0 && <div style={{ textAlign: 'center', padding: '40px 20px' }}><div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📭</div><div style={{ color: '#9ca3af', fontSize: '13px', lineHeight: 1.7 }}>You haven't received any offers yet.</div></div>}
+          <div style={{ fontFamily: 'serif', fontSize: '17px', fontWeight: 900, marginBottom: '2px' }}>Mga Offer Sayo</div>
+          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '14px' }}>{offers.length === 0 ? 'Wala pang Offer.' : `${offers.length} offer ang natanggap mo`}</div>
+          {offers.length === 0 && <div style={{ textAlign: 'center', padding: '40px 20px' }}><div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📭</div><div style={{ color: '#9ca3af', fontSize: '13px', lineHeight: 1.7 }}>Wala ka pang Offer.</div></div>}
           {offers.map((offer: any) => {
             const st = offerStatusMap[offer.status] || { label: offer.status, bg: '#f3f4f6', color: '#6b7280' }
             const isHired = ['paid','active','hired'].includes(offer.status)
@@ -273,21 +266,21 @@ export default function KBDashboard() {
                   </div>
                   <div style={{ ...s.infoBox, opacity: isClosed ? .6 : 1 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                      <div><div style={s.lbl10}>Salary</div><div style={{ fontFamily: 'serif', fontSize: '16px', fontWeight: 900, color: isClosed ? '#6b7280' : '#1a6b3c' }}>₱{offer.salary?.toLocaleString()}<span style={{ fontSize: '10px', fontWeight: 400, color: '#9ca3af' }}>/month</span></div></div>
-                      <div><div style={s.lbl10}>Location</div><div style={{ ...s.val13, color: isClosed ? '#6b7280' : '#1a1a1a' }}>{offer.city || '—'}</div></div>
+                      <div><div style={s.lbl10}>Sahod</div><div style={{ fontFamily: 'serif', fontSize: '16px', fontWeight: 900, color: isClosed ? '#6b7280' : '#1a6b3c' }}>₱{offer.salary?.toLocaleString()}<span style={{ fontSize: '10px', fontWeight: 400, color: '#9ca3af' }}>/buwan</span></div></div>
+                      <div><div style={s.lbl10}>Lokasyon</div><div style={{ ...s.val13, color: isClosed ? '#6b7280' : '#1a1a1a' }}>{offer.city || '—'}</div></div>
                       <div><div style={s.lbl10}>Setup</div><div style={{ ...s.val13, color: isClosed ? '#6b7280' : '#1a1a1a' }}>{offer.setup || '—'}</div></div>
-                      <div><div style={s.lbl10}>Household</div><div style={{ fontSize: '12px', fontWeight: 600, color: isClosed ? '#6b7280' : '#1a1a1a', lineHeight: 1.4 }}>{householdText(offer.household)} · {petsText(offer.pets)}</div></div>
+                      <div><div style={s.lbl10}>Pamilya</div><div style={{ fontSize: '12px', fontWeight: 600, color: isClosed ? '#6b7280' : '#1a1a1a', lineHeight: 1.4 }}>{householdText(offer.household)} · {petsText(offer.pets)}</div></div>
                     </div>
                   </div>
                   {!isClosed && <>
-                    <div style={{ fontSize: '12px', color: '#374151', marginBottom: '4px' }}>Duties: <strong>{offer.scope?.join(' · ') || '—'}</strong></div>
-                    <div style={{ fontSize: '12px', color: '#374151', marginBottom: '10px' }}>When: <strong>{urgencyLabel(offer.urgency)}</strong></div>
+                    <div style={{ fontSize: '12px', color: '#374151', marginBottom: '4px' }}>Kailangan: <strong>{offer.scope?.join(' · ') || '—'}</strong></div>
+                    <div style={{ fontSize: '12px', color: '#374151', marginBottom: '10px' }}>Kailan: <strong>{urgencyLabel(offer.urgency)}</strong></div>
                   </>}
-                  {offer.status === 'pending' && <button style={s.btn('#c9943a')} onClick={() => router.push(`/offer/review/${offer.id}`)}>View Full Offer</button>}
-                  {offer.status === 'reviewed' && <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#2563eb', textAlign: 'center' }}>Awaiting homeowner confirmation.</div>}
-                  {offer.status === 'countered' && <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center' }}>Counter offer submitted. Awaiting homeowner's response.</div>}
-                  {(offer.status === 'agreed' || offer.status === 'payment_pending') && <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center', fontWeight: 600 }}>Awaiting homeowner's payment.</div>}
-                  {isHired && <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#166534', fontWeight: 600, textAlign: 'center', marginBottom: '10px' }}>HIRED! Your employer is awaiting your arrival.</div>}
+                  {offer.status === 'pending' && <button style={s.btn('#c9943a')} onClick={() => router.push(`/offer/review/${offer.id}`)}>Tingnan ang Buong Offer</button>}
+                  {offer.status === 'reviewed' && <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#2563eb', textAlign: 'center' }}>Hinihintay ang confirmation ng homeowner.</div>}
+                  {offer.status === 'countered' && <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center' }}>Naisumite ang iyong counter offer. Hinihintay ang sagot ng homeowner.</div>}
+                  {(offer.status === 'agreed' || offer.status === 'payment_pending') && <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center', fontWeight: 600 }}>Hinihintay ang bayad ng homeowner.</div>}
+                  {isHired && <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#166534', fontWeight: 600, textAlign: 'center', marginBottom: '10px' }}>HIRED! Inaantay na ang pagdating mo sa lugar ng pagtatrabahuan.</div>}
                   {isHired && offer.homeowner?.profiles?.mobile && (
                     <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px' }}>
                       <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '8px' }}>Contact your employer</div>
@@ -305,13 +298,13 @@ export default function KBDashboard() {
                   {isCounterDeclined && (
                     <>
                       <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '11px 13px', fontSize: '12px', color: '#78350f', lineHeight: 1.75, marginBottom: '10px' }}>
-                        The homeowner declined your proposed changes to the offer.
+                        Ang iyong mga proposed na pagbabago sa offer ay hindi tinanggap ng homeowner.
                         <br /><br />
-                        The original offer remains valid for 48 hours from when it was first sent. You can still accept or decline it.
+                        Ang orihinal na offer ay nananatiling valid hanggang 48 oras mula nang ito ay unang ipadala. Maaari mo pa itong tanggapin o tanggihan.
                       </div>
                       {offerExpired ? (
                         <div style={{ background: '#f3f4f6', borderRadius: '9px', padding: '10px 12px', fontSize: '12px', color: '#6b7280', textAlign: 'center' as const }}>
-                          This offer has expired.
+                          Nag-expire na ang offer.
                         </div>
                       ) : (
                         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
@@ -325,7 +318,7 @@ export default function KBDashboard() {
                               window.location.reload()
                             }}
                           >
-                            {actioning === offer.id ? 'Processing...' : 'Accept Original Offer'}
+                            {actioning === offer.id ? 'Processing...' : 'Tanggapin ang Orihinal na Offer'}
                           </button>
                           <button
                             disabled={actioning === offer.id}
@@ -337,13 +330,13 @@ export default function KBDashboard() {
                               window.location.reload()
                             }}
                           >
-                            Decline Offer
+                            Tanggihan ang Offer
                           </button>
                         </div>
                       )}
                     </>
                   )}
-                  {isClosed && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#dc2626', textAlign: 'center' }}>This family has already hired someone.</div>}
+                  {isClosed && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#dc2626', textAlign: 'center' }}>Nakahanap na ng kasambahay ang pamilyang ito.</div>}
                 </div>
               </div>
             )
@@ -353,33 +346,33 @@ export default function KBDashboard() {
 
       {tab === 'applied' && (
         <div style={{ padding: '14px 14px 32px' }}>
-          <div style={{ fontFamily: 'serif', fontSize: '17px', fontWeight: 900, marginBottom: '2px' }}>My Applications</div>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '14px' }}>{appliedJobs.length} job{appliedJobs.length !== 1 ? 's' : ''} applied</div>
-          {appliedJobs.length === 0 && <div style={{ textAlign: 'center', padding: '40px 20px' }}><div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>✋</div><div style={{ color: '#9ca3af', fontSize: '13px', lineHeight: 1.7 }}>You haven't applied to any jobs yet.</div></div>}
+          <div style={{ fontFamily: 'serif', fontSize: '17px', fontWeight: 900, marginBottom: '2px' }}>Mga In-applyan Ko</div>
+          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '14px' }}>{appliedJobs.length} trabaho ang na-apply mo</div>
+          {appliedJobs.length === 0 && <div style={{ textAlign: 'center', padding: '40px 20px' }}><div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>✋</div><div style={{ color: '#9ca3af', fontSize: '13px', lineHeight: 1.7 }}>Wala ka pang na-apply na trabaho.</div></div>}
           {appliedJobs.map((job: any) => (
             <div key={job.id} style={s.card}>
               <div style={{ padding: '13px 14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <div><div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '1px' }}>Family in {job.city}</div><div style={{ fontSize: '11px', color: '#9ca3af' }}>{urgencyLabel(job.urgency)}</div></div>
-                  <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: '#fffbeb', color: '#92400e' }}>Pending</span>
+                  <div><div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '1px' }}>Pamilya sa {job.city}</div><div style={{ fontSize: '11px', color: '#9ca3af' }}>{urgencyLabel(job.urgency)}</div></div>
+                  <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: '#fffbeb', color: '#92400e' }}>Hinihintay</span>
                 </div>
                 <div style={s.infoBox}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    <div><div style={s.lbl10}>Salary</div><div style={{ fontFamily: 'serif', fontSize: '16px', fontWeight: 900, color: '#1a6b3c' }}>₱{job.salary?.toLocaleString()}<span style={{ fontSize: '10px', fontWeight: 400, color: '#9ca3af' }}>/month</span></div></div>
-                    <div><div style={s.lbl10}>Location</div><div style={s.val13}>{job.city}</div></div>
+                    <div><div style={s.lbl10}>Sahod</div><div style={{ fontFamily: 'serif', fontSize: '16px', fontWeight: 900, color: '#1a6b3c' }}>₱{job.salary?.toLocaleString()}<span style={{ fontSize: '10px', fontWeight: 400, color: '#9ca3af' }}>/buwan</span></div></div>
+                    <div><div style={s.lbl10}>Lokasyon</div><div style={s.val13}>{job.city}</div></div>
                     <div><div style={s.lbl10}>Setup</div><div style={s.val13}>{job.setup}</div></div>
-                    <div><div style={s.lbl10}>Household</div><div style={{ fontSize: '12px', fontWeight: 600, lineHeight: 1.4 }}>{householdText(job.household)} · {petsText(job.pets)}</div></div>
+                    <div><div style={s.lbl10}>Pamilya</div><div style={{ fontSize: '12px', fontWeight: 600, lineHeight: 1.4 }}>{householdText(job.household)} · {petsText(job.pets)}</div></div>
                   </div>
                 </div>
-                <div style={{ fontSize: '12px', color: '#374151', marginBottom: '4px' }}>Duties: <strong>{job.scope?.join(' · ') || '—'}</strong></div>
-                <div style={{ fontSize: '12px', color: '#374151', marginBottom: '10px' }}>When: <strong>{urgencyLabel(job.urgency)}</strong></div>
+                <div style={{ fontSize: '12px', color: '#374151', marginBottom: '4px' }}>Kailangan: <strong>{job.scope?.join(' · ') || '—'}</strong></div>
+                <div style={{ fontSize: '12px', color: '#374151', marginBottom: '10px' }}>Kailan: <strong>{urgencyLabel(job.urgency)}</strong></div>
                 <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', textAlign: 'center' }}>
-                  Awaiting homeowner's response. We will notify you by SMS.
+                  Hinihintay pa ang sagot ng homeowner. Mag-aabiso kami sa SMS.
                 </div>
               </div>
             </div>
           ))}
-          {appliedJobs.length > 0 && <button style={{ ...s.btn('#c9943a'), marginTop: '8px' }} onClick={() => setTab('jobs')}>Browse more jobs</button>}
+          {appliedJobs.length > 0 && <button style={{ ...s.btn('#c9943a'), marginTop: '8px' }} onClick={() => setTab('jobs')}>Mag-apply pa ng ibang trabaho</button>}
         </div>
       )}
 
@@ -396,11 +389,11 @@ export default function KBDashboard() {
               <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900 }}>{profile?.full_name}</div>
               <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '8px' }}>{profile?.mobile}</div>
               <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 12px', borderRadius: '50px', background: kb?.status === 'available' ? '#f0fdf4' : '#fef3e2', border: `1px solid ${kb?.status === 'available' ? '#bbf7d0' : '#fde8c0'}`, color: kb?.status === 'available' ? '#166534' : '#92400e' }}>
-                {kb?.status === 'available' ? 'Available' : kb?.status === 'hired' ? 'Hired' : 'Pending'}
+                {kb?.status === 'available' ? 'Available' : kb?.status === 'hired' ? 'Naka-hire' : 'Pending'}
               </span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '14px' }}>
-              {[{ n: offers.length, l: 'Offers', c: '#c9943a' }, { n: appliedIds.size, l: 'Applied', c: '#2563eb' }, { n: offers.filter(o => ['paid','active','hired'].includes(o.status)).length, l: 'Hired', c: '#1a6b3c' }].map((stat, i) => (
+              {[{ n: offers.length, l: 'Mga Offer', c: '#c9943a' }, { n: appliedIds.size, l: 'In-apply', c: '#2563eb' }, { n: offers.filter(o => ['paid','active','hired'].includes(o.status)).length, l: 'Na-hire', c: '#1a6b3c' }].map((stat, i) => (
                 <div key={i} style={{ background: '#fff', borderRadius: '10px', padding: '10px', border: '1px solid #ede8e0', textAlign: 'center' }}>
                   <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, color: stat.c }}>{stat.n}</div>
                   <div style={{ fontSize: '10px', color: '#9ca3af' }}>{stat.l}</div>
@@ -408,8 +401,8 @@ export default function KBDashboard() {
               ))}
             </div>
             <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #ede8e0', padding: '14px', marginBottom: '12px' }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '10px' }}>Details</div>
-              {[{ label: 'Province', value: kb?.province || profile?.city || '—' }, { label: 'Setup', value: kb?.setup || '—' }, { label: 'Civil Status', value: kb?.civil_status || '—' }, { label: 'No. of Children', value: kb?.num_children !== undefined ? String(kb.num_children) : '—' }, { label: 'Availability', value: kb?.availability || '—' }].map((row, i, arr) => (
+              <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '10px' }}>Detalye</div>
+              {[{ label: 'Probinsya', value: kb?.province || profile?.city || '—' }, { label: 'Setup', value: kb?.setup || '—' }, { label: 'Civil Status', value: kb?.civil_status || '—' }, { label: 'Bilang ng Anak', value: kb?.num_children !== undefined ? String(kb.num_children) : '—' }, { label: 'Availability', value: kb?.availability || '—' }].map((row, i, arr) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid #faf8f5' : 'none' }}>
                   <span style={{ fontSize: '12px', color: '#9ca3af' }}>{row.label}</span>
                   <span style={{ fontSize: '12px', fontWeight: 600 }}>{row.value}</span>
@@ -424,7 +417,6 @@ export default function KBDashboard() {
                 </div>
               </div>
             )}
-            {/* Documents section */}
             <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #ede8e0', padding: '14px', marginBottom: '14px' }}>
               <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '10px' }}>Mga Dokumento</div>
               <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px', marginBottom: '12px' }}>
@@ -455,7 +447,7 @@ export default function KBDashboard() {
               </div>
             </div>
 
-            <button onClick={() => setShowProfile(false)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid #ede8e0', background: 'transparent', color: '#6b7280', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 600, cursor: 'pointer', marginBottom: '8px' }}>Close</button>
+            <button onClick={() => setShowProfile(false)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid #ede8e0', background: 'transparent', color: '#6b7280', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 600, cursor: 'pointer', marginBottom: '8px' }}>Isara</button>
             <button onClick={handleSignOut} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid #fecaca', background: 'transparent', color: '#dc2626', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Sign Out</button>
           </div>
         </div>

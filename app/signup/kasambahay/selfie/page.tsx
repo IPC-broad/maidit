@@ -47,7 +47,7 @@ export default function SelfieCapture() {
       }
       setStream(mediaStream)
     } catch {
-      setCameraError('Could not access camera. Please allow camera permission in your browser settings.')
+      setCameraError('Hindi ma-access ang camera. Paki-allow ang camera permission sa iyong browser settings.')
     }
   }
 
@@ -102,7 +102,7 @@ export default function SelfieCapture() {
       )
       const found = detections.length > 0
       setFaceValid(found)
-      if (!found) setFaceError('Face not detected. Please try again.')
+      if (!found) setFaceError('Hindi malinaw ang mukha. Subukan ulit.')
     } catch {
       // On unexpected error let the user proceed rather than blocking them
       setFaceValid(true)
@@ -160,10 +160,10 @@ export default function SelfieCapture() {
       <div className="w-full max-w-md">
 
         <h1 className="text-xl font-bold text-center mb-2">
-          {isMobile ? 'Take a selfie.' : 'Upload a photo.'}
+          {isMobile ? 'Kumuha ng selfie.' : 'Mag-upload ng litrato.'}
         </h1>
         <p className="text-sm text-gray-500 text-center mb-6">
-          This will be shown to homeowners so they can recognize you.
+          Ito ay ipapakita sa mga homeowner para makilala ka nila.
         </p>
 
         <canvas ref={canvasRef} className="hidden" />
@@ -176,7 +176,7 @@ export default function SelfieCapture() {
                 <div className="text-3xl mb-3">📷</div>
                 <p className="text-sm text-red-700 mb-4">{cameraError}</p>
                 <button onClick={startCamera} className="bg-[#1a6b3c] text-white px-5 py-2 rounded-xl text-sm font-semibold">
-                  Try Again
+                  Subukan Ulit
                 </button>
               </div>
             ) : (
@@ -193,12 +193,12 @@ export default function SelfieCapture() {
               <>
                 {!photo ? (
                   <button onClick={capturePhoto} className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold">
-                    Take Selfie
+                    Kunan ng Selfie
                   </button>
                 ) : (
                   <div className="space-y-2">
                     {validating && (
-                      <div className="text-center text-sm text-gray-500 py-2">Checking face...</div>
+                      <div className="text-center text-sm text-gray-500 py-2">Sinusuri ang mukha...</div>
                     )}
                     {faceError && (
                       <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 text-center">
@@ -207,11 +207,11 @@ export default function SelfieCapture() {
                     )}
                     {faceValid && (
                       <button onClick={savePhoto} disabled={uploading} className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold disabled:opacity-60">
-                        {uploading ? 'Saving...' : 'Use this photo →'}
+                        {uploading ? 'Sine-save...' : 'Gamitin ang picture na ito →'}
                       </button>
                     )}
                     <button onClick={retake} disabled={uploading || validating} className="w-full text-sm text-gray-500 py-2 disabled:opacity-60">
-                      Retake
+                      Ulitin
                     </button>
                   </div>
                 )}
@@ -230,7 +230,7 @@ export default function SelfieCapture() {
                   className="border-2 border-dashed border-[#1a6b3c] rounded-2xl p-10 mb-4 text-center cursor-pointer bg-white hover:bg-green-50 transition-colors"
                 >
                   <div className="text-4xl mb-3">📷</div>
-                  <div className="font-bold text-sm text-[#1a6b3c] mb-1">Click to choose a photo</div>
+                  <div className="font-bold text-sm text-[#1a6b3c] mb-1">I-click para pumili ng litrato</div>
                   <div className="text-xs text-gray-400">JPG, PNG o HEIC · Max 10MB</div>
                 </div>
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
@@ -242,7 +242,7 @@ export default function SelfieCapture() {
                 </div>
                 <div className="space-y-2">
                   {validating && (
-                    <div className="text-center text-sm text-gray-500 py-2">Checking face...</div>
+                    <div className="text-center text-sm text-gray-500 py-2">Sinusuri ang mukha...</div>
                   )}
                   {faceError && (
                     <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 text-center">
@@ -251,11 +251,11 @@ export default function SelfieCapture() {
                   )}
                   {faceValid && (
                     <button onClick={savePhoto} disabled={uploading} className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold disabled:opacity-60">
-                      {uploading ? 'Saving...' : 'Use this photo →'}
+                      {uploading ? 'Sine-save...' : 'Gamitin ang litratong ito →'}
                     </button>
                   )}
                   <button onClick={retake} disabled={uploading || validating} className="w-full text-sm text-gray-500 py-2 disabled:opacity-60">
-                    Choose a different photo
+                    Pumili ng ibang litrato
                   </button>
                 </div>
               </>
@@ -264,7 +264,7 @@ export default function SelfieCapture() {
         )}
 
         <p className="text-xs text-gray-400 text-center mt-5">
-          This adds a "Selfie Verified" badge to your profile.
+          Lalagyan ito ng "Selfie Verified" badge sa iyong profile.
         </p>
 
       </div>
