@@ -47,6 +47,53 @@ export default function AdminTestPanel() {
   const [reminderRunning, setReminderRunning] = useState(false)
   const [reminderResult, setReminderResult] = useState<{ processed: number; reminders_sent: number; flagged: number } | null>(null)
 
+  const [profiles, setProfiles] = useState<any[]>([])
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deletingAll, setDeletingAll] = useState(false)
+
+  const PROTECTED_EMAILS = ['test@maidit.com', 'test.kasambahay@maidit.app', 'partner@maidit.com']
+
+  const loadProfiles = async () => {
+    const { supabase } = await import('../../../lib/supabase')
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, full_name, mobile, role, created_at, email')
+      .order('created_at', { ascending: false })
+    setProfiles(data || [])
+  }
+
+  const deleteAccount = async (profileId: string) => {
+    const confirmed = window.confirm('Sigurado ka bang i-delete ang account na ito?')
+    if (!confirmed) return
+    setDeletingId(profileId)
+    await fetch('/api/admin/delete-account', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile_id: profileId }),
+    })
+    setProfiles(prev => prev.filter(p => p.id !== profileId))
+    setDeletingId(null)
+  }
+
+  const deleteAllTestAccounts = async () => {
+    const toDelete = profiles.filter(p => !PROTECTED_EMAILS.includes(p.email || ''))
+    if (toDelete.length === 0) { setMsg('No test accounts to delete.'); return }
+    const confirmed = window.confirm(`Delete ${toDelete.length} test account(s)? Protected accounts (test@maidit.com etc.) will be kept.`)
+    if (!confirmed) return
+    setDeletingAll(true)
+    for (const p of toDelete) {
+      await fetch('/api/admin/delete-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profile_id: p.id }),
+      })
+    }
+    setMsg(`Deleted ${toDelete.length} test account(s).`)
+    setTimeout(() => setMsg(''), 3000)
+    await loadProfiles()
+    setDeletingAll(false)
+  }
+
   const PAYMENT_TESTS = [
     {
       id: 'A', expect: '₱2,001',
@@ -173,7 +220,7 @@ export default function AdminTestPanel() {
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load(); loadProfiles() }, [])
 
   const loadAgreedOffers = async () => {
     const res = await fetch('/api/test-webhook-trigger')
@@ -513,6 +560,71 @@ export default function AdminTestPanel() {
             <div><strong>Flagged for admin:</strong> {reminderResult.flagged}</div>
           </div>
         )}
+      </div>
+
+      {/* ── MANAGE ACCOUNTS ── */}
+      <div style={{ ...s.secTitle, marginTop: '32px' }}>🗑️ Manage Accounts ({profiles.length})</div>
+      <div style={s.card}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap' as const, gap: '8px' }}>
+          <div style={{ fontSize: '12px', color: '#9ca3af' }}>Protected: test@maidit.com, test.kasambahay@maidit.app, partner@maidit.com</div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={loadProfiles}
+              style={{ padding: '6px 12px', borderRadius: '7px', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', fontFamily: 'sans-serif', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+            >
+              Refresh
+            </button>
+            <button
+              onClick={deleteAllTestAccounts}
+              disabled={deletingAll}
+              style={{ padding: '6px 12px', borderRadius: '7px', background: deletingAll ? '#e5e7eb' : '#fef2f2', color: deletingAll ? '#9ca3af' : '#dc2626', border: '1px solid #fecaca', fontFamily: 'sans-serif', fontSize: '11px', fontWeight: 700, cursor: deletingAll ? 'default' : 'pointer' }}
+            >
+              {deletingAll ? 'Deleting…' : 'Delete All Test Accounts'}
+            </button>
+          </div>
+        </div>
+        <div style={{ overflowX: 'auto' as const }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' as const, fontSize: '12px' }}>
+            <thead>
+              <tr style={{ background: '#faf8f5' }}>
+                {['Mobile', 'Full Name', 'Role', 'Created At', ''].map(h => (
+                  <th key={h} style={{ padding: '8px 10px', textAlign: 'left' as const, fontWeight: 700, color: '#9ca3af', fontSize: '10px', textTransform: 'uppercase' as const, letterSpacing: '.5px', borderBottom: '1px solid #ede8e0', whiteSpace: 'nowrap' as const }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {profiles.map((p, i) => {
+                const isProtected = PROTECTED_EMAILS.includes(p.email || '')
+                return (
+                  <tr key={p.id} style={{ background: i % 2 === 0 ? '#fff' : '#faf8f5', opacity: isProtected ? .5 : 1 }}>
+                    <td style={{ padding: '8px 10px', borderBottom: '1px solid #f3f4f6', fontFamily: 'monospace', color: '#374151' }}>{p.mobile || '—'}</td>
+                    <td style={{ padding: '8px 10px', borderBottom: '1px solid #f3f4f6', fontWeight: 600, color: '#111827' }}>{p.full_name || '—'}</td>
+                    <td style={{ padding: '8px 10px', borderBottom: '1px solid #f3f4f6' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '50px', background: p.role === 'kasambahay' ? '#fef3e2' : p.role === 'homeowner' ? '#eff6ff' : '#f0fdf4', color: p.role === 'kasambahay' ? '#92400e' : p.role === 'homeowner' ? '#1d4ed8' : '#166534' }}>
+                        {p.role || '—'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '8px 10px', borderBottom: '1px solid #f3f4f6', color: '#9ca3af', whiteSpace: 'nowrap' as const }}>{new Date(p.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                    <td style={{ padding: '8px 10px', borderBottom: '1px solid #f3f4f6' }}>
+                      {!isProtected && (
+                        <button
+                          onClick={() => deleteAccount(p.id)}
+                          disabled={deletingId === p.id}
+                          style={{ padding: '4px 10px', borderRadius: '6px', background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', fontFamily: 'sans-serif', fontSize: '11px', fontWeight: 700, cursor: deletingId === p.id ? 'default' : 'pointer', opacity: deletingId === p.id ? .5 : 1 }}
+                        >
+                          {deletingId === p.id ? '…' : '✕ Delete'}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+              {profiles.length === 0 && (
+                <tr><td colSpan={5} style={{ padding: '20px', textAlign: 'center' as const, color: '#9ca3af' }}>No profiles found.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* ── PARTNERS ── */}
