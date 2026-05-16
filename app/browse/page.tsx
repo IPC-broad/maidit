@@ -163,13 +163,12 @@ export default function BrowsePage() {
 
   const showTransport = (kbProvince: string) => {
     if (!kbProvince) return false
-    // Same province as homeowner → never show
-    if (homeownerProvince && kbProvince === homeownerProvince) return false
-    // Leyte/Samar/Bicol → always flag (guests and logged-in)
-    if (TRANSPORT_PROVINCES.includes(kbProvince)) return true
-    // Logged-in with different province → show
-    if (currentUser && homeownerProvince && kbProvince !== homeownerProvince) return true
-    return false
+    if (homeownerProvince) {
+      // Known province: any inter-province = transport, same = hide
+      return kbProvince !== homeownerProvince
+    }
+    // No province on file (guests / new signups): only flag Leyte/Samar/Bicol
+    return TRANSPORT_PROVINCES.includes(kbProvince)
   }
 
   const filtered = profiles.filter(p => {
