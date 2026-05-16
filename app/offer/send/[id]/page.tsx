@@ -2,7 +2,9 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
+import { provinces as PH } from '../../../../lib/ph-locations'
 
+const provinceList = Object.keys(PH)
 
 const TRANSPORT_PROVINCES = [
   'Leyte', 'Southern Leyte', 'Samar', 'Eastern Samar', 'Northern Samar', 'Western Samar',
@@ -20,7 +22,8 @@ export default function SendOfferPage({ params }: any) {
     start_date: '',
     scope: [] as string[],
     setup: 'Stay-in',
-    city: 'Quezon City',
+    province: '',
+    city: '',
     adults: '1',
     seniors: '0',
     kids: '0',
@@ -32,7 +35,8 @@ export default function SendOfferPage({ params }: any) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [showPaywall, setShowPaywall] = useState(false)
-  const [hwProvince, setHwProvince] = useState<string | null>(null)
+  const [hwId, setHwId] = useState<string | null>(null)
+  const [hwProvinceKey, setHwProvinceKey] = useState<string | null>(null)
   const [transportDirectType, setTransportDirectType] = useState<'homeowner_pays' | 'reimburse' | 'kasambahay_pays' | ''>('')
 
   useEffect(() => {
@@ -45,8 +49,19 @@ export default function SendOfferPage({ params }: any) {
       const { data: hw } = await supabase.from('homeowners').select('id, subscription_expires_at').eq('profile_id', user.id).single()
       const subscribed = !!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date())
       if (!subscribed) setShowPaywall(true)
+      if (hw?.id) setHwId(hw.id)
+
       const { data: prof } = await supabase.from('profiles').select('city').eq('id', user.id).single()
-      setHwProvince(prof?.city || null)
+      const hwCity = prof?.city || null
+      // Reverse-lookup: find which province contains the homeowner's city
+      if (hwCity) {
+        const found = provinceList.find(prov => (PH[prov] || []).includes(hwCity))
+        setHwProvinceKey(found || null)
+        // Pre-fill form with homeowner's saved location
+        if (found) {
+          setForm(f => ({ ...f, province: found, city: hwCity }))
+        }
+      }
     }
     init()
   }, [kasambahayId])
@@ -107,8 +122,7 @@ export default function SendOfferPage({ params }: any) {
   const toggleScope = (sc: string) => setForm(f => ({ ...f, scope: f.scope.includes(sc) ? f.scope.filter((x: string) => x !== sc) : [...f.scope, sc] }))
 
   const kbProvince = kb?.province || ''
-  const sameProvince = !!(hwProvince && kbProvince && hwProvince === kbProvince)
-  // Show transport section whenever kb has a province and it differs from homeowner's
+  const sameProvince = !!(hwProvinceKey && kbProvince && hwProvinceKey === kbProvince)
   const showTransportSection = !!(kb && kbProvince && !sameProvince)
   // Show MaidIt option only for Leyte/Samar/Bicol
   const showMaidItOption = TRANSPORT_PROVINCES.includes(kbProvince)
@@ -175,9 +189,27 @@ export default function SendOfferPage({ params }: any) {
           <option>Stay-in</option><option>Stay-out</option><option>Either</option>
         </select>
 
-        <label style={s.lbl}>City</label>
-        <select style={s.sel} value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))}>
-          <option>Quezon City</option><option>Makati</option><option>Pasig</option><option>Taguig</option><option>Mandaluyong</option><option>Marikina</option><option>Paranaque</option><option>Las Pinas</option>
+        <label style={s.lbl}>Province / Region</label>
+        <select style={s.sel} value={form.province} onChange={e => {
+          const prov = e.target.value
+          const cities = (PH[prov] || [])
+          setForm(f => ({ ...f, province: prov, city: cities[0] || '' }))
+        }}>
+          <option value="">— Select province —</option>
+          {provinceList.map(p => <option key={p} value={p}>{p}</option>)}
+        </select>
+
+        <label style={s.lbl}>City / Municipality</label>
+        <select
+          style={{ ...s.sel, color: !form.province ? '#9ca3af' : '#1a1a1a' }}
+          value={form.city}
+          disabled={!form.province}
+          onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
+        >
+          {!form.province
+            ? <option value="">— Select province first —</option>
+            : (PH[form.province] || []).map(c => <option key={c} value={c}>{c}</option>)
+          }
         </select>
 
         <label style={s.lbl}>Household</label>
@@ -334,20 +366,23 @@ export default function SendOfferPage({ params }: any) {
       {showPaywall && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', zIndex: 50 }}>
           <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', maxWidth: '340px', width: '100%' }}>
-            <div style={{ fontFamily: 'serif', fontSize: '1.2rem', fontWeight: 900, marginBottom: '6px', color: '#1a1a1a' }}>Subscribe to MaidIt — ₱499/month</div>
-            <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '20px', lineHeight: 1.6 }}>Get platform access + 1 hiring fee credit (₱499 off your first hire)</div>
+            <div style={{ fontFamily: 'serif', fontSize: '1.2rem', fontWeight: 900, marginBottom: '6px', color: '#1a1a1a' }}>Subscribe to Send Offers</div>
+            <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '20px', lineHeight: 1.6 }}>A ₱499/month subscription gives you platform access and a ₱499 credit toward your first hire fee.</div>
             <button
               style={{ ...s.btn, opacity: subscribeLoading ? .6 : 1 }}
               disabled={subscribeLoading}
               onClick={async () => {
                 setSubscribeLoading(true)
-                const payload = { amount: 49900, description: 'MaidIt Subscription - ₱499' }
-                console.log('[offer/send subscribe] sending amount:', payload.amount)
                 try {
                   const res = await fetch('/api/create-payment-link', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
+                    body: JSON.stringify({
+                      amount: 49900,
+                      description: 'MaidIt Subscription - ₱499',
+                      homeowner_id: hwId,
+                      type: 'subscription',
+                    }),
                   })
                   const data = await res.json()
                   if (data.checkout_url) { window.location.href = data.checkout_url }
@@ -357,7 +392,7 @@ export default function SendOfferPage({ params }: any) {
             >
               {subscribeLoading ? 'Preparing payment...' : 'Subscribe for ₱499 →'}
             </button>
-            <button style={s.btnOutline} onClick={() => router.push('/dashboard/homeowner')}>Maybe later</button>
+            <button style={s.btnOutline} onClick={() => router.push('/browse')}>Maybe later</button>
           </div>
         </div>
       )}
