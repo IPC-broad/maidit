@@ -245,11 +245,11 @@ export default function AdminTestPanel() {
         .from('kasambahay')
         .select('*, profiles(*), partner:referred_by(*, profiles(*))')
         .not('referred_by', 'is', null)
-        .order('created_at', { ascending: false }),
+        .order('id', { ascending: false }),
       supabase
         .from('partners')
         .select('*, profiles(*)')
-        .order('created_at', { ascending: false }),
+        .order('id', { ascending: false }),
       fetch('/api/test-webhook-trigger').then(r => r.json()).catch(e => { console.error('[load] agreed offers fetch error:', e); return { offers: [] } }),
     ])
     if (offersRes.error) console.error('[load] offers query error:', offersRes.error)
@@ -629,7 +629,7 @@ export default function AdminTestPanel() {
           <table style={{ width: '100%', borderCollapse: 'collapse' as const, fontSize: '12px' }}>
             <thead>
               <tr style={{ background: '#faf8f5' }}>
-                {['Mobile', 'Full Name', 'Role', 'Created At', ''].map(h => (
+                {['Mobile', 'Full Name', 'Role', ''].map(h => (
                   <th key={h} style={{ padding: '8px 10px', textAlign: 'left' as const, fontWeight: 700, color: '#9ca3af', fontSize: '10px', textTransform: 'uppercase' as const, letterSpacing: '.5px', borderBottom: '1px solid #ede8e0', whiteSpace: 'nowrap' as const }}>{h}</th>
                 ))}
               </tr>
@@ -646,7 +646,6 @@ export default function AdminTestPanel() {
                         {p.role || '—'}
                       </span>
                     </td>
-                    <td style={{ padding: '8px 10px', borderBottom: '1px solid #f3f4f6', color: '#9ca3af', whiteSpace: 'nowrap' as const }}>{new Date(p.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                     <td style={{ padding: '8px 10px', borderBottom: '1px solid #f3f4f6' }}>
                       {isProtected ? (
                         <span style={{ fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '50px', background: '#f3f4f6', color: '#9ca3af', border: '1px solid #e5e7eb' }}>Protected</span>
@@ -664,7 +663,7 @@ export default function AdminTestPanel() {
                 )
               })}
               {profiles.length === 0 && (
-                <tr><td colSpan={5} style={{ padding: '20px', textAlign: 'center' as const, color: '#9ca3af' }}>No profiles found.</td></tr>
+                <tr><td colSpan={4} style={{ padding: '20px', textAlign: 'center' as const, color: '#9ca3af' }}>No profiles found.</td></tr>
               )}
             </tbody>
           </table>
