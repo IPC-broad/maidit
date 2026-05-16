@@ -163,8 +163,12 @@ export default function BrowsePage() {
 
   const showTransport = (kbProvince: string) => {
     if (!kbProvince) return false
+    // Never show if kasambahay is in the same province as homeowner
+    if (homeownerProvince && kbProvince === homeownerProvince) return false
+    // Logged-in: show whenever province differs
+    if (currentUser && homeownerProvince && kbProvince !== homeownerProvince) return true
+    // Always flag Leyte/Samar/Bicol provinces (for guests and logged-in without saved province)
     if (TRANSPORT_PROVINCES.includes(kbProvince)) return true
-    if (homeownerProvince && homeownerProvince !== kbProvince) return true
     return false
   }
 
@@ -451,6 +455,23 @@ export default function BrowsePage() {
             </div>
           </div>
 
+          {/* ── SUBSCRIPTION BANNER — logged-in unsubscribed homeowners ── */}
+          {currentUser && isSubscribed === false && (
+            <div style={{ margin:'12px 16px 0', background:'linear-gradient(135deg, #fef3e2 0%, #fffdf9 100%)', border:'1.5px solid #fde8c0', borderRadius:'14px', padding:'14px 16px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
+              <div style={{ flex:1 }}>
+                <div style={{ fontFamily:'Georgia, serif', fontSize:'.92rem', fontWeight:900, color:'#92400e', marginBottom:'3px' }}>Subscribe to MaidIt — ₱499/month</div>
+                <div style={{ fontSize:'.72rem', color:'#78350f', lineHeight:1.5 }}>Get platform access + ₱499 hiring fee credit on your first hire. Valid for 30 days.</div>
+              </div>
+              <button
+                onClick={handleSubscribe}
+                disabled={subscribeLoading}
+                style={{ padding:'9px 14px', borderRadius:'9px', background:'#c9943a', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'.78rem', fontWeight:700, cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' as const, opacity: subscribeLoading ? .6 : 1 }}
+              >
+                {subscribeLoading ? '...' : 'Subscribe for ₱499 →'}
+              </button>
+            </div>
+          )}
+
           {/* ── MATCHES BANNER — logged-in only ── */}
           {currentUser && (
             <div style={{ margin:'14px 16px 0', background:'linear-gradient(135deg, #fef3e2 0%, #fffdf9 100%)', border:'1.5px solid #fde8c0', borderRadius:'16px', padding:'14px 16px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
@@ -617,22 +638,22 @@ export default function BrowsePage() {
       {subscribeModalId && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.55)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
           <div style={{ background:'#fff', borderRadius:'16px', padding:'24px 20px', maxWidth:'320px', width:'100%' }}>
-            <div style={{ fontFamily:'Georgia, serif', fontSize:'1.15rem', fontWeight:900, color:'#111827', marginBottom:'6px' }}>I-unlock ang pagpapadala ng offer</div>
+            <div style={{ fontFamily:'Georgia, serif', fontSize:'1.15rem', fontWeight:900, color:'#111827', marginBottom:'6px' }}>Subscribe to Send Offers</div>
             <p style={{ fontSize:'.82rem', color:'#6b7280', lineHeight:1.6, margin:'0 0 20px' }}>
-              Mag-subscribe sa MaidIt para makapag-send ng offer at makuha ang ₱499 hiring fee credit sa iyong unang hire.
+              A ₱499/month subscription gives you platform access and a ₱499 credit toward your first hire fee.
             </p>
             <button
               onClick={handleSubscribe}
               disabled={subscribeLoading}
               style={{ width:'100%', padding:'12px', borderRadius:'10px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'.88rem', fontWeight:700, cursor:'pointer', marginBottom:'10px', opacity: subscribeLoading ? .6 : 1 }}
             >
-              {subscribeLoading ? 'Preparing payment...' : 'Mag-subscribe ng ₱499 →'}
+              {subscribeLoading ? 'Preparing payment...' : 'Subscribe for ₱499 →'}
             </button>
             <button
               onClick={() => setSubscribeModalId(null)}
               style={{ width:'100%', padding:'8px', background:'none', border:'none', fontFamily:'sans-serif', fontSize:'.8rem', color:'#9ca3af', cursor:'pointer' }}
             >
-              Bumalik sa browse
+              Maybe later
             </button>
           </div>
         </div>
