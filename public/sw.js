@@ -1,5 +1,17 @@
-const CACHE = 'maidit-v1'
-const PRECACHE = ['/', '/browse', '/login']
+const CACHE = 'maidit-v2'
+const PRECACHE = ['/']
+
+// Paths that must always go to the network (never serve cached)
+const NETWORK_FIRST = [
+  '/browse',
+  '/dashboard',
+  '/offer',
+  '/pay',
+  '/api',
+  '/arrival',
+  '/confirm',
+  '/auth',
+]
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -18,9 +30,20 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return
   const url = new URL(e.request.url)
-  // Don't intercept Supabase API or PayMongo calls
+
+  // Always go to network for Supabase, PayMongo, and external APIs
   if (url.hostname.includes('supabase.co') || url.hostname.includes('paymongo.com')) return
 
+  // Network-first for dynamic paths — never serve stale
+  const isNetworkFirst = NETWORK_FIRST.some(p => url.pathname === p || url.pathname.startsWith(p + '/'))
+  if (isNetworkFirst) {
+    e.respondWith(
+      fetch(e.request).catch(() => caches.match(e.request))
+    )
+    return
+  }
+
+  // Cache-first for static assets (JS, CSS, images, fonts)
   e.respondWith(
     caches.match(e.request).then(cached => {
       const network = fetch(e.request).then(res => {
