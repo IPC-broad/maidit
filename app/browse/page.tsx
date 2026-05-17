@@ -4,52 +4,123 @@ import { useRouter } from 'next/navigation'
 
 const STORAGE = 'https://xlagwtsrjbylhxfozoem.supabase.co/storage/v1/object/public/Selfies'
 const METRO = ['Quezon City','Makati','Pasig','Taguig','Manila','Mandaluyong','Marikina','Muntinlupa','Las Piñas','Parañaque','Valenzuela','Caloocan','Malabon','Navotas','Pateros','San Juan']
-
 const TRANSPORT_PROVINCES = [
   'Leyte', 'Southern Leyte', 'Samar', 'Eastern Samar', 'Northern Samar', 'Western Samar',
   'Camarines Norte', 'Camarines Sur', 'Albay', 'Sorsogon', 'Catanduanes', 'Masbate',
 ]
 
-const IconSearch = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+const C = {
+  forest: '#27500A', forestDeep: '#1c3b07', forestSoft: '#f0f5ec', forestLine: '#e2ecdb',
+  amber: '#c9943a', amberSoft: '#fbf3e2', amberLine: '#efe1bf', amberDeep: '#8a6418',
+  ink: '#1a1d18', ink2: '#4a504a', ink3: '#8a8f88', ink4: '#b8bcb5',
+  paper: '#ffffff', paper2: '#faf9f5', line: '#ebe9e2',
+}
+
+const serif = "'Instrument Serif', Georgia, serif"
+const sans = "'Geist', ui-sans-serif, sans-serif"
+
+const IcSearch = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
   </svg>
 )
-const IconChat = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+const IcChevDown = () => (
+  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 9l6 6 6-6" />
   </svg>
 )
-const IconBell = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+const IcArrowRight = ({ size = 16 }: { size?: number }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12h14M13 5l7 7-7 7" />
   </svg>
 )
-const IconMenu = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+const IcCheck = ({ size = 12 }: { size?: number }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 6L9 17l-5-5" />
+  </svg>
+)
+const IcPin = () => (
+  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s7-7 7-12a7 7 0 10-14 0c0 5 7 12 7 12z" /><circle cx="12" cy="10" r="2.4" />
+  </svg>
+)
+const IcBus = () => (
+  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="4" y="3" width="16" height="14" rx="2.4" /><path d="M4 11h16M9 3v8M15 3v8" />
+    <path d="M7 17v2M17 17v2" />
+    <circle cx="8" cy="14" r="0.9" fill="currentColor" stroke="none"/><circle cx="16" cy="14" r="0.9" fill="currentColor" stroke="none"/>
+  </svg>
+)
+const IcHeart = ({ filled }: { filled: boolean }) => (
+  <svg viewBox="0 0 24 24" width="17" height="17" fill={filled ? '#d44848' : 'none'} stroke={filled ? '#d44848' : C.ink4} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 21s-7-4.5-9.5-9C0.5 8 3 4 6.5 4c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3C21 4 23.5 8 21.5 12 19 16.5 12 21 12 21z" />
+  </svg>
+)
+const IcSparkle = ({ size = 14 }: { size?: number }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor">
+    <path d="M12 2l1.6 5.2L19 9l-5.4 1.8L12 16l-1.6-5.2L5 9l5.4-1.8L12 2zM19 14l.8 2.5L22 17l-2.2.5L19 20l-.8-2.5L16 17l2.2-.5L19 14zM5 14l.8 2.5L8 17l-2.2.5L5 20l-.8-2.5L2 17l2.2-.5L5 14z" />
+  </svg>
+)
+const IcLock = () => (
+  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V8a4 4 0 018 0v3" />
+  </svg>
+)
+const IcShield = () => (
+  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <path d="M9 12l2 2 4-4" stroke="#fff" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+)
+const IcCam = () => (
+  <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 8h3l2-2h6l2 2h3v11H4z" /><circle cx="12" cy="13" r="3" />
+  </svg>
+)
+const IcBell = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 16l-1-2V10a5 5 0 00-10 0v4l-1 2h12z" /><path d="M10 19a2 2 0 004 0" />
+  </svg>
+)
+const IcMenu = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
   </svg>
 )
-const IconHeart = ({ filled }: { filled: boolean }) => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill={filled ? '#ef4444' : 'none'} stroke={filled ? '#ef4444' : '#9ca3af'} strokeWidth="2">
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+const IcOffers = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+    <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+  </svg>
+)
+const IcPlus = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
   </svg>
 )
 
 const offerStatusMap: Record<string, { label: string; bg: string; color: string }> = {
-  pending:         { label: 'Awaiting kasambahay',   bg: '#fef3e2', color: '#c9943a' },
+  pending:         { label: 'Awaiting kasambahay',   bg: '#fef3e2', color: C.amber },
   reviewed:        { label: 'Being reviewed',         bg: '#eff6ff', color: '#2563eb' },
   fare_pending:    { label: 'Fare estimate pending',  bg: '#fffbeb', color: '#92400e' },
-  agreed:          { label: 'Agreed — Pay now',       bg: '#f0fdf4', color: '#1a6b3c' },
+  agreed:          { label: 'Agreed — Pay now',       bg: C.forestSoft, color: C.forest },
   payment_pending: { label: 'Processing payment',     bg: '#fffbeb', color: '#92400e' },
-  paid:            { label: 'Hired',                  bg: '#f0fdf4', color: '#1a6b3c' },
-  active:          { label: 'Hired',                  bg: '#f0fdf4', color: '#1a6b3c' },
-  hired:           { label: 'Hired',                  bg: '#f0fdf4', color: '#1a6b3c' },
-  countered:       { label: 'Counter offer',          bg: '#fef3e2', color: '#c9943a' },
+  paid:            { label: 'Hired',                  bg: C.forestSoft, color: C.forest },
+  active:          { label: 'Hired',                  bg: C.forestSoft, color: C.forest },
+  hired:           { label: 'Hired',                  bg: C.forestSoft, color: C.forest },
+  countered:       { label: 'Counter offer',          bg: '#fef3e2', color: C.amber },
   declined:        { label: 'Declined',               bg: '#fef2f2', color: '#dc2626' },
 }
 
 export default function BrowsePage() {
+  useEffect(() => {
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap'
+    document.head.appendChild(link)
+    return () => { try { document.head.removeChild(link) } catch {} }
+  }, [])
+
   const router = useRouter()
   const [tab, setTab] = useState<'browse' | 'offers'>('browse')
   const [profiles, setProfiles] = useState<any[]>([])
@@ -113,9 +184,7 @@ export default function BrowsePage() {
     setLoading(false)
   }
 
-  useEffect(() => {
-    load()
-  }, [])
+  useEffect(() => { load() }, [])
 
   const loadOffers = async () => {
     if (offersLoaded) return
@@ -150,11 +219,8 @@ export default function BrowsePage() {
         }),
       })
       const data = await res.json()
-      if (data.checkout_url) {
-        window.location.href = data.checkout_url
-      } else {
-        setSubscribeLoading(false)
-      }
+      if (data.checkout_url) window.location.href = data.checkout_url
+      else setSubscribeLoading(false)
     } catch {
       setSubscribeLoading(false)
     }
@@ -164,11 +230,7 @@ export default function BrowsePage() {
 
   const showTransport = (kbProvince: string) => {
     if (!kbProvince) return false
-    if (homeownerProvince) {
-      // Known province: any inter-province = transport, same = hide
-      return kbProvince !== homeownerProvince
-    }
-    // No province on file (guests / new signups): only flag Leyte/Samar/Bicol
+    if (homeownerProvince) return kbProvince !== homeownerProvince
     return TRANSPORT_PROVINCES.includes(kbProvince)
   }
 
@@ -200,7 +262,6 @@ export default function BrowsePage() {
     const hasSkills = !!(kb.skills && kb.skills.length > 0)
     const avail = (kb.availability || '').toLowerCase()
     const isImmediate = avail === 'immediate' || avail === 'asap'
-
     if (currentUser) {
       let score = 0
       const kbCity = (kb.profile?.city || kb.province || '').toLowerCase()
@@ -234,7 +295,6 @@ export default function BrowsePage() {
     return 0
   })
 
-  // Renders a single kasambahay card. Used for both visible and blurred sections.
   const renderKBCard = (kb: any) => {
     const fullName = kb.profile?.full_name || ''
     const firstName = fullName.split(' ')[0] || ''
@@ -246,19 +306,15 @@ export default function BrowsePage() {
     const extraSkills = skills.length - 3
     const selfieUrl = kb.profile?.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
     const showPhoto = !!(selfieUrl && !imgErrors[kb.id])
-    const availLabel = kb.availability === 'Immediate' ? 'Immediate'
-      : kb.availability ? kb.availability : null
+    const availLabel = kb.availability || null
     const expRaw = kb.experience
-    const expLabel = (!expRaw || expRaw === 'Baguhan' || expRaw === 0 || expRaw === '0')
-      ? 'No experience yet'
-      : typeof expRaw === 'number' ? `${expRaw} yr${expRaw !== 1 ? 's' : ''} exp`
-      : `${expRaw} exp`
+    const expYears = (!expRaw || expRaw === 'Baguhan' || expRaw === 0 || expRaw === '0') ? null
+      : typeof expRaw === 'number' ? expRaw : parseInt(expRaw) || null
     const kbProvince = kb.province || ''
-    const location = kbProvince || 'Location not specified'
-    const numKids = kb.num_children
-    const childrenLabel = (!numKids || numKids === '0' || numKids === 0)
-      ? 'No children' : `${numKids} ${parseInt(String(numKids)) === 1 ? 'child' : 'children'}`
-    const civilLine = kb.civil_status ? `${kb.civil_status} · ${childrenLabel}` : null
+    const location = kbProvince || 'Province not set'
+    const isNearby = !!(homeownerProvince && kbProvince && kbProvince.toLowerCase() === homeownerProvince.toLowerCase())
+    const hasTransport = showTransport(kbProvince)
+    const isAvailNow = availLabel?.toLowerCase() === 'immediate' || availLabel?.toLowerCase() === 'asap'
 
     const handleSendOffer = () => {
       if (!currentUser) router.push('/signup/homeowner')
@@ -272,384 +328,564 @@ export default function BrowsePage() {
     }
 
     return (
-      <div key={kb.id} style={{ background:'#fff', borderRadius:'16px', border:'1.5px solid #f0ece6', overflow:'hidden', marginBottom:'12px', boxShadow:'0 1px 8px rgba(0,0,0,.06)' }}>
-        {/* Main row */}
-        <div style={{ display:'flex' }}>
-
-          {/* Photo */}
-          <div style={{ width:'88px', flexShrink:0, position:'relative', background:'#f3f4f6' }}>
-            {showPhoto ? (
-              <img
-                src={selfieUrl!}
-                alt={displayName}
-                onError={() => setImgErrors(prev => ({ ...prev, [kb.id]: true }))}
-                style={{ width:'88px', height:'130px', objectFit:'cover', objectPosition:'top center', display:'block' }}
-              />
-            ) : (
-              <div style={{ width:'88px', height:'130px', background:'linear-gradient(135deg, #fdf3e3, #fde8c0)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.6rem', fontWeight:800, color:'#c9943a' }}>
-                {initials}
-              </div>
-            )}
+      <div key={kb.id} style={{
+        position: 'relative', background: C.paper, border: `1px solid ${C.line}`,
+        borderRadius: 20, overflow: 'hidden',
+        boxShadow: '0 1px 0 rgba(0,0,0,0.02), 0 10px 26px -18px rgba(28,59,7,0.18)',
+        marginBottom: 12,
+      }}>
+        {/* upper zone */}
+        <div style={{ display: 'flex', gap: 14, padding: '16px 16px 14px' }}>
+          {/* portrait column */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 7, alignItems: 'center', flexShrink: 0 }}>
+            {/* portrait */}
+            <div style={{ width: 100, height: 140, borderRadius: 14, overflow: 'hidden', position: 'relative', background: 'linear-gradient(155deg, #fde8c0 0%, #e8c47a 100%)', flexShrink: 0 }}>
+              {showPhoto ? (
+                <img
+                  src={selfieUrl!}
+                  alt={displayName}
+                  onError={() => setImgErrors(prev => ({ ...prev, [kb.id]: true }))}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }}
+                />
+              ) : (
+                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontFamily: serif, fontSize: 36, color: '#fff', lineHeight: 1 }}>{initials}</span>
+                </div>
+              )}
+              {selfieUrl && (
+                <div style={{
+                  position: 'absolute', bottom: 7, right: 7,
+                  width: 22, height: 22, borderRadius: '50%',
+                  background: 'rgba(27,59,7,0.88)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff',
+                }}>
+                  <IcCam />
+                </div>
+              )}
+            </div>
+            {/* verified chip */}
             {selfieUrl && (
-              <div style={{ position:'absolute', bottom:'5px', left:'3px', right:'3px', background:'rgba(26,107,60,.88)', borderRadius:'4px', padding:'2px 4px', display:'flex', alignItems:'center', gap:'2px' }}>
-                <span style={{ color:'#4ade80', fontSize:'7px', lineHeight:1 }}>●</span>
-                <span style={{ color:'#fff', fontSize:'7px', fontWeight:700, lineHeight:1 }}>Selfie Verified</span>
-              </div>
-            )}
-            {kb.govt_id && (
-              <div style={{ position:'absolute', top:'5px', left:'3px', background:'rgba(201,148,58,.92)', borderRadius:'4px', padding:'2px 5px' }}>
-                <span style={{ color:'#fff', fontSize:'7px', fontWeight:700 }}>⭐ Premium</span>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                padding: '3px 8px 3px 6px',
+                background: C.forestSoft, border: `1px solid ${C.forestLine}`,
+                borderRadius: 999, fontSize: 9.5, fontWeight: 600, color: C.forest,
+                letterSpacing: '0.02em', textTransform: 'uppercase' as const,
+                whiteSpace: 'nowrap' as const,
+              }}>
+                <IcCheck size={9} /> Selfie
               </div>
             )}
           </div>
 
-          {/* Info */}
-          <div style={{ flex:1, padding:'10px 8px 10px 10px', minWidth:0, overflow:'hidden' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:'4px', marginBottom:'1px', flexWrap:'wrap' as const }}>
-              <span style={{ fontWeight:800, fontSize:'14px', color:'#111827' }}>{displayName}</span>
-              {kb.age ? <span style={{ fontSize:'11px', color:'#9ca3af' }}>· {kb.age} y/o</span> : null}
-              <span style={{ color:'#22c55e', fontSize:'9px' }}>●</span>
-            </div>
-            <div style={{ fontSize:'11px', color:'#6b7280', marginBottom:'4px', lineHeight:1.3 }}>
-              {'Kasambahay'}
-              {kb.setup ? ` · ${kb.setup}` : ''}
-            </div>
-            <div style={{ fontSize:'11px', color:'#6b7280', marginBottom:'5px', display:'flex', alignItems:'center', gap:'2px' }}>
-              <span>📍</span>
-              <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' as const }}>{location}</span>
-            </div>
-            {visibleSkills.length > 0 && (
-              <div style={{ display:'flex', gap:'3px', flexWrap:'wrap' as const, marginBottom:'4px' }}>
-                {visibleSkills.map((skill: string) => (
-                  <span key={skill} style={{ fontSize:'9px', fontWeight:600, padding:'2px 6px', borderRadius:'5px', background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0' }}>
-                    {skill}
-                  </span>
-                ))}
-                {extraSkills > 0 && (
-                  <span style={{ fontSize:'9px', padding:'2px 5px', borderRadius:'5px', background:'#f3f4f6', color:'#9ca3af' }}>+{extraSkills}</span>
-                )}
+          {/* content column */}
+          <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
+            {/* name + heart */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6 }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 17, fontWeight: 600, color: C.ink, letterSpacing: '-0.012em', lineHeight: 1.2 }}>
+                  {displayName}{kb.age ? <span style={{ color: C.ink3, fontWeight: 400 }}>, {kb.age}</span> : null}
+                </div>
+                <div style={{ fontSize: 12.5, color: C.ink2, marginTop: 2, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontWeight: 500 }}>Kasambahay{kb.setup ? ` · ${kb.setup}` : ''}</span>
+                  {expYears !== null && (
+                    <>
+                      <span style={{ width: 3, height: 3, borderRadius: '50%', background: C.ink4, display: 'inline-block', flexShrink: 0 }} />
+                      <span>{expYears} yr{expYears !== 1 ? 's' : ''}</span>
+                    </>
+                  )}
+                </div>
               </div>
-            )}
-            <div style={{ fontSize:'10px', color:'#9ca3af', lineHeight:1.4, marginBottom:'2px' }}>{expLabel}</div>
-            {civilLine && (
-              <div style={{ fontSize:'10px', color:'#9ca3af', lineHeight:1.4 }}>{civilLine}</div>
-            )}
-          </div>
-
-          {/* Right — salary + badges */}
-          <div style={{ width:'76px', flexShrink:0, padding:'10px 8px', display:'flex', flexDirection:'column' as const, alignItems:'flex-end', gap:'3px' }}>
-            {kb.has_govt_id ? (
-              <div style={{ background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:'5px', padding:'2px 5px', textAlign:'center' as const }}>
-                <span style={{ fontSize:'8px', fontWeight:700, color:'#2563eb' }}>🛡️ ID Verified</span>
-              </div>
-            ) : <div />}
-            <div style={{ display:'flex', justifyContent:'flex-end' }}>
               <button
                 onClick={() => setSaved(prev => ({ ...prev, [kb.id]: !prev[kb.id] }))}
-                style={{ background:'none', border:'none', cursor:'pointer', padding:'2px', display:'flex' }}
+                style={{
+                  width: 32, height: 32, borderRadius: '50%',
+                  background: saved[kb.id] ? '#fef2f2' : 'transparent',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  flex: '0 0 auto', border: 'none', cursor: 'pointer',
+                }}
               >
-                <IconHeart filled={!!saved[kb.id]} />
+                <IcHeart filled={!!saved[kb.id]} />
               </button>
             </div>
-            <div style={{ flex:1 }} />
-            {showTransport(kb.province) && (
-              <div style={{ display:'flex', alignItems:'center', gap:'2px', justifyContent:'flex-end', marginBottom:'2px' }}>
-                <span style={{ fontSize:'10px' }}>🚌</span>
-                <span style={{ fontSize:'8px', fontWeight:700, color:'#c9943a' }}>Transport</span>
-              </div>
-            )}
-            <div style={{ textAlign:'right' as const, marginBottom:'1px' }}>
-              <div style={{ fontFamily:'Georgia, serif', fontSize:'13px', fontWeight:900, color:'#1a6b3c', lineHeight:1.1 }}>
-                ₱{kb.asking_salary?.toLocaleString()}
-              </div>
-              <div style={{ fontSize:'8px', color:'#9ca3af' }}>/&nbsp;month</div>
+
+            {/* location row */}
+            <div style={{
+              display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: 6,
+              marginTop: 10, fontSize: 12, color: C.ink2,
+            }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ color: C.forest }}><IcPin /></span>
+                {location}
+              </span>
+              {isNearby && (
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center',
+                  padding: '2px 7px', background: C.forestSoft, color: C.forest,
+                  borderRadius: 999, fontSize: 10.5, fontWeight: 600, letterSpacing: '0.02em',
+                }}>
+                  NEARBY
+                </span>
+              )}
+              {hasTransport && (
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  padding: '2px 8px 2px 6px', background: C.amberSoft, color: C.amberDeep,
+                  borderRadius: 999, fontSize: 10.5, fontWeight: 600, letterSpacing: '0.02em',
+                }}>
+                  <IcBus /> Open to relocate
+                </span>
+              )}
             </div>
-            {availLabel && (
-              <div style={{ fontSize:'8px', color:'#6b7280', textAlign:'right' as const, lineHeight:1.35 }}>
-                {availLabel}
+
+            {/* skills */}
+            {visibleSkills.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 5, marginTop: 10 }}>
+                {visibleSkills.map((s: string) => (
+                  <span key={s} style={{
+                    padding: '3px 9px', background: C.paper2, border: `1px solid ${C.line}`,
+                    borderRadius: 999, fontSize: 11, color: C.ink2, fontWeight: 500,
+                  }}>{s}</span>
+                ))}
+                {extraSkills > 0 && (
+                  <span style={{ padding: '3px 8px', color: C.ink3, fontSize: 11, fontWeight: 500 }}>
+                    +{extraSkills} more
+                  </span>
+                )}
               </div>
             )}
           </div>
         </div>
 
-        {/* Bottom buttons */}
-        <div style={{ display:'flex', gap:'8px', padding:'8px 10px 10px', borderTop:'1px solid #f3f4f6' }}>
-          <button
-            onClick={handleSeeProfile}
-            style={{ flex:1, padding:'7px 4px', background:'#fff', color:'#1a6b3c', border:'1.5px solid #1a6b3c', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'10px', fontWeight:700, cursor:'pointer' }}
-          >
-            See Full Profile
-          </button>
-          <button
-            onClick={handleSendOffer}
-            style={{ flex:1, padding:'7px 4px', background:'#1a6b3c', color:'#fff', border:'none', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'10px', fontWeight:700, cursor:'pointer' }}
-          >
-            Send Offer →
-          </button>
+        {/* lower tray */}
+        <div style={{
+          borderTop: `1px solid ${C.line}`,
+          padding: '12px 16px 14px',
+          background: 'linear-gradient(180deg, #fcfbf7 0%, #ffffff 100%)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div>
+              <span style={{ fontSize: 17, fontWeight: 600, color: C.ink, letterSpacing: '-0.01em' }}>
+                ₱{kb.asking_salary?.toLocaleString() || '—'}
+              </span>
+              <span style={{ fontSize: 12, color: C.ink3, marginLeft: 3 }}>/mo</span>
+            </div>
+            {availLabel && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: C.ink2 }}>
+                <span style={{
+                  width: 6, height: 6, borderRadius: '50%',
+                  background: isAvailNow ? '#3acc7f' : C.amber,
+                  display: 'inline-block', flexShrink: 0,
+                }} />
+                {isAvailNow ? 'Available now' : availLabel.toLowerCase()}
+              </div>
+            )}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 8 }}>
+            <button
+              onClick={handleSeeProfile}
+              style={{
+                height: 42, borderRadius: 12, background: C.paper,
+                border: `1px solid ${C.line}`, color: C.ink,
+                fontSize: 13, fontWeight: 600, fontFamily: sans,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', letterSpacing: '-0.005em',
+              }}
+            >
+              View Profile
+            </button>
+            <button
+              onClick={handleSendOffer}
+              style={{
+                height: 42, borderRadius: 12, background: C.forest, color: C.paper,
+                fontSize: 13, fontWeight: 600, fontFamily: sans,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                border: 'none', cursor: 'pointer', letterSpacing: '-0.005em',
+                boxShadow: '0 4px 12px -6px rgba(39,80,10,0.5)',
+              }}
+            >
+              Send Offer <IcArrowRight size={14} />
+            </button>
+          </div>
         </div>
       </div>
     )
   }
 
   if (loading) return (
-    <div style={{ minHeight:'100vh', background:'#f4f6f8', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif', color:'#6b7280' }}>
+    <div style={{ minHeight: '100vh', background: C.paper2, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: sans, color: C.ink3 }}>
       Loading...
     </div>
   )
 
-  // For non-logged-in: show first 2 openly, rest blurred
   const visibleCards = !currentUser ? filteredAndSorted.slice(0, 2) : filteredAndSorted
   const lockedCards  = !currentUser ? filteredAndSorted.slice(2) : []
 
   return (
-    <div style={{ minHeight:'100vh', background:'#f4f6f8', fontFamily:'sans-serif', paddingBottom:'80px' }}>
+    <div style={{ minHeight: '100vh', background: C.paper2, fontFamily: sans, paddingBottom: 80 }}>
 
       {/* ── NAVBAR ── */}
-      <div style={{ background:'#fff', padding:'12px 18px', display:'flex', alignItems:'center', justifyContent:'space-between', borderBottom:'1px solid #ede8e0', position:'sticky', top:0, zIndex:100 }}>
-        <span style={{ fontFamily:'Georgia, serif', fontSize:'1.35rem', fontWeight:900, color:'#1a1a1a', letterSpacing:'-0.5px' }}>
-          Maid<span style={{ color:'#c9943a' }}>It</span>
+      <div style={{
+        background: C.paper, padding: '12px 18px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        borderBottom: `1px solid ${C.line}`, position: 'sticky', top: 0, zIndex: 100,
+      }}>
+        <span style={{ fontFamily: serif, fontSize: '1.5rem', color: C.forestDeep, letterSpacing: '-0.5px', lineHeight: 1 }}>
+          Maid<span style={{ color: C.amber }}>It</span>
         </span>
-        <div style={{ display:'flex', alignItems:'center', gap:'16px', color:'#6b7280' }}>
-          <button style={{ background:'none', border:'none', cursor:'pointer', color:'#6b7280', display:'flex', padding:0 }}><IconChat /></button>
-          <button style={{ background:'none', border:'none', cursor:'pointer', color:'#6b7280', display:'flex', padding:0 }}><IconBell /></button>
-          <button style={{ background:'none', border:'none', cursor:'pointer', color:'#6b7280', display:'flex', padding:0 }}><IconMenu /></button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, color: C.ink3 }}>
+          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.ink3, display: 'flex', padding: 0 }}>
+            <IcBell />
+          </button>
+          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.ink3, display: 'flex', padding: 0 }}>
+            <IcMenu />
+          </button>
         </div>
       </div>
 
       {tab === 'browse' && (
         <>
-          {/* ── HEADER SECTION ── */}
-          <div style={{ background:'#fff', padding:'18px 16px 0', borderBottom:'1px solid #ede8e0' }}>
-            <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'6px', gap:'10px' }}>
+          {/* ── HEADER ── */}
+          <div style={{ background: C.paper, padding: '20px 18px 0', borderBottom: `1px solid ${C.line}` }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, marginBottom: 6 }}>
               <div>
-                <h1 style={{ fontFamily:'Georgia, serif', fontSize:'1.55rem', fontWeight:900, color:'#111827', margin:0, lineHeight:1.2 }}>Browse Kasambahay</h1>
-                <p style={{ fontSize:'.78rem', color:'#6b7280', margin:'5px 0 0', lineHeight:1.5 }}>Verified profiles. Selfie required for everyone's safety.</p>
+                <h1 style={{ fontFamily: serif, fontSize: 30, color: C.forestDeep, margin: 0, lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+                  Browse kasambahay.
+                </h1>
+                <p style={{ fontSize: 13, color: C.ink3, margin: '4px 0 0', lineHeight: 1.4 }}>
+                  Verified profiles. Selfie required for everyone's safety.
+                </p>
               </div>
-              <div style={{ background:'#fef3e2', border:'1px solid #fde8c0', borderRadius:'50px', padding:'5px 10px', display:'flex', alignItems:'center', gap:'4px', flexShrink:0, marginTop:'2px' }}>
-                <span style={{ fontSize:'12px' }}>🛡️</span>
-                <span style={{ fontSize:'.62rem', fontWeight:700, color:'#c9943a', whiteSpace:'nowrap' as const }}>Safe hiring with MaidIt</span>
+              <div style={{
+                background: C.forestSoft, border: `1px solid ${C.forestLine}`,
+                borderRadius: 50, padding: '4px 10px',
+                display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, marginTop: 3,
+              }}>
+                <span style={{ color: C.forest, display: 'flex' }}><IcShield /></span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: C.forest, whiteSpace: 'nowrap' as const }}>Safe hiring</span>
               </div>
             </div>
 
             {/* Search */}
-            <div style={{ position:'relative', margin:'14px 0 14px' }}>
-              <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', color:'#9ca3af', display:'flex' }}>
-                <IconSearch />
+            <div style={{ position: 'relative', margin: '14px 0 14px' }}>
+              <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: C.ink3, display: 'flex' }}>
+                <IcSearch />
               </span>
               <input
                 type="text"
                 placeholder="Search by role, skills, or location"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                style={{ width:'100%', padding:'11px 13px 11px 42px', borderRadius:'12px', border:'1.5px solid #e5e7eb', background:'#f9fafb', fontSize:'.84rem', fontFamily:'sans-serif', color:'#111827', outline:'none', boxSizing:'border-box' as const }}
+                style={{
+                  width: '100%', padding: '11px 14px 11px 44px', borderRadius: 14,
+                  border: `1px solid ${C.line}`, background: C.paper2,
+                  fontSize: 14, fontFamily: sans, color: C.ink, outline: 'none',
+                  boxSizing: 'border-box' as const,
+                }}
               />
             </div>
 
             {/* Filter pills */}
-            <div style={{ display:'flex', gap:'6px', overflowX:'auto' as const, paddingBottom:'14px' }}>
+            <div style={{ display: 'flex', gap: 7, overflowX: 'auto' as const, paddingBottom: 14, scrollbarWidth: 'none' as const }}>
               {([
-                { id:'Lahat',    label:'All Matches', icon:'⭐', amber:true,  disabled:false },
-                { id:'Stay-in',  label:'Stay-in',     icon:'🏠', amber:false, disabled:false },
-                { id:'Stay-out', label:'Stay-out',     icon:'🚶', amber:false, disabled:false },
-                { id:'Nearby',   label:'Nearby',       icon:'📍', amber:false, disabled:!currentUser },
-                { id:'More',     label:'More Filters', icon:'⚙️', amber:false, disabled:false, dropdown:true },
-              ] as const).map(({ id, label, icon, amber, disabled, dropdown }: any) => {
+                { id: 'Lahat',    label: 'All Matches' },
+                { id: 'Stay-in',  label: 'Stay-in' },
+                { id: 'Stay-out', label: 'Stay-out' },
+                { id: 'Nearby',   label: 'Nearby', disabled: !currentUser },
+              ] as const).map(({ id, label, disabled }: any) => {
                 const active = filter === id
                 return (
                   <button
                     key={id}
                     disabled={disabled}
-                    title={disabled ? 'Log in to see nearby helpers' : undefined}
                     onClick={() => { if (!disabled) setFilter(id) }}
                     style={{
-                      display:'flex', alignItems:'center', gap:'5px', padding:'7px 14px',
-                      borderRadius:'50px', border:'1.5px solid',
-                      borderColor: active ? (amber ? '#c9943a' : '#1a6b3c') : '#e5e7eb',
-                      background: active ? (amber ? '#fef3e2' : '#f0fdf4') : '#fff',
-                      color: active ? (amber ? '#c9943a' : '#1a6b3c') : (disabled ? '#d1d5db' : '#6b7280'),
-                      fontFamily:'sans-serif', fontSize:'.72rem', fontWeight:600,
+                      display: 'flex', alignItems: 'center', padding: '7px 14px',
+                      borderRadius: 50, border: `1.5px solid ${active ? C.forest : C.line}`,
+                      background: active ? C.forest : C.paper,
+                      color: active ? C.paper : (disabled ? C.ink4 : C.ink2),
+                      fontFamily: sans, fontSize: 12.5, fontWeight: active ? 600 : 500,
                       cursor: disabled ? 'not-allowed' : 'pointer',
-                      whiteSpace:'nowrap' as const, flexShrink:0, opacity: disabled ? .5 : 1
+                      whiteSpace: 'nowrap' as const, flexShrink: 0, opacity: disabled ? 0.5 : 1,
                     }}
                   >
-                    <span style={{ fontSize:'11px' }}>{icon}</span>
                     {label}
-                    {dropdown && <span style={{ fontSize:'10px' }}>▾</span>}
                   </button>
                 )
               })}
+              <button
+                onClick={() => {}}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px',
+                  borderRadius: 50, border: `1.5px solid ${C.line}`, background: C.paper,
+                  color: C.ink2, fontFamily: sans, fontSize: 12.5, fontWeight: 500,
+                  cursor: 'pointer', whiteSpace: 'nowrap' as const, flexShrink: 0,
+                }}
+              >
+                Filters <IcChevDown />
+              </button>
             </div>
           </div>
 
-          {/* ── SUBSCRIPTION BANNER — logged-in unsubscribed homeowners ── */}
+          {/* ── SUBSCRIPTION BANNER — unsubscribed ── */}
           {currentUser && isSubscribed === false && (
-            <div style={{ margin:'12px 16px 0', background:'linear-gradient(135deg, #fef3e2 0%, #fffdf9 100%)', border:'1.5px solid #fde8c0', borderRadius:'14px', padding:'14px 16px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
-              <div style={{ flex:1 }}>
-                <div style={{ fontFamily:'Georgia, serif', fontSize:'.92rem', fontWeight:900, color:'#92400e', marginBottom:'3px' }}>Subscribe to MaidIt — ₱499/month</div>
-                <div style={{ fontSize:'.72rem', color:'#78350f', lineHeight:1.5 }}>Get platform access + ₱499 hiring fee credit on your first hire. Valid for 30 days.</div>
+            <div style={{
+              margin: '14px 18px 0',
+              background: 'linear-gradient(180deg, #fbf3e2 0%, #f5e6c2 100%)',
+              border: `1px solid ${C.amberLine}`, borderRadius: 18,
+              padding: '16px 18px', position: 'relative', overflow: 'hidden',
+            }}>
+              <div style={{ position: 'absolute', top: 14, right: 18, color: C.amber, opacity: 0.45 }}>
+                <IcSparkle size={14} />
+              </div>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '3px 9px 3px 7px', background: C.paper,
+                color: C.amberDeep, border: `1px solid ${C.amberLine}`,
+                borderRadius: 999, fontSize: 10, fontWeight: 600, letterSpacing: '0.08em',
+                marginBottom: 10, textTransform: 'uppercase' as const,
+              }}>
+                <IcLock /> Unlock More
+              </div>
+              <div style={{ fontFamily: serif, fontSize: 22, lineHeight: 1.15, color: C.forestDeep, letterSpacing: '-0.015em' }}>
+                Reach <em style={{ color: C.amber }}>every</em> kasambahay on MaidIt.
+              </div>
+              <div style={{ fontSize: 12.5, color: C.amberDeep, opacity: 0.85, marginTop: 6, lineHeight: 1.4 }}>
+                Send 10 job offers · 1 post — ₱499/month, cancel anytime.
               </div>
               <button
                 onClick={handleSubscribe}
                 disabled={subscribeLoading}
-                style={{ padding:'9px 14px', borderRadius:'9px', background:'#c9943a', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'.78rem', fontWeight:700, cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' as const, opacity: subscribeLoading ? .6 : 1 }}
+                style={{
+                  marginTop: 14, width: '100%', height: 46, borderRadius: 13,
+                  background: C.amberDeep, color: C.paper, fontFamily: sans,
+                  fontSize: 14, fontWeight: 600, letterSpacing: '-0.005em', border: 'none',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  cursor: 'pointer', opacity: subscribeLoading ? 0.6 : 1,
+                }}
               >
-                {subscribeLoading ? '...' : 'Subscribe for ₱499 →'}
+                {subscribeLoading ? 'Preparing...' : 'Subscribe'} <IcArrowRight />
               </button>
             </div>
           )}
 
-          {/* ── MATCHES BANNER — logged-in only ── */}
-          {currentUser && (
-            <div style={{ margin:'14px 16px 0', background:'linear-gradient(135deg, #fef3e2 0%, #fffdf9 100%)', border:'1.5px solid #fde8c0', borderRadius:'16px', padding:'14px 16px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-              <div style={{ flex:1 }}>
-                <div style={{ display:'flex', alignItems:'center', gap:'7px', marginBottom:'5px', flexWrap:'wrap' as const }}>
-                  <span style={{ fontSize:'1.1rem' }}>⭐</span>
-                  <span style={{ fontFamily:'Georgia, serif', fontSize:'1rem', fontWeight:900, color:'#1a1a1a' }}>Your Matches</span>
-                  <span style={{ fontSize:'.6rem', fontWeight:700, background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0', borderRadius:'50px', padding:'2px 8px' }}>Personalized for you</span>
-                </div>
-                <p style={{ fontSize:'.74rem', color:'#78350f', margin:0, lineHeight:1.55 }}>
-                  {homeownerCity
-                    ? `Showing ${filteredAndSorted.length} top matches · Based on your location in ${homeownerCity}`
-                    : `Showing ${filteredAndSorted.length} top matches · Complete your profile for better matches`
-                  }
-                </p>
+          {/* ── CREDITS BANNER — subscribed ── */}
+          {currentUser && isSubscribed && (
+            <div style={{
+              margin: '14px 18px 0',
+              background: `linear-gradient(135deg, ${C.forestSoft} 0%, #e5eede 100%)`,
+              border: `1px solid ${C.forestLine}`, borderRadius: 16,
+              padding: '13px 16px', display: 'flex', alignItems: 'center', gap: 12,
+            }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 11, background: C.paper,
+                color: C.forest, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: `1px solid ${C.forestLine}`, flexShrink: 0,
+              }}>
+                <IcSparkle />
               </div>
-              <div style={{ flexShrink:0, fontSize:'2.8rem', marginLeft:'14px', lineHeight:1 }}>👩‍🍳</div>
+              <div style={{ flex: 1, fontSize: 12.5, color: C.ink2, lineHeight: 1.4 }}>
+                <div style={{ fontWeight: 600, color: C.forestDeep, fontSize: 13 }}>
+                  {filteredAndSorted.length} matches near you
+                </div>
+                {homeownerCity
+                  ? `Ranked for your location in ${homeownerCity}`
+                  : 'Complete your profile for better matches'}
+              </div>
             </div>
           )}
 
           {/* ── SORT ROW ── */}
-          <div style={{ padding:'10px 16px 6px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-            <div style={{ fontSize:'.72rem', color:'#6b7280' }}>
-              {filteredAndSorted.length} helper{filteredAndSorted.length !== 1 ? 's' : ''} found
+          <div style={{ padding: '10px 18px 4px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: 12.5, color: C.ink2 }}>
+              <span style={{ color: C.ink, fontWeight: 600 }}>{filteredAndSorted.length}</span> matches
             </div>
-            <div style={{ display:'flex', alignItems:'center', gap:'4px', fontSize:'.72rem', color:'#374151' }}>
-              <span style={{ fontWeight:500, color:'#6b7280' }}>Sort:</span>
+            <button
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12.5, color: C.ink2, fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer' }}
+            >
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value as typeof sortBy)}
-                style={{ background:'none', border:'none', fontFamily:'sans-serif', fontSize:'.72rem', fontWeight:700, color:'#1a6b3c', cursor:'pointer', padding:0, outline:'none' }}
+                style={{ background: 'none', border: 'none', fontFamily: sans, fontSize: 12.5, fontWeight: 500, color: C.ink2, cursor: 'pointer', padding: 0, outline: 'none' }}
               >
                 <option value="best">Best Match</option>
                 <option value="newest">Newest</option>
                 <option value="salary-asc">Salary: Low → High</option>
                 <option value="salary-desc">Salary: High → Low</option>
               </select>
-            </div>
+              <IcChevDown />
+            </button>
           </div>
 
           {/* ── CARDS ── */}
-          <div style={{ padding:'0 16px 20px', maxWidth:'900px', margin:'0 auto', width:'100%', boxSizing:'border-box' as const }}>
+          <div style={{ padding: '14px 18px 6px' }}>
             {filteredAndSorted.length === 0 && (
-              <div style={{ textAlign:'center', padding:'48px 20px', color:'#9ca3af', fontSize:'.84rem' }}>
+              <div style={{ textAlign: 'center', padding: '48px 20px', color: C.ink3, fontSize: 14 }}>
                 No matches found.
               </div>
             )}
 
-            {/* Visible cards (all for logged-in, first 2 for guests) */}
+            {/* Visible cards */}
             {visibleCards.map(renderKBCard)}
 
-            {/* Blurred + locked section for non-logged-in guests */}
+            {/* Logged-out: blurred remainder + unlock wall */}
             {lockedCards.length > 0 && (
-              <div style={{ position:'relative' }}>
-                {/* Blurred cards underneath */}
-                <div style={{ filter:'blur(6px)', pointerEvents:'none', userSelect:'none' as const }}>
-                  {lockedCards.map(renderKBCard)}
+              <div style={{ position: 'relative' }}>
+                <div style={{ filter: 'blur(3.5px)', pointerEvents: 'none', userSelect: 'none' as const }}>
+                  {lockedCards.slice(0, 2).map(renderKBCard)}
                 </div>
-
-                {/* Lock overlay */}
-                <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', zIndex:5 }}>
-                  <div style={{ background:'#fff', borderRadius:'18px', padding:'28px 22px', boxShadow:'0 8px 40px rgba(0,0,0,.18)', textAlign:'center', width:'88%', maxWidth:'300px' }}>
-                    <div style={{ fontSize:'2.2rem', marginBottom:'10px' }}>🔒</div>
-                    <div style={{ fontFamily:'Georgia, serif', fontSize:'1.05rem', fontWeight:900, color:'#111827', marginBottom:'6px' }}>
-                      See all available helpers
+                <div style={{
+                  position: 'absolute', left: 0, right: 0, bottom: -1, height: 160,
+                  background: 'linear-gradient(180deg, rgba(250,249,245,0) 0%, #faf9f5 70%)',
+                  pointerEvents: 'none',
+                }} />
+                <div style={{ marginTop: -130, position: 'relative', zIndex: 2 }}>
+                  {/* Unlock wall */}
+                  <div style={{
+                    borderRadius: 22, overflow: 'hidden', border: `1px solid ${C.forestLine}`,
+                    background: 'linear-gradient(170deg, #f0f5ec 0%, #fbf3e2 100%)',
+                    padding: '26px 22px 22px', position: 'relative',
+                  }}>
+                    <div style={{ position: 'absolute', top: 18, right: 22, color: C.amber, opacity: 0.6 }}>
+                      <IcSparkle size={16} />
                     </div>
-                    <p style={{ fontSize:'.78rem', color:'#6b7280', lineHeight:1.6, margin:'0 0 18px' }}>
-                      Create a free account to view all profiles and send offers
+                    <div style={{ position: 'absolute', top: 52, right: 50, color: C.amber, opacity: 0.4 }}>
+                      <IcSparkle size={10} />
+                    </div>
+
+                    {/* mini avatar cluster */}
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+                      <div style={{ display: 'flex' }}>
+                        {lockedCards.slice(0, 3).map((kb: any, i: number) => {
+                          const fn = kb.profile?.full_name || ''
+                          const ini = fn.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase() || '?'
+                          return (
+                            <div key={kb.id} style={{ marginLeft: i === 0 ? 0 : -14, zIndex: 5 - i }}>
+                              <div style={{
+                                width: 46, height: 46, borderRadius: '50%',
+                                border: '2.5px solid #fbf3e2',
+                                background: 'linear-gradient(155deg, #fde8c0 0%, #c9943a 100%)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                color: '#fff', fontFamily: serif, fontSize: 18,
+                              }}>{ini}</div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    <h2 style={{
+                      margin: 0, fontFamily: serif, fontSize: 26, lineHeight: 1.15,
+                      color: C.forestDeep, textAlign: 'center', letterSpacing: '-0.02em',
+                    }}>
+                      See <em style={{ color: C.amber }}>every</em> kasambahay.
+                    </h2>
+                    <p style={{
+                      margin: '8px auto 18px', maxWidth: 280, textAlign: 'center',
+                      fontSize: 13.5, lineHeight: 1.45, color: C.ink2,
+                    }}>
+                      Create a free account to unlock full profiles, save favorites, and send offers.
                     </p>
+
                     <button
                       onClick={() => router.push('/signup/homeowner')}
-                      style={{ width:'100%', padding:'11px', borderRadius:'10px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'.86rem', fontWeight:700, cursor:'pointer', marginBottom:'8px' }}
+                      style={{
+                        width: '100%', height: 48, borderRadius: 14,
+                        background: C.forest, color: C.paper, fontFamily: sans,
+                        fontSize: 14.5, fontWeight: 600, letterSpacing: '-0.005em', border: 'none',
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                        cursor: 'pointer', boxShadow: '0 4px 14px -6px rgba(39,80,10,0.55)',
+                      }}
                     >
-                      Sign Up Free →
+                      Create Free Account <IcArrowRight />
                     </button>
-                    <button
-                      onClick={() => router.push('/login')}
-                      style={{ width:'100%', padding:'11px', borderRadius:'10px', background:'transparent', color:'#1a6b3c', border:'1.5px solid #1a6b3c', fontFamily:'sans-serif', fontSize:'.86rem', fontWeight:700, cursor:'pointer' }}
-                    >
-                      Log In
-                    </button>
+                    <div style={{ marginTop: 10, textAlign: 'center', fontSize: 12.5, color: C.ink3 }}>
+                      Already have one?{' '}
+                      <span
+                        onClick={() => router.push('/login')}
+                        style={{ color: C.forest, fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        Sign in
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
-          </div>
 
-          {/* ── CTA STRIP ── */}
-          <div style={{ margin:'0 16px 24px', background:'#fef3e2', border:'1.5px solid #fde8c0', borderRadius:'14px', padding:'14px 16px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
-            <div style={{ fontSize:'.82rem', color:'#78350f', fontWeight:600, lineHeight:1.5 }}>
-              ✨ New helpers join every day.<br />
-              <span style={{ fontWeight:400, color:'#92400e', fontSize:'.76rem' }}>Find your perfect match today.</span>
-            </div>
-            <button
-              onClick={() => router.push('/signup/homeowner')}
-              style={{ padding:'10px 16px', borderRadius:'10px', background:'#c9943a', border:'none', color:'#fff', fontFamily:'sans-serif', fontSize:'.8rem', fontWeight:700, cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' as const }}
-            >
-              Get Started
-            </button>
+            {/* Subscribed footer */}
+            {currentUser && isSubscribed && (
+              <div style={{
+                margin: '10px 0 18px', padding: '14px 16px',
+                border: `1px dashed ${C.forestLine}`, borderRadius: 16, background: C.forestSoft,
+                display: 'flex', alignItems: 'center', gap: 12,
+              }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: 11, background: C.paper, color: C.forest,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.forestLine}`,
+                }}>
+                  <IcSparkle />
+                </div>
+                <div style={{ flex: 1, fontSize: 12.5, color: C.ink2, lineHeight: 1.4 }}>
+                  <div style={{ fontWeight: 600, color: C.forestDeep, fontSize: 13 }}>New helpers join every day</div>
+                  We'll notify you when fresh matches arrive.
+                </div>
+              </div>
+            )}
           </div>
         </>
       )}
 
       {/* ── OFFERS TAB ── */}
       {tab === 'offers' && (
-        <div style={{ padding:'16px 16px 32px', maxWidth:'900px', margin:'0 auto', width:'100%', boxSizing:'border-box' as const }}>
-          <div style={{ fontFamily:'Georgia, serif', fontSize:'1.1rem', fontWeight:900, marginBottom:'2px', color:'#111827' }}>My Offers</div>
-          <div style={{ fontSize:'.72rem', color:'#6b7280', marginBottom:'14px' }}>{offers.length} offer{offers.length !== 1 ? 's' : ''} sent</div>
-          {offersLoading && <div style={{ textAlign:'center', padding:'40px', color:'#6b7280' }}>Loading...</div>}
+        <div style={{ padding: '16px 16px 32px', maxWidth: 900, margin: '0 auto', width: '100%', boxSizing: 'border-box' as const }}>
+          <div style={{ fontFamily: serif, fontSize: '1.2rem', marginBottom: '2px', color: C.ink }}>My Offers</div>
+          <div style={{ fontSize: '.72rem', color: C.ink3, marginBottom: '14px' }}>{offers.length} offer{offers.length !== 1 ? 's' : ''} sent</div>
+          {offersLoading && <div style={{ textAlign: 'center', padding: '40px', color: C.ink3 }}>Loading...</div>}
           {!offersLoading && offers.length === 0 && (
-            <div style={{ textAlign:'center', padding:'40px 20px' }}>
-              <div style={{ fontSize:'2.5rem', marginBottom:'12px' }}>📭</div>
-              <div style={{ color:'#6b7280', fontSize:'.84rem', lineHeight:1.7 }}>You haven't sent any offers yet.</div>
-              <button onClick={() => setTab('browse')} style={{ marginTop:'16px', padding:'10px 20px', borderRadius:'10px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'.84rem', fontWeight:700, cursor:'pointer' }}>Browse Kasambahay</button>
+            <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📭</div>
+              <div style={{ color: C.ink3, fontSize: '.84rem', lineHeight: 1.7 }}>You haven't sent any offers yet.</div>
+              <button onClick={() => setTab('browse')} style={{ marginTop: '16px', padding: '10px 20px', borderRadius: '10px', background: C.forest, color: C.paper, border: 'none', fontFamily: sans, fontSize: '.84rem', fontWeight: 700, cursor: 'pointer' }}>Browse Kasambahay</button>
             </div>
           )}
           {offers.map((offer: any) => {
-            const st = offerStatusMap[offer.status] || { label: offer.status, bg: '#f3f4f6', color: '#6b7280' }
+            const st = offerStatusMap[offer.status] || { label: offer.status, bg: '#f3f4f6', color: C.ink3 }
             const kbName = offer.kasambahay?.profiles?.full_name || 'Kasambahay'
             const isHired = ['paid','active','hired'].includes(offer.status)
             const needsPayment = offer.status === 'agreed'
             return (
-              <div key={offer.id} style={{ background:'#fff', borderRadius:'13px', border:'1px solid #ede8e0', overflow:'hidden', marginBottom:'12px' }}>
-                <div style={{ padding:'13px 14px' }}>
-                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'8px' }}>
+              <div key={offer.id} style={{ background: C.paper, borderRadius: '13px', border: `1px solid ${C.line}`, overflow: 'hidden', marginBottom: '12px' }}>
+                <div style={{ padding: '13px 14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <div>
-                      <div style={{ fontWeight:700, fontSize:'14px', marginBottom:'2px' }}>{kbName}</div>
-                      <div style={{ fontSize:'11px', color:'#9ca3af' }}>{new Date(offer.created_at).toLocaleDateString('en-PH', { month:'short', day:'numeric', year:'numeric' })}</div>
+                      <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '2px' }}>{kbName}</div>
+                      <div style={{ fontSize: '11px', color: C.ink3 }}>{new Date(offer.created_at).toLocaleDateString('en-PH', { month:'short', day:'numeric', year:'numeric' })}</div>
                     </div>
-                    <span style={{ fontSize:'10px', fontWeight:700, padding:'4px 10px', borderRadius:'50px', background:st.bg, color:st.color, whiteSpace:'nowrap' as const }}>{st.label}</span>
+                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: st.bg, color: st.color, whiteSpace: 'nowrap' as const }}>{st.label}</span>
                   </div>
-                  <div style={{ background:'#faf8f5', borderRadius:'10px', padding:'10px 12px', marginBottom:'10px' }}>
-                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
-                      <div><div style={{ fontSize:'10px', color:'#9ca3af', marginBottom:'2px' }}>Salary</div><div style={{ fontFamily:'Georgia, serif', fontSize:'16px', fontWeight:900, color:'#1a6b3c' }}>₱{offer.salary?.toLocaleString()}<span style={{ fontSize:'10px', fontWeight:400, color:'#9ca3af' }}>/mo</span></div></div>
-                      <div><div style={{ fontSize:'10px', color:'#9ca3af', marginBottom:'2px' }}>Location</div><div style={{ fontSize:'13px', fontWeight:700 }}>{offer.city || '—'}</div></div>
-                      <div><div style={{ fontSize:'10px', color:'#9ca3af', marginBottom:'2px' }}>Setup</div><div style={{ fontSize:'13px', fontWeight:700 }}>{offer.setup || '—'}</div></div>
-                      <div><div style={{ fontSize:'10px', color:'#9ca3af', marginBottom:'2px' }}>Scope</div><div style={{ fontSize:'12px', fontWeight:600, lineHeight:1.4 }}>{offer.scope?.join(', ') || '—'}</div></div>
+                  <div style={{ background: C.paper2, borderRadius: '10px', padding: '10px 12px', marginBottom: '10px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <div><div style={{ fontSize: '10px', color: C.ink3, marginBottom: '2px' }}>Salary</div><div style={{ fontFamily: serif, fontSize: '16px', fontWeight: 900, color: C.forest }}>₱{offer.salary?.toLocaleString()}<span style={{ fontSize: '10px', fontWeight: 400, color: C.ink3 }}>/mo</span></div></div>
+                      <div><div style={{ fontSize: '10px', color: C.ink3, marginBottom: '2px' }}>Location</div><div style={{ fontSize: '13px', fontWeight: 700 }}>{offer.city || '—'}</div></div>
+                      <div><div style={{ fontSize: '10px', color: C.ink3, marginBottom: '2px' }}>Setup</div><div style={{ fontSize: '13px', fontWeight: 700 }}>{offer.setup || '—'}</div></div>
+                      <div><div style={{ fontSize: '10px', color: C.ink3, marginBottom: '2px' }}>Scope</div><div style={{ fontSize: '12px', fontWeight: 600, lineHeight: 1.4 }}>{offer.scope?.join(', ') || '—'}</div></div>
                     </div>
                   </div>
                   {offer.fare_estimate && (
-                    <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:'9px', padding:'9px 12px', fontSize:'12px', color:'#92400e', marginBottom:'10px' }}>
+                    <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: '#92400e', marginBottom: '10px' }}>
                       Kasambahay fare estimate: <strong>₱{offer.fare_estimate?.toLocaleString()}</strong>
                     </div>
                   )}
                   {needsPayment && (
-                    <button style={{ width:'100%', padding:'11px', borderRadius:'10px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'13px', fontWeight:700, cursor:'pointer' }}
+                    <button style={{ width: '100%', padding: '11px', borderRadius: '10px', background: C.forest, color: C.paper, border: 'none', fontFamily: sans, fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
                       onClick={() => router.push(`/pay/${offer.id}`)}>
                       Proceed to Hire →
                     </button>
                   )}
                   {isHired && (
-                    <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:'9px', padding:'9px 12px', fontSize:'12px', color:'#166534', fontWeight:600, textAlign:'center' as const }}>
+                    <div style={{ background: C.forestSoft, border: `1px solid ${C.forestLine}`, borderRadius: '9px', padding: '9px 12px', fontSize: '12px', color: C.forest, fontWeight: 600, textAlign: 'center' as const }}>
                       Hired! Awaiting kasambahay arrival.
                     </div>
                   )}
@@ -677,83 +913,95 @@ export default function BrowsePage() {
           : `${expRaw} experience`
         return (
           <div
-            style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.6)', zIndex:300, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 300, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
             onClick={e => { if (e.target === e.currentTarget) setProfileModalKb(null) }}
           >
-            <div style={{ background:'#fff', borderRadius:'18px', maxWidth:'360px', width:'100%', maxHeight:'88vh', overflowY:'auto', position:'relative' }}>
-              {/* Close */}
-              <div style={{ display:'flex', justifyContent:'flex-end', padding:'12px 14px 0' }}>
-                <button onClick={() => setProfileModalKb(null)} style={{ background:'none', border:'none', fontSize:'1.1rem', cursor:'pointer', color:'#9ca3af', padding:'2px 6px', lineHeight:1 }}>✕</button>
+            <div style={{
+              background: C.paper, borderRadius: '22px 22px 0 0', width: '100%', maxWidth: 480,
+              maxHeight: '88vh', overflowY: 'auto', position: 'relative',
+              boxShadow: '0 -20px 50px -10px rgba(28,59,7,0.32)',
+            }}>
+              {/* drag handle */}
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
+                <div style={{ width: 36, height: 4, borderRadius: 2, background: C.line }} />
               </div>
 
-              {/* Avatar + name */}
-              <div style={{ display:'flex', flexDirection:'column' as const, alignItems:'center', padding:'4px 20px 16px' }}>
-                {selfieUrl && !imgErrors[kb.id] ? (
-                  <img
-                    src={selfieUrl}
-                    alt={fullName}
-                    onError={() => setImgErrors(prev => ({ ...prev, [kb.id]: true }))}
-                    style={{ width:'88px', height:'88px', borderRadius:'50%', objectFit:'cover' as const, border:'3px solid #e5e7eb', marginBottom:'12px' }}
-                  />
-                ) : (
-                  <div style={{ width:'88px', height:'88px', borderRadius:'50%', background:'linear-gradient(135deg, #fdf3e3, #fde8c0)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.8rem', fontWeight:800, color:'#c9943a', marginBottom:'12px' }}>
-                    {initials}
-                  </div>
-                )}
-                <div style={{ fontWeight:800, fontSize:'1.1rem', color:'#111827', marginBottom:'3px' }}>{fullName}</div>
-                <div style={{ fontSize:'.8rem', color:'#6b7280', marginBottom:'10px' }}>
+              {/* close */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 16px 0' }}>
+                <button onClick={() => setProfileModalKb(null)} style={{ background: 'none', border: 'none', fontSize: '1.1rem', cursor: 'pointer', color: C.ink3, padding: '4px 6px', lineHeight: 1 }}>✕</button>
+              </div>
+
+              {/* avatar + name */}
+              <div style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', padding: '8px 20px 18px' }}>
+                <div style={{ width: 96, height: 96, borderRadius: '50%', overflow: 'hidden', border: `3px solid ${C.forestLine}`, marginBottom: 14 }}>
+                  {selfieUrl && !imgErrors[kb.id] ? (
+                    <img
+                      src={selfieUrl}
+                      alt={fullName}
+                      onError={() => setImgErrors(prev => ({ ...prev, [kb.id]: true }))}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' as const }}
+                    />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(155deg, #fde8c0 0%, #e8c47a 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontFamily: serif, fontSize: 30, color: '#fff' }}>{initials}</span>
+                    </div>
+                  )}
+                </div>
+                <div style={{ fontFamily: serif, fontSize: 22, color: C.ink, letterSpacing: '-0.015em', marginBottom: 4 }}>{fullName}</div>
+                <div style={{ fontSize: 13, color: C.ink3, marginBottom: 12 }}>
                   {kb.age ? `${kb.age} y/o · ` : ''}{kb.province || 'Province not specified'}
                 </div>
-                {/* Verification badges */}
-                <div style={{ display:'flex', gap:'5px', flexWrap:'wrap' as const, justifyContent:'center' }}>
+                {/* badges */}
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' as const, justifyContent: 'center' }}>
                   {kb.has_govt_id && (
-                    <span style={{ fontSize:'10px', fontWeight:700, padding:'3px 9px', borderRadius:'50px', background:'#eff6ff', color:'#2563eb', border:'1px solid #bfdbfe' }}>🛡️ ID Verified</span>
+                    <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 10px', borderRadius: 50, background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe' }}>🛡️ ID Verified</span>
                   )}
                   {kb.has_nbi && (
-                    <span style={{ fontSize:'10px', fontWeight:700, padding:'3px 9px', borderRadius:'50px', background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0' }}>✅ NBI Cleared</span>
+                    <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 10px', borderRadius: 50, background: C.forestSoft, color: C.forest, border: `1px solid ${C.forestLine}` }}>✅ NBI Cleared</span>
                   )}
                   {selfieUrl && (
-                    <span style={{ fontSize:'10px', fontWeight:700, padding:'3px 9px', borderRadius:'50px', background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0' }}>📸 Selfie Verified</span>
+                    <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 10px', borderRadius: 50, background: C.forestSoft, color: C.forest, border: `1px solid ${C.forestLine}` }}>
+                      <IcCheck size={9} /> Selfie Verified
+                    </span>
                   )}
                 </div>
               </div>
 
-              {/* Details */}
-              <div style={{ padding:'0 16px 20px', display:'flex', flexDirection:'column' as const, gap:'10px' }}>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }}>
-                  <div style={{ background:'#f9fafb', borderRadius:'10px', padding:'11px 12px' }}>
-                    <div style={{ fontSize:'9px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#9ca3af', marginBottom:'4px' }}>Setup</div>
-                    <div style={{ fontSize:'13px', fontWeight:600, color:'#111827' }}>{kb.setup || '—'}</div>
+              {/* details */}
+              <div style={{ padding: '0 16px 24px', display: 'flex', flexDirection: 'column' as const, gap: 10 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div style={{ background: C.paper2, borderRadius: 12, padding: '11px 12px' }}>
+                    <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: C.ink3, marginBottom: 4 }}>Setup</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{kb.setup || '—'}</div>
                   </div>
-                  <div style={{ background:'#f9fafb', borderRadius:'10px', padding:'11px 12px' }}>
-                    <div style={{ fontSize:'9px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#9ca3af', marginBottom:'4px' }}>Experience</div>
-                    <div style={{ fontSize:'13px', fontWeight:600, color:'#111827' }}>{expLabel}</div>
+                  <div style={{ background: C.paper2, borderRadius: 12, padding: '11px 12px' }}>
+                    <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: C.ink3, marginBottom: 4 }}>Experience</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{expLabel}</div>
                   </div>
                   {kb.civil_status && (
-                    <div style={{ background:'#f9fafb', borderRadius:'10px', padding:'11px 12px' }}>
-                      <div style={{ fontSize:'9px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#9ca3af', marginBottom:'4px' }}>Civil Status</div>
-                      <div style={{ fontSize:'13px', fontWeight:600, color:'#111827' }}>{kb.civil_status}</div>
+                    <div style={{ background: C.paper2, borderRadius: 12, padding: '11px 12px' }}>
+                      <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: C.ink3, marginBottom: 4 }}>Civil Status</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{kb.civil_status}</div>
                     </div>
                   )}
-                  <div style={{ background:'#f9fafb', borderRadius:'10px', padding:'11px 12px' }}>
-                    <div style={{ fontSize:'9px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#9ca3af', marginBottom:'4px' }}>Children</div>
-                    <div style={{ fontSize:'13px', fontWeight:600, color:'#111827' }}>{childrenLabel}</div>
+                  <div style={{ background: C.paper2, borderRadius: 12, padding: '11px 12px' }}>
+                    <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: C.ink3, marginBottom: 4 }}>Children</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{childrenLabel}</div>
                   </div>
                   {kb.availability && (
-                    <div style={{ background:'#f9fafb', borderRadius:'10px', padding:'11px 12px', gridColumn:'1 / -1' }}>
-                      <div style={{ fontSize:'9px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#9ca3af', marginBottom:'4px' }}>Availability</div>
-                      <div style={{ fontSize:'13px', fontWeight:600, color:'#111827' }}>{kb.availability}</div>
+                    <div style={{ background: C.paper2, borderRadius: 12, padding: '11px 12px', gridColumn: '1 / -1' }}>
+                      <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: C.ink3, marginBottom: 4 }}>Availability</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{kb.availability}</div>
                     </div>
                   )}
                 </div>
 
-                {/* Skills */}
                 {skills.length > 0 && (
-                  <div style={{ background:'#f9fafb', borderRadius:'10px', padding:'11px 12px' }}>
-                    <div style={{ fontSize:'9px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#9ca3af', marginBottom:'8px' }}>Skills</div>
-                    <div style={{ display:'flex', flexWrap:'wrap' as const, gap:'6px' }}>
+                  <div style={{ background: C.paper2, borderRadius: 12, padding: '11px 12px' }}>
+                    <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: C.ink3, marginBottom: 8 }}>Skills</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 6 }}>
                       {skills.map((skill: string) => (
-                        <span key={skill} style={{ fontSize:'11px', fontWeight:600, padding:'4px 10px', borderRadius:'20px', background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0' }}>
+                        <span key={skill} style={{ fontSize: 12, fontWeight: 600, padding: '4px 11px', borderRadius: 20, background: C.forestSoft, color: C.forest, border: `1px solid ${C.forestLine}` }}>
                           {skill}
                         </span>
                       ))}
@@ -763,9 +1011,16 @@ export default function BrowsePage() {
 
                 <button
                   onClick={() => { setProfileModalKb(null); router.push(`/offer/send/${kb.id}`) }}
-                  style={{ width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'.92rem', fontWeight:700, cursor:'pointer' }}
+                  style={{
+                    width: '100%', height: 48, borderRadius: 14, border: 'none',
+                    background: C.forest, color: C.paper, fontFamily: sans,
+                    fontSize: 15, fontWeight: 600, cursor: 'pointer',
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    boxShadow: '0 4px 14px -6px rgba(39,80,10,0.55)',
+                    letterSpacing: '-0.005em',
+                  }}
                 >
-                  Send Offer →
+                  Send Offer <IcArrowRight />
                 </button>
               </div>
             </div>
@@ -775,22 +1030,22 @@ export default function BrowsePage() {
 
       {/* ── SUBSCRIBE MODAL ── */}
       {subscribeModalId && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.55)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
-          <div style={{ background:'#fff', borderRadius:'16px', padding:'24px 20px', maxWidth:'320px', width:'100%' }}>
-            <div style={{ fontFamily:'Georgia, serif', fontSize:'1.15rem', fontWeight:900, color:'#111827', marginBottom:'6px' }}>Subscribe to Send Offers</div>
-            <p style={{ fontSize:'.82rem', color:'#6b7280', lineHeight:1.6, margin:'0 0 20px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: C.paper, borderRadius: '18px', padding: '24px 20px', maxWidth: '320px', width: '100%' }}>
+            <div style={{ fontFamily: serif, fontSize: '1.2rem', color: C.ink, marginBottom: '6px' }}>Subscribe to Send Offers</div>
+            <p style={{ fontSize: '.82rem', color: C.ink2, lineHeight: 1.6, margin: '0 0 20px' }}>
               A ₱499/month subscription gives you platform access and a ₱499 credit toward your first hire fee.
             </p>
             <button
               onClick={handleSubscribe}
               disabled={subscribeLoading}
-              style={{ width:'100%', padding:'12px', borderRadius:'10px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'.88rem', fontWeight:700, cursor:'pointer', marginBottom:'10px', opacity: subscribeLoading ? .6 : 1 }}
+              style={{ width: '100%', padding: '12px', borderRadius: '12px', border: 'none', background: C.forest, color: C.paper, fontFamily: sans, fontSize: '.9rem', fontWeight: 700, cursor: 'pointer', marginBottom: '10px', opacity: subscribeLoading ? .6 : 1 }}
             >
               {subscribeLoading ? 'Preparing payment...' : 'Subscribe for ₱499 →'}
             </button>
             <button
               onClick={() => setSubscribeModalId(null)}
-              style={{ width:'100%', padding:'8px', background:'none', border:'none', fontFamily:'sans-serif', fontSize:'.8rem', color:'#9ca3af', cursor:'pointer' }}
+              style={{ width: '100%', padding: '8px', background: 'none', border: 'none', fontFamily: sans, fontSize: '.8rem', color: C.ink3, cursor: 'pointer' }}
             >
               Maybe later
             </button>
@@ -799,17 +1054,11 @@ export default function BrowsePage() {
       )}
 
       {/* ── BOTTOM NAV ── */}
-      <div style={{ position:'fixed', bottom:0, left:0, right:0, background:'#fff', borderTop:'1px solid #f0ece6', display:'flex', boxShadow:'0 -2px 10px rgba(0,0,0,.05)' }}>
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: C.paper, borderTop: `1px solid ${C.line}`, display: 'flex', boxShadow: '0 -2px 10px rgba(0,0,0,.04)' }}>
         {([
-          { id:'browse', label:'Browse', icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          )},
-          { id:'offers', label:'My Offers', icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          )},
-          { id:'postjob', label:'Post Job', icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          )},
+          { id: 'browse', label: 'Browse', icon: <IcSearch /> },
+          { id: 'offers', label: 'My Offers', icon: <IcOffers /> },
+          { id: 'postjob', label: 'Post Job', icon: <IcPlus /> },
         ] as const).map((t) => {
           const active = tab === t.id
           return (
@@ -820,10 +1069,14 @@ export default function BrowsePage() {
                 setTab(t.id as 'browse' | 'offers')
                 if (t.id === 'offers') loadOffers()
               }}
-              style={{ flex:1, padding:'10px 4px', display:'flex', flexDirection:'column' as const, alignItems:'center', gap:'3px', border:'none', background:'transparent', cursor:'pointer', color: active ? '#1a6b3c' : '#9ca3af' }}
+              style={{
+                flex: 1, padding: '10px 4px', display: 'flex', flexDirection: 'column' as const,
+                alignItems: 'center', gap: 3, border: 'none', background: 'transparent',
+                cursor: 'pointer', color: active ? C.forest : C.ink3,
+              }}
             >
               {t.icon}
-              <span style={{ fontSize:'.57rem', fontWeight: active ? 700 : 500 }}>{t.label}</span>
+              <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, letterSpacing: '-0.005em' }}>{t.label}</span>
             </button>
           )
         })}
