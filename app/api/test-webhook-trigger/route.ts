@@ -44,10 +44,10 @@ export async function POST(req: NextRequest) {
   if (body.action === 'update_status') {
     const { offer_id, status } = body
     if (!offer_id || !status) return NextResponse.json({ error: 'offer_id and status required' }, { status: 400 })
-    console.log('[update_status] offer_id:', offer_id, 'status:', status)
-    const { error } = await supabaseAdmin.from('offers').update({ status }).eq('id', offer_id)
+    console.log('[update_status] received:', { offer_id, status })
+    const { data, error } = await supabaseAdmin.from('offers').update({ status }).eq('id', offer_id).select()
+    console.log('[update_status] result:', { data, error })
     if (error) {
-      console.log('[update_status] error:', error)
       return NextResponse.json({ error: error.message, code: error.code }, { status: 500 })
     }
     return NextResponse.json({ success: true, offer_id, status })

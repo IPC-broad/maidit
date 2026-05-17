@@ -51,7 +51,7 @@ export default function HWDashboard() {
         setOffers(offersData || [])
         const offeredMap: Record<string, boolean> = {}
         for (const o of offersData || []) {
-          if (['pending','reviewed','agreed','payment_pending','paid','active','hired','countered'].includes(o.status)) {
+          if (['pending','reviewed','agreed','payment_pending','paid','active','hired','countered','fare_pending','fare_countered'].includes(o.status)) {
             offeredMap[o.kasambahay_id] = true
           }
         }
@@ -79,7 +79,17 @@ export default function HWDashboard() {
     if (hw) {
       const { data } = await supabase
         .from('offers')
-        .select('*, kasambahay:kasambahay_id(*, profiles(full_name, mobile))')
+        .select(`
+          id, status, salary, setup, city, scope, household,
+          pets, urgency, start_date, transport_service,
+          transport_direct_type, fare_estimate, fare_countered,
+          created_at, arrived_at, rematch_available, rematch_expires_at,
+          estimated_arrival, kasambahay_id,
+          kasambahay:kasambahay_id(
+            id, province, setup, selfie_url, asking_salary,
+            profile:profile_id(full_name, mobile)
+          )
+        `)
         .eq('homeowner_id', hw.id)
         .order('created_at', { ascending: false })
       setOffers(data || [])
@@ -317,7 +327,8 @@ export default function HWDashboard() {
           )}
           {offers.map((offer: any) => {
             const st = offerStatusMap[offer.status] || { label: offer.status, bg: '#f3f4f6', color: '#6b7280' }
-            const kbName = offer.kasambahay?.profiles?.full_name || 'Kasambahay'
+            const kbName = offer.kasambahay?.profile?.full_name || 'Kasambahay'
+            const kbMobile = offer.kasambahay?.profile?.mobile
             const isPaid = ['paid','active'].includes(offer.status)
             const isHired = offer.status === 'hired'
             const needsPayment = offer.status === 'agreed'
@@ -331,6 +342,22 @@ export default function HWDashboard() {
               setRematchQ3('')
               setRematchDone(false)
             }
+
+            // Build household summary e.g. "2 adults · 1 child"
+            let householdLabel = ''
+            if (offer.household) {
+              let hh = offer.household
+              if (typeof hh === 'string') { try { hh = JSON.parse(hh) } catch {} }
+              const parts: string[] = []
+              if (hh?.adults) parts.push(`${hh.adults} adult${hh.adults !== 1 ? 's' : ''}`)
+              if (hh?.kids) parts.push(`${hh.kids} child${hh.kids !== 1 ? 'ren' : ''}`)
+              if (hh?.seniors) parts.push(`${hh.seniors} senior${hh.seniors !== 1 ? 's' : ''}`)
+              householdLabel = parts.join(' · ')
+            }
+            const petsLabel = offer.pets && offer.pets !== 'No' && offer.pets !== 'Wala' ? offer.pets : ''
+            const scopeLabel = Array.isArray(offer.scope) && offer.scope.length > 0 ? offer.scope[0] : (offer.scope || '—')
+            const urgencyLabel = offer.urgency === 'ASAP' ? 'ASAP' : offer.urgency ? offer.urgency : ''
+
             return (
               <div key={offer.id} style={{ background:'#fff', borderRadius:'13px', border:'1px solid #ede8e0', ...(offer.status === 'countered' ? { borderLeft:'4px solid #dc2626' } : {}), overflow:'hidden', marginBottom:'12px' }}>
                 <div style={{ padding:'13px 14px' }}>
@@ -355,7 +382,9 @@ export default function HWDashboard() {
                       <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Salary</div><div style={{ fontFamily:'serif', fontSize:'16px', fontWeight:900, color:'#1a6b3c' }}>₱{offer.salary?.toLocaleString()}<span style={{ fontSize:'10px', fontWeight:400, color:'#9ca3af' }}>/month</span></div></div>
                       <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Location</div><div style={{ fontSize:'13px', fontWeight:700 }}>{offer.city || '—'}</div></div>
                       <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Setup</div><div style={{ fontSize:'13px', fontWeight:700 }}>{offer.setup || '—'}</div></div>
-                      <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Scope</div><div style={{ fontSize:'12px', fontWeight:600, lineHeight:1.4 }}>{offer.scope?.join(', ') || '—'}</div></div>
+                      <div><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Scope</div><div style={{ fontSize:'12px', fontWeight:600, lineHeight:1.4 }}>{scopeLabel}</div></div>
+                      {householdLabel ? <div style={{ gridColumn:'1 / -1' }}><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Household</div><div style={{ fontSize:'13px', fontWeight:600 }}>{householdLabel}{petsLabel ? ` · 🐾 ${petsLabel}` : ''}</div></div> : null}
+                      {urgencyLabel ? <div style={{ gridColumn:'1 / -1' }}><div style={{ fontSize:'12px', color:'#4b5563', marginBottom:'3px', fontWeight:600 }}>Start</div><div style={{ fontSize:'13px', fontWeight:600 }}>{urgencyLabel}</div></div> : null}
                     </div>
                   </div>
                   {offer.fare_estimate && offer.status !== 'countered' && (
@@ -419,18 +448,18 @@ export default function HWDashboard() {
                       Proceed to Hire →
                     </button>
                   )}
-                  {(isPaid || isHired) && offer.kasambahay?.profiles?.mobile && (
+                  {(isPaid || isHired) && kbMobile && (
                     <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:'10px', padding:'12px 14px', marginBottom:'8px' }}>
                       <div style={{ fontSize:'10px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#166534', marginBottom:'8px' }}>Contact your kasambahay</div>
                       {isPaid && !offer.arrived_at && (
                         <div style={{ fontSize:'12px', color:'#166534', marginBottom:'10px', lineHeight:1.5 }}>Your kasambahay is on her way. You can now contact her directly.</div>
                       )}
                       <div style={{ fontSize:'13px', fontWeight:700, color:'#111827', marginBottom:'2px' }}>{kbName}</div>
-                      <div style={{ fontSize:'13px', color:'#374151', marginBottom:'10px' }}>{offer.kasambahay.profiles.mobile}</div>
+                      <div style={{ fontSize:'13px', color:'#374151', marginBottom:'10px' }}>{kbMobile}</div>
                       <div style={{ display:'flex', gap:'6px', marginBottom:'8px' }}>
-                        <a href={`viber://chat?number=${toIntl(offer.kasambahay.profiles.mobile)}`} style={{ flex:1, padding:'9px', borderRadius:'9px', background:'#7c3aed', color:'#fff', fontFamily:'sans-serif', fontSize:'12px', fontWeight:700, cursor:'pointer', textAlign:'center' as const, textDecoration:'none', display:'block' }}>💬 Viber</a>
-                        <a href={`https://wa.me/${toIntl(offer.kasambahay.profiles.mobile)}`} target="_blank" rel="noreferrer" style={{ flex:1, padding:'9px', borderRadius:'9px', background:'#16a34a', color:'#fff', fontFamily:'sans-serif', fontSize:'12px', fontWeight:700, cursor:'pointer', textAlign:'center' as const, textDecoration:'none', display:'block' }}>💬 WhatsApp</a>
-                        <button onClick={() => navigator.clipboard.writeText(offer.kasambahay.profiles.mobile)} style={{ padding:'9px 12px', borderRadius:'9px', background:'transparent', border:'1.5px solid #e5e7eb', color:'#6b7280', fontFamily:'sans-serif', fontSize:'12px', fontWeight:600, cursor:'pointer' }}>Copy</button>
+                        <a href={`viber://chat?number=${toIntl(kbMobile)}`} style={{ flex:1, padding:'9px', borderRadius:'9px', background:'#7c3aed', color:'#fff', fontFamily:'sans-serif', fontSize:'12px', fontWeight:700, cursor:'pointer', textAlign:'center' as const, textDecoration:'none', display:'block' }}>💬 Viber</a>
+                        <a href={`https://wa.me/${toIntl(kbMobile)}`} target="_blank" rel="noreferrer" style={{ flex:1, padding:'9px', borderRadius:'9px', background:'#16a34a', color:'#fff', fontFamily:'sans-serif', fontSize:'12px', fontWeight:700, cursor:'pointer', textAlign:'center' as const, textDecoration:'none', display:'block' }}>💬 WhatsApp</a>
+                        <button onClick={() => navigator.clipboard.writeText(kbMobile)} style={{ padding:'9px 12px', borderRadius:'9px', background:'transparent', border:'1.5px solid #e5e7eb', color:'#6b7280', fontFamily:'sans-serif', fontSize:'12px', fontWeight:600, cursor:'pointer' }}>Copy</button>
                       </div>
                       <div style={{ fontSize:'10px', color:'#6b7280', lineHeight:1.5 }}>Future hires through MaidIt include rematch protection.</div>
                     </div>

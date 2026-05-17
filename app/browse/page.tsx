@@ -9,6 +9,20 @@ const TRANSPORT_PROVINCES = [
   'Camarines Norte', 'Camarines Sur', 'Albay', 'Sorsogon', 'Catanduanes', 'Masbate',
 ]
 
+const SKILL_LABELS: Record<string, string> = {
+  'Pagluluto': 'Cooking',
+  'Paglalaba': 'Laundry',
+  'Paglilinis': 'Cleaning',
+  'Pag-aalaga ng Bata': 'Childcare',
+  'Pag-aalaga ng Matanda': 'Elder Care',
+  'Pag-aalaga ng Alagang Hayop': 'Pet Care',
+  'Pamimili': 'Grocery/Errands',
+  'Pagmamaneho': 'Driving',
+  'All-Around Maid (Lahat ng gawaing bahay)': 'All-Around Maid',
+  'All-around Maid': 'All-Around Maid',
+}
+const displaySkill = (s: string) => SKILL_LABELS[s] || s
+
 const C = {
   forest: '#27500A', forestDeep: '#1c3b07', forestSoft: '#f0f5ec', forestLine: '#e2ecdb',
   amber: '#c9943a', amberSoft: '#fbf3e2', amberLine: '#efe1bf', amberDeep: '#8a6418',
@@ -446,7 +460,7 @@ export default function BrowsePage() {
                   <span key={s} style={{
                     padding: '3px 9px', background: C.paper2, border: `1px solid ${C.line}`,
                     borderRadius: 999, fontSize: 11, color: C.ink2, fontWeight: 500,
-                  }}>{s}</span>
+                  }}>{displaySkill(s)}</span>
                 ))}
                 {extraSkills > 0 && (
                   <span style={{ padding: '3px 8px', color: C.ink3, fontSize: 11, fontWeight: 500 }}>
@@ -1002,7 +1016,7 @@ export default function BrowsePage() {
                     <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 6 }}>
                       {skills.map((skill: string) => (
                         <span key={skill} style={{ fontSize: 12, fontWeight: 600, padding: '4px 11px', borderRadius: 20, background: C.forestSoft, color: C.forest, border: `1px solid ${C.forestLine}` }}>
-                          {skill}
+                          {displaySkill(skill)}
                         </span>
                       ))}
                     </div>
