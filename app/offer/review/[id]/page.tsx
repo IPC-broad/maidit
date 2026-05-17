@@ -71,10 +71,21 @@ export default function OfferReviewPage() {
     return d.toLocaleDateString('fil-PH', { month: 'long', day: 'numeric', year: 'numeric' })
   }
 
-  const transportLabel = (t: string) => {
-    if (t === 'full') return 'Amo ang sasagot sa pamasahe'
+  const transportLabel = () => {
+    if (offer?.transport_service) return '🛡️ MaidIt Assisted Travel (kasama sa bayad)'
+    const t = offer?.transport_direct_type
+    if (t === 'homeowner_pays') return 'Amo ang magbabayad ng pamasahe'
     if (t === 'reimburse') return 'Ako muna ang sasagot pero irereimburse ng amo pagdating ko'
-    return 'Ikaw ang magbabayad ng sarili mong pamasahe'
+    if (t === 'kasambahay_pays') return 'Ikaw ang magbabayad ng sarili mong pamasahe'
+    return 'Direct arrangement'
+  }
+
+  const urgencyTL: Record<string, string> = {
+    'ASAP': 'Kailangan na agad',
+    'Within a few days': 'Sa loob ng ilang araw',
+    'Next week': 'Susunod na linggo',
+    'Flexible / To be discussed': 'Flexible',
+    'Flexible': 'Flexible',
   }
 
   const tick = (k: string) => setChecklist(c => ({ ...c, [k]: !c[k as keyof typeof c] }))
@@ -189,8 +200,9 @@ export default function OfferReviewPage() {
 
   const hwCity = offer?.homeowners?.profiles?.city || offer?.city || ''
   const showFare = isProvince && checklist.transport &&
-    (offer?.transport_arrangement === 'full' || offer?.transport_arrangement === 'reimburse')
-  const showStartDate = hasValidDate(offer?.start_date) || offer?.urgency === 'ASAP'
+    !offer?.transport_service &&
+    (offer?.transport_direct_type === 'homeowner_pays' || offer?.transport_direct_type === 'reimburse')
+  const showStartDate = hasValidDate(offer?.start_date)
   const household = offer?.household
     ? (typeof offer.household === 'string' ? JSON.parse(offer.household) : offer.household)
     : null
@@ -200,7 +212,7 @@ export default function OfferReviewPage() {
     household?.seniors ? `${household.seniors} seniors` : '',
     household?.kids ? `${household.kids} children` : '',
   ].filter(Boolean).join(', ')
-  const showPets = offer?.pets && offer.pets !== 'No Pets'
+  const showPets = offer?.pets && offer.pets !== 'No Pets' && offer.pets !== 'Walang Pets' && offer.pets !== 'None'
 
   return (
     <div style={s.wrap}>
@@ -272,7 +284,7 @@ export default function OfferReviewPage() {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={s.checkLabel} onClick={() => { tick('start_date'); if (checklist.start_date) setCounterDate('') }}>
-                  Simula ng trabaho: <strong>{offer?.urgency === 'ASAP' && !hasValidDate(offer?.start_date) ? 'Kailangan na agad' : formatDate(offer.start_date)}</strong>
+                  Simula ng trabaho: <strong>{formatDate(offer.start_date)}</strong>
                 </div>
                 <div style={toggleStatus(checklist.start_date)} onClick={() => { tick('start_date'); if (checklist.start_date) setCounterDate('') }}>
                   {checklist.start_date ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}
@@ -308,7 +320,7 @@ export default function OfferReviewPage() {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={s.checkLabel} onClick={() => { tick('transport'); if (checklist.transport) setTransportCountered('') }}>
-                  Transportasyon: <strong>{transportLabel(offer.transport_arrangement)}</strong>
+                  Transportasyon: <strong>{transportLabel()}</strong>
                 </div>
                 <div style={toggleStatus(checklist.transport)} onClick={() => { tick('transport'); if (checklist.transport) setTransportCountered('') }}>
                   {checklist.transport ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}
@@ -355,7 +367,7 @@ export default function OfferReviewPage() {
                 <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.urgency ? '✓' : '✗'}</span>
               </div>
               <div style={{ flex: 1 }}>
-                <div style={s.checkLabel}>Kelan kailangan: <strong>{offer.urgency}</strong></div>
+                <div style={s.checkLabel}>Kelan kailangan: <strong>{urgencyTL[offer.urgency] || offer.urgency}</strong></div>
                 <div style={toggleStatus(checklist.urgency)}>{checklist.urgency ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}</div>
               </div>
             </div>

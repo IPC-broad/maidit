@@ -309,7 +309,7 @@ export default function SendOfferPage({ params }: any) {
                     }}>
                     <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a1a1a', marginBottom: '4px' }}>Direct</div>
                     <div style={{ fontSize: '12px', color: '#4b5563', lineHeight: 1.5, marginBottom: '6px' }}>You coordinate transport with the kasambahay directly.</div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a6b3c' }}>Free</div>
+                    <div style={{ fontSize: '18px', fontWeight: 700, color: '#27500A', marginTop: '6px' }}>Free</div>
                     {isDirect && (
                       <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px', marginTop: '10px' }}>
                         {([
@@ -355,7 +355,12 @@ export default function SendOfferPage({ params }: any) {
                     }}>
                     <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a1a1a', marginBottom: '4px' }}>🛡️ MaidIt Assisted Travel</div>
                     <div style={{ fontSize: '12px', color: '#4b5563', lineHeight: 1.5 }}>We coordinate transport and guarantee arrival.</div>
-                    {!isMaidIt && <div style={{ fontSize: '13px', fontWeight: 700, color: '#c9943a', marginTop: '6px' }}>+₱6,000</div>}
+                    {!isMaidIt && (
+                      <div style={{ marginTop: '6px' }}>
+                        <div style={{ fontSize: '18px', fontWeight: 700, color: '#c9943a', lineHeight: 1.1 }}>+₱6,000</div>
+                        <div style={{ fontSize: '11px', color: '#92400e', marginTop: '2px' }}>one-time fee</div>
+                      </div>
+                    )}
                     {isMaidIt && (
                       <>
                         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px', margin: '10px 0' }}>
@@ -377,9 +382,6 @@ export default function SendOfferPage({ params }: any) {
                       </>
                     )}
                   </div>
-                </div>
-                <div style={{ fontSize: '12px', color: '#9ca3af', textAlign: 'center' as const, marginTop: '8px', lineHeight: 1.5 }}>
-                  MaidIt transport fee is included in the hire fee payment at checkout.
                 </div>
               </>
             )}
