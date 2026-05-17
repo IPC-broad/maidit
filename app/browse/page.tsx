@@ -324,6 +324,15 @@ export default function BrowsePage() {
     const expRaw = kb.experience
     const expYears = (!expRaw || expRaw === 'Baguhan' || expRaw === 0 || expRaw === '0') ? null
       : typeof expRaw === 'number' ? expRaw : parseInt(expRaw) || null
+    const expDisplay = (!expRaw || expRaw === 'Baguhan' || expRaw === '0' || expRaw === 0)
+      ? 'No experience yet'
+      : `${expRaw} exp`
+    const nc = kb.num_children
+    const familyLine = [
+      kb.civil_status || null,
+      nc === 0 ? 'No children' : nc === 1 ? '1 child' : nc > 1 ? `${nc} children` : null,
+    ].filter(Boolean).join(' · ')
+    const infoLine = [expDisplay, familyLine || null].filter(Boolean).join(' · ')
     const kbProvince = kb.province || ''
     const location = kbProvince || 'Province not set'
     const isNearby = !!(homeownerProvince && kbProvince && kbProvince.toLowerCase() === homeownerProvince.toLowerCase())
@@ -469,6 +478,11 @@ export default function BrowsePage() {
                 )}
               </div>
             )}
+
+            {/* experience + family line */}
+            <div style={{ marginTop: 8, fontSize: 11, color: C.ink3, lineHeight: 1.4 }}>
+              {infoLine}
+            </div>
           </div>
         </div>
 
