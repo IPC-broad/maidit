@@ -22,8 +22,14 @@ export default function PayPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
-      const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
-      setIsTester(profile?.full_name?.toLowerCase().includes('test') ?? false)
+      const { data: prof } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+
+      const isTester = !!(
+        prof?.full_name?.toLowerCase().includes('test') ||
+        user?.email?.toLowerCase().includes('test')
+      )
+      console.log('[pay] isTester:', isTester, prof?.full_name, user?.email)
+      setIsTester(isTester)
 
       const { data } = await supabase
         .from('offers')
