@@ -253,7 +253,6 @@ export default function ArrivalPage() {
           {[
             { icon: '⏱️', title: '30-day trial begins', desc: 'You have 30 days to raise concerns or request a free rematch.' },
             { icon: '🔄', title: 'Rematch protection activates', desc: 'If there are issues within 30 days, MaidIt arranges a free replacement.' },
-            { icon: '💸', title: 'Referror receives payout', desc: 'The community partner who referred your kasambahay gets paid.' },
           ].map((item, i, arr) => (
             <div key={i} style={{ display: 'flex', gap: '13px', paddingBottom: i < arr.length - 1 ? '12px' : 0, marginBottom: i < arr.length - 1 ? '12px' : 0, borderBottom: i < arr.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
               <div style={{ width: '34px', height: '34px', borderRadius: '9px', background: '#f0fdf4', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', flexShrink: 0 }}>
