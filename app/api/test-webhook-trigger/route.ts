@@ -44,10 +44,11 @@ export async function POST(req: NextRequest) {
   if (body.action === 'update_status') {
     const { offer_id, status } = body
     if (!offer_id || !status) return NextResponse.json({ error: 'offer_id and status required' }, { status: 400 })
+    console.log('[update_status] offer_id:', offer_id, 'status:', status)
     const { error } = await supabaseAdmin.from('offers').update({ status }).eq('id', offer_id)
     if (error) {
-      console.log('[test-webhook-trigger] update_status error:', error)
-      return NextResponse.json({ error: 'Update failed', supabase_error: error }, { status: 500 })
+      console.log('[update_status] error:', error)
+      return NextResponse.json({ error: error.message, code: error.code }, { status: 500 })
     }
     return NextResponse.json({ success: true, offer_id, status })
   }

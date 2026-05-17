@@ -18,8 +18,8 @@ function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  // Kasambahay mobile login
-  const [mobile, setMobile] = useState('')
+  // Kasambahay mobile-or-email login
+  const [mobileOrEmail, setMobileOrEmail] = useState('')
   const [mobilePassword, setMobilePassword] = useState('')
 
   const [loading, setLoading] = useState(false)
@@ -68,16 +68,24 @@ function LoginForm() {
     }
   }
 
-  const handleMobileLogin = async () => {
-    if (!mobile || !mobilePassword) { setError('Punan ang lahat ng fields'); return }
+  const handleKbLogin = async () => {
+    if (!mobileOrEmail || !mobilePassword) { setError('Punan ang lahat ng fields'); return }
     setLoading(true)
     setError('')
     try {
       const { supabase } = await import('../../lib/supabase')
-      const cleanMobile = mobile.replace(/\D/g, '')
-      const kbEmail = `kb_${cleanMobile}@maidit.app`
-      const { data, error } = await supabase.auth.signInWithPassword({ email: kbEmail, password: mobilePassword })
-      if (error) { setError('Mali ang mobile number o password. Subukan ulit.'); setLoading(false); return }
+      const val = mobileOrEmail.trim()
+      const isMobile = /^(\+63|09)\d/.test(val) || /^\d{10,11}$/.test(val)
+      let kbEmail: string
+      if (isMobile) {
+        const digits = val.replace(/\D/g, '')
+        const normalized = digits.startsWith('63') ? '0' + digits.slice(2) : digits
+        kbEmail = `kb_${normalized}@maidit.app`
+      } else {
+        kbEmail = val
+      }
+      const { error } = await supabase.auth.signInWithPassword({ email: kbEmail, password: mobilePassword })
+      if (error) { setError('Mali ang mobile/email o password. Subukan ulit.'); setLoading(false); return }
       setLoading(false)
       router.push('/dashboard/kasambahay')
     } catch {
@@ -93,7 +101,7 @@ function LoginForm() {
       const { supabase } = await import('../../lib/supabase')
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
-        options: { redirectTo: `${window.location.origin}/dashboard/kasambahay` },
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
       })
       if (error) { setError(error.message); setFbLoading(false) }
     } catch {
@@ -131,13 +139,13 @@ function LoginForm() {
           <div style={{ fontSize: '.68rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#c9943a', marginBottom: '12px' }}>
             Para sa Kasambahay
           </div>
-          <label style={lbl}>Mobile Number</label>
+          <label style={lbl}>Mobile number or email</label>
           <input
             style={inp}
-            placeholder="09XXXXXXXXX"
-            value={mobile}
-            onChange={e => setMobile(e.target.value.replace(/\D/g, '').slice(0, 11))}
-            inputMode="numeric"
+            placeholder="09XXXXXXXXX or email@example.com"
+            value={mobileOrEmail}
+            onChange={e => setMobileOrEmail(e.target.value)}
+            autoComplete="username"
           />
           <label style={lbl}>Password</label>
           <input
@@ -146,11 +154,12 @@ function LoginForm() {
             placeholder="Iyong password"
             value={mobilePassword}
             onChange={e => setMobilePassword(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleMobileLogin()}
+            onKeyDown={e => e.key === 'Enter' && handleKbLogin()}
+            autoComplete="current-password"
           />
           <button
             style={{ width: '100%', padding: '13px', borderRadius: '12px', border: 'none', background: '#c9943a', color: '#fff', fontFamily: 'sans-serif', fontSize: '.92rem', fontWeight: 700, cursor: 'pointer', opacity: loading ? 0.6 : 1, marginBottom: '10px' }}
-            onClick={handleMobileLogin}
+            onClick={handleKbLogin}
             disabled={loading}
           >
             {loading ? 'Signing in...' : 'Mag-sign in →'}
