@@ -52,6 +52,7 @@ export default function KasambahaySignup() {
     first_name: '',
     last_name: '',
     mobile: '',
+    password: '',
     otp: '',
     age: '',
     salary: '',
@@ -106,12 +107,16 @@ export default function KasambahaySignup() {
   }
 
   const checkMobile = async () => {
-    if (!form.first_name || !form.last_name || !form.mobile) {
+    if (!form.first_name || !form.last_name || !form.mobile || !form.password) {
       setError('Punan ang lahat ng fields')
       return
     }
     if (form.mobile.length < 11) {
       setError('Ilagay ang tamang mobile number (11 digits)')
+      return
+    }
+    if (form.password.length < 5) {
+      setError('Ang password ay dapat ay hindi bababa sa 5 characters')
       return
     }
     setLoading(true)
@@ -164,11 +169,10 @@ export default function KasambahaySignup() {
     const { supabase } = await import('../../../lib/supabase')
 
     const autoEmail = `kb_${form.mobile}@maidit.app`
-    const autoPassword = Math.random().toString(36).slice(-12)
 
     const { data, error } = await supabase.auth.signUp({
       email: autoEmail,
-      password: autoPassword
+      password: form.password
     })
 
     if (error) {
@@ -351,6 +355,19 @@ export default function KasambahaySignup() {
               onChange={e => update('mobile', e.target.value.replace(/\D/g,'').slice(0,11))}
               inputMode="numeric"
               maxLength={11}
+            />
+          </div>
+
+          {/* Password */}
+          <label style={s.lbl}>Lumikha ng Password</label>
+          <div style={{ position:'relative' }}>
+            <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', fontSize:'14px', lineHeight:1, pointerEvents:'none' }}>🔒</span>
+            <input
+              style={{ ...s.input, paddingLeft:'38px' }}
+              type="password"
+              placeholder="Minimum 5 characters"
+              value={form.password}
+              onChange={e => update('password', e.target.value)}
             />
           </div>
 

@@ -8,6 +8,7 @@ export default function PostJobPage() {
   const router = useRouter()
 
   const [hwId, setHwId] = useState<string | null>(null)
+  const [isTester, setIsTester] = useState(false)
   const [initLoading, setInitLoading] = useState(true)
   const [error, setError] = useState('')
   const [step, setStep] = useState<'form' | 'review' | 'pay' | 'confirm' | 'done'>('form')
@@ -32,6 +33,9 @@ export default function PostJobPage() {
       const { supabase } = await import('../../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+
+      const { data: profData } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+      setIsTester((profData?.full_name || '').toLowerCase().includes('test'))
 
       let { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
       if (!hw) {
@@ -258,7 +262,7 @@ export default function PostJobPage() {
       </div>
       <div style={s.body}>
         <div style={{ fontFamily: 'serif', fontSize: '1.15rem', fontWeight: 900, marginBottom: '16px' }}>
-          Looks good? 👀
+          Ready to Post Your Job?
         </div>
         <div style={s.card}>
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '12px' }}>Job Summary</div>
@@ -279,19 +283,32 @@ export default function PostJobPage() {
 
         <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '11px', padding: '12px 14px', marginBottom: '10px' }}>
           <div style={{ fontSize: '.74rem', color: '#92400e', lineHeight: 1.6 }}>
-            💡 Activating this listing costs <strong>₱499</strong> — paid once via PayMongo. Your job goes live immediately after.
+            💡 Post this job for <strong>₱499</strong> — one-time payment via PayMongo. Your listing goes live immediately after payment.
           </div>
         </div>
 
         <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '11px', padding: '12px 14px', marginBottom: '18px' }}>
-          <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.6 }}>
-            After posting, you can send up to <strong>10 job offers</strong>. Your ₱499 subscription includes one hiring fee credit valid for 30 days — first hire is <strong>₱2,001</strong>, subsequent hires within 30 days are ₱2,500.
+          <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.7 }}>
+            <strong>✅ Your ₱499 posting includes:</strong><br/>
+            • Up to 10 job offers<br/>
+            • 1 discounted first hire within 30 days<br/>
+            <br/>
+            Your first hire is only <strong>₱2,001</strong>. Additional hires use the standard <strong>₱2,500</strong> hiring fee.
           </div>
         </div>
 
         <button style={s.btnAmber} onClick={() => setStep('pay')}>
           Continue to Payment →
         </button>
+        {isTester && (
+          <button
+            style={{ ...s.btnOutline, marginBottom: '8px', color: '#6b7280', fontSize: '.78rem' }}
+            onClick={handlePost}
+            disabled={submitting}
+          >
+            {submitting ? 'Posting...' : 'Skip Payment (Test Mode)'}
+          </button>
+        )}
         <button style={s.btnOutline} onClick={() => setStep('form')}>
           ← Edit Job
         </button>
@@ -400,7 +417,6 @@ export default function PostJobPage() {
         <label style={s.lbl}>Monthly Salary (₱)</label>
         <input style={s.inp} type="number" placeholder="e.g. 9000" value={form.salary}
           onChange={e => update('salary', e.target.value)} />
-        <div style={{ fontSize: '.7rem', color: '#9ca3af', marginBottom: '16px' }}>Typical: ₱8,000 – ₱15,000/month</div>
 
         <button
           style={s.btnAmber}

@@ -44,7 +44,7 @@ export default function OfferReviewPage() {
       if (!user) { router.push('/login'); return }
       const { data } = await supabase
         .from('offers')
-        .select('*, homeowners(*, profiles(*))')
+        .select('*, urgency, start_date, household, pets, scope, transport_service, transport_direct_type, homeowners(*, profiles(*))')
         .eq('id', offerId)
         .single()
       setOffer(data)

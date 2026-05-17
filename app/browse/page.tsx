@@ -546,7 +546,7 @@ export default function BrowsePage() {
               </div>
             )}
 
-            {/* Visible cards (all for logged-in, first 3 for guests) */}
+            {/* Visible cards (all for logged-in, first 2 for guests) */}
             {visibleCards.map(renderKBCard)}
 
             {/* Blurred + locked section for non-logged-in guests */}

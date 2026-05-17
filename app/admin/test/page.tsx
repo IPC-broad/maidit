@@ -389,6 +389,9 @@ export default function AdminTestPanel() {
 
       {/* ── OFFERS ── */}
       <div style={s.secTitle}>Recent Offers ({offers.length})</div>
+      <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '10px' }}>
+        ℹ️ Status changes reflect on user dashboards after page refresh.
+      </div>
 
       {loading && <div style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>Loading...</div>}
 

@@ -36,7 +36,7 @@ export default function KBDashboard() {
       if (kbData) {
         const { data: offersData } = await supabase
           .from('offers')
-          .select('*, homeowner:homeowner_id(*, profiles(full_name, mobile))')
+          .select('*, household, pets, scope, urgency, start_date, homeowner:homeowner_id(*, profiles(full_name, mobile))')
           .eq('kasambahay_id', kbData.id)
         setOffers(offersData || [])
         const { data: apps } = await supabase.from('applications').select('job_id').eq('kasambahay_id', kbData.id)
@@ -297,7 +297,27 @@ export default function KBDashboard() {
                       <div><div style={s.lbl10}>Sahod</div><div style={{ fontFamily: 'serif', fontSize: '16px', fontWeight: 900, color: '#1a6b3c' }}>₱{offer.salary?.toLocaleString()}<span style={{ fontSize: '10px', fontWeight: 400, color: '#9ca3af' }}>/buwan</span></div></div>
                       <div><div style={s.lbl10}>Lokasyon</div><div style={s.val13}>{offer.city || '—'}</div></div>
                       <div><div style={s.lbl10}>Setup</div><div style={s.val13}>{offer.setup || '—'}</div></div>
+                      {offer.urgency && <div><div style={s.lbl10}>Kelan</div><div style={s.val13}>{urgencyLabel(offer.urgency)}</div></div>}
                     </div>
+                    {offer.household && (() => {
+                      const h = typeof offer.household === 'string' ? JSON.parse(offer.household) : offer.household
+                      const hText = householdText(h)
+                      return hText !== '—' ? (
+                        <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #f3f4f6' }}>
+                          <div style={s.lbl10}>Pamilya</div>
+                          <div style={{ fontSize: '12px', fontWeight: 600 }}>
+                            {hText}
+                            {offer.pets && offer.pets !== 'No' && offer.pets !== 'Wala' && offer.pets !== 'No Pets' && ` · ${petsText(offer.pets)}`}
+                          </div>
+                        </div>
+                      ) : null
+                    })()}
+                    {offer.scope?.length > 0 && (
+                      <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #f3f4f6' }}>
+                        <div style={s.lbl10}>Kailangan</div>
+                        <div style={{ fontSize: '12px', fontWeight: 600 }}>{offer.scope.join(', ')}</div>
+                      </div>
+                    )}
                   </div>
 
                   {offer.status === 'pending' && (
