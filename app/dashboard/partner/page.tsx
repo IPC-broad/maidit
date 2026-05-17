@@ -1,3 +1,5 @@
+// PARTNER PAGE — All UI text must be in Taglish
+// DO NOT translate to English during audits
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'

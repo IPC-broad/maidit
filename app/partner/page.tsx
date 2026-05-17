@@ -1,3 +1,5 @@
+// PARTNER PAGE — All UI text must be in Taglish
+// DO NOT translate to English during audits
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -6,8 +8,8 @@ type Province = { code: string; name: string }
 type Step = 'landing' | 'step1' | 'reflink' | 'step2' | 'dashboard'
 
 const NETWORK_OPTIONS = [
-  'Barangay / Community', 'Church / Parish', 'Family / Relatives',
-  'School / Training', 'Former kasambahay', 'Other'
+  'Barangay / Komunidad', 'Simbahan / Parish', 'Pamilya / Kamag-anak',
+  'Paaralan / Training', 'Dating kasambahay', 'Iba pa'
 ]
 const POOL_SIZES = ['5–10', '11–25', '26–50', '50+']
 
@@ -78,12 +80,12 @@ export default function PartnerPage() {
   }
 
   const handleStep1 = async () => {
-    if (!firstName.trim() || !lastName.trim()) { setS1Error('Please enter your first and last name.'); return }
+    if (!firstName.trim() || !lastName.trim()) { setS1Error('Pakisulat ang iyong pangalan at apelyido.'); return }
     const name = `${firstName.trim()} ${lastName.trim()}`
     if (!mobile || mobile.length !== 11 || !mobile.startsWith('09')) {
-      setS1Error('Please enter a valid 11-digit mobile number starting with 09.'); return
+      setS1Error('Pakisulat ang tamang 11-digit mobile number na nagsisimula sa 09.'); return
     }
-    if (!selProv) { setS1Error('Please select your province.'); return }
+    if (!selProv) { setS1Error('Piliin ang iyong probinsya.'); return }
     setS1Error('')
     setSubmitting1(true)
 
@@ -97,7 +99,7 @@ export default function PartnerPage() {
     })
 
     if (signupError || !signupData.user) {
-      setS1Error('Could not create account. This mobile number may already be registered.')
+      setS1Error('Hindi ma-create ang account. Baka registered na ang mobile number na ito.')
       setSubmitting1(false); return
     }
 
@@ -127,7 +129,7 @@ export default function PartnerPage() {
 
   const handleStep2 = async () => {
     if (!gcash || gcash.length !== 11 || !gcash.startsWith('09')) {
-      alert('Please enter a valid GCash number.'); return
+      alert('Pakisulat ang tamang GCash number.'); return
     }
     setSubmitting2(true)
     const { supabase } = await import('../../lib/supabase')
@@ -152,7 +154,7 @@ export default function PartnerPage() {
   }
 
   const shareSMS = () => {
-    const msg = encodeURIComponent(`Apply as a kasambahay on MaidIt! Free and safe. Use my referral link: https://maidit.vercel.app/signup/kasambahay?ref=${refCode}`)
+    const msg = encodeURIComponent(`Mag-apply bilang kasambahay sa MaidIt! Libre at ligtas. Gamitin ang link ko: https://maidit.vercel.app/signup/kasambahay?ref=${refCode}`)
     window.open(`sms:?body=${msg}`, '_blank')
   }
 
@@ -212,7 +214,7 @@ export default function PartnerPage() {
         </div>
         <div style={{ display: 'flex', gap: '7px' }}>
           <button onClick={() => router.push('/login')} style={{ padding: '5px 12px', borderRadius: '7px', background: 'transparent', border: '1.5px solid #e5e0d8', color: '#6b7280', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: 'sans-serif' }}>Login</button>
-          <button onClick={() => setStep('step1')} style={{ padding: '6px 14px', borderRadius: '8px', background: '#c9943a', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>Become a Partner</button>
+          <button onClick={() => setStep('step1')} style={{ padding: '6px 14px', borderRadius: '8px', background: '#c9943a', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>Maging Partner</button>
         </div>
       </nav>
 
@@ -231,50 +233,48 @@ export default function PartnerPage() {
           <div className="bg-white sm:bg-transparent" style={{ padding: '20px 16px 20px 14px', display: 'flex', flexDirection: 'column' as const, justifyContent: 'center' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', background: '#1a6b3c', borderRadius: '50px', padding: '4px 10px', fontSize: '8px', fontWeight: 700, color: '#fff', textTransform: 'uppercase' as const, letterSpacing: '.5px', marginBottom: '11px', alignSelf: 'flex-start' as const }}>Community Partner</div>
             <h1 style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, lineHeight: 1.2, marginBottom: '9px', color: '#1a1a1a' }}>
-              Earn while<br />
-              <em style={{ color: '#1a6b3c', fontStyle: 'italic' }}>helping your community 🍃</em>
+              Kumita habang<br />
+              <em style={{ color: '#1a6b3c', fontStyle: 'italic' }}>tumutulong sa iyong komunidad 🍃</em>
             </h1>
             <p style={{ fontSize: '15px', color: '#6b7280', lineHeight: 1.65, marginBottom: '13px' }}>
-              Kumita ng hanggang <strong style={{ color: '#1a1a1a' }}>₱1,000</strong> sa bawat ma-hire na referral mo.
+              Mag-refer ng mga naghahanap ng trabaho sa iyong komunidad — kumita ng <strong style={{ color: '#1a1a1a' }}>₱1,000</strong> sa bawat successful hire.
             </p>
             <button style={{ padding: '10px 14px', borderRadius: '9px', background: '#c9943a', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif', alignSelf: 'flex-start' as const }} onClick={() => setStep('step1')}>
-              Become a Community Partner →
+              Maging Community Partner →
             </button>
           </div>
         </div>
       </div>
 
-      {/* EARNINGS — two cards side by side */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', padding: '12px 14px 0' }}>
-        {/* Kita per hire */}
-        <div style={{ background: '#1a6b3c', borderRadius: '14px', padding: '15px 14px' }}>
-          <div style={{ fontSize: '8px', color: 'rgba(255,255,255,.55)', textTransform: 'uppercase' as const, letterSpacing: '.6px', marginBottom: '8px' }}>EARNINGS PER HIRE</div>
-          <div style={{ fontFamily: 'serif', fontSize: '30px', fontWeight: 900, color: '#fff', lineHeight: 1, marginBottom: '5px' }}>₱1,000</div>
-          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,.75)', marginBottom: '10px' }}>per kasambahay hired</div>
-          <div style={{ borderTop: '1px solid rgba(255,255,255,.18)', paddingTop: '10px', marginBottom: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,.7)' }}>₱500</span>
-              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,.55)', textAlign: 'right' as const }}>Referral fee</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,.7)' }}>₱500</span>
-              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,.55)', textAlign: 'right' as const }}>Transport assistance fee</span>
-            </div>
+      {/* EARNINGS — headline + two breakdown cards */}
+      <div style={{ padding: '16px 14px 0' }}>
+        {/* Headline total */}
+        <div style={{ textAlign: 'center' as const, marginBottom: '12px' }}>
+          <div style={{ fontSize: '9px', color: '#9ca3af', textTransform: 'uppercase' as const, letterSpacing: '.6px', marginBottom: '4px' }}>KITA MO PER HIRE</div>
+          <div style={{ fontFamily: 'serif', fontSize: '36px', fontWeight: 900, color: '#1a1a1a', lineHeight: 1 }}>₱1,000</div>
+          <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>bawat kasambahay na ma-hire · walang limit</div>
+        </div>
+
+        {/* Two breakdown cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+          {/* Left — referral fee */}
+          <div style={{ background: '#1a6b3c', borderRadius: '14px', padding: '15px 14px' }}>
+            <div style={{ fontFamily: 'serif', fontSize: '26px', fontWeight: 900, color: '#fff', lineHeight: 1, marginBottom: '4px' }}>₱500</div>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,.9)', marginBottom: '6px' }}>Referral Fee</div>
+            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.6)', lineHeight: 1.5 }}>Para sa bawat kasambahay na ma-hire mo</div>
           </div>
-          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,.38)', lineHeight: 1.55 }}>
-            Ang transport assistance fee ay para sa mga partner na mag-a-ayos ng transportasyon ng kasambahay mula Leyte, Samar, at Bicol. Hindi mo babayaran ang ticket — ikaw lang ang mag-a-arrange.
+          {/* Right — transport fee */}
+          <div style={{ background: '#fef3e2', borderRadius: '14px', padding: '15px 14px', border: '1px solid #fde8c0' }}>
+            <div style={{ fontFamily: 'serif', fontSize: '26px', fontWeight: 900, color: '#c9943a', lineHeight: 1, marginBottom: '4px' }}>+₱500</div>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: '#92400e', marginBottom: '6px' }}>Transport Fee</div>
+            <div style={{ fontSize: '11px', color: '#78350f', lineHeight: 1.5 }}>Kung ikaw ang nag-ayos ng transportasyon (Leyte, Samar, Bicol kasambahays only)</div>
           </div>
         </div>
-        {/* Halimbawa */}
-        <div style={{ background: '#fff', borderRadius: '14px', padding: '15px 14px', border: '1px solid #ede8e0' }}>
-          <div style={{ fontSize: '8px', color: '#9ca3af', textTransform: 'uppercase' as const, letterSpacing: '.6px', marginBottom: '10px' }}>EXAMPLE</div>
-          <div style={{ paddingBottom: '9px', borderBottom: '1px solid #f3f4f6', marginBottom: '9px' }}>
-            <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>5 hires / month</div>
-            <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 900, color: '#1a6b3c' }}>₱5,000</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>20 hires / month</div>
-            <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 900, color: '#1a6b3c' }}>₱20,000</div>
+
+        {/* Small explanation */}
+        <div style={{ background: '#fff', border: '1px solid #ede8e0', borderRadius: '10px', padding: '10px 12px', marginBottom: '4px' }}>
+          <div style={{ fontSize: '11px', color: '#6b7280', lineHeight: 1.65 }}>
+            Ang transport assistance fee ay para sa partner na nag-a-ayos ng biyahe ng kasambahay. Hindi mo babayaran ang ticket — ikaw lang ang mag-a-arrange.
           </div>
         </div>
       </div>
@@ -282,53 +282,26 @@ export default function PartnerPage() {
       {/* 3 FEATURE CARDS — horizontal row */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', padding: '12px 14px 20px' }}>
         {[
-          { icon: '🌱', title: 'Tulong sa Komunidad', sub: 'Tulungan ang mga kasambahay sa iyong lugar na makahanap ng magandang employer at oportunidad.' },
-          { icon: '💸', title: 'Kumita sa Bawat Hire', sub: '₱500 referral fee sa bawat hire. Dagdag ₱500 kung ikaw ang nag-ayos ng transportasyon ng kasambahay mula Leyte, Samar, o Bicol.' },
-          { icon: '🛡️', title: 'Ligtas at Transparent', sub: 'Verified ang lahat ng employers sa MaidIt platform. Malinaw ang bawat payout — walang hidden charges.' },
+          { icon: '🌱', title: 'Nakatutulong sa Komunidad', sub: 'Tulungan ang mga naghahanap ng trabaho na makahanap ng mabuting employer at oportunidad.' },
+          { icon: '💸', title: 'Kumikita sa Bawat Hire', sub: 'May kita sa bawat successful hire at dagdag kita para sa transport assistance.' },
+          { icon: '🛡️', title: 'Ligtas at Maayos', sub: 'Verified ang employers at transparent ang payouts sa platform ng MaidIt.' },
         ].map((card, i) => (
           <div key={i} style={{ background: '#fff', borderRadius: '12px', padding: '13px 11px', border: '1px solid #ede8e0', display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
             <div style={{ width: '34px', height: '34px', borderRadius: '9px', background: '#fef3e2', border: '1px solid #fde8c0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px' }}>{card.icon}</div>
             <div style={{ fontWeight: 700, fontSize: '13px', color: '#1a1a1a', lineHeight: 1.3 }}>{card.title}</div>
-            <div style={{ fontSize: '11px', color: '#6b7280', lineHeight: 1.5 }}>{card.sub}</div>
+            <div style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.5 }}>{card.sub}</div>
           </div>
         ))}
-      </div>
-
-      {/* HOW IT WORKS */}
-      <div style={{ padding: '0 14px 22px' }}>
-        <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.6px', color: '#9ca3af', marginBottom: '14px' }}>Paano gumagana</div>
-        {[
-          { n: 1, txt: 'Mag-sign up bilang Community Partner' },
-          { n: 2, txt: 'I-refer ang mga kasambahay sa iyong lugar' },
-          { n: 3, txt: 'Kumita ng ₱500 pagdating ng kasambahay' },
-          { n: 4, txt: 'Dagdag ₱500 kung ikaw ang nag-handle ng transportasyon (Leyte, Samar, Bicol only)' },
-        ].map(({ n, txt }) => (
-          <div key={n} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '12px' }}>
-            <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: '#1a6b3c', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800, flexShrink: 0 }}>{n}</div>
-            <span style={{ fontSize: '13px', color: '#374151', lineHeight: 1.55, paddingTop: '4px' }}>{txt}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* CTA SECTION */}
-      <div style={{ margin: '0 14px 14px', background: '#1a6b3c', borderRadius: '18px', padding: '28px 20px', textAlign: 'center' }}>
-        <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 900, color: '#fff', marginBottom: '8px', lineHeight: 1.2 }}>Handa ka na bang kumita?</div>
-        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.75)', lineHeight: 1.65, marginBottom: '18px' }}>
-          Mag-sign up na ngayon.
-        </p>
-        <button style={{ padding: '13px 24px', borderRadius: '11px', background: '#c9943a', border: 'none', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }} onClick={() => setStep('step1')}>
-          Mag-sign up Ngayon →
-        </button>
       </div>
 
       {/* FOOTER BANNER */}
       <div style={{ background: '#fef3e2', borderTop: '1px solid #fde8c0', padding: '16px 18px', display: 'flex', alignItems: 'center', gap: '12px' }}>
         <span style={{ fontSize: '22px', flexShrink: 0 }}>⭐</span>
         <div style={{ flex: 1, fontSize: '13px', fontWeight: 700, color: '#c9943a', lineHeight: 1.5 }}>
-          More referrals, more earnings!
+          Mas maraming referrals, mas maraming kita!
         </div>
         <button style={{ padding: '9px 14px', borderRadius: '9px', background: '#c9943a', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif', flexShrink: 0, whiteSpace: 'nowrap' as const }} onClick={() => setStep('step1')}>
-          Join →
+          Sumali →
         </button>
       </div>
     </div>
@@ -337,19 +310,19 @@ export default function PartnerPage() {
   // ─── STEP 1 ───
   if (step === 'step1') return (
     <div style={s.wrap}>
-      <NavBar back={() => setStep('landing')} title="Quick Signup" sub="Step 1 of 2" />
+      <NavBar back={() => setStep('landing')} title="Quick Signup" sub="Hakbang 1 ng 2" />
       <div style={s.body}>
-        <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 900, marginBottom: '6px' }}>Just a few details 👋</div>
-        <div style={{ fontSize: '15px', color: '#6b7280', marginBottom: '24px', lineHeight: 1.6 }}>Get your referral link right away. Free to join.</div>
+        <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 900, marginBottom: '6px' }}>Ilang detalye lang 👋</div>
+        <div style={{ fontSize: '15px', color: '#6b7280', marginBottom: '24px', lineHeight: 1.6 }}>Tapos may referral link ka na agad. Libre at walang bayad.</div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
           <div>
-            <label style={s.lbl}>First Name *</label>
+            <label style={s.lbl}>Pangalan *</label>
             <input style={s.inp} type="text" placeholder="Juan" value={firstName}
               onChange={e => setFirstName(e.target.value.replace(/\b\w/g, c => c.toUpperCase()))} />
           </div>
           <div>
-            <label style={s.lbl}>Last Name *</label>
+            <label style={s.lbl}>Apelyido *</label>
             <input style={s.inp} type="text" placeholder="Dela Cruz" value={lastName}
               onChange={e => setLastName(e.target.value.replace(/\b\w/g, c => c.toUpperCase()))} />
           </div>
@@ -359,20 +332,20 @@ export default function PartnerPage() {
         <input style={s.inp} type="tel" placeholder="09XX XXX XXXX" maxLength={11} value={mobile}
           onChange={e => setMobile(e.target.value.replace(/\D/g, '').slice(0, 11))} />
 
-        <label style={s.lbl}>Province *</label>
+        <label style={s.lbl}>Probinsya *</label>
         <div ref={provRef} style={{ position: 'relative' }}>
           <div onClick={() => setProvOpen(!provOpen)} style={{ width: '100%', padding: '12px 13px', border: `1.5px solid ${selProv ? '#c9943a' : '#e5e0d8'}`, borderRadius: '11px', fontSize: '14px', background: '#fff', color: selProv ? '#1a1a1a' : '#9ca3af', marginBottom: provOpen ? '0' : '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', boxSizing: 'border-box' as const }}>
-            <span>{selProv ? selProv.name : 'Select province'}</span>
+            <span>{selProv ? selProv.name : 'Piliin ang probinsya'}</span>
             <span style={{ fontSize: '11px', opacity: .5 }}>▾</span>
           </div>
           {provOpen && (
             <div style={{ background: '#fff', border: '1.5px solid #e5e0d8', borderRadius: '11px', marginBottom: '12px', overflow: 'hidden', position: 'relative', zIndex: 50 }}>
               <input autoFocus style={{ width: '100%', padding: '10px 12px', border: 'none', borderBottom: '1px solid #ede8e0', background: '#faf8f5', color: '#1a1a1a', fontSize: '13px', outline: 'none', fontFamily: 'sans-serif' }}
-                placeholder="Search province..." value={provSearch}
+                placeholder="Hanapin ang probinsya..." value={provSearch}
                 onChange={e => setProvSearch(e.target.value)} />
               <div style={{ maxHeight: '190px', overflowY: 'auto' }}>
                 {filteredProvs.length === 0
-                  ? <div style={{ padding: '12px', fontSize: '12px', color: '#9ca3af' }}>No results found</div>
+                  ? <div style={{ padding: '12px', fontSize: '12px', color: '#9ca3af' }}>Walang nahanap</div>
                   : filteredProvs.map(p => (
                     <div key={p.code} onClick={() => { setSelProv(p); setProvOpen(false); setProvSearch('') }}
                       style={{ padding: '10px 13px', cursor: 'pointer', fontSize: '13px', color: selProv?.code === p.code ? '#c9943a' : '#1a1a1a', background: selProv?.code === p.code ? 'rgba(201,148,58,.08)' : 'transparent', borderBottom: '1px solid #f3f4f6' }}>
@@ -387,15 +360,15 @@ export default function PartnerPage() {
 
         <div style={s.divider} />
 
-        <label style={s.lbl}>Your Selfie — so we can verify you *</label>
-        <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '10px', lineHeight: 1.5 }}>This won't be posted — it's only for verifying your account.</div>
+        <label style={s.lbl}>Selfie mo — para makilala ka namin *</label>
+        <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '10px', lineHeight: 1.5 }}>Hindi ito i-po-post — para lang sa verification ng iyong account.</div>
 
         {selfieData && <img src={selfieData} alt="selfie" style={{ width: '100%', maxHeight: '220px', objectFit: 'cover', borderRadius: '11px', marginBottom: '12px' }} />}
 
         <div onClick={() => selfieRef.current?.click()} style={{ background: '#f9fafb', border: `2px dashed ${selfieData ? '#1a6b3c' : '#d1d5db'}`, borderRadius: '13px', padding: '24px 16px', textAlign: 'center', cursor: 'pointer', marginBottom: '12px' }}>
           {selfieData
-            ? <><div style={{ fontSize: '20px', marginBottom: '6px' }}>✅</div><div style={{ fontWeight: 700, fontSize: '13px', color: '#1a6b3c' }}>Selfie saved!</div><div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>Tap to change</div></>
-            : <><div style={{ fontSize: '32px', marginBottom: '8px' }}>📸</div><div style={{ fontWeight: 700, fontSize: '14px', color: '#1a1a1a', marginBottom: '4px' }}>Tap to take a selfie</div><div style={{ fontSize: '14px', color: '#6b7280' }}>Clear face · No filter</div></>
+            ? <><div style={{ fontSize: '20px', marginBottom: '6px' }}>✅</div><div style={{ fontWeight: 700, fontSize: '13px', color: '#1a6b3c' }}>Selfie saved!</div><div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>I-tap para palitan</div></>
+            : <><div style={{ fontSize: '32px', marginBottom: '8px' }}>📸</div><div style={{ fontWeight: 700, fontSize: '14px', color: '#1a1a1a', marginBottom: '4px' }}>I-tap para kumuha ng selfie</div><div style={{ fontSize: '14px', color: '#6b7280' }}>Malinaw na mukha · Walang filter</div></>
           }
         </div>
         <input ref={selfieRef} type="file" accept="image/*" capture="user" style={{ display: 'none' }} onChange={handleSelfie} />
@@ -403,10 +376,10 @@ export default function PartnerPage() {
         {s1Error && <div style={s.err}>⚠️ {s1Error}</div>}
 
         <button style={{ ...s.goldBtn, opacity: submitting1 ? .6 : 1 }} onClick={handleStep1} disabled={submitting1}>
-          {submitting1 ? 'Loading...' : 'Become a Community Partner →'}
+          {submitting1 ? 'Naglo-load...' : 'Maging Community Partner →'}
         </button>
         <div style={{ fontSize: '13px', color: '#9ca3af', textAlign: 'center', marginTop: '10px', lineHeight: 1.6 }}>
-          Quick approval — we'll text you once ready. Your info is safe and secure.
+          Quick approval — we'll text you once ready. Libre at secure ang info mo.
         </div>
       </div>
     </div>
@@ -420,9 +393,9 @@ export default function PartnerPage() {
       </nav>
       <div style={{ padding: '36px 18px 48px', textAlign: 'center' }}>
         <div style={{ fontSize: '40px', marginBottom: '12px' }}>🎉</div>
-        <h1 style={{ fontFamily: 'serif', fontSize: '24px', fontWeight: 900, color: '#1a6b3c', marginBottom: '8px' }}>Here's your referral code!</h1>
+        <h1 style={{ fontFamily: 'serif', fontSize: '24px', fontWeight: 900, color: '#1a6b3c', marginBottom: '8px' }}>Eto na ang referral code mo!</h1>
         <p style={{ fontSize: '15px', color: '#6b7280', lineHeight: 1.7, marginBottom: '24px' }}>
-          Start earning — refer people looking for work, get <strong style={{ color: '#1a1a1a' }}>₱1,000</strong> for every successful hire!
+          Simulan nang kumita — mag-refer ng kakilalang naghahanap ng trabaho, may <strong style={{ color: '#1a1a1a' }}>₱1,000</strong> ka sa bawat successful hire!
         </p>
 
         <div style={{ background: '#fff', border: '1px solid #fde8c0', borderRadius: '13px', padding: '16px', marginBottom: '14px', textAlign: 'left' }}>
@@ -443,11 +416,11 @@ export default function PartnerPage() {
         </div>
 
         <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '12px', padding: '14px', marginBottom: '20px', textAlign: 'left' }}>
-          <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', color: '#9ca3af', marginBottom: '10px' }}>Next steps</div>
+          <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', color: '#9ca3af', marginBottom: '10px' }}>Susunod na hakbang</div>
           {[
-            'Share the referral link with kasambahay you know',
-            'Complete your profile to receive payouts',
-            'Add kasambahay to your dashboard',
+            'I-share ang referral link sa mga kasambahay na kakilala mo',
+            'Kumpletuhin ang iyong profile para makatanggap ng payout',
+            'I-upload ang mga kasambahay sa iyong dashboard',
           ].map((txt, i) => (
             <div key={i} style={{ display: 'flex', gap: '9px', marginBottom: i < 2 ? '9px' : 0, alignItems: 'flex-start' }}>
               <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#fde8c0', color: '#c9943a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800, flexShrink: 0 }}>{i + 1}</div>
@@ -456,8 +429,8 @@ export default function PartnerPage() {
           ))}
         </div>
 
-        <button style={{ ...s.goldBtn, marginBottom: '10px' }} onClick={() => setStep('step2')}>Complete My Profile →</button>
-        <button style={s.outlineBtn} onClick={() => router.push('/dashboard/partner')}>Go to Dashboard</button>
+        <button style={{ ...s.goldBtn, marginBottom: '10px' }} onClick={() => setStep('step2')}>Kumpletuhin ang Profile Ko →</button>
+        <button style={s.outlineBtn} onClick={() => router.push('/dashboard/partner')}>Pumunta sa Dashboard</button>
       </div>
     </div>
   )
@@ -465,17 +438,17 @@ export default function PartnerPage() {
   // ─── STEP 2 ───
   if (step === 'step2') return (
     <div style={s.wrap}>
-      <NavBar back={() => setStep('reflink')} title="Complete Your Profile" sub="Step 2 of 2 · For payout setup" />
+      <NavBar back={() => setStep('reflink')} title="Kumpletuhin ang Profile" sub="Hakbang 2 ng 2 · Para sa payout" />
       <div style={s.body}>
-        <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, marginBottom: '6px' }}>Almost done! 🙌</div>
-        <div style={{ fontSize: '15px', color: '#6b7280', marginBottom: '22px', lineHeight: 1.6 }}>We need a few more details to send you your earnings.</div>
+        <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, marginBottom: '6px' }}>Halos tapos na! 🙌</div>
+        <div style={{ fontSize: '15px', color: '#6b7280', marginBottom: '22px', lineHeight: 1.6 }}>Kailangan namin ng ilang detalye para mapadala ang iyong kita.</div>
 
         <label style={s.lbl}>GCash / Maya number (para sa payout) *</label>
         <input style={s.inp} type="tel" placeholder="09XX XXX XXXX" maxLength={11} value={gcash}
           onChange={e => setGcash(e.target.value.replace(/\D/g, '').slice(0, 11))} />
 
         <div style={s.divider} />
-        <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.6px', color: '#6b7280', marginBottom: '13px' }}>Where do you usually meet workers?</div>
+        <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.6px', color: '#6b7280', marginBottom: '13px' }}>Saan ka kadalasang nakakakilala ng workers?</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '16px' }}>
           {NETWORK_OPTIONS.map(opt => (
             <div key={opt} style={s.chip(networks.includes(opt))}
@@ -485,25 +458,25 @@ export default function PartnerPage() {
           ))}
         </div>
 
-        <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.6px', color: '#6b7280', marginBottom: '13px' }}>How many people in your network are currently looking for work?</div>
+        <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.6px', color: '#6b7280', marginBottom: '13px' }}>Ilan ang kakilala mong naghahanap ng trabaho ngayon?</div>
         <div style={{ display: 'flex', gap: '6px', marginBottom: '16px' }}>
           {POOL_SIZES.map(p => (
             <div key={p} style={s.chip(poolSize === p)} onClick={() => setPoolSize(p)}>{p}</div>
           ))}
         </div>
 
-        <label style={s.lbl}>Short description (optional)</label>
+        <label style={s.lbl}>Maikling kwento (optional)</label>
         <textarea style={{ ...s.inp, resize: 'none', lineHeight: 1.55 }} rows={3}
-          placeholder="Tell us how you meet kasambahay in your community..."
+          placeholder="Sabihin mo sa amin kung paano mo nakilala ang mga kasambahay sa iyong komunidad..."
           value={note} onChange={e => setNote(e.target.value)} />
 
         <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '10px', padding: '12px 14px', marginBottom: '16px', fontSize: '14px', color: '#78350f', lineHeight: 1.65 }}>
-          By submitting, you agree that all transactions go through the MaidIt platform. Separate placement fees are not allowed.<br /><br />
+          Sa pag-submit, sumasang-ayon ka na ang lahat ng transaksyon ay dumaan sa MaidIt platform. Bawal ang hiwalay na placement fee.<br /><br />
           If the kasambahay leaves within 30 days, the ₱500 recruitment fee will be adjusted from your next payout.
         </div>
 
         <button style={{ ...s.goldBtn, opacity: submitting2 ? .6 : 1 }} onClick={handleStep2} disabled={submitting2}>
-          {submitting2 ? 'Saving...' : 'Save Profile →'}
+          {submitting2 ? 'Nagse-save...' : 'I-save ang Profile →'}
         </button>
       </div>
     </div>
