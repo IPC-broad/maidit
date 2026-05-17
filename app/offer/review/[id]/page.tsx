@@ -30,6 +30,9 @@ export default function OfferReviewPage() {
     start_date: true,
     setup: true,
     transport: true,
+    urgency: true,
+    household: true,
+    pets: true,
   })
 
   const metro = ['Quezon City','Makati','Pasig','Taguig','Manila','Mandaluyong','Marikina','Paranaque','Las Pinas','Muntinlupa','Caloocan','Malabon','Navotas','Valenzuela','Pasay','Pateros','San Juan']
@@ -187,7 +190,17 @@ export default function OfferReviewPage() {
   const hwCity = offer?.homeowners?.profiles?.city || offer?.city || ''
   const showFare = isProvince && checklist.transport &&
     (offer?.transport_arrangement === 'full' || offer?.transport_arrangement === 'reimburse')
-  const showStartDate = hasValidDate(offer?.start_date)
+  const showStartDate = hasValidDate(offer?.start_date) || offer?.urgency === 'ASAP'
+  const household = offer?.household
+    ? (typeof offer.household === 'string' ? JSON.parse(offer.household) : offer.household)
+    : null
+  const hasHousehold = household && (household.adults || household.seniors || household.kids)
+  const householdStr = [
+    household?.adults ? `${household.adults} adults` : '',
+    household?.seniors ? `${household.seniors} seniors` : '',
+    household?.kids ? `${household.kids} children` : '',
+  ].filter(Boolean).join(', ')
+  const showPets = offer?.pets && offer.pets !== 'No Pets'
 
   return (
     <div style={s.wrap}>
@@ -259,7 +272,7 @@ export default function OfferReviewPage() {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={s.checkLabel} onClick={() => { tick('start_date'); if (checklist.start_date) setCounterDate('') }}>
-                  Simula ng trabaho: <strong>{formatDate(offer.start_date)}</strong>
+                  Simula ng trabaho: <strong>{offer?.urgency === 'ASAP' && !hasValidDate(offer?.start_date) ? 'Kailangan na agad' : formatDate(offer.start_date)}</strong>
                 </div>
                 <div style={toggleStatus(checklist.start_date)} onClick={() => { tick('start_date'); if (checklist.start_date) setCounterDate('') }}>
                   {checklist.start_date ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}
@@ -277,7 +290,7 @@ export default function OfferReviewPage() {
           )}
 
           {/* SETUP */}
-          <div style={isProvince ? s.row : s.rowLast} onClick={() => tick('setup')}>
+          <div style={s.row} onClick={() => tick('setup')}>
             <div style={toggleBox(checklist.setup)}>
               <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.setup ? '✓' : '✗'}</span>
             </div>
@@ -289,7 +302,7 @@ export default function OfferReviewPage() {
 
           {/* TRANSPORT */}
           {isProvince && (
-            <div style={s.rowLast}>
+            <div style={s.row}>
               <div style={toggleBox(checklist.transport)} onClick={() => { tick('transport'); if (checklist.transport) setTransportCountered('') }}>
                 <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.transport ? '✓' : '✗'}</span>
               </div>
@@ -331,6 +344,45 @@ export default function OfferReviewPage() {
                     )}
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* URGENCY */}
+          {offer?.urgency && (
+            <div style={(!hasHousehold && !showPets) ? s.rowLast : s.row} onClick={() => tick('urgency')}>
+              <div style={toggleBox(checklist.urgency)}>
+                <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.urgency ? '✓' : '✗'}</span>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={s.checkLabel}>Kelan kailangan: <strong>{offer.urgency}</strong></div>
+                <div style={toggleStatus(checklist.urgency)}>{checklist.urgency ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}</div>
+              </div>
+            </div>
+          )}
+
+          {/* HOUSEHOLD */}
+          {hasHousehold && (
+            <div style={!showPets ? s.rowLast : s.row} onClick={() => tick('household')}>
+              <div style={toggleBox(checklist.household)}>
+                <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.household ? '✓' : '✗'}</span>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={s.checkLabel}>Mga miyembro ng pamilya: <strong>{householdStr}</strong></div>
+                <div style={toggleStatus(checklist.household)}>{checklist.household ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}</div>
+              </div>
+            </div>
+          )}
+
+          {/* PETS */}
+          {showPets && (
+            <div style={s.rowLast} onClick={() => tick('pets')}>
+              <div style={toggleBox(checklist.pets)}>
+                <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.pets ? '✓' : '✗'}</span>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={s.checkLabel}>Mga alagang hayop: <strong>{offer.pets}</strong></div>
+                <div style={toggleStatus(checklist.pets)}>{checklist.pets ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}</div>
               </div>
             </div>
           )}
