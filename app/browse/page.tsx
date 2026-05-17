@@ -71,6 +71,7 @@ export default function BrowsePage() {
   const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null)
   const [homeownerDbId, setHomeownerDbId] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<'best' | 'newest' | 'salary-asc' | 'salary-desc'>('best')
+  const [profileModalKb, setProfileModalKb] = useState<any>(null)
 
   const load = async () => {
     const { supabase } = await import('../../lib/supabase')
@@ -102,7 +103,7 @@ export default function BrowsePage() {
       .select(`
         id, profile_id, asking_salary, setup, skills, experience,
         province, available_from, selfie_url, status, availability,
-        has_govt_id, age, facebook_url,
+        has_govt_id, has_nbi, age, facebook_url, civil_status, num_children,
         profile:profile_id (
           full_name, selfie_url, city
         )
@@ -250,114 +251,140 @@ export default function BrowsePage() {
     const expRaw = kb.experience
     const expLabel = (!expRaw || expRaw === 'Baguhan' || expRaw === 0 || expRaw === '0')
       ? 'No experience yet'
-      : `${expRaw} yrs exp`
-    const expLine = expLabel
+      : typeof expRaw === 'number' ? `${expRaw} yr${expRaw !== 1 ? 's' : ''} exp`
+      : `${expRaw} exp`
     const kbProvince = kb.province || ''
     const location = kbProvince || 'Location not specified'
+    const numKids = kb.num_children
+    const childrenLabel = (!numKids || numKids === '0' || numKids === 0)
+      ? 'No children' : `${numKids} ${parseInt(String(numKids)) === 1 ? 'child' : 'children'}`
+    const civilLine = kb.civil_status ? `${kb.civil_status} · ${childrenLabel}` : null
+
+    const handleSendOffer = () => {
+      if (!currentUser) router.push('/signup/homeowner')
+      else if (isSubscribed) router.push(`/offer/send/${kb.id}`)
+      else setSubscribeModalId(kb.id)
+    }
+    const handleSeeProfile = () => {
+      if (!currentUser) router.push('/signup/homeowner')
+      else if (isSubscribed) setProfileModalKb(kb)
+      else setSubscribeModalId(kb.id)
+    }
 
     return (
-      <div key={kb.id} style={{ background:'#fff', borderRadius:'16px', border:'1.5px solid #f0ece6', overflow:'hidden', marginBottom:'12px', display:'flex', boxShadow:'0 1px 8px rgba(0,0,0,.06)' }}>
+      <div key={kb.id} style={{ background:'#fff', borderRadius:'16px', border:'1.5px solid #f0ece6', overflow:'hidden', marginBottom:'12px', boxShadow:'0 1px 8px rgba(0,0,0,.06)' }}>
+        {/* Main row */}
+        <div style={{ display:'flex' }}>
 
-        {/* Photo */}
-        <div style={{ width:'88px', flexShrink:0, position:'relative', background:'#f3f4f6' }}>
-          {showPhoto ? (
-            <img
-              src={selfieUrl!}
-              alt={displayName}
-              onError={() => setImgErrors(prev => ({ ...prev, [kb.id]: true }))}
-              style={{ width:'88px', height:'130px', objectFit:'cover', objectPosition:'top center', display:'block' }}
-            />
-          ) : (
-            <div style={{ width:'88px', height:'130px', background:'linear-gradient(135deg, #fdf3e3, #fde8c0)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.6rem', fontWeight:800, color:'#c9943a' }}>
-              {initials}
-            </div>
-          )}
-          <div style={{ position:'absolute', bottom:'5px', left:'3px', right:'3px', background:'rgba(26,107,60,.88)', borderRadius:'4px', padding:'2px 4px', display:'flex', alignItems:'center', gap:'2px' }}>
-            <span style={{ color:'#4ade80', fontSize:'7px', lineHeight:1 }}>●</span>
-            <span style={{ color:'#fff', fontSize:'7px', fontWeight:700, lineHeight:1 }}>Selfie Verified</span>
+          {/* Photo */}
+          <div style={{ width:'88px', flexShrink:0, position:'relative', background:'#f3f4f6' }}>
+            {showPhoto ? (
+              <img
+                src={selfieUrl!}
+                alt={displayName}
+                onError={() => setImgErrors(prev => ({ ...prev, [kb.id]: true }))}
+                style={{ width:'88px', height:'130px', objectFit:'cover', objectPosition:'top center', display:'block' }}
+              />
+            ) : (
+              <div style={{ width:'88px', height:'130px', background:'linear-gradient(135deg, #fdf3e3, #fde8c0)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.6rem', fontWeight:800, color:'#c9943a' }}>
+                {initials}
+              </div>
+            )}
+            {selfieUrl && (
+              <div style={{ position:'absolute', bottom:'5px', left:'3px', right:'3px', background:'rgba(26,107,60,.88)', borderRadius:'4px', padding:'2px 4px', display:'flex', alignItems:'center', gap:'2px' }}>
+                <span style={{ color:'#4ade80', fontSize:'7px', lineHeight:1 }}>●</span>
+                <span style={{ color:'#fff', fontSize:'7px', fontWeight:700, lineHeight:1 }}>Selfie Verified</span>
+              </div>
+            )}
+            {kb.govt_id && (
+              <div style={{ position:'absolute', top:'5px', left:'3px', background:'rgba(201,148,58,.92)', borderRadius:'4px', padding:'2px 5px' }}>
+                <span style={{ color:'#fff', fontSize:'7px', fontWeight:700 }}>⭐ Premium</span>
+              </div>
+            )}
           </div>
-          {kb.govt_id && (
-            <div style={{ position:'absolute', top:'5px', left:'3px', background:'rgba(201,148,58,.92)', borderRadius:'4px', padding:'2px 5px' }}>
-              <span style={{ color:'#fff', fontSize:'7px', fontWeight:700 }}>⭐ Premium</span>
+
+          {/* Info */}
+          <div style={{ flex:1, padding:'10px 8px 10px 10px', minWidth:0, overflow:'hidden' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'4px', marginBottom:'1px', flexWrap:'wrap' as const }}>
+              <span style={{ fontWeight:800, fontSize:'14px', color:'#111827' }}>{displayName}</span>
+              {kb.age ? <span style={{ fontSize:'11px', color:'#9ca3af' }}>· {kb.age} y/o</span> : null}
+              <span style={{ color:'#22c55e', fontSize:'9px' }}>●</span>
             </div>
-          )}
+            <div style={{ fontSize:'11px', color:'#6b7280', marginBottom:'4px', lineHeight:1.3 }}>
+              {'Kasambahay'}
+              {kb.setup ? ` · ${kb.setup}` : ''}
+            </div>
+            <div style={{ fontSize:'11px', color:'#6b7280', marginBottom:'5px', display:'flex', alignItems:'center', gap:'2px' }}>
+              <span>📍</span>
+              <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' as const }}>{location}</span>
+            </div>
+            {visibleSkills.length > 0 && (
+              <div style={{ display:'flex', gap:'3px', flexWrap:'wrap' as const, marginBottom:'4px' }}>
+                {visibleSkills.map((skill: string) => (
+                  <span key={skill} style={{ fontSize:'9px', fontWeight:600, padding:'2px 6px', borderRadius:'5px', background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0' }}>
+                    {skill}
+                  </span>
+                ))}
+                {extraSkills > 0 && (
+                  <span style={{ fontSize:'9px', padding:'2px 5px', borderRadius:'5px', background:'#f3f4f6', color:'#9ca3af' }}>+{extraSkills}</span>
+                )}
+              </div>
+            )}
+            <div style={{ fontSize:'10px', color:'#9ca3af', lineHeight:1.4, marginBottom:'2px' }}>{expLabel}</div>
+            {civilLine && (
+              <div style={{ fontSize:'10px', color:'#9ca3af', lineHeight:1.4 }}>{civilLine}</div>
+            )}
+          </div>
+
+          {/* Right — salary + badges */}
+          <div style={{ width:'76px', flexShrink:0, padding:'10px 8px', display:'flex', flexDirection:'column' as const, alignItems:'flex-end', gap:'3px' }}>
+            {kb.has_govt_id ? (
+              <div style={{ background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:'5px', padding:'2px 5px', textAlign:'center' as const }}>
+                <span style={{ fontSize:'8px', fontWeight:700, color:'#2563eb' }}>🛡️ ID Verified</span>
+              </div>
+            ) : <div />}
+            <div style={{ display:'flex', justifyContent:'flex-end' }}>
+              <button
+                onClick={() => setSaved(prev => ({ ...prev, [kb.id]: !prev[kb.id] }))}
+                style={{ background:'none', border:'none', cursor:'pointer', padding:'2px', display:'flex' }}
+              >
+                <IconHeart filled={!!saved[kb.id]} />
+              </button>
+            </div>
+            <div style={{ flex:1 }} />
+            {showTransport(kb.province) && (
+              <div style={{ display:'flex', alignItems:'center', gap:'2px', justifyContent:'flex-end', marginBottom:'2px' }}>
+                <span style={{ fontSize:'10px' }}>🚌</span>
+                <span style={{ fontSize:'8px', fontWeight:700, color:'#c9943a' }}>Transport</span>
+              </div>
+            )}
+            <div style={{ textAlign:'right' as const, marginBottom:'1px' }}>
+              <div style={{ fontFamily:'Georgia, serif', fontSize:'13px', fontWeight:900, color:'#1a6b3c', lineHeight:1.1 }}>
+                ₱{kb.asking_salary?.toLocaleString()}
+              </div>
+              <div style={{ fontSize:'8px', color:'#9ca3af' }}>/&nbsp;month</div>
+            </div>
+            {availLabel && (
+              <div style={{ fontSize:'8px', color:'#6b7280', textAlign:'right' as const, lineHeight:1.35 }}>
+                {availLabel}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Info */}
-        <div style={{ flex:1, padding:'10px 8px 10px 10px', minWidth:0, overflow:'hidden' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'4px', marginBottom:'1px', flexWrap:'wrap' as const }}>
-            <span style={{ fontWeight:800, fontSize:'14px', color:'#111827' }}>{displayName}</span>
-            {kb.age ? <span style={{ fontSize:'12px', color:'#6b7280' }}>, {kb.age}</span> : null}
-            <span style={{ color:'#22c55e', fontSize:'9px' }}>●</span>
-          </div>
-          <div style={{ fontSize:'11px', color:'#6b7280', marginBottom:'4px', lineHeight:1.3 }}>
-            {'Kasambahay'}
-            {kb.setup ? ` · ${kb.setup}` : ''}
-          </div>
-          <div style={{ fontSize:'11px', color:'#6b7280', marginBottom:'6px', display:'flex', alignItems:'center', gap:'2px' }}>
-            <span>📍</span>
-            <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' as const }}>{location}</span>
-          </div>
-          {visibleSkills.length > 0 && (
-            <div style={{ display:'flex', gap:'3px', flexWrap:'wrap' as const, marginBottom:'5px' }}>
-              {visibleSkills.map((skill: string) => (
-                <span key={skill} style={{ fontSize:'9px', fontWeight:600, padding:'2px 6px', borderRadius:'5px', background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0' }}>
-                  {skill}
-                </span>
-              ))}
-              {extraSkills > 0 && (
-                <span style={{ fontSize:'9px', padding:'2px 5px', borderRadius:'5px', background:'#f3f4f6', color:'#9ca3af' }}>+{extraSkills}</span>
-              )}
-            </div>
-          )}
-          {expLine ? (
-            <div style={{ fontSize:'10px', color:'#9ca3af', lineHeight:1.4, marginBottom:'4px' }}>{expLine}</div>
-          ) : null}
-        </div>
-
-        {/* Actions */}
-        <div style={{ width:'84px', flexShrink:0, padding:'10px 8px', display:'flex', flexDirection:'column' as const, alignItems:'stretch', gap:'3px' }}>
-          {kb.has_govt_id ? (
-            <div style={{ background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:'5px', padding:'2px 5px', textAlign:'center' as const, marginBottom:'2px' }}>
-              <span style={{ fontSize:'8px', fontWeight:700, color:'#2563eb' }}>🛡️ ID Verified</span>
-            </div>
-          ) : <div />}
-          <div style={{ display:'flex', justifyContent:'flex-end' }}>
-            <button
-              onClick={() => setSaved(prev => ({ ...prev, [kb.id]: !prev[kb.id] }))}
-              style={{ background:'none', border:'none', cursor:'pointer', padding:'2px', display:'flex' }}
-            >
-              <IconHeart filled={!!saved[kb.id]} />
-            </button>
-          </div>
-          <div style={{ flex:1 }} />
-          {showTransport(kb.province) && (
-            <div style={{ display:'flex', alignItems:'center', gap:'3px', justifyContent:'flex-end', marginBottom:'3px' }}>
-              <span style={{ fontSize:'11px' }}>🚌</span>
-              <span style={{ fontSize:'8px', fontWeight:700, color:'#c9943a' }}>Transport needed</span>
-            </div>
-          )}
-          <div style={{ textAlign:'right' as const, marginBottom:'1px' }}>
-            <div style={{ fontFamily:'Georgia, serif', fontSize:'13px', fontWeight:900, color:'#1a6b3c', lineHeight:1.1 }}>
-              ₱{kb.asking_salary?.toLocaleString()}
-            </div>
-            <div style={{ fontSize:'8px', color:'#9ca3af' }}>/&nbsp;month</div>
-          </div>
-          {availLabel && (
-            <div style={{ fontSize:'8px', color:'#6b7280', textAlign:'right' as const, lineHeight:1.35, marginBottom:'4px' }}>
-              Available:<br />{availLabel}
-            </div>
-          )}
-          {/* Send Offer */}
+        {/* Bottom buttons */}
+        <div style={{ display:'flex', gap:'8px', padding:'8px 10px 10px', borderTop:'1px solid #f3f4f6' }}>
           <button
-            onClick={() => {
-              if (!currentUser) { router.push('/signup/homeowner') }
-              else if (isSubscribed) { router.push(`/offer/send/${kb.id}`) }
-              else { setSubscribeModalId(kb.id) }
-            }}
-            style={{ width:'100%', padding:'6px 4px', background:'#1a6b3c', color:'#fff', border:'none', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'10px', fontWeight:700, cursor:'pointer' }}
+            onClick={handleSeeProfile}
+            style={{ flex:1, padding:'7px 4px', background:'#fff', color:'#1a6b3c', border:'1.5px solid #1a6b3c', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'10px', fontWeight:700, cursor:'pointer' }}
           >
-            Send Offer
+            See Full Profile
+          </button>
+          <button
+            onClick={handleSendOffer}
+            style={{ flex:1, padding:'7px 4px', background:'#1a6b3c', color:'#fff', border:'none', borderRadius:'8px', fontFamily:'sans-serif', fontSize:'10px', fontWeight:700, cursor:'pointer' }}
+          >
+            Send Offer →
           </button>
         </div>
       </div>
@@ -632,6 +659,119 @@ export default function BrowsePage() {
           })}
         </div>
       )}
+
+      {/* ── FULL PROFILE MODAL ── */}
+      {profileModalKb && (() => {
+        const kb = profileModalKb
+        const fullName = kb.profile?.full_name || ''
+        const initials = fullName.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase() || '?'
+        const selfieUrl = kb.profile?.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
+        const skills: string[] = kb.skills || []
+        const numKids = kb.num_children
+        const childrenLabel = (!numKids || numKids === '0' || numKids === 0)
+          ? 'No children' : `${numKids} ${parseInt(String(numKids)) === 1 ? 'child' : 'children'}`
+        const expRaw = kb.experience
+        const expLabel = (!expRaw || expRaw === 'Baguhan' || expRaw === 0 || expRaw === '0')
+          ? 'No experience yet'
+          : typeof expRaw === 'number' ? `${expRaw} year${expRaw !== 1 ? 's' : ''} experience`
+          : `${expRaw} experience`
+        return (
+          <div
+            style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.6)', zIndex:300, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}
+            onClick={e => { if (e.target === e.currentTarget) setProfileModalKb(null) }}
+          >
+            <div style={{ background:'#fff', borderRadius:'18px', maxWidth:'360px', width:'100%', maxHeight:'88vh', overflowY:'auto', position:'relative' }}>
+              {/* Close */}
+              <div style={{ display:'flex', justifyContent:'flex-end', padding:'12px 14px 0' }}>
+                <button onClick={() => setProfileModalKb(null)} style={{ background:'none', border:'none', fontSize:'1.1rem', cursor:'pointer', color:'#9ca3af', padding:'2px 6px', lineHeight:1 }}>✕</button>
+              </div>
+
+              {/* Avatar + name */}
+              <div style={{ display:'flex', flexDirection:'column' as const, alignItems:'center', padding:'4px 20px 16px' }}>
+                {selfieUrl && !imgErrors[kb.id] ? (
+                  <img
+                    src={selfieUrl}
+                    alt={fullName}
+                    onError={() => setImgErrors(prev => ({ ...prev, [kb.id]: true }))}
+                    style={{ width:'88px', height:'88px', borderRadius:'50%', objectFit:'cover' as const, border:'3px solid #e5e7eb', marginBottom:'12px' }}
+                  />
+                ) : (
+                  <div style={{ width:'88px', height:'88px', borderRadius:'50%', background:'linear-gradient(135deg, #fdf3e3, #fde8c0)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.8rem', fontWeight:800, color:'#c9943a', marginBottom:'12px' }}>
+                    {initials}
+                  </div>
+                )}
+                <div style={{ fontWeight:800, fontSize:'1.1rem', color:'#111827', marginBottom:'3px' }}>{fullName}</div>
+                <div style={{ fontSize:'.8rem', color:'#6b7280', marginBottom:'10px' }}>
+                  {kb.age ? `${kb.age} y/o · ` : ''}{kb.province || 'Province not specified'}
+                </div>
+                {/* Verification badges */}
+                <div style={{ display:'flex', gap:'5px', flexWrap:'wrap' as const, justifyContent:'center' }}>
+                  {kb.has_govt_id && (
+                    <span style={{ fontSize:'10px', fontWeight:700, padding:'3px 9px', borderRadius:'50px', background:'#eff6ff', color:'#2563eb', border:'1px solid #bfdbfe' }}>🛡️ ID Verified</span>
+                  )}
+                  {kb.has_nbi && (
+                    <span style={{ fontSize:'10px', fontWeight:700, padding:'3px 9px', borderRadius:'50px', background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0' }}>✅ NBI Cleared</span>
+                  )}
+                  {selfieUrl && (
+                    <span style={{ fontSize:'10px', fontWeight:700, padding:'3px 9px', borderRadius:'50px', background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0' }}>📸 Selfie Verified</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Details */}
+              <div style={{ padding:'0 16px 20px', display:'flex', flexDirection:'column' as const, gap:'10px' }}>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }}>
+                  <div style={{ background:'#f9fafb', borderRadius:'10px', padding:'11px 12px' }}>
+                    <div style={{ fontSize:'9px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#9ca3af', marginBottom:'4px' }}>Setup</div>
+                    <div style={{ fontSize:'13px', fontWeight:600, color:'#111827' }}>{kb.setup || '—'}</div>
+                  </div>
+                  <div style={{ background:'#f9fafb', borderRadius:'10px', padding:'11px 12px' }}>
+                    <div style={{ fontSize:'9px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#9ca3af', marginBottom:'4px' }}>Experience</div>
+                    <div style={{ fontSize:'13px', fontWeight:600, color:'#111827' }}>{expLabel}</div>
+                  </div>
+                  {kb.civil_status && (
+                    <div style={{ background:'#f9fafb', borderRadius:'10px', padding:'11px 12px' }}>
+                      <div style={{ fontSize:'9px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#9ca3af', marginBottom:'4px' }}>Civil Status</div>
+                      <div style={{ fontSize:'13px', fontWeight:600, color:'#111827' }}>{kb.civil_status}</div>
+                    </div>
+                  )}
+                  <div style={{ background:'#f9fafb', borderRadius:'10px', padding:'11px 12px' }}>
+                    <div style={{ fontSize:'9px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#9ca3af', marginBottom:'4px' }}>Children</div>
+                    <div style={{ fontSize:'13px', fontWeight:600, color:'#111827' }}>{childrenLabel}</div>
+                  </div>
+                  {kb.availability && (
+                    <div style={{ background:'#f9fafb', borderRadius:'10px', padding:'11px 12px', gridColumn:'1 / -1' }}>
+                      <div style={{ fontSize:'9px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#9ca3af', marginBottom:'4px' }}>Availability</div>
+                      <div style={{ fontSize:'13px', fontWeight:600, color:'#111827' }}>{kb.availability}</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Skills */}
+                {skills.length > 0 && (
+                  <div style={{ background:'#f9fafb', borderRadius:'10px', padding:'11px 12px' }}>
+                    <div style={{ fontSize:'9px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#9ca3af', marginBottom:'8px' }}>Skills</div>
+                    <div style={{ display:'flex', flexWrap:'wrap' as const, gap:'6px' }}>
+                      {skills.map((skill: string) => (
+                        <span key={skill} style={{ fontSize:'11px', fontWeight:600, padding:'4px 10px', borderRadius:'20px', background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0' }}>
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  onClick={() => { setProfileModalKb(null); router.push(`/offer/send/${kb.id}`) }}
+                  style={{ width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'.92rem', fontWeight:700, cursor:'pointer' }}
+                >
+                  Send Offer →
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* ── SUBSCRIBE MODAL ── */}
       {subscribeModalId && (
