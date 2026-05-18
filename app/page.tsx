@@ -91,63 +91,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trusted Profiles banner card */}
-      <div style={{
-        margin: '16px 18px',
-        background: C.paper,
-        border: `1px solid ${C.line}`,
-        borderRadius: 18,
-        padding: '18px 18px 16px',
-      }}>
-        {/* Eyebrow pill */}
-        <div style={{
-          display: 'inline-block',
-          background: C.forestSoft,
-          color: C.forest,
-          fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-          borderRadius: 50,
-          padding: '4px 10px',
-          marginBottom: 10,
-        }}>
-          VERIFIED & SAFE
-        </div>
-
-        {/* Heading */}
-        <div style={{
-          fontFamily: serif,
-          fontSize: 22,
-          color: C.forestDeep,
-          lineHeight: 1.25,
-          marginBottom: 14,
-        }}>
-          Selfie required. ID verified. Real people only.
-        </div>
-
-        {/* Feature pills */}
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 8,
-        }}>
-          {['🛡️ ID Checked', '💬 Direct Contact', '🔒 Safe Payment'].map((label) => (
-            <span key={label} style={{
-              background: C.paper2,
-              border: `1px solid ${C.line}`,
-              color: C.ink2,
-              padding: '6px 12px',
-              borderRadius: 50,
-              fontSize: 12,
-              fontWeight: 600,
-            }}>
-              {label}
-            </span>
-          ))}
-        </div>
-      </div>
-
       {/* Role cards */}
       <div style={{
         padding: '0 18px',
