@@ -1,10 +1,24 @@
 'use client'
-import { Suspense } from 'react'
-import { useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
+const C = {
+  forest: '#27500A', forestDeep: '#1c3b07', forestSoft: '#f0f5ec', forestLine: '#e2ecdb',
+  amber: '#c9943a', amberSoft: '#fbf3e2',
+  ink: '#1a1d18', ink2: '#4a504a', ink3: '#8a8f88', ink4: '#b8bcb5',
+  paper: '#ffffff', paper2: '#faf9f5', line: '#ebe9e2',
+}
+const serif = "'Instrument Serif', Georgia, serif"
+const sans  = "'Geist', ui-sans-serif, sans-serif"
+
+const IcArrowRight = () => (
+  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12h14M13 5l7 7-7 7"/>
+  </svg>
+)
+
 const FacebookIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
   </svg>
 )
@@ -14,82 +28,78 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const redirectTo = searchParams?.get('redirect') || ''
 
-  // Email login (homeowners / partners)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [credential, setCredential] = useState('')
+  const [password, setPassword]     = useState('')
+  const [loading, setLoading]       = useState(false)
+  const [fbLoading, setFbLoading]   = useState(false)
+  const [error, setError]           = useState('')
+  const [showPass, setShowPass]     = useState(false)
 
-  // Kasambahay mobile-or-email login
-  const [mobileOrEmail, setMobileOrEmail] = useState('')
-  const [mobilePassword, setMobilePassword] = useState('')
+  useEffect(() => {
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap'
+    document.head.appendChild(link)
+    return () => { try { document.head.removeChild(link) } catch {} }
+  }, [])
 
-  const [loading, setLoading] = useState(false)
-  const [fbLoading, setFbLoading] = useState(false)
-  const [error, setError] = useState('')
+  const redirectAfterLogin = async (supabase: any, userId: string) => {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single()
 
-  const inp: React.CSSProperties = {
-    width: '100%', padding: '11px 13px', border: '1.5px solid #e5e7eb',
-    borderRadius: '11px', fontFamily: 'sans-serif', fontSize: '.88rem',
-    outline: 'none', marginBottom: '13px', background: '#fff', color: '#111827',
-    boxSizing: 'border-box',
-  }
-  const lbl: React.CSSProperties = {
-    display: 'block', fontSize: '.63rem', fontWeight: 700,
-    textTransform: 'uppercase', letterSpacing: '.5px',
-    color: '#6b7280', marginBottom: '4px',
-  }
+    if (!profile?.role) {
+      router.push('/signup/choose-role')
+      return
+    }
 
-  const handleEmailLogin = async () => {
-    if (!email || !password) { setError('Please fill in all fields'); return }
-    setLoading(true)
-    setError('')
-    try {
-      const { supabase } = await import('../../lib/supabase')
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) { setError(error.message); setLoading(false); return }
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single()
-      setLoading(false)
-      let dest = redirectTo || (
-        profile?.role === 'kasambahay' ? '/dashboard/kasambahay' :
-        profile?.role === 'partner'    ? '/dashboard/partner' :
-        '/dashboard/homeowner'
-      )
-      if (profile?.role === 'homeowner' && !redirectTo) {
-        const intent = localStorage.getItem('maidit_intent')
-        if (intent === 'post_job') { localStorage.removeItem('maidit_intent'); dest = '/dashboard/homeowner/post-job' }
+    if (redirectTo) { router.push(redirectTo); return }
+
+    if (profile.role === 'homeowner') {
+      const intent = localStorage.getItem('maidit_intent')
+      if (intent === 'post_job') {
+        localStorage.removeItem('maidit_intent')
+        router.push('/dashboard/homeowner/post-job')
+        return
       }
-      router.push(dest)
-    } catch {
-      setError('Something went wrong. Please try again.')
-      setLoading(false)
+      router.push('/dashboard/homeowner')
+    } else if (profile.role === 'kasambahay') {
+      router.push('/dashboard/kasambahay')
+    } else if (profile.role === 'partner') {
+      router.push('/dashboard/partner')
+    } else {
+      router.push('/dashboard/homeowner')
     }
   }
 
-  const handleKbLogin = async () => {
-    if (!mobileOrEmail || !mobilePassword) { setError('Punan ang lahat ng fields'); return }
+  const handleLogin = async () => {
+    if (!credential.trim() || !password) { setError('Please fill in all fields.'); return }
+    if (password.length < 5) { setError('Password must be at least 5 characters.'); return }
     setLoading(true)
     setError('')
     try {
       const { supabase } = await import('../../lib/supabase')
-      const val = mobileOrEmail.trim()
+      const val = credential.trim()
       const isMobile = /^(\+63|09)\d/.test(val) || /^\d{10,11}$/.test(val)
-      let kbEmail: string
+      let loginEmail: string
       if (isMobile) {
         const digits = val.replace(/\D/g, '')
         const normalized = digits.startsWith('63') ? '0' + digits.slice(2) : digits
-        kbEmail = `kb_${normalized}@maidit.app`
+        loginEmail = `kb_${normalized}@maidit.app`
       } else {
-        kbEmail = val
+        loginEmail = val
       }
-      const { error } = await supabase.auth.signInWithPassword({ email: kbEmail, password: mobilePassword })
-      if (error) { setError('Mali ang mobile/email o password. Subukan ulit.'); setLoading(false); return }
-      setLoading(false)
-      router.push('/dashboard/kasambahay')
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email: loginEmail, password })
+      if (signInError) {
+        setError('Incorrect email/mobile or password. Please try again.')
+        setLoading(false)
+        return
+      }
+      await redirectAfterLogin(supabase, data.user.id)
     } catch {
-      setError('May error. Subukan ulit.')
+      setError('Something went wrong. Please try again.')
       setLoading(false)
     }
   }
@@ -99,128 +109,152 @@ function LoginForm() {
     setError('')
     try {
       const { supabase } = await import('../../lib/supabase')
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
         options: { redirectTo: `${window.location.origin}/auth/callback` },
       })
-      if (error) { setError(error.message); setFbLoading(false) }
+      if (oauthError) { setError(oauthError.message); setFbLoading(false) }
     } catch {
-      setError('Facebook login failed. Try again.')
+      setError('Facebook login failed. Please try again.')
       setFbLoading(false)
     }
   }
 
-  const divider = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '20px 0' }}>
-      <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }} />
-      <span style={{ fontSize: '.72rem', color: '#9ca3af', whiteSpace: 'nowrap' }}>— o kaya —</span>
-      <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }} />
-    </div>
-  )
+  const inputStyle: React.CSSProperties = {
+    width: '100%', padding: '13px 14px',
+    border: `1.5px solid ${C.line}`, borderRadius: 13,
+    fontFamily: sans, fontSize: 15, color: C.ink,
+    background: C.paper, outline: 'none', boxSizing: 'border-box',
+  }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#faf8f5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px 20px', fontFamily: 'sans-serif' }}>
-      <div style={{ width: '100%', maxWidth: '380px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <h1 style={{ fontFamily: 'serif', fontSize: '2rem', fontWeight: 900, marginBottom: '4px', color: '#111827' }}>
-            Maid<span style={{ color: '#c9943a' }}>It</span>
-          </h1>
-          <p style={{ color: '#6b7280', fontSize: '.82rem' }}>Sign in to your account</p>
+    <div style={{ minHeight: '100vh', background: C.paper2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 20px', fontFamily: sans }}>
+      <div style={{ width: '100%', maxWidth: 400 }}>
+
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: 36 }}>
+          <div style={{ fontFamily: serif, fontSize: 42, color: C.forestDeep, letterSpacing: '-1px', lineHeight: 1 }}>
+            Maid<span style={{ color: C.amber }}>It</span>
+          </div>
+          <div style={{ fontFamily: serif, fontSize: 22, color: C.ink, marginTop: 10, lineHeight: 1.2, letterSpacing: '-0.01em' }}>
+            Welcome <em style={{ color: C.amber }}>back.</em>
+          </div>
+          <div style={{ fontSize: 13, color: C.ink3, marginTop: 5 }}>Sign in to your account</div>
         </div>
 
-        {error && (
-          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '9px', padding: '10px 13px', fontSize: '.78rem', color: '#dc2626', marginBottom: '12px' }}>
-            {error}
-          </div>
-        )}
+        {/* Card */}
+        <div style={{ background: C.paper, borderRadius: 20, border: `1px solid ${C.line}`, padding: '24px 22px', boxShadow: '0 2px 20px -8px rgba(28,59,7,0.12)' }}>
 
-        {/* ── KASAMBAHAY: Mobile + Password ── */}
-        <div style={{ background: '#fff', border: '1.5px solid #fde8c0', borderRadius: '13px', padding: '16px', marginBottom: '4px' }}>
-          <div style={{ fontSize: '.68rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#c9943a', marginBottom: '12px' }}>
-            Para sa Kasambahay
+          {error && (
+            <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '10px 13px', fontSize: 13, color: '#dc2626', marginBottom: 18 }}>
+              {error}
+            </div>
+          )}
+
+          {/* Credential input */}
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: C.ink3, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 7 }}>
+              Mobile number or email
+            </label>
+            <input
+              style={inputStyle}
+              placeholder="09XXXXXXXXX or you@email.com"
+              value={credential}
+              onChange={e => setCredential(e.target.value)}
+              autoComplete="username"
+              inputMode="email"
+            />
           </div>
-          <label style={lbl}>Mobile number or email</label>
-          <input
-            style={inp}
-            placeholder="09XXXXXXXXX or email@example.com"
-            value={mobileOrEmail}
-            onChange={e => setMobileOrEmail(e.target.value)}
-            autoComplete="username"
-          />
-          <label style={lbl}>Password</label>
-          <input
-            style={inp}
-            type="password"
-            placeholder="Iyong password"
-            value={mobilePassword}
-            onChange={e => setMobilePassword(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleKbLogin()}
-            autoComplete="current-password"
-          />
+
+          {/* Password input */}
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: C.ink3, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 7 }}>
+              Password
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                style={{ ...inputStyle, paddingRight: 48 }}
+                type={showPass ? 'text' : 'password'}
+                placeholder="Your password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPass(v => !v)}
+                style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: C.ink3, padding: 0 }}
+              >
+                {showPass ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </div>
+
+          {/* Sign in button */}
           <button
-            style={{ width: '100%', padding: '13px', borderRadius: '12px', border: 'none', background: '#c9943a', color: '#fff', fontFamily: 'sans-serif', fontSize: '.92rem', fontWeight: 700, cursor: 'pointer', opacity: loading ? 0.6 : 1, marginBottom: '10px' }}
-            onClick={handleKbLogin}
+            onClick={handleLogin}
             disabled={loading}
+            style={{
+              width: '100%', height: 52, borderRadius: 14, border: 'none',
+              background: loading ? C.ink4 : C.forest, color: C.paper,
+              fontFamily: sans, fontSize: 15, fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              letterSpacing: '-0.005em',
+              boxShadow: loading ? 'none' : '0 4px 14px -6px rgba(39,80,10,0.45)',
+              transition: 'background .15s',
+            }}
           >
-            {loading ? 'Signing in...' : 'Mag-sign in →'}
+            {loading ? 'Signing in…' : <><span>Sign in</span> <IcArrowRight /></>}
           </button>
 
-          {divider}
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0' }}>
+            <div style={{ flex: 1, height: 1, background: C.line }} />
+            <span style={{ fontSize: 12, color: C.ink4, whiteSpace: 'nowrap' }}>— o kaya —</span>
+            <div style={{ flex: 1, height: 1, background: C.line }} />
+          </div>
 
+          {/* Facebook */}
           <button
-            style={{ width: '100%', padding: '13px', borderRadius: '12px', border: 'none', background: '#1877f2', color: '#fff', fontFamily: 'sans-serif', fontSize: '.92rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', opacity: fbLoading ? 0.6 : 1 }}
             onClick={handleFacebookLogin}
             disabled={fbLoading}
+            style={{
+              width: '100%', height: 50, borderRadius: 14, border: 'none',
+              background: '#1877f2', color: '#fff',
+              fontFamily: sans, fontSize: 14, fontWeight: 600,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              cursor: fbLoading ? 'not-allowed' : 'pointer',
+              opacity: fbLoading ? 0.7 : 1, transition: 'opacity .15s',
+            }}
           >
             <FacebookIcon />
-            <span>{fbLoading ? 'Redirecting...' : 'Continue with Facebook'}</span>
+            {fbLoading ? 'Redirecting…' : 'Continue with Facebook'}
           </button>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '20px 0' }}>
-          <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }} />
-          <span style={{ fontSize: '.72rem', color: '#9ca3af', whiteSpace: 'nowrap' }}>Homeowner or Partner</span>
-          <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }} />
+        {/* Footer links */}
+        <div style={{ textAlign: 'center', marginTop: 22, fontSize: 13, color: C.ink3 }}>
+          Bagong user?{' '}
+          <span
+            onClick={() => router.push('/signup/choose-role')}
+            style={{ color: C.forest, fontWeight: 700, cursor: 'pointer' }}
+          >
+            Gumawa ng account
+          </span>
+        </div>
+        <div style={{ textAlign: 'center', marginTop: 10 }}>
+          <a href="/forgot-password" style={{ fontSize: 12, color: C.ink4, textDecoration: 'none' }}>
+            Forgot password?
+          </a>
+        </div>
+        <div style={{ textAlign: 'center', marginTop: 8 }}>
+          <a href="/" style={{ fontSize: 12, color: C.ink4, textDecoration: 'none' }}>
+            ← Back to home
+          </a>
         </div>
 
-        {/* ── HOMEOWNER / PARTNER: Email + Password ── */}
-        <label style={lbl}>Email Address</label>
-        <input
-          style={inp}
-          type="email"
-          placeholder="you@email.com"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-        />
-        <label style={lbl}>Password</label>
-        <input
-          style={inp}
-          type="password"
-          placeholder="Your password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleEmailLogin()}
-        />
-        <button
-          style={{ width: '100%', padding: '13px', borderRadius: '12px', border: 'none', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '.92rem', fontWeight: 700, cursor: 'pointer', opacity: loading ? 0.6 : 1 }}
-          onClick={handleEmailLogin}
-          disabled={loading}
-        >
-          {loading ? 'Signing in...' : 'Sign In'}
-        </button>
-
-        <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '.78rem', color: '#6b7280' }}>
-          No account?{' '}
-          <a href="/signup/homeowner" style={{ color: '#1a6b3c', fontWeight: 700, textDecoration: 'none' }}>Homeowner</a>
-          {' or '}
-          <a href="/signup/kasambahay" style={{ color: '#c9943a', fontWeight: 700, textDecoration: 'none' }}>Kasambahay</a>
-        </div>
-        <div style={{ textAlign: 'center', marginTop: '8px' }}>
-          <a href="/forgot-password" style={{ fontSize: '.76rem', color: '#6b7280', textDecoration: 'none' }}>Forgot password?</a>
-        </div>
-        <div style={{ textAlign: 'center', marginTop: '8px' }}>
-          <a href="/" style={{ fontSize: '.76rem', color: '#9ca3af', textDecoration: 'none' }}>Back to Home</a>
-        </div>
       </div>
     </div>
   )
