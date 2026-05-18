@@ -2,6 +2,15 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
+const C = {
+  forest: '#1a6b3c', forestDeep: '#27500A', forestDark: '#1c3b07',
+  amber: '#c9943a', amberSoft: '#fef3e2', amberLine: '#fde8c0',
+  ink: '#111827', ink2: '#6b7280', ink3: '#9ca3af',
+  paper: '#ffffff', paper2: '#faf8f5', line: '#e5e7eb',
+}
+const serif = "'Instrument Serif', Georgia, serif"
+const sans  = "ui-sans-serif, system-ui, sans-serif"
+
 type Province = { code: string; name: string }
 
 export default function KasambahaySignup() {
@@ -47,6 +56,14 @@ export default function KasambahaySignup() {
   const [walaPaDocs, setWalaPaDocs] = useState(false)
   const [idFile, setIdFile] = useState<string | null>(null)
   const [policeFile, setPoliceFile] = useState<string | null>(null)
+
+  useEffect(() => {
+    const link = document.createElement('link')
+    link.href = 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700&display=swap'
+    link.rel = 'stylesheet'
+    document.head.appendChild(link)
+    return () => { try { document.head.removeChild(link) } catch {} }
+  }, [])
 
   useEffect(() => {
     setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
@@ -240,33 +257,33 @@ export default function KasambahaySignup() {
   }
 
   const s: any = {
-    wrap: { minHeight:'100vh', background:'#faf8f5', padding:'24px 20px', fontFamily:'sans-serif', color:'#111827' },
+    wrap: { minHeight:'100vh', background:C.paper2, padding:'24px 20px', fontFamily:sans, color:C.ink },
     toprow: { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'16px' },
-    back: { background:'none', border:'none', fontSize:'1rem', color:'#6b7280', cursor:'pointer', padding:0 },
-    stepnum: { fontSize:'13px', color:'#9ca3af' },
+    back: { background:'none', border:'none', fontSize:'1rem', color:C.ink2, cursor:'pointer', padding:0, fontFamily:sans },
+    stepnum: { fontSize:'13px', color:C.ink3, fontFamily:sans },
     bar: { display:'flex', gap:'4px', marginBottom:'22px' },
-    seg: (active: boolean) => ({ flex:1, height:'4px', borderRadius:'2px', background: active ? '#1a6b3c' : '#e5e7eb' }),
-    title: { fontWeight:900, fontSize:'22px', marginBottom:'5px', color:'#c9943a' },
-    sub: { fontSize:'14px', color:'#6b7280', marginBottom:'20px', lineHeight:1.5 },
-    lbl: { display:'block', fontSize:'15px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#6b7280', marginBottom:'4px' },
-    hint: { fontSize:'14px', color:'#9ca3af', marginBottom:'8px', lineHeight:1.4 },
-    input: { width:'100%', padding:'11px 13px', border:'1.5px solid #e5e7eb', borderRadius:'11px', fontFamily:'sans-serif', fontSize:'16px', outline:'none', marginBottom:'13px', background:'#fff', color:'#111827' },
-    btn: { width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:'#c9943a', color:'#fff', fontFamily:'sans-serif', fontSize:'16px', fontWeight:700, cursor:'pointer' },
-    err: { background:'#fef2f2', border:'1px solid #fecaca', borderRadius:'9px', padding:'10px 13px', fontSize:'14px', color:'#dc2626', marginBottom:'13px' },
-    note: { background:'#fffbeb', border:'1px solid #fde68a', borderRadius:'10px', padding:'11px 13px', marginBottom:'16px', fontSize:'14px', color:'#92400e', lineHeight:1.6 }
+    seg: (active: boolean) => ({ flex:1, height:'4px', borderRadius:'2px', background: active ? C.forest : C.line }),
+    title: { fontFamily:serif, fontWeight:900, fontSize:'22px', marginBottom:'5px', color:C.forest },
+    sub: { fontSize:'14px', color:C.ink2, marginBottom:'20px', lineHeight:1.5, fontFamily:sans },
+    lbl: { display:'block', fontSize:'11px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.07em', color:C.ink3, marginBottom:'5px', fontFamily:sans },
+    hint: { fontSize:'13px', color:C.ink3, marginBottom:'8px', lineHeight:1.4, fontFamily:sans },
+    input: { width:'100%', padding:'11px 13px', border:`1.5px solid ${C.line}`, borderRadius:'11px', fontFamily:sans, fontSize:'15px', outline:'none', marginBottom:'13px', background:C.paper, color:C.ink },
+    btn: { width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:C.forest, color:'#fff', fontFamily:sans, fontSize:'16px', fontWeight:700, cursor:'pointer' },
+    err: { background:'#fef2f2', border:'1px solid #fecaca', borderRadius:'9px', padding:'10px 13px', fontSize:'14px', color:'#dc2626', marginBottom:'13px', fontFamily:sans },
+    note: { background:C.amberSoft, border:`1px solid ${C.amberLine}`, borderRadius:'10px', padding:'11px 13px', marginBottom:'16px', fontSize:'14px', color:'#92400e', lineHeight:1.6, fontFamily:sans }
   }
 
   if (success) return (
-    <div style={{ minHeight:'100vh', background:'#faf8f5', padding:'40px 20px', fontFamily:'sans-serif', display:'flex', flexDirection:'column' as const, alignItems:'center', justifyContent:'center', textAlign:'center' as const }}>
+    <div style={{ minHeight:'100vh', background:C.paper2, padding:'40px 20px', fontFamily:sans, display:'flex', flexDirection:'column' as const, alignItems:'center', justifyContent:'center', textAlign:'center' as const }}>
       <div style={{ fontSize:'52px', marginBottom:'20px' }}>🎉</div>
-      <h1 style={{ fontFamily:'serif', fontSize:'28px', fontWeight:900, color:'#1a6b3c', marginBottom:'10px', lineHeight:1.2 }}>
+      <h1 style={{ fontFamily:serif, fontSize:'30px', fontWeight:400, color:C.forestDeep, marginBottom:'10px', lineHeight:1.2 }}>
         Na-sign up ka na!
       </h1>
-      <p style={{ fontSize:'16px', color:'#6b7280', lineHeight:1.6, marginBottom:'28px', maxWidth:'300px' }}>
+      <p style={{ fontSize:'15px', color:C.ink2, lineHeight:1.6, marginBottom:'28px', maxWidth:'300px', fontFamily:sans }}>
         Maaari ka nang makatanggap ng mga job offer.
       </p>
       <button
-        style={{ padding:'14px 28px', borderRadius:'13px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'16px', fontWeight:700, cursor:'pointer' }}
+        style={{ padding:'14px 28px', borderRadius:'13px', border:'none', background:C.forest, color:'#fff', fontFamily:sans, fontSize:'16px', fontWeight:700, cursor:'pointer' }}
         onClick={() => router.push('/dashboard/kasambahay')}
       >
         Pumunta sa Dashboard →
@@ -291,15 +308,15 @@ export default function KasambahaySignup() {
       {step === 1 && (
         <>
           {/* Forest green header */}
-          <div style={{ background:'#1a6b3c', borderRadius:'16px', padding:'22px 18px', marginBottom:'20px' }}>
-            <h1 style={{ fontFamily:'serif', fontSize:'26px', fontWeight:900, color:'#fff', marginBottom:'6px', lineHeight:1.2 }}>
+          <div style={{ background:`linear-gradient(160deg, ${C.forestDark} 0%, ${C.forestDeep} 100%)`, borderRadius:'16px', padding:'22px 18px', marginBottom:'20px' }}>
+            <h1 style={{ fontFamily:serif, fontSize:'26px', fontWeight:400, color:'#fff', marginBottom:'6px', lineHeight:1.2 }}>
               Mag-sign up bilang Kasambahay
             </h1>
-            <p style={{ fontSize:'14px', color:'rgba(255,255,255,.8)', lineHeight:1.5, margin:0 }}>
+            <p style={{ fontSize:'14px', color:'rgba(255,255,255,.78)', lineHeight:1.5, margin:0, fontFamily:sans }}>
               Libre. Ligtas. Trabahong para sa iyo.
             </p>
             {refParam && (
-              <div style={{ marginTop:'12px', background:'rgba(255,255,255,.15)', borderRadius:'8px', padding:'7px 11px', fontSize:'12px', color:'#fff', fontWeight:700, display:'inline-flex', alignItems:'center', gap:'6px' }}>
+              <div style={{ marginTop:'12px', background:'rgba(255,255,255,.15)', borderRadius:'8px', padding:'7px 11px', fontSize:'12px', color:'#fff', fontWeight:700, display:'inline-flex', alignItems:'center', gap:'6px', fontFamily:sans }}>
                 ✓ May referral code: {refParam}
               </div>
             )}
@@ -597,7 +614,7 @@ export default function KasambahaySignup() {
 
             {/* Amber tip */}
             <div style={{ background:'#fef3e2', border:'1px solid #fde8c0', borderRadius:'10px', padding:'10px 13px', marginTop:'14px', fontSize:'13px', color:'#92400e', lineHeight:1.6 }}>
-              💡 <strong>Malaki ang tyansa mong mapili</strong> kung may dokumento ka. Pwede ito i-upload mamaya sa iyong profile.
+              💡 <strong>Malaki ang tyansa na maofferan agad ng trabaho</strong> kapag may ID o clearance ka!
             </div>
           </div>
 
