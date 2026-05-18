@@ -40,6 +40,7 @@ export default function PartnerDashboard() {
   const [saveMsg, setSaveMsg] = useState('')
   const [saving, setSaving] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [showShareSheet, setShowShareSheet] = useState(false)
   const [savedName, setSavedName] = useState('')
   const photoRef = useRef<HTMLInputElement>(null)
 
@@ -365,40 +366,18 @@ export default function PartnerDashboard() {
               const hasOffer = workerOffers.some(o => o.kasambahay_id === w.id)
               return (
                 <div key={w.id} style={{ background: '#fff', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px', border: '1px solid #ede8e0' }}>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: (w.status === 'pending_confirmation' || hasOffer) ? '10px' : '0' }}>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#fef3e2', border: '2px solid #fde8c0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>👩</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: '15px', color: '#111827' }}>{w.profiles?.full_name}</div>
-                      <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '1px' }}>{w.province} · {w.profiles?.mobile}</div>
-                      {w.skills?.length > 0 && (
-                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '5px' }}>
-                          {w.skills.map((skill: string) => (
-                            <span key={skill} style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '4px', background: '#f3ede5', color: '#92400e' }}>{skill}</span>
-                          ))}
-                        </div>
-                      )}
+                      <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '1px' }}>{w.province}</div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
-                      {w.confirmed_at && w.status === 'available' && (Date.now() - new Date(w.confirmed_at).getTime()) / (1000*60*60*24) <= 7 && (
-                        <span style={{ fontSize: '9px', fontWeight: 800, padding: '2px 7px', borderRadius: '50px', background: '#dc2626', color: '#fff' }}>BAGO!</span>
-                      )}
-                      <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: st.bg, color: st.color, whiteSpace: 'nowrap' as const, border: `1px solid ${st.color}30` }}>{st.label}</span>
-                    </div>
+                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: st.bg, color: st.color, whiteSpace: 'nowrap' as const, border: `1px solid ${st.color}30` }}>{st.label}</span>
                   </div>
-                  {hasOffer && (
-                    <div style={{ background: '#e0f7fa', border: '1px solid #b2ebf2', borderRadius: '8px', padding: '7px 10px', fontSize: '12px', color: '#006064', fontWeight: 700 }}>
-                      📨 May Job Offer na natanggap
-                    </div>
-                  )}
-                  {w.status === 'pending_confirmation' && (
-                    <div style={{ background: '#fef3e2', borderRadius: '8px', padding: '7px 10px', fontSize: '12px', color: '#92400e' }}>
-                      📱 Naghhintay ng reply sa text message
-                    </div>
-                  )}
                 </div>
               )
             })}
-            <button onClick={() => setTab('add')} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#1a6b3c', border: 'none', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif', marginTop: '4px' }}>
+            <button onClick={() => setShowShareSheet(true)} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#1a6b3c', border: 'none', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif', marginTop: '4px' }}>
               + Mag-refer ng Kasambahay
             </button>
           </>
@@ -587,6 +566,45 @@ export default function PartnerDashboard() {
           Patuloy na mag-refer at kumita kasama ang MaidIt! 💚
         </div>
       </div>
+
+      {/* SHARE SHEET */}
+      {showShareSheet && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 50, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <div style={{ background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px 36px', width: '100%', maxWidth: 480 }}>
+            <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: '#e5e7eb', margin: '0 auto 20px' }} />
+            <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, color: '#1a1a1a', marginBottom: '6px' }}>I-share ang referral link mo</div>
+            <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '16px', lineHeight: 1.5 }}>
+              Pabigyan ng trabaho ang kasambahay na kakilala mo at kumita ka ng ₱500!
+            </div>
+            <div style={{ background: '#f9f6f2', borderRadius: '12px', padding: '12px 14px', marginBottom: '14px' }}>
+              <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Ang iyong referral link</div>
+              <div style={{ fontSize: '13px', color: '#1a1a1a', wordBreak: 'break-all' as const, fontWeight: 600 }}>
+                maidit.vercel.app/signup/kasambahay?ref={referralCode}
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '16px' }}>
+              <button onClick={() => { const link = `https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`; navigator.clipboard.writeText(link).catch(() => {}); setCopied(true); setTimeout(() => setCopied(false), 2000) }} style={{ padding: '12px 8px', borderRadius: '12px', background: copied ? '#f0fdf4' : '#f3f4f6', border: `1px solid ${copied ? '#bbf7d0' : '#e5e7eb'}`, color: copied ? '#1a6b3c' : '#374151', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '20px' }}>{copied ? '✅' : '📋'}</span>
+                <span>{copied ? 'Copied!' : 'Copy Link'}</span>
+              </button>
+              <button onClick={() => { const link = encodeURIComponent(`https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`); window.open(`https://www.facebook.com/sharer/sharer.php?u=${link}`, '_blank') }} style={{ padding: '12px 8px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1877f2', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '20px' }}>💙</span>
+                <span>Facebook</span>
+              </button>
+              <button onClick={() => { const link = encodeURIComponent(`https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`); window.open(`fb-messenger://share?link=${link}`, '_blank') }} style={{ padding: '12px 8px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#2563eb', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '20px' }}>💬</span>
+                <span>Messenger</span>
+              </button>
+            </div>
+            <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '10px', padding: '10px 13px', marginBottom: '16px', fontSize: '12px', color: '#92400e', lineHeight: 1.65 }}>
+              📌 Sabihin sa kasambahay: "Mag-sign up sa MaidIt gamit ang link ko — libre at ligtas. May trabahong naghihintay sa iyo."
+            </div>
+            <button onClick={() => setShowShareSheet(false)} style={{ width: '100%', padding: '13px', borderRadius: '12px', background: '#f3f4f6', border: 'none', color: '#374151', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'sans-serif' }}>
+              Isara
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* SUCCESS MODAL */}
       {showSuccess && (

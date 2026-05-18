@@ -40,12 +40,18 @@ export default function KasambahaySignup() {
   // Selfie
   const [selfieData, setSelfieData] = useState<string | null>(null)
   const selfieRef = useRef<HTMLInputElement>(null)
+  const idRef = useRef<HTMLInputElement>(null)
+  const policeRef = useRef<HTMLInputElement>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [refParam, setRefParam] = useState('')
+  const [walaPaDocs, setWalaPaDocs] = useState(false)
+  const [idFile, setIdFile] = useState<string | null>(null)
+  const [policeFile, setPoliceFile] = useState<string | null>(null)
 
   useEffect(() => {
     setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
     const ref = new URLSearchParams(window.location.search).get('ref')
-    if (ref) localStorage.setItem('maidit_ref', ref)
+    if (ref) { localStorage.setItem('maidit_ref', ref); setRefParam(ref) }
   }, [])
 
   const [form, setForm] = useState({
@@ -86,6 +92,22 @@ export default function KasambahaySignup() {
   const filteredProvs = provinces.filter(p =>
     p.name.toLowerCase().includes(provSearch.toLowerCase())
   ).slice(0, 80)
+
+  const handleIdFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => setIdFile(ev.target?.result as string)
+    reader.readAsDataURL(file)
+  }
+
+  const handlePoliceFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => setPoliceFile(ev.target?.result as string)
+    reader.readAsDataURL(file)
+  }
 
   const handleSelfie = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -160,14 +182,17 @@ export default function KasambahaySignup() {
       localStorage.removeItem('maidit_ref')
     }
 
+    const finalGovtIdTypes = walaPaDocs ? ['Wala'] : idFile ? [...govtIdTypes.filter(x => x !== 'Wala'), 'ID Uploaded'] : govtIdTypes
+    const finalHasGovtId = !walaPaDocs && (idFile ? true : hasGovtId)
+
     await supabase.from('kasambahay').insert({
       profile_id: userId,
       asking_salary: parseInt(form.salary),
       setup: form.setup,
       has_nbi: hasNbi,
-      has_police_clearance: hasPoliceClearance,
-      govt_id_types: govtIdTypes,
-      has_govt_id: hasGovtId,
+      has_police_clearance: policeFile ? true : hasPoliceClearance,
+      govt_id_types: finalGovtIdTypes,
+      has_govt_id: finalHasGovtId,
       experience: form.experience,
       province: selProv!.name,
       age: form.age ? parseInt(form.age) : null,
@@ -194,6 +219,20 @@ export default function KasambahaySignup() {
       } catch (err) {
         console.error('[signup] Selfie upload error:', err)
       }
+    }
+
+    if (idFile && userId) {
+      try {
+        const blob = await fetch(idFile).then(r => r.blob())
+        await supabase.storage.from('Selfies').upload(`${userId}/govt_id.png`, blob, { upsert: true, contentType: 'image/png' })
+      } catch {}
+    }
+
+    if (policeFile && userId) {
+      try {
+        const blob = await fetch(policeFile).then(r => r.blob())
+        await supabase.storage.from('Selfies').upload(`${userId}/police_clearance.png`, blob, { upsert: true, contentType: 'image/png' })
+      } catch {}
     }
 
     setLoading(false)
@@ -251,53 +290,31 @@ export default function KasambahaySignup() {
       {/* ── STEP 1 ── */}
       {step === 1 && (
         <>
-          {/* Hero card */}
-          <div style={{ background:'#faf8f5', borderRadius:'16px', border:'1.5px solid #e8e2d9', overflow:'hidden', marginBottom:'20px' }}>
-            <div style={{ display:'grid', gridTemplateColumns:'3fr 2fr' }}>
-              {/* Left: copy */}
-              <div style={{ padding:'18px 12px 18px 16px', display:'flex', flexDirection:'column' as const, justifyContent:'center' }}>
-                <h1 style={{ fontFamily:'serif', fontSize:'22px', fontWeight:900, color:'#c9943a', marginBottom:'5px', lineHeight:1.2 }}>Mag-sign up</h1>
-                <p style={{ fontSize:'14px', color:'#6b7280', marginBottom:'13px', lineHeight:1.5 }}>Ilagay ang iyong detalye para makapagsimula.</p>
-                <div style={{ display:'flex', flexDirection:'column' as const, gap:'9px' }}>
-                  <div style={{ display:'flex', gap:'8px', alignItems:'flex-start' }}>
-                    <div style={{ width:'22px', height:'22px', borderRadius:'6px', background:'#f0fdf4', border:'1px solid #bbf7d0', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'12px' }}>🛡️</div>
-                    <div>
-                      <div style={{ fontSize:'14px', fontWeight:700, color:'#1a6b3c', lineHeight:1.3 }}>Ligtas at madali lang!</div>
-                      <div style={{ fontSize:'13px', color:'#9ca3af', lineHeight:1.4 }}>Protektado ang iyong impormasyon.</div>
-                    </div>
-                  </div>
-                  <div style={{ display:'flex', gap:'8px', alignItems:'flex-start' }}>
-                    <div style={{ width:'22px', height:'22px', borderRadius:'6px', background:'#fef3e2', border:'1px solid #fde8c0', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'12px' }}>👥</div>
-                    <div>
-                      <div style={{ fontSize:'14px', fontWeight:700, color:'#c9943a', lineHeight:1.3 }}>Trabaho na angkop sa iyo. Sweldo na tama.</div>
-                      <div style={{ fontSize:'13px', color:'#9ca3af', lineHeight:1.4 }}>Libreng mag-sign up. Walang bayad.</div>
-                    </div>
-                  </div>
-                </div>
+          {/* Forest green header */}
+          <div style={{ background:'#1a6b3c', borderRadius:'16px', padding:'22px 18px', marginBottom:'20px' }}>
+            <h1 style={{ fontFamily:'serif', fontSize:'26px', fontWeight:900, color:'#fff', marginBottom:'6px', lineHeight:1.2 }}>
+              Mag-sign up bilang Kasambahay
+            </h1>
+            <p style={{ fontSize:'14px', color:'rgba(255,255,255,.8)', lineHeight:1.5, margin:0 }}>
+              Libre. Ligtas. Trabahong para sa iyo.
+            </p>
+            {refParam && (
+              <div style={{ marginTop:'12px', background:'rgba(255,255,255,.15)', borderRadius:'8px', padding:'7px 11px', fontSize:'12px', color:'#fff', fontWeight:700, display:'inline-flex', alignItems:'center', gap:'6px' }}>
+                ✓ May referral code: {refParam}
               </div>
-              {/* Right: photo */}
-              <div style={{ overflow:'hidden' }}>
-                <img
-                  src="https://xlagwtsrjbylhxfozoem.supabase.co/storage/v1/object/public/assets/preview.webp"
-                  alt="Kasambahay"
-                  style={{ width:'100%', height:'100%', minHeight:'200px', objectFit:'cover', display:'block' }}
-                />
-              </div>
+            )}
+          </div>
+
+          {/* Pangalan + Apelyido — side by side */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', marginBottom:'0' }}>
+            <div>
+              <label style={s.lbl}>Pangalan</label>
+              <input style={s.input} placeholder="Ana" value={form.first_name} onChange={e => update('first_name', e.target.value)} />
             </div>
-          </div>
-
-          {/* Pangalan */}
-          <label style={s.lbl}>Pangalan</label>
-          <div style={{ position:'relative' }}>
-            <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', fontSize:'14px', lineHeight:1, pointerEvents:'none' }}>👤</span>
-            <input style={{ ...s.input, paddingLeft:'38px' }} placeholder="Ana" value={form.first_name} onChange={e => update('first_name', e.target.value)} />
-          </div>
-
-          {/* Apelyido */}
-          <label style={s.lbl}>Apelyido</label>
-          <div style={{ position:'relative' }}>
-            <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', fontSize:'14px', lineHeight:1, pointerEvents:'none' }}>👤</span>
-            <input style={{ ...s.input, paddingLeft:'38px' }} placeholder="Santos" value={form.last_name} onChange={e => update('last_name', e.target.value)} />
+            <div>
+              <label style={s.lbl}>Apelyido</label>
+              <input style={s.input} placeholder="Santos" value={form.last_name} onChange={e => update('last_name', e.target.value)} />
+            </div>
           </div>
 
           {/* Mobile Number */}
@@ -526,30 +543,61 @@ export default function KasambahaySignup() {
           </div>
 
           <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
-            <div style={{ fontSize:'13px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>MGA DOKUMENTO (i-tick kung mayroon)</div>
-            <div style={{ display:'flex', flexDirection:'column' as const, gap:'10px' }}>
-              {['Wala','Passport','SSS ID','PhilHealth ID','Pag-IBIG ID','Postal ID','Barangay ID','Driver\'s License','PRC ID','Voter\'s ID'].map((label) => (
-                <div key={label} style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => toggleGovtId(label)}>
-                  <div style={{ width:'22px', height:'22px', borderRadius:'5px', border:'2px solid', borderColor: govtIdTypes.includes(label) ? '#c9943a' : '#d1d5db', background: govtIdTypes.includes(label) ? '#c9943a' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                    {govtIdTypes.includes(label) && <span style={{ color:'#fff', fontSize:'13px', fontWeight:900 }}>✓</span>}
+            <div style={{ fontSize:'13px', fontWeight:700, color:'#9ca3af', marginBottom:'12px' }}>MGA DOKUMENTO</div>
+
+            {/* Wala pa */}
+            <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer', marginBottom:'14px' }} onClick={() => { setWalaPaDocs(!walaPaDocs); setIdFile(null); setPoliceFile(null) }}>
+              <div style={{ width:'22px', height:'22px', borderRadius:'5px', border:'2px solid', borderColor: walaPaDocs ? '#c9943a' : '#d1d5db', background: walaPaDocs ? '#c9943a' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                {walaPaDocs && <span style={{ color:'#fff', fontSize:'13px', fontWeight:900 }}>✓</span>}
+              </div>
+              <span style={{ fontSize:'15px', color:'#374151', fontWeight: walaPaDocs ? 700 : 400 }}>Wala pa akong dokumento</span>
+            </div>
+
+            {!walaPaDocs && (
+              <div style={{ display:'flex', flexDirection:'column' as const, gap:'10px' }}>
+                {/* Government ID upload */}
+                <div>
+                  <div style={{ fontSize:'13px', fontWeight:600, color:'#374151', marginBottom:'7px' }}>Government ID</div>
+                  <div
+                    onClick={() => idRef.current?.click()}
+                    style={{ border:`2px dashed ${idFile ? '#1a6b3c' : '#d1d5db'}`, borderRadius:'10px', padding:'12px 14px', cursor:'pointer', background: idFile ? '#f0fdf4' : '#fafafa', display:'flex', alignItems:'center', gap:'10px' }}
+                  >
+                    <span style={{ fontSize:'20px' }}>{idFile ? '✅' : '📎'}</span>
+                    <span style={{ fontSize:'14px', color: idFile ? '#1a6b3c' : '#6b7280', fontWeight: idFile ? 700 : 400 }}>
+                      {idFile ? 'Na-upload ang ID' : 'I-upload ang Government ID'}
+                    </span>
                   </div>
-                  <span style={{ fontSize:'15px', color:'#374151' }}>{label}</span>
+                  <input ref={idRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handleIdFile} />
                 </div>
-              ))}
-              <div style={{ borderTop:'1px solid #f3f4f6', paddingTop:'10px', display:'flex', flexDirection:'column' as const, gap:'10px' }}>
+
+                {/* Police Clearance upload */}
+                <div>
+                  <div style={{ fontSize:'13px', fontWeight:600, color:'#374151', marginBottom:'7px' }}>Police Clearance</div>
+                  <div
+                    onClick={() => policeRef.current?.click()}
+                    style={{ border:`2px dashed ${policeFile ? '#1a6b3c' : '#d1d5db'}`, borderRadius:'10px', padding:'12px 14px', cursor:'pointer', background: policeFile ? '#f0fdf4' : '#fafafa', display:'flex', alignItems:'center', gap:'10px' }}
+                  >
+                    <span style={{ fontSize:'20px' }}>{policeFile ? '✅' : '📎'}</span>
+                    <span style={{ fontSize:'14px', color: policeFile ? '#1a6b3c' : '#6b7280', fontWeight: policeFile ? 700 : 400 }}>
+                      {policeFile ? 'Na-upload ang Police Clearance' : 'I-upload ang Police Clearance'}
+                    </span>
+                  </div>
+                  <input ref={policeRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handlePoliceFile} />
+                </div>
+
+                {/* NBI checkbox */}
                 <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => setHasNbi(!hasNbi)}>
                   <div style={{ width:'22px', height:'22px', borderRadius:'5px', border:'2px solid', borderColor: hasNbi ? '#1a6b3c' : '#d1d5db', background: hasNbi ? '#1a6b3c' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                     {hasNbi && <span style={{ color:'#fff', fontSize:'13px', fontWeight:900 }}>✓</span>}
                   </div>
                   <span style={{ fontSize:'15px', color:'#374151' }}>Mayroon akong NBI Clearance</span>
                 </div>
-                <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => setHasPoliceClearance(!hasPoliceClearance)}>
-                  <div style={{ width:'22px', height:'22px', borderRadius:'5px', border:'2px solid', borderColor: hasPoliceClearance ? '#1a6b3c' : '#d1d5db', background: hasPoliceClearance ? '#1a6b3c' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                    {hasPoliceClearance && <span style={{ color:'#fff', fontSize:'13px', fontWeight:900 }}>✓</span>}
-                  </div>
-                  <span style={{ fontSize:'15px', color:'#374151' }}>Mayroon akong Police Clearance</span>
-                </div>
               </div>
+            )}
+
+            {/* Amber tip */}
+            <div style={{ background:'#fef3e2', border:'1px solid #fde8c0', borderRadius:'10px', padding:'10px 13px', marginTop:'14px', fontSize:'13px', color:'#92400e', lineHeight:1.6 }}>
+              💡 <strong>Malaki ang tyansa mong mapili</strong> kung may dokumento ka. Pwede ito i-upload mamaya sa iyong profile.
             </div>
           </div>
 

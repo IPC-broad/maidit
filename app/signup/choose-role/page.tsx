@@ -61,7 +61,7 @@ function ChooseRoleContent() {
       emoji: '🤝',
       title: 'Gusto kong maging Partner',
       sub: 'Refer kasambahay and earn commissions with every hire.',
-      href: `/signup/partner`,
+      href: `/partner`,
       border: C.line,
       bg: C.paper2,
       accent: C.ink2,
