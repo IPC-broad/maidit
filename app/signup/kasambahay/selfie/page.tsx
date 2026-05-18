@@ -14,9 +14,6 @@ export default function SelfieCapture() {
   const [uploading, setUploading] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [isMobile, setIsMobile] = useState(true)
-  const [validating, setValidating] = useState(false)
-  const [faceValid, setFaceValid] = useState<boolean | null>(null)
-  const [faceError, setFaceError] = useState<string | null>(null)
 
   // Pre-load the tiny face detector model as soon as the component mounts so
   // it is ready by the time the user takes a photo.
@@ -24,11 +21,6 @@ export default function SelfieCapture() {
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
     setIsMobile(mobile)
     if (mobile) startCamera()
-
-    import('face-api.js').then(faceapi => {
-      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights'
-      faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL).catch(() => {})
-    }).catch(() => {})
 
     return () => stopCamera()
   }, [])
@@ -65,7 +57,6 @@ export default function SelfieCapture() {
     if (ctx) ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
     setPhoto(canvas.toDataURL('image/jpeg', 0.85))
     stopCamera()
-    validateFace(canvas)
   }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,39 +72,12 @@ export default function SelfieCapture() {
       canvas.getContext('2d')!.drawImage(img, 0, 0)
       setPhoto(canvas.toDataURL('image/jpeg', 0.85))
       URL.revokeObjectURL(url)
-      validateFace(canvas)
     }
     img.src = url
   }
 
-  const validateFace = async (canvas: HTMLCanvasElement) => {
-    setValidating(true)
-    setFaceError(null)
-    setFaceValid(null)
-    try {
-      const faceapi = await import('face-api.js')
-      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights'
-      if (!faceapi.nets.tinyFaceDetector.isLoaded) {
-        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)
-      }
-      const detections = await faceapi.detectAllFaces(
-        canvas,
-        new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.5 })
-      )
-      const found = detections.length > 0
-      setFaceValid(found)
-      if (!found) setFaceError('Hindi malinaw ang mukha. Subukan ulit.')
-    } catch {
-      // On unexpected error let the user proceed rather than blocking them
-      setFaceValid(true)
-    }
-    setValidating(false)
-  }
-
   const retake = () => {
     setPhoto(null)
-    setFaceValid(null)
-    setFaceError(null)
     if (isMobile) startCamera()
   }
 
@@ -197,20 +161,10 @@ export default function SelfieCapture() {
                   </button>
                 ) : (
                   <div className="space-y-2">
-                    {validating && (
-                      <div className="text-center text-sm text-gray-500 py-2">Sinusuri ang mukha...</div>
-                    )}
-                    {faceError && (
-                      <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 text-center">
-                        {faceError}
-                      </div>
-                    )}
-                    {faceValid && (
-                      <button onClick={savePhoto} disabled={uploading} className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold disabled:opacity-60">
-                        {uploading ? 'Sine-save...' : 'Gamitin ang picture na ito →'}
-                      </button>
-                    )}
-                    <button onClick={retake} disabled={uploading || validating} className="w-full text-sm text-gray-500 py-2 disabled:opacity-60">
+                    <button onClick={savePhoto} disabled={uploading} className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold disabled:opacity-60">
+                      {uploading ? 'Sine-save...' : 'Gamitin ang picture na ito →'}
+                    </button>
+                    <button onClick={retake} disabled={uploading} className="w-full text-sm text-gray-500 py-2 disabled:opacity-60">
                       Ulitin
                     </button>
                   </div>
@@ -241,20 +195,10 @@ export default function SelfieCapture() {
                   <img src={photo} alt="Preview" className="w-full h-[320px] object-cover" />
                 </div>
                 <div className="space-y-2">
-                  {validating && (
-                    <div className="text-center text-sm text-gray-500 py-2">Sinusuri ang mukha...</div>
-                  )}
-                  {faceError && (
-                    <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 text-center">
-                      {faceError}
-                    </div>
-                  )}
-                  {faceValid && (
-                    <button onClick={savePhoto} disabled={uploading} className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold disabled:opacity-60">
-                      {uploading ? 'Sine-save...' : 'Gamitin ang litratong ito →'}
-                    </button>
-                  )}
-                  <button onClick={retake} disabled={uploading || validating} className="w-full text-sm text-gray-500 py-2 disabled:opacity-60">
+                  <button onClick={savePhoto} disabled={uploading} className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold disabled:opacity-60">
+                    {uploading ? 'Sine-save...' : 'Gamitin ang litratong ito →'}
+                  </button>
+                  <button onClick={retake} disabled={uploading} className="w-full text-sm text-gray-500 py-2 disabled:opacity-60">
                     Pumili ng ibang litrato
                   </button>
                 </div>
@@ -264,7 +208,7 @@ export default function SelfieCapture() {
         )}
 
         <p className="text-xs text-gray-400 text-center mt-5">
-          Lalagyan ito ng "Selfie Verified" badge sa iyong profile.
+          Ang iyong selfie ay nai-upload na. Ire-review ng MaidIt team sa loob ng 24 oras.
         </p>
 
       </div>
