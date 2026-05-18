@@ -358,11 +358,11 @@ export default function BrowsePage() {
         marginBottom: 12,
       }}>
         {/* upper zone */}
-        <div style={{ display: 'flex', gap: 14, padding: '16px 16px 14px' }}>
+        <div className="kb-card-upper" style={{ display: 'flex', gap: 14, padding: '16px 16px 14px' }}>
           {/* portrait column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 7, alignItems: 'center', flexShrink: 0 }}>
             {/* portrait */}
-            <div style={{ width: 100, height: 140, borderRadius: 14, overflow: 'hidden', position: 'relative', background: 'linear-gradient(155deg, #fde8c0 0%, #e8c47a 100%)', flexShrink: 0 }}>
+            <div className="kb-portrait" style={{ width: 88, height: 122, borderRadius: 14, overflow: 'hidden', position: 'relative', background: 'linear-gradient(155deg, #fde8c0 0%, #e8c47a 100%)', flexShrink: 0 }}>
               {showPhoto ? (
                 <img
                   src={selfieUrl!}
@@ -487,7 +487,7 @@ export default function BrowsePage() {
         </div>
 
         {/* lower tray */}
-        <div style={{
+        <div className="kb-card-lower" style={{
           borderTop: `1px solid ${C.line}`,
           padding: '12px 16px 14px',
           background: 'linear-gradient(180deg, #fcfbf7 0%, #ffffff 100%)',
@@ -513,10 +513,11 @@ export default function BrowsePage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 8 }}>
             <button
               onClick={handleSeeProfile}
+              className="kb-card-btn"
               style={{
-                height: 42, borderRadius: 12, background: C.paper,
+                height: 40, borderRadius: 12, background: C.paper,
                 border: `1px solid ${C.line}`, color: C.ink,
-                fontSize: 13, fontWeight: 600, fontFamily: sans,
+                fontSize: 12, fontWeight: 600, fontFamily: sans,
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', letterSpacing: '-0.005em',
               }}
@@ -525,15 +526,16 @@ export default function BrowsePage() {
             </button>
             <button
               onClick={handleSendOffer}
+              className="kb-card-btn"
               style={{
-                height: 42, borderRadius: 12, background: C.forest, color: C.paper,
-                fontSize: 13, fontWeight: 600, fontFamily: sans,
+                height: 40, borderRadius: 12, background: C.forest, color: C.paper,
+                fontSize: 12, fontWeight: 600, fontFamily: sans,
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 border: 'none', cursor: 'pointer', letterSpacing: '-0.005em',
                 boxShadow: '0 4px 12px -6px rgba(39,80,10,0.5)',
               }}
             >
-              Send Offer <IcArrowRight size={14} />
+              Send Offer <IcArrowRight size={13} />
             </button>
           </div>
         </div>
@@ -552,6 +554,14 @@ export default function BrowsePage() {
 
   return (
     <div style={{ minHeight: '100vh', background: C.paper2, fontFamily: sans, paddingBottom: 80 }}>
+      <style>{`
+        @media (max-width: 399px) {
+          .kb-portrait { width: 76px !important; height: 108px !important; }
+          .kb-card-btn { font-size: 11px !important; height: 36px !important; }
+          .kb-card-upper { padding: 12px 12px 12px !important; gap: 10px !important; }
+          .kb-card-lower { padding: 10px 12px 12px !important; }
+        }
+      `}</style>
 
       {/* ── NAVBAR ── */}
       <div style={{
@@ -615,7 +625,7 @@ export default function BrowsePage() {
             </div>
 
             {/* Filter pills */}
-            <div style={{ display: 'flex', gap: 7, overflowX: 'auto' as const, paddingBottom: 14, scrollbarWidth: 'none' as const }}>
+            <div style={{ display: 'flex', gap: 7, overflowX: 'auto' as const, paddingBottom: 14, scrollbarWidth: 'none' as const, WebkitOverflowScrolling: 'touch' as any }}>
               {([
                 { id: 'Lahat',    label: 'All Matches' },
                 { id: 'Stay-in',  label: 'Stay-in' },
@@ -759,8 +769,8 @@ export default function BrowsePage() {
 
             {/* Logged-out: blurred remainder + unlock wall */}
             {lockedCards.length > 0 && (
-              <div style={{ position: 'relative' }}>
-                <div style={{ filter: 'blur(3.5px)', pointerEvents: 'none', userSelect: 'none' as const }}>
+              <div style={{ position: 'relative', width: '100%' }}>
+                <div style={{ filter: 'blur(3.5px)', pointerEvents: 'none', userSelect: 'none' as const, width: '100%' }}>
                   {lockedCards.slice(0, 2).map(renderKBCard)}
                 </div>
                 <div style={{
@@ -945,8 +955,9 @@ export default function BrowsePage() {
             onClick={e => { if (e.target === e.currentTarget) setProfileModalKb(null) }}
           >
             <div style={{
-              background: C.paper, borderRadius: '22px 22px 0 0', width: '100%', maxWidth: 480,
-              maxHeight: '88vh', overflowY: 'auto', position: 'relative',
+              background: C.paper, borderRadius: '24px 24px 0 0', width: '100%', maxWidth: 480,
+              maxHeight: '85vh', overflowY: 'auto', position: 'relative',
+              left: 0, right: 0,
               boxShadow: '0 -20px 50px -10px rgba(28,59,7,0.32)',
             }}>
               {/* drag handle */}
