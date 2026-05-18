@@ -9,7 +9,7 @@ export default function KasambahaySignup() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [cooldown, setCooldown] = useState(0)
+  const [success, setSuccess] = useState(false)
 
   const [hasNbi, setHasNbi] = useState(false)
   const [hasPoliceClearance, setHasPoliceClearance] = useState(false)
@@ -53,7 +53,6 @@ export default function KasambahaySignup() {
     last_name: '',
     mobile: '',
     password: '',
-    otp: '',
     age: '',
     salary: '',
     setup: 'Stay-in',
@@ -96,17 +95,7 @@ export default function KasambahaySignup() {
     reader.readAsDataURL(file)
   }
 
-  const startCooldown = () => {
-    setCooldown(60)
-    const interval = setInterval(() => {
-      setCooldown(prev => {
-        if (prev <= 1) { clearInterval(interval); return 0 }
-        return prev - 1
-      })
-    }, 1000)
-  }
-
-  const checkMobile = async () => {
+  const checkMobile = () => {
     if (!form.first_name || !form.last_name || !form.mobile || !form.password) {
       setError('Punan ang lahat ng fields')
       return
@@ -119,47 +108,17 @@ export default function KasambahaySignup() {
       setError('Ang password ay dapat ay hindi bababa sa 8 characters')
       return
     }
-    setLoading(true)
     setError('')
-
-    const res = await fetch('/api/send-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mobile: form.mobile, checkOnly: true })
-    })
-    const data = await res.json()
-
-    if (!res.ok) {
-      setError(data.error || 'May error. Subukan ulit.')
-      setLoading(false)
-      return
-    }
-
-    setLoading(false)
     setStep(2)
   }
 
-  const sendOtpAndProceed = () => {
+  const handleStep2 = () => {
     if (!selProv || !form.salary) {
       setError('Punan ang lahat ng fields')
       return
     }
     setError('')
-    setStep(3)
-  }
-
-  const resendOtp = async () => {
-    if (cooldown > 0 || loading) return
-    setLoading(true)
-    setError('')
-
-    const res = await fetch('/api/send-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mobile: form.mobile })
-    })
-    if (res.ok) startCooldown()
-    setLoading(false)
+    createAccount()
   }
 
   const createAccount = async () => {
@@ -238,28 +197,7 @@ export default function KasambahaySignup() {
     }
 
     setLoading(false)
-    router.push(selfieData ? '/signup/kasambahay/success' : '/signup/kasambahay/selfie')
-  }
-
-  const verifyAndCreate = async () => {
-    if (!form.otp || form.otp.length < 6) {
-      setError('Ilagay ang 6-digit code')
-      return
-    }
-    setLoading(true)
-    setError('')
-    const res = await fetch('/api/verify-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mobile: form.mobile, code: form.otp })
-    })
-    const data = await res.json()
-    if (!res.ok) {
-      setError(data.error || 'Mali ang code. Subukan ulit.')
-      setLoading(false)
-      return
-    }
-    await createAccount()
+    setSuccess(true)
   }
 
   const s: any = {
@@ -279,15 +217,33 @@ export default function KasambahaySignup() {
     note: { background:'#fffbeb', border:'1px solid #fde68a', borderRadius:'10px', padding:'11px 13px', marginBottom:'16px', fontSize:'14px', color:'#92400e', lineHeight:1.6 }
   }
 
+  if (success) return (
+    <div style={{ minHeight:'100vh', background:'#faf8f5', padding:'40px 20px', fontFamily:'sans-serif', display:'flex', flexDirection:'column' as const, alignItems:'center', justifyContent:'center', textAlign:'center' as const }}>
+      <div style={{ fontSize:'52px', marginBottom:'20px' }}>🎉</div>
+      <h1 style={{ fontFamily:'serif', fontSize:'28px', fontWeight:900, color:'#1a6b3c', marginBottom:'10px', lineHeight:1.2 }}>
+        Na-sign up ka na!
+      </h1>
+      <p style={{ fontSize:'16px', color:'#6b7280', lineHeight:1.6, marginBottom:'28px', maxWidth:'300px' }}>
+        Maaari ka nang makatanggap ng mga job offer.
+      </p>
+      <button
+        style={{ padding:'14px 28px', borderRadius:'13px', border:'none', background:'#1a6b3c', color:'#fff', fontFamily:'sans-serif', fontSize:'16px', fontWeight:700, cursor:'pointer' }}
+        onClick={() => router.push('/dashboard/kasambahay')}
+      >
+        Pumunta sa Dashboard →
+      </button>
+    </div>
+  )
+
   return (
     <div style={s.wrap}>
       <div style={s.toprow}>
         <button style={s.back} onClick={() => step > 1 ? setStep(step - 1) : router.push('/')}>← Back</button>
-        <span style={s.stepnum}>Hakbang {step} ng 3</span>
+        <span style={s.stepnum}>Hakbang {step} ng 2</span>
       </div>
 
       <div style={s.bar}>
-        {[1,2,3].map(i => <div key={i} style={s.seg(i <= step)} />)}
+        {[1,2].map(i => <div key={i} style={s.seg(i <= step)} />)}
       </div>
 
       {error && <div style={s.err}>⚠️ {error}</div>}
@@ -607,61 +563,12 @@ export default function KasambahaySignup() {
             inputMode="url"
           />
 
-          <div style={s.note}>
-            📱 Magpapadala kami ng 6-digit verification code sa <strong>{form.mobile}</strong> sa susunod na hakbang.
-          </div>
-
           <button
             style={{ ...s.btn, opacity: loading ? .6 : 1 }}
-            onClick={sendOtpAndProceed}
+            onClick={handleStep2}
             disabled={loading}
           >
-            {loading ? 'Sending code...' : 'Susunod — I-verify ang Number →'}
-          </button>
-        </>
-      )}
-
-      {/* ── STEP 3: OTP Verification ── */}
-      {step === 3 && (
-        <>
-          <div style={s.title}>I-verify ang iyong number</div>
-
-          {/* Bypass — top, most prominent */}
-          <div style={{ background:'#fffbeb', border:'2px solid #f59e0b', borderRadius:'12px', padding:'16px', marginBottom:'20px' }}>
-            <p style={{ fontSize:'15px', color:'#92400e', marginBottom:'14px', lineHeight:1.6 }}>
-              ⏳ Ang SMS verification ay hindi pa available.<br />
-              I-click ang button sa ibaba para magpatuloy.
-            </p>
-            <button
-              style={{ width:'100%', padding:'16px', borderRadius:'10px', background:'#c9943a', border:'none', color:'#fff', fontSize:'17px', fontWeight:700, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? .7 : 1 }}
-              onClick={createAccount}
-              disabled={loading}
-            >
-              {loading ? 'Ginagawa...' : 'Magpatuloy (SMS coming soon) →'}
-            </button>
-          </div>
-
-          {/* Divider */}
-          <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'20px' }}>
-            <div style={{ flex:1, height:'1px', background:'#e5e7eb' }} />
-            <span style={{ fontSize:'13px', color:'#9ca3af' }}>— o kaya —</span>
-            <div style={{ flex:1, height:'1px', background:'#e5e7eb' }} />
-          </div>
-
-          {/* Grayed OTP section */}
-          <label style={{ ...s.lbl, opacity:.4 }}>Verification Code</label>
-          <input
-            style={{ ...s.input, fontSize:'1.3rem', fontWeight:700, textAlign:'center' as const, letterSpacing:'8px', opacity:.4 }}
-            placeholder="000000"
-            value={form.otp}
-            onChange={e => update('otp', e.target.value.replace(/\D/g,'').slice(0,6))}
-            maxLength={6}
-            inputMode="numeric"
-            disabled
-          />
-
-          <button style={{ ...s.btn, opacity:.4 }} onClick={verifyAndCreate} disabled>
-            I-verify at Gumawa ng Account →
+            {loading ? 'Ginagawa ang account...' : 'Gumawa ng Account →'}
           </button>
         </>
       )}
