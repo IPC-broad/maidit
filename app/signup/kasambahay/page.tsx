@@ -115,8 +115,8 @@ export default function KasambahaySignup() {
       setError('Ilagay ang tamang mobile number (11 digits)')
       return
     }
-    if (form.password.length < 5) {
-      setError('Ang password ay dapat ay hindi bababa sa 5 characters')
+    if (form.password.length < 8) {
+      setError('Ang password ay dapat ay hindi bababa sa 8 characters')
       return
     }
     setLoading(true)
@@ -365,7 +365,7 @@ export default function KasambahaySignup() {
             <input
               style={{ ...s.input, paddingLeft:'38px' }}
               type="password"
-              placeholder="Minimum 5 characters"
+              placeholder="Minimum 8 characters"
               value={form.password}
               onChange={e => update('password', e.target.value)}
             />

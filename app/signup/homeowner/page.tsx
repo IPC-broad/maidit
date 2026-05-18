@@ -142,6 +142,7 @@ export default function HomeownerSignup() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [showPass, setShowPass] = useState(false)
   const [form, setForm] = useState({
     full_name: '', mobile: '', email: '',
     password: '', province: '', city: '',
@@ -161,6 +162,15 @@ export default function HomeownerSignup() {
   const citiesForProvince: string[] = form.province
     ? ((provinces as Record<string, string[]>)[form.province] || [])
     : []
+
+  const pwStrength = (pw: string) => {
+    if (!pw || pw.length < 8) return null
+    const score = [/[a-z]/.test(pw), /[A-Z]/.test(pw), /\d/.test(pw), /[^a-zA-Z0-9]/.test(pw)].filter(Boolean).length
+    if (score <= 2) return { label: 'Weak', color: '#ef4444', bar: '#ef4444', width: '33%' }
+    if (score === 3) return { label: 'Good', color: '#f59e0b', bar: '#f59e0b', width: '66%' }
+    return { label: 'Strong', color: '#22c55e', bar: '#22c55e', width: '100%' }
+  }
+  const strength = pwStrength(form.password)
 
   const handleSignup = async () => {
     if (form.password.length < 8) { setError('Password must be at least 8 characters'); return }
@@ -330,12 +340,47 @@ export default function HomeownerSignup() {
             </div>
             <div style={{ fontSize: 11.5, color: C.ink3, marginTop: 7, paddingLeft: 2 }}>We'll text you a verification code.</div>
           </div>
+
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: C.ink, marginBottom: 7, letterSpacing: '-0.005em' }}>Create a password</div>
+            <div style={{ position: 'relative' }}>
+              <input
+                style={{ ...inputBase, paddingRight: 60 }}
+                type={showPass ? 'text' : 'password'}
+                placeholder="Minimum 8 characters"
+                value={form.password}
+                onChange={e => update('password', e.target.value)}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPass(v => !v)}
+                style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: C.ink3, padding: 0, fontFamily: sans }}
+              >
+                {showPass ? 'Hide' : 'Show'}
+              </button>
+            </div>
+            {form.password.length > 0 && (
+              <div style={{ marginTop: 8 }}>
+                <div style={{ height: 3, borderRadius: 2, background: C.line, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: strength?.width ?? '0%', background: strength?.bar ?? C.line, borderRadius: 2, transition: 'width .2s, background .2s' }} />
+                </div>
+                {strength && (
+                  <div style={{ fontSize: 11, color: strength.color, fontWeight: 600, marginTop: 4 }}>{strength.label}</div>
+                )}
+                {!strength && form.password.length > 0 && (
+                  <div style={{ fontSize: 11, color: C.ink3, marginTop: 4 }}>At least 8 characters needed</div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         <div style={{ padding: '28px 22px 14px' }}>
           <button
             onClick={() => {
               if (!form.full_name || !form.email) { setError('Please fill in all fields'); return }
+              if (form.password.length < 8) { setError('Password must be at least 8 characters'); return }
               setError(''); setStep(2)
             }}
             style={primaryBtn()}
@@ -474,15 +519,7 @@ export default function HomeownerSignup() {
         </div>
 
         <div style={{ padding: '18px 22px 0' }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: C.ink, marginBottom: 7, letterSpacing: '-0.005em' }}>Password</div>
-          <input
-            type="password"
-            style={inputBase}
-            placeholder="Min. 8 characters"
-            value={form.password}
-            onChange={e => update('password', e.target.value)}
-          />
-          <div style={{ fontSize: 11.5, color: C.ink3, marginTop: 7, paddingLeft: 2 }}>
+          <div style={{ fontSize: 11.5, color: C.ink3, paddingLeft: 2 }}>
             ✅ Browse all profiles free &nbsp;·&nbsp; ✅ Send offers with ₱499/month subscription
           </div>
         </div>
