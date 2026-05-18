@@ -188,7 +188,7 @@ export default function BrowsePage() {
       .select(`
         id, profile_id, asking_salary, setup, skills, experience,
         province, available_from, selfie_url, status, availability,
-        has_govt_id, has_nbi, age, facebook_url, civil_status, num_children,
+        has_govt_id, has_nbi, age, facebook_url, civil_status, num_children, referred_by,
         profile:profile_id (
           full_name, selfie_url, city
         )
@@ -419,6 +419,22 @@ export default function BrowsePage() {
                     </>
                   )}
                 </div>
+                {kb.referred_by && (
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center',
+                    marginTop: 5,
+                    padding: '2px 9px',
+                    background: C.amberSoft,
+                    border: `1px solid ${C.amberLine}`,
+                    borderRadius: 999,
+                    fontSize: 10.5,
+                    fontWeight: 600,
+                    color: C.amberDeep,
+                    letterSpacing: '0.01em',
+                  }}>
+                    🤝 Via Community Partner
+                  </div>
+                )}
               </div>
               <button
                 onClick={() => setSaved(prev => ({ ...prev, [kb.id]: !prev[kb.id] }))}

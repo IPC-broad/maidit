@@ -30,21 +30,59 @@ export default function Home() {
       fontFamily: sans,
       paddingBottom: 24,
     }}>
+      {/* Nav */}
+      <nav style={{
+        background: C.paper,
+        borderBottom: `1px solid ${C.line}`,
+        padding: '12px 18px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        position: 'sticky' as const,
+        top: 0,
+        zIndex: 100,
+      }}>
+        <div style={{ fontFamily: serif, fontSize: 26, color: C.forestDeep, lineHeight: 1 }}>
+          Maid<span style={{ color: C.amber }}>It</span>
+        </div>
+        <button
+          onClick={() => router.push('/login')}
+          style={{
+            padding: '8px 18px',
+            borderRadius: 50,
+            background: C.forest,
+            border: 'none',
+            color: '#fff',
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontFamily: sans,
+          }}
+        >
+          Log in
+        </button>
+      </nav>
+
       {/* Hero */}
       <section style={{
         background: 'linear-gradient(175deg, #1c3b07 0%, #27500A 60%, #2d5c0c 100%)',
-        padding: '52px 22px 40px',
+        padding: '36px 22px 32px',
         textAlign: 'center',
       }}>
-        {/* Logo */}
+        {/* Amber eyebrow badge */}
         <div style={{
-          fontFamily: serif,
-          fontSize: 48,
-          color: '#ffffff',
-          marginBottom: 16,
-          lineHeight: 1,
+          display: 'inline-block',
+          background: C.amber,
+          borderRadius: 50,
+          padding: '4px 14px',
+          fontSize: 11,
+          fontWeight: 700,
+          color: '#fff',
+          letterSpacing: '0.04em',
+          textTransform: 'uppercase' as const,
+          marginBottom: 14,
         }}>
-          Maid<span style={{ color: C.amber }}>It</span>
+          Trusted · Verified · Safe
         </div>
 
         {/* Tagline */}
@@ -54,7 +92,7 @@ export default function Home() {
           fontStyle: 'italic',
           color: '#ffffff',
           lineHeight: 1.2,
-          marginBottom: 12,
+          marginBottom: 10,
         }}>
           Find <span style={{ color: C.amber }}>trusted</span> help for your family.
         </div>
@@ -63,33 +101,35 @@ export default function Home() {
         <div style={{
           fontSize: 14,
           color: 'rgba(255,255,255,0.7)',
-          marginBottom: 24,
         }}>
           Verified kasambahay. Real families. Safe hiring.
         </div>
-
-        {/* Stats pills */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 8,
-          flexWrap: 'wrap',
-        }}>
-          {['✓ Trusted Profiles', '✓ Direct Communication', '✓ Safe Payment'].map((label) => (
-            <span key={label} style={{
-              background: 'rgba(255,255,255,0.12)',
-              borderRadius: 50,
-              padding: '6px 14px',
-              fontSize: 12,
-              color: '#ffffff',
-            }}>
-              {label}
-            </span>
-          ))}
-        </div>
       </section>
+
+      {/* Trust strip */}
+      <div style={{
+        background: C.paper,
+        borderBottom: `1px solid ${C.line}`,
+        padding: '12px 18px',
+        display: 'flex',
+        justifyContent: 'center',
+        gap: 8,
+        flexWrap: 'wrap' as const,
+      }}>
+        {['✓ Trusted Profiles', '✓ Direct Communication', '✓ Safe Payment'].map((label) => (
+          <span key={label} style={{
+            background: C.forestSoft,
+            border: `1px solid ${C.forestLine}`,
+            borderRadius: 50,
+            padding: '5px 13px',
+            fontSize: 11.5,
+            fontWeight: 600,
+            color: C.forest,
+          }}>
+            {label}
+          </span>
+        ))}
+      </div>
 
       {/* Role cards */}
       <div style={{

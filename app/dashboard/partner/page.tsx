@@ -59,6 +59,10 @@ export default function PartnerDashboard() {
     num_children: '0', availability: '', availability_custom: '',
     photo: null as string | null, has_nbi: false, govt_id_types: [] as string[],
   })
+  const [workerConfirmed, setWorkerConfirmed] = useState(false)
+  const [workerAge, setWorkerAge] = useState('')
+  const [workerHowReferred, setWorkerHowReferred] = useState('')
+  const [workerSalary, setWorkerSalary] = useState('')
 
   useEffect(() => {
     const link = document.createElement('link')
@@ -138,17 +142,23 @@ export default function PartnerDashboard() {
   const handleAddWorker = async () => {
     const { apelyido, pangalan, mobile, province } = workerForm
     if (!apelyido || !pangalan || !mobile || !province) {
-      setSaveMsg('Pakisulat ang apelyido, pangalan, mobile, at probinsya.'); return
+      setSaveMsg('Pakisulat ang lahat ng required fields.'); return
     }
     if (mobile.length !== 11 || !mobile.startsWith('09')) {
       setSaveMsg('Pakisulat ang tamang 11-digit mobile number.'); return
     }
+    if (workerForm.skills.length === 0) {
+      setSaveMsg('Pumili ng kahit isang kasanayan.'); return
+    }
+    if (!workerSalary) { setSaveMsg('Ilagay ang hinahangad na sahod.'); return }
+    if (!workerHowReferred) { setSaveMsg('Piliin kung paano kayo nagkakilala.'); return }
+    if (!workerConfirmed) { setSaveMsg('Kailangan mong i-confirm ang checkbox sa ibaba.'); return }
     setSaving(true)
     setSaveMsg('')
     const { supabase } = await import('../../../lib/supabase')
     const { data: existing } = await supabase.from('profiles').select('id').eq('mobile', mobile).single()
     if (existing) {
-      setSaveMsg('ERROR: Ang mobile number na ito ay rehistrado na. Gamitin ang ibang numero.')
+      setSaveMsg('ERROR: Ang mobile number na ito ay rehistrado na.')
       setSaving(false); return
     }
     const full_name = `${pangalan} ${apelyido}`
@@ -159,31 +169,41 @@ export default function PartnerDashboard() {
       setSaveMsg('Hindi ma-save. Subukan ulit.')
       setSaving(false); return
     }
-    const token = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)
-    await supabase.from('kasambahay').insert({
+    const kasambahayRow: any = {
       profile_id: profile.id, province, skills: workerForm.skills,
-      referred_by: partner.id, status: 'pending_confirmation',
+      referred_by: partner.id, status: 'available',
       setup: workerForm.setup, civil_status: workerForm.civil_status,
       num_children: parseInt(workerForm.num_children) || 0,
-      availability: workerForm.availability === 'Iba pa (custom)' && workerForm.availability_custom
-        ? `${workerForm.availability_custom} araw` : workerForm.availability,
-      confirm_token: token, has_nbi: workerForm.has_nbi, govt_id_types: workerForm.govt_id_types,
-    })
-    const { data: newKb } = await supabase.from('kasambahay').select('id').eq('profile_id', profile.id).single()
-    if (newKb?.id) {
-      fetch('/api/notify-worker', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          kasambahayId: newKb.id,
-          token,
-          name: full_name,
-          mobile: workerForm.mobile,
-          partnerName: partner?.profiles?.full_name?.split(' ')[0] || 'MaidIt Partner'
-        }) }).catch(() => {})
+      availability: workerForm.availability,
+      has_nbi: workerForm.has_nbi, govt_id_types: workerForm.govt_id_types,
     }
+    if (workerAge) kasambahayRow.age = parseInt(workerAge)
+    if (workerSalary) kasambahayRow.asking_salary = parseInt(workerSalary)
+    if (workerHowReferred) kasambahayRow.how_referred = workerHowReferred
+    await supabase.from('kasambahay').insert(kasambahayRow)
+
+    // Upload photo if present
+    if (workerForm.photo && profile.id) {
+      try {
+        const blob = await fetch(workerForm.photo).then(r => r.blob())
+        const { data: uploadData } = await supabase.storage
+          .from('kasambahay-photos')
+          .upload(`${profile.id}/photo.png`, blob, { upsert: true, contentType: 'image/png' })
+        if (uploadData) {
+          const { data: { publicUrl } } = supabase.storage.from('kasambahay-photos').getPublicUrl(`${profile.id}/photo.png`)
+          await supabase.from('kasambahay').update({ partner_photo_url: publicUrl }).eq('profile_id', profile.id)
+        }
+      } catch {}
+    }
+
     setSavedName(pangalan)
     setShowSuccess(true)
     setSaving(false)
-    setWorkerForm({ apelyido: '', pangalan: '', mobile: '', province: '', skills: [], setup: 'Kahit alin', civil_status: '', num_children: '0', availability: '', availability_custom: '', photo: null, has_nbi: false, govt_id_types: [] })
+    setWorkerForm({ apelyido: '', pangalan: '', mobile: '', province: '', skills: [], setup: 'Stay-in', civil_status: '', num_children: '0', availability: '', availability_custom: '', photo: null, has_nbi: false, govt_id_types: [] })
+    setWorkerAge('')
+    setWorkerSalary('')
+    setWorkerHowReferred('')
+    setWorkerConfirmed(false)
   }
 
   const totalEarned = payouts.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0)
@@ -474,35 +494,41 @@ export default function PartnerDashboard() {
         {/* ADD WORKER TAB */}
         {tab === 'add' && (
           <>
-            <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '14px', lineHeight: 1.6 }}>
-              I-upload ang kasambahay sa iyong pool.
+            <div style={{ fontFamily: sans, fontSize: '14px', color: C.ink3, marginBottom: '16px', lineHeight: 1.6 }}>
+              I-refer ang isang kasambahay sa iyong komunidad. Lahat ng fields ay kinakailangan.
             </div>
 
             {saveMsg && (
-              <div style={{ background: saveMsg.includes('ERROR') ? '#fef2f2' : '#f0fdf4', border: `1px solid ${saveMsg.includes('ERROR') ? '#fecaca' : '#bbf7d0'}`, borderRadius: '9px', padding: '12px 14px', fontSize: '14px', fontWeight: 600, color: saveMsg.includes('ERROR') ? '#dc2626' : '#166534', marginBottom: '12px', lineHeight: 1.5 }}>
+              <div style={{ background: saveMsg.includes('ERROR') ? '#fef2f2' : '#f0fdf4', border: `1px solid ${saveMsg.includes('ERROR') ? '#fecaca' : '#bbf7d0'}`, borderRadius: '9px', padding: '12px 14px', fontSize: '14px', fontWeight: 600, color: saveMsg.includes('ERROR') ? '#dc2626' : '#166534', marginBottom: '12px', lineHeight: 1.5, fontFamily: sans }}>
                 {saveMsg}
               </div>
             )}
 
-            <div style={{ background: '#fff', borderRadius: '13px', padding: '14px', border: '1px solid #ede8e0', marginBottom: '12px' }}>
-              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#c9943a', marginBottom: '13px' }}>Detalye ng Worker</div>
+            {/* Worker Details card */}
+            <div style={{ background: C.paper, borderRadius: '13px', padding: '16px', border: `1px solid ${C.line}`, marginBottom: '12px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.amber, marginBottom: '14px', fontFamily: sans }}>Detalye ng Kasambahay</div>
 
+              {/* Pangalan + Apelyido side by side */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={s.lbl}>Apelyido *</label>
-                  <input style={s.inp} placeholder="Santos" value={workerForm.apelyido}
-                    onChange={e => setWorkerForm(f => ({ ...f, apelyido: e.target.value.replace(/\b\w/g, (c: string) => c.toUpperCase()) }))} />
-                </div>
                 <div>
                   <label style={s.lbl}>Pangalan *</label>
                   <input style={s.inp} placeholder="Maria" value={workerForm.pangalan}
                     onChange={e => setWorkerForm(f => ({ ...f, pangalan: e.target.value.replace(/\b\w/g, (c: string) => c.toUpperCase()) }))} />
                 </div>
+                <div>
+                  <label style={s.lbl}>Apelyido *</label>
+                  <input style={s.inp} placeholder="Santos" value={workerForm.apelyido}
+                    onChange={e => setWorkerForm(f => ({ ...f, apelyido: e.target.value.replace(/\b\w/g, (c: string) => c.toUpperCase()) }))} />
+                </div>
               </div>
 
-              <label style={s.lbl}>Mobile Number *</label>
+              <label style={s.lbl}>Cellphone *</label>
               <input style={s.inp} type="tel" placeholder="09XXXXXXXXX" maxLength={11} value={workerForm.mobile}
                 onChange={e => setWorkerForm(f => ({ ...f, mobile: e.target.value.replace(/\D/g, '').slice(0, 11) }))} />
+
+              <label style={s.lbl}>Edad *</label>
+              <input style={s.inp} type="number" placeholder="25" min={18} max={65} value={workerAge}
+                onChange={e => setWorkerAge(e.target.value)} inputMode="numeric" />
 
               <label style={s.lbl}>Probinsya *</label>
               <select style={s.sel} value={workerForm.province} onChange={e => setWorkerForm(f => ({ ...f, province: e.target.value }))}>
@@ -510,38 +536,7 @@ export default function PartnerDashboard() {
                 {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={s.lbl}>Civil Status</label>
-                  <select style={s.sel} value={workerForm.civil_status} onChange={e => setWorkerForm(f => ({ ...f, civil_status: e.target.value }))}>
-                    <option value="">Piliin...</option>
-                    {CIVIL_STATUS.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={s.lbl}>Bilang ng Anak</label>
-                  <select style={s.sel} value={workerForm.num_children} onChange={e => setWorkerForm(f => ({ ...f, num_children: e.target.value }))}>
-                    {Array.from({ length: 21 }, (_, i) => <option key={i} value={i}>{i === 0 ? 'Wala' : i}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              <label style={s.lbl}>Setup</label>
-              <select style={s.sel} value={workerForm.setup} onChange={e => setWorkerForm(f => ({ ...f, setup: e.target.value }))}>
-                {SETUPS.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-
-              <label style={s.lbl}>Available Magtrabaho</label>
-              <select style={s.sel} value={workerForm.availability} onChange={e => setWorkerForm(f => ({ ...f, availability: e.target.value, availability_custom: '' }))}>
-                <option value="">Piliin...</option>
-                {AVAILABILITY.map(a => <option key={a} value={a}>{a}</option>)}
-              </select>
-              {workerForm.availability === 'Iba pa (custom)' && (
-                <input style={s.inp} type="number" placeholder="Ilang araw? e.g. 45" value={workerForm.availability_custom}
-                  onChange={e => setWorkerForm(f => ({ ...f, availability_custom: e.target.value }))} />
-              )}
-
-              <label style={s.lbl}>Skills (piliin lahat ng applicable)</label>
+              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Kasanayan * (pumili ng isa man)</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '12px' }}>
                 {SKILLS.map(skill => (
                   <div key={skill.en} style={s.skillChip(workerForm.skills.includes(skill.en))} onClick={() => toggleSkill(skill.en)}>
@@ -550,46 +545,75 @@ export default function PartnerDashboard() {
                 ))}
               </div>
 
-              <label style={s.lbl}>Litrato ng Worker</label>
+              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Setup *</div>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                {[['Stay-in', 'Stay-in'], ['Stay-out', 'Stay-out'], ['Pareho okay', 'Kahit alin']].map(([label, value]) => (
+                  <div
+                    key={value}
+                    onClick={() => setWorkerForm(f => ({ ...f, setup: value }))}
+                    style={{ flex: 1, padding: '9px 6px', borderRadius: '10px', border: `1.5px solid ${workerForm.setup === value ? C.forest : C.line}`, background: workerForm.setup === value ? C.forest : C.paper, color: workerForm.setup === value ? '#fff' : C.ink3, fontSize: '12px', fontWeight: 700, cursor: 'pointer', textAlign: 'center' as const, fontFamily: sans }}
+                  >
+                    {label}
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Kelan pwede magsimula *</div>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' as const }}>
+                {[['Pwede na agad', 'Immediate'], ['1 linggo', 'Within 1 week'], ['1 buwan', 'Within 1 month']].map(([label, value]) => (
+                  <div
+                    key={value}
+                    onClick={() => setWorkerForm(f => ({ ...f, availability: value }))}
+                    style={{ padding: '9px 14px', borderRadius: '10px', border: `1.5px solid ${workerForm.availability === value ? C.forest : C.line}`, background: workerForm.availability === value ? C.forest : C.paper, color: workerForm.availability === value ? '#fff' : C.ink3, fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans }}
+                  >
+                    {label}
+                  </div>
+                ))}
+              </div>
+
+              <label style={s.lbl}>Hinahangad na Sahod (₱/buwan) *</label>
+              <div style={{ position: 'relative', marginBottom: '10px' }}>
+                <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontFamily: serif, fontSize: '16px', color: C.ink2, pointerEvents: 'none' }}>₱</span>
+                <input style={{ ...s.inp, paddingLeft: '26px', marginBottom: 0 }} type="number" placeholder="9000" value={workerSalary}
+                  onChange={e => setWorkerSalary(e.target.value)} />
+              </div>
+
+              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Paano kayo nagkakilala *</div>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' as const, marginBottom: '12px' }}>
+                {['Kababayan', 'Kaibigan', 'Kapamilya', 'Estudyante', 'Iba pa'].map(opt => (
+                  <div
+                    key={opt}
+                    onClick={() => setWorkerHowReferred(opt)}
+                    style={{ padding: '8px 13px', borderRadius: '10px', border: `1.5px solid ${workerHowReferred === opt ? C.amber : C.line}`, background: workerHowReferred === opt ? C.amberSoft : C.paper, color: workerHowReferred === opt ? '#92400e' : C.ink3, fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans }}
+                  >
+                    {opt}
+                  </div>
+                ))}
+              </div>
+
+              <label style={s.lbl}>Litrato ng Kasambahay *</label>
               {workerForm.photo && <img src={workerForm.photo} alt="worker" style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', borderRadius: '10px', marginBottom: '8px' }} />}
-              <div onClick={() => photoRef.current?.click()} style={{ background: '#fdf9f4', border: `2px dashed ${workerForm.photo ? '#1a6b3c' : '#e5e0d8'}`, borderRadius: '11px', padding: '20px', textAlign: 'center', cursor: 'pointer', marginBottom: '12px' }}>
+              <div onClick={() => photoRef.current?.click()} style={{ background: '#fdf9f4', border: `2px dashed ${workerForm.photo ? C.forest : C.line}`, borderRadius: '11px', padding: '20px', textAlign: 'center' as const, cursor: 'pointer', marginBottom: '4px' }}>
                 {workerForm.photo
-                  ? <><div style={{ fontSize: '18px', marginBottom: '4px' }}>✅</div><div style={{ fontSize: '13px', color: '#1a6b3c', fontWeight: 700 }}>Litrato na-upload!</div></>
-                  : <><div style={{ fontSize: '28px', marginBottom: '6px' }}>📷</div><div style={{ fontSize: '13px', fontWeight: 700 }}>I-tap para mag-upload ng litrato</div></>
+                  ? <><div style={{ fontSize: '18px', marginBottom: '4px' }}>✅</div><div style={{ fontSize: '13px', color: C.forest, fontWeight: 700, fontFamily: sans }}>Litrato na-upload!</div></>
+                  : <><div style={{ fontSize: '28px', marginBottom: '6px' }}>📷</div><div style={{ fontSize: '13px', fontWeight: 700, fontFamily: sans }}>I-upload ang litrato ng kasambahay</div></>
                 }
               </div>
               <input ref={photoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhoto} />
             </div>
 
-            <div style={{ background: '#fff', border: '1.5px solid #e5e0d8', borderRadius: '12px', padding: '14px', marginBottom: '12px' }}>
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#4b5563', marginBottom: '10px', textTransform: 'uppercase' as const, letterSpacing: '.5px' }}>Mga Dokumento (i-tick kung mayroon)</div>
-              <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '10px' }}>
-                {['Wala','PhilHealth ID','SSS ID','Postal ID','Passport','UMID','National ID'].map((label) => (
-                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => toggleGovtId(label)}>
-                    <div style={{ width: '20px', height: '20px', borderRadius: '5px', border: '2px solid', borderColor: workerForm.govt_id_types.includes(label) ? '#c9943a' : '#d1d5db', background: workerForm.govt_id_types.includes(label) ? '#c9943a' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      {workerForm.govt_id_types.includes(label) && <span style={{ color: '#fff', fontSize: '11px', fontWeight: 900 }}>✓</span>}
-                    </div>
-                    <span style={{ fontSize: '13px', color: '#374151' }}>{label}</span>
-                  </div>
-                ))}
-                <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => setWorkerForm(f => ({ ...f, has_nbi: !f.has_nbi }))}>
-                    <div style={{ width: '20px', height: '20px', borderRadius: '5px', border: '2px solid', borderColor: workerForm.has_nbi ? '#1a6b3c' : '#d1d5db', background: workerForm.has_nbi ? '#1a6b3c' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      {workerForm.has_nbi && <span style={{ color: '#fff', fontSize: '11px', fontWeight: 900 }}>✓</span>}
-                    </div>
-                    <span style={{ fontSize: '13px', color: '#374151' }}>NBI Clearance</span>
-                  </div>
-                </div>
+            {/* Confirmation */}
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', background: C.paper, border: `1.5px solid ${workerConfirmed ? C.forest : C.line}`, borderRadius: '12px', padding: '14px', marginBottom: '14px', cursor: 'pointer' }} onClick={() => setWorkerConfirmed(!workerConfirmed)}>
+              <div style={{ width: '22px', height: '22px', borderRadius: '6px', border: `2px solid ${workerConfirmed ? C.forest : '#d1d5db'}`, background: workerConfirmed ? C.forest : C.paper, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
+                {workerConfirmed && <span style={{ color: '#fff', fontSize: '13px', fontWeight: 900 }}>✓</span>}
+              </div>
+              <div style={{ fontSize: '13px', color: C.ink, lineHeight: 1.6, fontFamily: sans }}>
+                Pinatutunayan ko na ang kasambahay na ito ay isang tunay na tao at personal niyang ipinahahayag ang kanyang interes na maging bahagi ng MaidIt platform.
               </div>
             </div>
 
-            <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px', marginBottom: '14px', fontSize: '12px', color: '#2563eb', lineHeight: 1.65 }}>
-              📱 <strong>Makakatanggap ng text message ang iyong nirefer.</strong><br />
-              Kapag kinompirma nya, siya ay makakasama na sa mga pwede i-hire ng mga homeowner.
-            </div>
-
             <button style={{ ...s.submitBtn, opacity: saving ? .6 : 1 }} onClick={handleAddWorker} disabled={saving}>
-              {saving ? 'Nagse-save...' : 'I-submit ang Worker →'}
+              {saving ? 'Nagse-save...' : 'I-submit ang Kasambahay →'}
             </button>
           </>
         )}

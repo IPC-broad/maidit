@@ -36,8 +36,8 @@ export default function KasambahaySignup() {
   const hasGovtId = govtIdTypes.length > 0 && !govtIdTypes.includes('Wala')
 
   const [skills, setSkills] = useState<string[]>([])
-  const toggleSkill = (s: string) =>
-    setSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])
+  const toggleSkill = (sk: string) =>
+    setSkills(prev => prev.includes(sk) ? prev.filter(x => x !== sk) : [...prev, sk])
 
   // Province dropdown
   const [provinces, setProvinces] = useState<Province[]>([])
@@ -56,6 +56,9 @@ export default function KasambahaySignup() {
   const [walaPaDocs, setWalaPaDocs] = useState(false)
   const [idFile, setIdFile] = useState<string | null>(null)
   const [policeFile, setPoliceFile] = useState<string | null>(null)
+
+  // Show/hide password
+  const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
     const link = document.createElement('link')
@@ -145,6 +148,10 @@ export default function KasambahaySignup() {
     }
     if (form.password.length < 8) {
       setError('Ang password ay dapat ay hindi bababa sa 8 characters')
+      return
+    }
+    if (!form.age) {
+      setError('Ilagay ang iyong edad')
       return
     }
     setError('')
@@ -256,6 +263,19 @@ export default function KasambahaySignup() {
     setSuccess(true)
   }
 
+  // num_children stepper helpers
+  const numChildrenDisplay = (v: string) => v
+  const decrementChildren = () => {
+    const cur = form.num_children === '10+' ? 10 : parseInt(form.num_children)
+    if (cur <= 0) return
+    update('num_children', String(cur - 1))
+  }
+  const incrementChildren = () => {
+    const cur = form.num_children === '10+' ? 10 : parseInt(form.num_children)
+    if (cur >= 10) { update('num_children', '10+'); return }
+    update('num_children', String(cur + 1))
+  }
+
   const s: any = {
     wrap: { minHeight:'100vh', background:C.paper2, padding:'24px 20px', fontFamily:sans, color:C.ink },
     toprow: { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'16px' },
@@ -270,7 +290,21 @@ export default function KasambahaySignup() {
     input: { width:'100%', padding:'11px 13px', border:`1.5px solid ${C.line}`, borderRadius:'11px', fontFamily:sans, fontSize:'15px', outline:'none', marginBottom:'13px', background:C.paper, color:C.ink },
     btn: { width:'100%', padding:'13px', borderRadius:'12px', border:'none', background:C.forest, color:'#fff', fontFamily:sans, fontSize:'16px', fontWeight:700, cursor:'pointer' },
     err: { background:'#fef2f2', border:'1px solid #fecaca', borderRadius:'9px', padding:'10px 13px', fontSize:'14px', color:'#dc2626', marginBottom:'13px', fontFamily:sans },
-    note: { background:C.amberSoft, border:`1px solid ${C.amberLine}`, borderRadius:'10px', padding:'11px 13px', marginBottom:'16px', fontSize:'14px', color:'#92400e', lineHeight:1.6, fontFamily:sans }
+    note: { background:C.amberSoft, border:`1px solid ${C.amberLine}`, borderRadius:'10px', padding:'11px 13px', marginBottom:'16px', fontSize:'14px', color:'#92400e', lineHeight:1.6, fontFamily:sans },
+    pill: (selected: boolean, variant: 'forest' | 'amber' = 'forest') => ({
+      padding: '9px 16px',
+      borderRadius: '999px',
+      border: `1.5px solid ${selected ? (variant === 'amber' ? C.amber : C.forest) : C.line}`,
+      background: selected ? (variant === 'amber' ? C.amberSoft : C.forest) : C.paper,
+      color: selected ? (variant === 'amber' ? C.amber : '#fff') : C.ink2,
+      fontFamily: sans,
+      fontSize: '14px',
+      fontWeight: selected ? 700 : 400,
+      cursor: 'pointer',
+      whiteSpace: 'nowrap' as const,
+    }),
+    sectionBox: { background:C.paper, border:`1.5px solid #e5e0d8`, borderRadius:'12px', padding:'14px', marginBottom:'14px' },
+    sectionTitle: { fontSize:'11px', fontWeight:700, color:C.ink3, textTransform:'uppercase' as const, letterSpacing:'.07em', marginBottom:'12px', fontFamily:sans },
   }
 
   if (success) return (
@@ -308,8 +342,8 @@ export default function KasambahaySignup() {
       {step === 1 && (
         <>
           {/* Forest green header */}
-          <div style={{ background:`linear-gradient(160deg, ${C.forestDark} 0%, ${C.forestDeep} 100%)`, borderRadius:'16px', padding:'22px 18px', marginBottom:'20px' }}>
-            <h1 style={{ fontFamily:serif, fontSize:'26px', fontWeight:400, color:'#fff', marginBottom:'6px', lineHeight:1.2 }}>
+          <div style={{ background:`linear-gradient(160deg, ${C.forestDark} 0%, ${C.forestDeep} 100%)`, borderRadius:'16px', padding:'22px 18px', marginBottom:'24px' }}>
+            <h1 style={{ fontFamily:serif, fontSize:'28px', fontWeight:400, color:'#fff', marginBottom:'6px', lineHeight:1.2 }}>
               Mag-sign up bilang Kasambahay
             </h1>
             <p style={{ fontSize:'14px', color:'rgba(255,255,255,.78)', lineHeight:1.5, margin:0, fontFamily:sans }}>
@@ -322,7 +356,14 @@ export default function KasambahaySignup() {
             )}
           </div>
 
-          {/* Pangalan + Apelyido — side by side */}
+          <h2 style={{ fontFamily:serif, fontSize:'26px', fontWeight:400, color:C.forest, marginBottom:'6px', lineHeight:1.2 }}>
+            Simulan natin.
+          </h2>
+          <p style={{ fontFamily:sans, fontSize:'14px', color:C.ink2, marginBottom:'20px', lineHeight:1.5 }}>
+            Punan ang iyong mga detalye para makapagsimula.
+          </p>
+
+          {/* 1. Pangalan + Apelyido — side by side */}
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', marginBottom:'0' }}>
             <div>
               <label style={s.lbl}>Pangalan</label>
@@ -334,8 +375,8 @@ export default function KasambahaySignup() {
             </div>
           </div>
 
-          {/* Mobile Number */}
-          <label style={s.lbl}>Mobile Number</label>
+          {/* 2. Cellphone */}
+          <label style={s.lbl}>Cellphone</label>
           <div style={{ position:'relative' }}>
             <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', fontSize:'14px', lineHeight:1, pointerEvents:'none' }}>📱</span>
             <input
@@ -348,50 +389,323 @@ export default function KasambahaySignup() {
             />
           </div>
 
-          {/* Password */}
-          <label style={s.lbl}>Lumikha ng Password</label>
+          {/* 3. Password */}
+          <label style={s.lbl}>Password</label>
           <div style={{ position:'relative' }}>
             <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', fontSize:'14px', lineHeight:1, pointerEvents:'none' }}>🔒</span>
             <input
-              style={{ ...s.input, paddingLeft:'38px' }}
-              type="password"
+              style={{ ...s.input, paddingLeft:'38px', paddingRight:'44px' }}
+              type={showPassword ? 'text' : 'password'}
               placeholder="Minimum 8 characters"
               value={form.password}
               onChange={e => update('password', e.target.value)}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(p => !p)}
+              style={{ position:'absolute', right:'13px', top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:'14px', color:C.ink3, padding:0, lineHeight:1, marginBottom:'13px' }}
+            >
+              {showPassword ? '🙈' : '👁️'}
+            </button>
           </div>
 
-          {/* Selfie */}
-          <div style={{ marginBottom:'16px' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:'5px', marginBottom:'5px' }}>
-              <span style={{ fontSize:'15px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#1a6b3c' }}>SELFIE</span>
-              <span style={{ fontSize:'15px', fontWeight:700, color:'#1a6b3c' }}>(required)</span>
+          {/* 4. Edad + Probinsya — side by side 2-column */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', marginBottom:'13px' }}>
+            {/* Left: Edad */}
+            <div>
+              <label style={s.lbl}>Edad</label>
+              <input
+                style={{ ...s.input, marginBottom:0 }}
+                type="number"
+                placeholder="25"
+                min={18}
+                max={65}
+                value={form.age}
+                onChange={e => update('age', e.target.value)}
+                inputMode="numeric"
+              />
             </div>
-            <p style={{ fontSize:'14px', color:'#6b7280', lineHeight:1.55, marginBottom:'10px' }}>
-              Makakatulong ito para makita ka ng employers at mas mapili ka agad. Ipapakita lang ito sa verified employers. Hindi ipo-post publicly.
-            </p>
+            {/* Right: Probinsya */}
+            <div ref={provRef} style={{ position:'relative' }}>
+              <label style={s.lbl}>Probinsya</label>
+              <div
+                onClick={() => setProvOpen(!provOpen)}
+                style={{ width:'100%', padding:'11px 13px', border:`1.5px solid ${selProv ? C.amber : C.line}`, borderRadius:'11px', fontSize:'15px', background:C.paper, color: selProv ? C.ink : C.ink3, display:'flex', justifyContent:'space-between', alignItems:'center', cursor:'pointer', boxSizing:'border-box' as const, height:'45px' }}
+              >
+                <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' as const, fontSize:'14px' }}>
+                  {selProv ? selProv.name : 'Piliin...'}
+                </span>
+                <span style={{ fontSize:'11px', opacity:.5, flexShrink:0, marginLeft:'4px' }}>▾</span>
+              </div>
+              {provOpen && (
+                <div style={{ position:'absolute', top:'100%', left:0, right:0, background:C.paper, border:`1.5px solid ${C.line}`, borderRadius:'11px', zIndex:100, overflow:'hidden', marginTop:'4px' }}>
+                  <input
+                    autoFocus
+                    style={{ width:'100%', padding:'10px 12px', border:'none', borderBottom:`1px solid ${C.line}`, background:C.paper2, color:C.ink, fontSize:'14px', outline:'none', fontFamily:sans, boxSizing:'border-box' as const }}
+                    placeholder="Hanapin..."
+                    value={provSearch}
+                    onChange={e => setProvSearch(e.target.value)}
+                  />
+                  <div style={{ maxHeight:'190px', overflowY:'auto' as const }}>
+                    {filteredProvs.length === 0
+                      ? <div style={{ padding:'12px', fontSize:'14px', color:C.ink3 }}>Walang nahanap</div>
+                      : filteredProvs.map(p => (
+                        <div
+                          key={p.code}
+                          onClick={() => { setSelProv(p); setProvOpen(false); setProvSearch('') }}
+                          style={{ padding:'10px 13px', cursor:'pointer', fontSize:'14px', color: selProv?.code === p.code ? C.amber : C.ink, background: selProv?.code === p.code ? C.amberSoft : 'transparent', borderBottom:`1px solid ${C.line}` }}
+                        >
+                          {p.name}
+                        </div>
+                      ))
+                    }
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
-            {selfieData && (
-              <img src={selfieData} alt="selfie" style={{ width:'100%', maxHeight:'200px', objectFit:'cover', borderRadius:'11px', marginBottom:'10px' }} />
+          {/* 5. Setup — 3 pills */}
+          <label style={s.lbl}>Setup</label>
+          <div style={{ display:'flex', gap:'8px', marginBottom:'20px', flexWrap:'wrap' as const }}>
+            {[
+              { label: 'Stay-in', value: 'Stay-in' },
+              { label: 'Stay-out', value: 'Stay-out' },
+              { label: 'Pareho okay', value: 'Kahit alin' },
+            ].map(({ label, value }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => update('setup', value)}
+                style={s.pill(form.setup === value, 'forest')}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <button
+            style={{ ...s.btn, background:C.amber, opacity: loading ? .6 : 1 }}
+            onClick={checkMobile}
+            disabled={loading}
+          >
+            {loading ? 'Checking...' : 'Susunod →'}
+          </button>
+
+          <div style={{ textAlign:'center' as const, marginTop:'12px', fontSize:'14px', color:C.ink3, display:'flex', alignItems:'center', justifyContent:'center', gap:'5px' }}>
+            🔒 Hindi namin ibinibigay ang iyong number sa iba.
+          </div>
+        </>
+      )}
+
+      {/* ── STEP 2 ── */}
+      {step === 2 && (
+        <>
+          <h2 style={{ fontFamily:serif, fontSize:'26px', fontWeight:400, color:C.forest, marginBottom:'20px', lineHeight:1.2 }}>
+            Ano ang magagawa mo?
+          </h2>
+
+          {/* 1. Skills — 2-column grid */}
+          <div style={s.sectionBox}>
+            <div style={s.sectionTitle}>Kasanayan (Skills)</div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
+              {[
+                'Pagluluto','Paglalaba','Paglilinis','Pag-aalaga ng Bata',
+                'Pag-aalaga ng Matanda','Pag-aalaga ng Alagang Hayop','Pamimili','Pagmamaneho'
+              ].map(skill => (
+                <div
+                  key={skill}
+                  onClick={() => toggleSkill(skill)}
+                  style={{
+                    padding: '9px 11px',
+                    borderRadius: '10px',
+                    border: `1.5px solid ${skills.includes(skill) ? C.amber : C.line}`,
+                    background: skills.includes(skill) ? C.amberSoft : C.paper,
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    color: skills.includes(skill) ? C.amber : C.ink2,
+                    fontWeight: skills.includes(skill) ? 700 : 400,
+                    fontFamily: sans,
+                    textAlign: 'center' as const,
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {skill}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 2. Civil Status — pills */}
+          <div style={s.sectionBox}>
+            <div style={s.sectionTitle}>Civil Status</div>
+            <div style={{ display:'flex', flexWrap:'wrap' as const, gap:'8px' }}>
+              {['Single', 'Kasal', 'Hiwalay', 'Biyuda/Biyudo'].map(val => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => update('civil_status', val)}
+                  style={s.pill(form.civil_status === val, 'forest')}
+                >
+                  {val}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 3. Bilang ng Anak — stepper */}
+          <div style={s.sectionBox}>
+            <div style={s.sectionTitle}>Bilang ng Anak</div>
+            <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
+              <button
+                type="button"
+                onClick={decrementChildren}
+                style={{ width:'40px', height:'40px', borderRadius:'50%', border:`2px solid ${C.amber}`, background:C.paper, color:C.amber, fontSize:'20px', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
+              >
+                −
+              </button>
+              <span style={{ fontFamily:serif, fontSize:'24px', color:C.ink, minWidth:'40px', textAlign:'center' as const }}>
+                {numChildrenDisplay(form.num_children)}
+              </span>
+              <button
+                type="button"
+                onClick={incrementChildren}
+                style={{ width:'40px', height:'40px', borderRadius:'50%', border:`2px solid ${C.amber}`, background:C.amber, color:'#fff', fontSize:'20px', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          {/* 4. Kelan pwede magsimula — pills */}
+          <div style={s.sectionBox}>
+            <div style={s.sectionTitle}>Kelan pwede magsimula</div>
+            <div style={{ display:'flex', flexWrap:'wrap' as const, gap:'8px' }}>
+              {[
+                { label: 'Pwede na agad', value: 'Immediate' },
+                { label: '1 linggo', value: 'Within 1 week' },
+                { label: '1 buwan', value: 'Within 1 month' },
+                { label: 'Flexible', value: 'Flexible' },
+              ].map(({ label, value }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => update('availability', value)}
+                  style={s.pill(form.availability === value, 'forest')}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 5. Hinihingi na Sahod */}
+          <label style={s.lbl}>Hinihingi na Sahod (₱/buwan)</label>
+          <div style={{ position:'relative' }}>
+            <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', color:C.ink2, fontFamily:serif, fontWeight:700, fontSize:'16px' }}>₱</span>
+            <input
+              style={{ ...s.input, paddingLeft:'28px' }}
+              type="number"
+              placeholder="9000"
+              value={form.salary}
+              onChange={e => update('salary', e.target.value)}
+            />
+          </div>
+
+          {/* 6. Documents section */}
+          <div style={s.sectionBox}>
+            <div style={s.sectionTitle}>Mga Dokumento</div>
+
+            {/* Wala pa */}
+            <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer', marginBottom:'14px' }} onClick={() => { setWalaPaDocs(!walaPaDocs); setIdFile(null); setPoliceFile(null) }}>
+              <div style={{ width:'22px', height:'22px', borderRadius:'5px', border:'2px solid', borderColor: walaPaDocs ? C.amber : '#d1d5db', background: walaPaDocs ? C.amber : C.paper, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                {walaPaDocs && <span style={{ color:'#fff', fontSize:'13px', fontWeight:900 }}>✓</span>}
+              </div>
+              <span style={{ fontSize:'15px', color:C.ink, fontFamily:sans, fontWeight: walaPaDocs ? 700 : 400 }}>Wala pa akong dokumento</span>
+            </div>
+
+            {!walaPaDocs && (
+              <div style={{ display:'flex', flexDirection:'column' as const, gap:'10px' }}>
+                {/* Government ID upload */}
+                <div>
+                  <div style={{ fontSize:'13px', fontWeight:600, color:C.ink, marginBottom:'7px', fontFamily:sans }}>Government ID</div>
+                  <div
+                    onClick={() => idRef.current?.click()}
+                    style={{ border:`2px dashed ${idFile ? C.forest : '#d1d5db'}`, borderRadius:'10px', padding:'12px 14px', cursor:'pointer', background: idFile ? '#f0fdf4' : '#fafafa', display:'flex', alignItems:'center', gap:'10px' }}
+                  >
+                    <span style={{ fontSize:'20px' }}>{idFile ? '✅' : '📎'}</span>
+                    <span style={{ fontSize:'14px', color: idFile ? C.forest : C.ink2, fontWeight: idFile ? 700 : 400, fontFamily:sans }}>
+                      {idFile ? 'Na-upload ang ID' : 'I-upload ang Government ID'}
+                    </span>
+                  </div>
+                  <input ref={idRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handleIdFile} />
+                </div>
+
+                {/* Police Clearance upload */}
+                <div>
+                  <div style={{ fontSize:'13px', fontWeight:600, color:C.ink, marginBottom:'7px', fontFamily:sans }}>Police Clearance</div>
+                  <div
+                    onClick={() => policeRef.current?.click()}
+                    style={{ border:`2px dashed ${policeFile ? C.forest : '#d1d5db'}`, borderRadius:'10px', padding:'12px 14px', cursor:'pointer', background: policeFile ? '#f0fdf4' : '#fafafa', display:'flex', alignItems:'center', gap:'10px' }}
+                  >
+                    <span style={{ fontSize:'20px' }}>{policeFile ? '✅' : '📎'}</span>
+                    <span style={{ fontSize:'14px', color: policeFile ? C.forest : C.ink2, fontWeight: policeFile ? 700 : 400, fontFamily:sans }}>
+                      {policeFile ? 'Na-upload ang Police Clearance' : 'I-upload ang Police Clearance'}
+                    </span>
+                  </div>
+                  <input ref={policeRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handlePoliceFile} />
+                </div>
+
+                {/* NBI checkbox */}
+                <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => setHasNbi(!hasNbi)}>
+                  <div style={{ width:'22px', height:'22px', borderRadius:'5px', border:'2px solid', borderColor: hasNbi ? C.forest : '#d1d5db', background: hasNbi ? C.forest : C.paper, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    {hasNbi && <span style={{ color:'#fff', fontSize:'13px', fontWeight:900 }}>✓</span>}
+                  </div>
+                  <span style={{ fontSize:'15px', color:C.ink, fontFamily:sans }}>Mayroon akong NBI Clearance</span>
+                </div>
+              </div>
             )}
 
-            <div
-              onClick={() => selfieRef.current?.click()}
-              style={{ background: selfieData ? '#f0fdf4' : '#fff', border:`2px dashed #1a6b3c`, borderRadius:'13px', padding:'20px 16px', textAlign:'center' as const, cursor:'pointer' }}
-            >
-              {selfieData ? (
-                <>
-                  <div style={{ fontSize:'20px', marginBottom:'5px' }}>✅</div>
-                  <div style={{ fontWeight:700, fontSize:'15px', color:'#1a6b3c' }}>Selfie saved!</div>
-                  <div style={{ fontSize:'14px', color:'#6b7280', marginTop:'3px' }}>I-tap para palitan</div>
-                </>
-              ) : (
-                <>
-                  <div style={{ fontSize:'28px', marginBottom:'7px' }}>📷</div>
-                  <div style={{ fontWeight:700, fontSize:'15px', color:'#1a6b3c', marginBottom:'3px' }}>I-tap para kumuha ng selfie</div>
-                  <div style={{ fontSize:'14px', color:'#9ca3af' }}>Malinaw na mukha · Walang filter · Good lighting</div>
-                </>
-              )}
+            {/* Amber tip */}
+            <div style={{ background:C.amberSoft, border:`1px solid ${C.amberLine}`, borderRadius:'10px', padding:'10px 13px', marginTop:'14px', fontSize:'13px', color:'#92400e', lineHeight:1.6, fontFamily:sans }}>
+              💡 Mas madaling ma-hire ang mga may dokumento. Mas maraming employer ang pipili sa iyo.
+            </div>
+          </div>
+
+          {/* 7. Selfie section */}
+          <div style={s.sectionBox}>
+            <div style={s.sectionTitle}>
+              Selfie <span style={{ color: '#dc2626', fontWeight:700 }}>(required)</span>
+            </div>
+            <p style={{ fontSize:'13px', color:C.ink3, lineHeight:1.5, marginBottom:'12px', fontFamily:sans }}>
+              Kinakailangan para ma-verify ang iyong identity.
+            </p>
+            <div style={{ display:'flex', flexDirection:'column' as const, alignItems:'center', gap:'12px' }}>
+              {/* Circular preview */}
+              <div style={{
+                width: '96px',
+                height: '96px',
+                borderRadius: '50%',
+                border: selfieData ? `3px solid ${C.forest}` : `2px dashed ${C.forest}`,
+                overflow: 'hidden',
+                background: selfieData ? 'transparent' : C.paper2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                {selfieData
+                  ? <img src={selfieData} alt="selfie" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                  : <span style={{ fontSize:'28px' }}>🤳</span>
+                }
+              </div>
+              <button
+                type="button"
+                onClick={() => selfieRef.current?.click()}
+                style={{ padding:'10px 20px', borderRadius:'999px', border:`1.5px solid ${C.forest}`, background:C.paper, color:C.forest, fontFamily:sans, fontSize:'14px', fontWeight:700, cursor:'pointer' }}
+              >
+                📷 Kumuha ng Selfie
+              </button>
             </div>
             <input
               ref={selfieRef}
@@ -404,232 +718,7 @@ export default function KasambahaySignup() {
           </div>
 
           <button
-            style={{ ...s.btn, opacity: loading ? .6 : 1 }}
-            onClick={checkMobile}
-            disabled={loading}
-          >
-            {loading ? 'Checking...' : 'Magpatuloy →'}
-          </button>
-
-          <div style={{ textAlign:'center' as const, marginTop:'12px', fontSize:'14px', color:'#9ca3af', display:'flex', alignItems:'center', justifyContent:'center', gap:'5px' }}>
-            🔒 Hindi namin ibinibigay ang iyong number sa iba.
-          </div>
-        </>
-      )}
-
-      {/* ── STEP 2: Profile Details ── */}
-      {step === 2 && (
-        <>
-          <div style={s.title}>Karagdagang Impormasyon</div>
-          <div style={s.sub}>Kumpleto ang iyong profile para makita ng mga homeowner</div>
-
-          <label style={s.lbl}>Probinsya *</label>
-          <div ref={provRef} style={{ position:'relative', marginBottom:'0' }}>
-            <div
-              onClick={() => setProvOpen(!provOpen)}
-              style={{ width:'100%', padding:'11px 13px', border:`1.5px solid ${selProv ? '#c9943a' : '#e5e7eb'}`, borderRadius:'11px', fontSize:'.88rem', background:'#fff', color: selProv ? '#111827' : '#9ca3af', marginBottom: provOpen ? '0' : '13px', display:'flex', justifyContent:'space-between', alignItems:'center', cursor:'pointer', boxSizing:'border-box' as const }}
-            >
-              <span>{selProv ? selProv.name : 'Piliin ang probinsya'}</span>
-              <span style={{ fontSize:'11px', opacity:.5 }}>▾</span>
-            </div>
-            {provOpen && (
-              <div style={{ background:'#fff', border:'1.5px solid #e5e7eb', borderRadius:'11px', marginBottom:'13px', overflow:'hidden', position:'relative', zIndex:50 }}>
-                <input
-                  autoFocus
-                  style={{ width:'100%', padding:'10px 12px', border:'none', borderBottom:'1px solid #f3f4f6', background:'#faf8f5', color:'#111827', fontSize:'16px', outline:'none', fontFamily:'sans-serif' }}
-                  placeholder="Hanapin ang probinsya..."
-                  value={provSearch}
-                  onChange={e => setProvSearch(e.target.value)}
-                />
-                <div style={{ maxHeight:'190px', overflowY:'auto' }}>
-                  {filteredProvs.length === 0
-                    ? <div style={{ padding:'12px', fontSize:'15px', color:'#9ca3af' }}>Walang nahanap</div>
-                    : filteredProvs.map(p => (
-                      <div
-                        key={p.code}
-                        onClick={() => { setSelProv(p); setProvOpen(false); setProvSearch('') }}
-                        style={{ padding:'10px 13px', cursor:'pointer', fontSize:'15px', color: selProv?.code === p.code ? '#c9943a' : '#111827', background: selProv?.code === p.code ? 'rgba(201,148,58,.08)' : 'transparent', borderBottom:'1px solid #f3f4f6' }}
-                      >
-                        {p.name}
-                      </div>
-                    ))
-                  }
-                </div>
-              </div>
-            )}
-          </div>
-
-          <label style={s.lbl}>Edad</label>
-          <div style={s.hint}>Para malaman ng homeowner ang iyong edad</div>
-          <input
-            style={s.input}
-            type="number"
-            placeholder="25"
-            min={18}
-            max={65}
-            value={form.age}
-            onChange={e => update('age', e.target.value)}
-            inputMode="numeric"
-          />
-
-          <label style={s.lbl}>Hinihingi na Sahod (₱)</label>
-          <div style={{ position:'relative' }}>
-            <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', color:'#6b7280', fontWeight:700 }}>₱</span>
-            <input
-              style={{ ...s.input, paddingLeft:'28px' }}
-              type="number"
-              placeholder="9000"
-              value={form.salary}
-              onChange={e => update('salary', e.target.value)}
-            />
-          </div>
-
-          <label style={s.lbl}>Setup</label>
-          <select style={s.input} value={form.setup} onChange={e => update('setup', e.target.value)}>
-            <option>Stay-in</option>
-            <option>Stay-out</option>
-            <option>Kahit alin</option>
-          </select>
-
-          <label style={s.lbl}>Karanasan</label>
-          <select style={s.input} value={form.experience} onChange={e => update('experience', e.target.value)}>
-            <option>Baguhan</option>
-            <option>1-2 taon</option>
-            <option>3-5 taon</option>
-            <option>6-10 taon</option>
-            <option>10+ taon</option>
-          </select>
-
-          <label style={s.lbl}>Kelan ka pwede magsimula ng trabaho?</label>
-          <select style={s.input} value={form.availability} onChange={e => update('availability', e.target.value)}>
-            <option value="Immediate">Pwede na agad</option>
-            <option value="Within 1 week">Sa loob ng 1 linggo</option>
-            <option value="Within 2 weeks">Sa loob ng 2 linggo</option>
-            <option value="Within 1 month">Sa loob ng 1 buwan</option>
-            <option value="Flexible">Flexible</option>
-          </select>
-
-          <div style={{ background:'#fdf3e3', border:'1px solid rgba(201,148,58,.2)', borderRadius:'12px', padding:'13px 15px', marginBottom:'16px' }}>
-            <div style={{ fontSize:'14px', fontWeight:800, color:'#c9943a', textTransform:'uppercase' as const, letterSpacing:'.5px', marginBottom:'9px' }}>Bakit MaidIt?</div>
-            <div style={{ display:'flex', flexDirection:'column' as const, gap:'7px' }}>
-              <div style={{ display:'flex', gap:'8px', fontSize:'15px', color:'#111827' }}><span>💼</span><span>May trabahong naghihintay sa iyo</span></div>
-              <div style={{ display:'flex', gap:'8px', fontSize:'15px', color:'#111827' }}><span>⚖️</span><span>Wastong sweldo na naaayon sa batas</span></div>
-              <div style={{ display:'flex', gap:'8px', fontSize:'15px', color:'#111827' }}><span>🆓</span><span>Libre — walang babayaran para mag-apply</span></div>
-            </div>
-          </div>
-
-          <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
-            <div style={{ fontSize:'13px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>KASANAYAN (Skills)</div>
-            <div style={{ display:'flex', flexWrap:'wrap' as const, gap:'8px' }}>
-              {['All-Around Maid (Lahat ng gawaing bahay)','Pagluluto','Paglalaba','Paglilinis','Pag-aalaga ng Bata','Pag-aalaga ng Matanda','Pag-aalaga ng Alagang Hayop','Pamimili','Pagmamaneho'].map(skill => (
-                <div
-                  key={skill}
-                  onClick={() => toggleSkill(skill)}
-                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 11px', borderRadius:'20px', border:`1.5px solid ${skills.includes(skill) ? '#c9943a' : '#e5e7eb'}`, background: skills.includes(skill) ? 'rgba(201,148,58,.1)' : '#fff', cursor:'pointer', fontSize:'15px', color: skills.includes(skill) ? '#c9943a' : '#374151', fontWeight: skills.includes(skill) ? 700 : 400 }}
-                >
-                  {skills.includes(skill) && <span style={{ fontSize:'10px' }}>✓ </span>}
-                  {skill}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
-            <div style={{ fontSize:'13px', fontWeight:700, color:'#9ca3af', marginBottom:'10px' }}>KATAYUAN SA PAMILYA</div>
-
-            <label style={s.lbl}>Civil Status</label>
-            <div style={{ display:'flex', flexWrap:'wrap' as const, gap:'8px', marginBottom:'14px' }}>
-              {[['Single','Single'],['Kasal','Married'],['Hiwalay','Separated'],['Biyuda/Biyudo','Widowed']].map(([val, eng]) => (
-                <div
-                  key={val}
-                  onClick={() => update('civil_status', val)}
-                  style={{ display:'flex', alignItems:'center', gap:'7px', padding:'8px 12px', borderRadius:'20px', border:`1.5px solid ${form.civil_status === val ? '#1a6b3c' : '#e5e7eb'}`, background: form.civil_status === val ? 'rgba(26,107,60,.08)' : '#fff', cursor:'pointer', fontSize:'15px', color: form.civil_status === val ? '#1a6b3c' : '#374151', fontWeight: form.civil_status === val ? 700 : 400 }}
-                >
-                  {form.civil_status === val && <span style={{ fontSize:'10px' }}>✓ </span>}
-                  {val} <span style={{ color:'#9ca3af', fontWeight:400 }}>({eng})</span>
-                </div>
-              ))}
-            </div>
-
-            <label style={s.lbl}>Bilang ng Anak</label>
-            <select style={s.input} value={form.num_children} onChange={e => update('num_children', e.target.value)}>
-              {['0','1','2','3','4','5','6','7','8','9','10+'].map(n => (
-                <option key={n} value={n}>{n}</option>
-              ))}
-            </select>
-          </div>
-
-          <div style={{ background:'#fff', border:'1.5px solid #e5e0d8', borderRadius:'12px', padding:'14px', marginBottom:'14px' }}>
-            <div style={{ fontSize:'13px', fontWeight:700, color:'#9ca3af', marginBottom:'12px' }}>MGA DOKUMENTO</div>
-
-            {/* Wala pa */}
-            <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer', marginBottom:'14px' }} onClick={() => { setWalaPaDocs(!walaPaDocs); setIdFile(null); setPoliceFile(null) }}>
-              <div style={{ width:'22px', height:'22px', borderRadius:'5px', border:'2px solid', borderColor: walaPaDocs ? '#c9943a' : '#d1d5db', background: walaPaDocs ? '#c9943a' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                {walaPaDocs && <span style={{ color:'#fff', fontSize:'13px', fontWeight:900 }}>✓</span>}
-              </div>
-              <span style={{ fontSize:'15px', color:'#374151', fontWeight: walaPaDocs ? 700 : 400 }}>Wala pa akong dokumento</span>
-            </div>
-
-            {!walaPaDocs && (
-              <div style={{ display:'flex', flexDirection:'column' as const, gap:'10px' }}>
-                {/* Government ID upload */}
-                <div>
-                  <div style={{ fontSize:'13px', fontWeight:600, color:'#374151', marginBottom:'7px' }}>Government ID</div>
-                  <div
-                    onClick={() => idRef.current?.click()}
-                    style={{ border:`2px dashed ${idFile ? '#1a6b3c' : '#d1d5db'}`, borderRadius:'10px', padding:'12px 14px', cursor:'pointer', background: idFile ? '#f0fdf4' : '#fafafa', display:'flex', alignItems:'center', gap:'10px' }}
-                  >
-                    <span style={{ fontSize:'20px' }}>{idFile ? '✅' : '📎'}</span>
-                    <span style={{ fontSize:'14px', color: idFile ? '#1a6b3c' : '#6b7280', fontWeight: idFile ? 700 : 400 }}>
-                      {idFile ? 'Na-upload ang ID' : 'I-upload ang Government ID'}
-                    </span>
-                  </div>
-                  <input ref={idRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handleIdFile} />
-                </div>
-
-                {/* Police Clearance upload */}
-                <div>
-                  <div style={{ fontSize:'13px', fontWeight:600, color:'#374151', marginBottom:'7px' }}>Police Clearance</div>
-                  <div
-                    onClick={() => policeRef.current?.click()}
-                    style={{ border:`2px dashed ${policeFile ? '#1a6b3c' : '#d1d5db'}`, borderRadius:'10px', padding:'12px 14px', cursor:'pointer', background: policeFile ? '#f0fdf4' : '#fafafa', display:'flex', alignItems:'center', gap:'10px' }}
-                  >
-                    <span style={{ fontSize:'20px' }}>{policeFile ? '✅' : '📎'}</span>
-                    <span style={{ fontSize:'14px', color: policeFile ? '#1a6b3c' : '#6b7280', fontWeight: policeFile ? 700 : 400 }}>
-                      {policeFile ? 'Na-upload ang Police Clearance' : 'I-upload ang Police Clearance'}
-                    </span>
-                  </div>
-                  <input ref={policeRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handlePoliceFile} />
-                </div>
-
-                {/* NBI checkbox */}
-                <div style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => setHasNbi(!hasNbi)}>
-                  <div style={{ width:'22px', height:'22px', borderRadius:'5px', border:'2px solid', borderColor: hasNbi ? '#1a6b3c' : '#d1d5db', background: hasNbi ? '#1a6b3c' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                    {hasNbi && <span style={{ color:'#fff', fontSize:'13px', fontWeight:900 }}>✓</span>}
-                  </div>
-                  <span style={{ fontSize:'15px', color:'#374151' }}>Mayroon akong NBI Clearance</span>
-                </div>
-              </div>
-            )}
-
-            {/* Amber tip */}
-            <div style={{ background:'#fef3e2', border:'1px solid #fde8c0', borderRadius:'10px', padding:'10px 13px', marginTop:'14px', fontSize:'13px', color:'#92400e', lineHeight:1.6 }}>
-              💡 <strong>Malaki ang tyansa na maofferan agad ng trabaho</strong> kapag may ID o clearance ka!
-            </div>
-          </div>
-
-          <label style={s.lbl}>Facebook Profile Link <span style={{ fontWeight:400, textTransform:'none' as const, letterSpacing:0 }}>(kung meron)</span></label>
-          <div style={s.hint}>Para makontak ka ng homeowner sa Facebook</div>
-          <input
-            style={s.input}
-            placeholder="https://facebook.com/iyong-pangalan"
-            value={form.facebook_url}
-            onChange={e => update('facebook_url', e.target.value)}
-            inputMode="url"
-          />
-
-          <button
-            style={{ ...s.btn, opacity: loading ? .6 : 1 }}
+            style={{ ...s.btn, background:C.forest, opacity: loading ? .6 : 1 }}
             onClick={handleStep2}
             disabled={loading}
           >
