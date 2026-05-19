@@ -14,14 +14,14 @@ const serif = "'Instrument Serif', Georgia, serif"
 const sans  = "'Geist', ui-sans-serif, sans-serif"
 
 const SKILLS = [
-  { en: 'Housekeeping', tl: 'Paglilinis ng Bahay' },
-  { en: 'Yaya', tl: 'Pag-aalaga ng Bata' },
-  { en: 'Cooking', tl: 'Pagluluto' },
-  { en: 'Laundry', tl: 'Paglalaba' },
-  { en: 'Elder Care', tl: 'Pag-aalaga ng Matatanda' },
-  { en: 'Driving', tl: 'Pagmamaneho' },
-  { en: 'Gardening', tl: 'Paghahalaman' },
-  { en: 'Pet Care', tl: 'Pag-aalaga ng Alagang Hayop' },
+  'All-Around Maid',
+  'Pagluluto',
+  'Paglalaba',
+  'Paglilinis',
+  'Pag-aalaga ng Bata',
+  'Pag-aalaga ng Matanda',
+  'Pag-aalaga ng Alagang Hayop',
+  'Pagmamaneho',
 ]
 const SETUPS = ['Stay-in', 'Stay-out', 'Kahit alin']
 const CIVIL_STATUS = ['Single', 'May asawa', 'Balo/Biyuda']
@@ -328,7 +328,7 @@ export default function PartnerDashboard() {
           <div style={{ background: 'rgba(255,255,255,.1)', borderRadius: '4px', height: '6px', marginBottom: '6px' }}>
             <div style={{ background: '#f0c97a', borderRadius: '4px', height: '6px', width: `${Math.min(hiredCount * 20, 100)}%`, transition: 'width .3s' }} />
           </div>
-          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.5)' }}>{hiredCount} / 5 successful hire · ₱1,000 per successful hire</div>
+          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.5)' }}>{hiredCount} / 5 successful hire · ₱500 per successful hire</div>
         </div>
 
         {/* REFERRAL CODE */}
@@ -373,7 +373,7 @@ export default function PartnerDashboard() {
             <div style={{ fontSize: '28px' }}>⭐</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: '13px', fontWeight: 700, color: '#92400e', marginBottom: '2px', fontFamily: sans }}>VIP Partner Benefit</div>
-              <div style={{ fontSize: '13px', color: '#92400e', fontWeight: 600, fontFamily: sans }}>₱1,000 upfront sa worker arrival.</div>
+              <div style={{ fontSize: '13px', color: '#92400e', fontWeight: 600, fontFamily: sans }}>₱500 Referral Fee sa bawat matagumpay na hire.</div>
               <div style={{ fontSize: '12px', color: '#b45309', marginTop: '2px', fontFamily: sans }}>Makatanggap ng pera agad kapag dumating ang worker.</div>
             </div>
           </div>
@@ -383,8 +383,8 @@ export default function PartnerDashboard() {
             <div style={{ fontSize: '28px' }}>💰</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: '13px', fontWeight: 700, color: C.forest, marginBottom: '2px', fontFamily: sans }}>Partner Benefit</div>
-              <div style={{ fontSize: '13px', color: C.forest, fontWeight: 600, fontFamily: sans }}>₱600 sa arrival + ₱400 after 30 days</div>
-              <div style={{ fontSize: '12px', color: '#166534', marginTop: '2px', fontFamily: sans }}>= ₱1,000 total kada successful hire</div>
+              <div style={{ fontSize: '13px', color: C.forest, fontWeight: 600, fontFamily: sans }}>₱500 Referral Fee sa bawat matagumpay na hire</div>
+              <div style={{ fontSize: '12px', color: '#166534', marginTop: '2px', fontFamily: sans }}>+₱500 BONUS for transport (Leyte/Samar/Bicol only)</div>
             </div>
           </div>
         )}
@@ -539,8 +539,8 @@ export default function PartnerDashboard() {
               <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Kasanayan * (pumili ng isa man)</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '12px' }}>
                 {SKILLS.map(skill => (
-                  <div key={skill.en} style={s.skillChip(workerForm.skills.includes(skill.en))} onClick={() => toggleSkill(skill.en)}>
-                    {skill.tl}
+                  <div key={skill} style={s.skillChip(workerForm.skills.includes(skill))} onClick={() => toggleSkill(skill)}>
+                    {skill}
                   </div>
                 ))}
               </div>

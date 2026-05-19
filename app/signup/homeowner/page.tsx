@@ -148,6 +148,9 @@ export default function HomeownerSignup() {
     password: '', province: '', city: '',
     setup: 'Stay-in', scope: [] as string[],
   })
+  const [isFacebook, setIsFacebook] = useState(false)
+  const [fbUserId, setFbUserId] = useState('')
+  const [fbProviderId, setFbProviderId] = useState('')
 
   const update = (k: string, v: string) => setForm(f => ({...f, [k]: v}))
   const toggleScope = (s: string) => setForm(f => ({
@@ -173,17 +176,24 @@ export default function HomeownerSignup() {
   const strength = pwStrength(form.password)
 
   const handleSignup = async () => {
-    if (form.password.length < 8) { setError('Password must be at least 8 characters'); return }
+    if (!isFacebook && form.password.length < 8) { setError('Password must be at least 8 characters'); return }
     setLoading(true)
     setError('')
     const { supabase } = await import('../../../lib/supabase')
-    const { data, error } = await supabase.auth.signUp({
-      email: form.email, password: form.password,
-    })
-    if (error) { setError(error.message); setLoading(false); return }
+
+    let userId: string
+    if (isFacebook && fbUserId) {
+      userId = fbUserId
+    } else {
+      const { data, error } = await supabase.auth.signUp({
+        email: form.email, password: form.password,
+      })
+      if (error) { setError(error.message); setLoading(false); return }
+      userId = data.user?.id!
+    }
 
     await supabase.from('profiles').insert({
-      id: data.user?.id,
+      id: userId,
       role: 'homeowner',
       full_name: form.full_name,
       mobile: form.mobile,
@@ -191,9 +201,10 @@ export default function HomeownerSignup() {
     })
 
     await supabase.from('homeowners').insert({
-      profile_id: data.user?.id,
+      profile_id: userId,
       preferred_setup: form.setup,
       scope: form.scope,
+      ...(fbProviderId ? { facebook_url: `https://facebook.com/${fbProviderId}` } : {}),
     })
 
     const intent = localStorage.getItem('maidit_intent')
@@ -208,6 +219,24 @@ export default function HomeownerSignup() {
     setSuccess(true)
     setTimeout(() => router.push('/browse'), 2200)
   }
+
+  useEffect(() => {
+    const detectFacebook = async () => {
+      const { supabase } = await import('../../../lib/supabase')
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user?.app_metadata?.provider === 'facebook') {
+        setIsFacebook(true)
+        setFbUserId(user.id)
+        setFbProviderId(user.user_metadata?.provider_id || '')
+        setForm(f => ({
+          ...f,
+          full_name: user.user_metadata?.full_name || f.full_name,
+          email: user.email || f.email,
+        }))
+      }
+    }
+    detectFacebook()
+  }, [])
 
   useEffect(() => {
     const link = document.createElement('link')
@@ -341,46 +370,52 @@ export default function HomeownerSignup() {
             <div style={{ fontSize: 11.5, color: C.ink3, marginTop: 7, paddingLeft: 2 }}>We'll text you a verification code.</div>
           </div>
 
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: C.ink, marginBottom: 7, letterSpacing: '-0.005em' }}>Create a password</div>
-            <div style={{ position: 'relative' }}>
-              <input
-                style={{ ...inputBase, paddingRight: 60 }}
-                type={showPass ? 'text' : 'password'}
-                placeholder="Minimum 8 characters"
-                value={form.password}
-                onChange={e => update('password', e.target.value)}
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPass(v => !v)}
-                style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: C.ink3, padding: 0, fontFamily: sans }}
-              >
-                {showPass ? 'Hide' : 'Show'}
-              </button>
+          {isFacebook ? (
+            <div style={{ padding: '12px 16px', background: C.amberSoft, border: `1px solid #fde8c0`, borderRadius: 14, fontSize: 14, color: '#92400e', fontWeight: 500 }}>
+              🔗 Connected via Facebook.
             </div>
-            {form.password.length > 0 && (
-              <div style={{ marginTop: 8 }}>
-                <div style={{ height: 3, borderRadius: 2, background: C.line, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: strength?.width ?? '0%', background: strength?.bar ?? C.line, borderRadius: 2, transition: 'width .2s, background .2s' }} />
-                </div>
-                {strength && (
-                  <div style={{ fontSize: 11, color: strength.color, fontWeight: 600, marginTop: 4 }}>{strength.label}</div>
-                )}
-                {!strength && form.password.length > 0 && (
-                  <div style={{ fontSize: 11, color: C.ink3, marginTop: 4 }}>At least 8 characters needed</div>
-                )}
+          ) : (
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: C.ink, marginBottom: 7, letterSpacing: '-0.005em' }}>Create a password</div>
+              <div style={{ position: 'relative' }}>
+                <input
+                  style={{ ...inputBase, paddingRight: 60 }}
+                  type={showPass ? 'text' : 'password'}
+                  placeholder="Minimum 8 characters"
+                  value={form.password}
+                  onChange={e => update('password', e.target.value)}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(v => !v)}
+                  style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: C.ink3, padding: 0, fontFamily: sans }}
+                >
+                  {showPass ? 'Hide' : 'Show'}
+                </button>
               </div>
-            )}
-          </div>
+              {form.password.length > 0 && (
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ height: 3, borderRadius: 2, background: C.line, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: strength?.width ?? '0%', background: strength?.bar ?? C.line, borderRadius: 2, transition: 'width .2s, background .2s' }} />
+                  </div>
+                  {strength && (
+                    <div style={{ fontSize: 11, color: strength.color, fontWeight: 600, marginTop: 4 }}>{strength.label}</div>
+                  )}
+                  {!strength && form.password.length > 0 && (
+                    <div style={{ fontSize: 11, color: C.ink3, marginTop: 4 }}>At least 8 characters needed</div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div style={{ padding: '28px 22px 14px' }}>
           <button
             onClick={() => {
               if (!form.full_name || !form.email) { setError('Please fill in all fields'); return }
-              if (form.password.length < 8) { setError('Password must be at least 8 characters'); return }
+              if (!isFacebook && form.password.length < 8) { setError('Password must be at least 8 characters'); return }
               setError(''); setStep(2)
             }}
             style={primaryBtn()}

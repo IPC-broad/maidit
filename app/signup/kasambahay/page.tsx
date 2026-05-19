@@ -60,6 +60,11 @@ export default function KasambahaySignup() {
   // Show/hide password
   const [showPassword, setShowPassword] = useState(false)
 
+  // Facebook OAuth detection
+  const [isFacebook, setIsFacebook] = useState(false)
+  const [fbUserId, setFbUserId] = useState('')
+  const [fbProviderId, setFbProviderId] = useState('')
+
   useEffect(() => {
     const link = document.createElement('link')
     link.href = 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700&display=swap'
@@ -72,6 +77,26 @@ export default function KasambahaySignup() {
     setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
     const ref = new URLSearchParams(window.location.search).get('ref')
     if (ref) { localStorage.setItem('maidit_ref', ref); setRefParam(ref) }
+  }, [])
+
+  useEffect(() => {
+    const detectFacebook = async () => {
+      const { supabase } = await import('../../../lib/supabase')
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user?.app_metadata?.provider === 'facebook') {
+        setIsFacebook(true)
+        setFbUserId(user.id)
+        setFbProviderId(user.user_metadata?.provider_id || '')
+        const fullName = (user.user_metadata?.full_name || '').trim()
+        const parts = fullName.split(' ')
+        setForm(f => ({
+          ...f,
+          first_name: parts[0] || f.first_name,
+          last_name: parts.slice(1).join(' ') || f.last_name,
+        }))
+      }
+    }
+    detectFacebook()
   }, [])
 
   const [form, setForm] = useState({
@@ -138,7 +163,11 @@ export default function KasambahaySignup() {
   }
 
   const checkMobile = () => {
-    if (!form.first_name || !form.last_name || !form.mobile || !form.password) {
+    if (!form.first_name || !form.last_name || !form.mobile) {
+      setError('Punan ang lahat ng fields')
+      return
+    }
+    if (!isFacebook && !form.password) {
       setError('Punan ang lahat ng fields')
       return
     }
@@ -146,7 +175,7 @@ export default function KasambahaySignup() {
       setError('Ilagay ang tamang mobile number (11 digits)')
       return
     }
-    if (form.password.length < 8) {
+    if (!isFacebook && form.password.length < 8) {
       setError('Ang password ay dapat ay hindi bababa sa 8 characters')
       return
     }
@@ -173,20 +202,23 @@ export default function KasambahaySignup() {
 
     const { supabase } = await import('../../../lib/supabase')
 
-    const autoEmail = `kb_${form.mobile}@maidit.app`
+    let userId: string
 
-    const { data, error } = await supabase.auth.signUp({
-      email: autoEmail,
-      password: form.password
-    })
-
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-      return
+    if (isFacebook && fbUserId) {
+      userId = fbUserId
+    } else {
+      const autoEmail = `kb_${form.mobile}@maidit.app`
+      const { data, error } = await supabase.auth.signUp({
+        email: autoEmail,
+        password: form.password
+      })
+      if (error) {
+        setError(error.message)
+        setLoading(false)
+        return
+      }
+      userId = data.user?.id!
     }
-
-    const userId = data.user?.id
 
     await supabase.from('profiles').insert({
       id: userId,
@@ -225,6 +257,7 @@ export default function KasambahaySignup() {
       civil_status: form.civil_status,
       num_children: form.num_children,
       ...(referredBy ? { referred_by: referredBy } : {}),
+      ...(fbProviderId ? { facebook_url: `https://facebook.com/${fbProviderId}` } : {}),
       ...(form.facebook_url.trim() ? { facebook_url: form.facebook_url.trim() } : {})
     })
 
@@ -389,25 +422,36 @@ export default function KasambahaySignup() {
             />
           </div>
 
-          {/* 3. Password */}
-          <label style={s.lbl}>Password</label>
-          <div style={{ position:'relative' }}>
-            <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', fontSize:'14px', lineHeight:1, pointerEvents:'none' }}>🔒</span>
-            <input
-              style={{ ...s.input, paddingLeft:'38px', paddingRight:'44px' }}
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Minimum 8 characters"
-              value={form.password}
-              onChange={e => update('password', e.target.value)}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(p => !p)}
-              style={{ position:'absolute', right:'13px', top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:'14px', color:C.ink3, padding:0, lineHeight:1, marginBottom:'13px' }}
-            >
-              {showPassword ? '🙈' : '👁️'}
-            </button>
-          </div>
+          {/* Facebook notice */}
+          {isFacebook && (
+            <div style={s.note}>
+              🔗 Naka-connect ang iyong Facebook account.
+            </div>
+          )}
+
+          {/* 3. Password — hidden for Facebook users */}
+          {!isFacebook && (
+            <>
+              <label style={s.lbl}>Password</label>
+              <div style={{ position:'relative' }}>
+                <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', fontSize:'14px', lineHeight:1, pointerEvents:'none' }}>🔒</span>
+                <input
+                  style={{ ...s.input, paddingLeft:'38px', paddingRight:'44px' }}
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Minimum 8 characters"
+                  value={form.password}
+                  onChange={e => update('password', e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(p => !p)}
+                  style={{ position:'absolute', right:'13px', top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:'14px', color:C.ink3, padding:0, lineHeight:1, marginBottom:'13px' }}
+                >
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
+            </>
+          )}
 
           {/* 4. Edad + Probinsya — side by side 2-column */}
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', marginBottom:'13px' }}>

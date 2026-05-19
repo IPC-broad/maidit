@@ -1,4 +1,4 @@
-const CACHE = 'maidit-v2'
+const CACHE = 'maidit-v3'
 const PRECACHE = ['/']
 
 // Paths that must always go to the network (never serve cached)
@@ -11,6 +11,8 @@ const NETWORK_FIRST = [
   '/arrival',
   '/confirm',
   '/auth',
+  '/icon-192.png',
+  '/icon-512.png',
 ]
 
 self.addEventListener('install', e => {

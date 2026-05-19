@@ -63,7 +63,6 @@ export default function OfferReviewPage() {
   }
 
   const isCounter = (!checklist.salary && !!counterSalary) ||
-    (!checklist.start_date && !!counterDate) ||
     (!checklist.transport && !!transportCountered)
 
   const formatDate = (val: any) => {
@@ -95,7 +94,6 @@ export default function OfferReviewPage() {
       setError('Pakipili ang gusto mong transport arrangement'); return
     }
     if (!checklist.salary && !counterSalary) { setError('Pakilagay ang gusto mong sweldo'); return }
-    if (!checklist.start_date && !counterDate) { setError('Pakilagay ang petsa ng iyong pagdating'); return }
     const fareNeeded = isProvince && checklist.transport &&
       (offer?.transport_arrangement === 'full' || offer?.transport_arrangement === 'reimburse') && !fareInput
     if (fareNeeded) { setError('Pakilagay ang iyong estimated na pamasahe'); return }
@@ -276,31 +274,6 @@ export default function OfferReviewPage() {
             </div>
           </div>
 
-          {/* START DATE — only when a valid date exists */}
-          {showStartDate && (
-            <div style={s.row}>
-              <div style={toggleBox(checklist.start_date)} onClick={() => { tick('start_date'); if (checklist.start_date) setCounterDate('') }}>
-                <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.start_date ? '✓' : '✗'}</span>
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={s.checkLabel} onClick={() => { tick('start_date'); if (checklist.start_date) setCounterDate('') }}>
-                  Simula ng trabaho: <strong>{formatDate(offer.start_date)}</strong>
-                </div>
-                <div style={toggleStatus(checklist.start_date)} onClick={() => { tick('start_date'); if (checklist.start_date) setCounterDate('') }}>
-                  {checklist.start_date ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}
-                </div>
-                {!checklist.start_date && (
-                  <div style={s.counterBox}>
-                    <div style={s.counterLabel}>Kailan ka makakarating?</div>
-                    <div style={{ fontSize:'.72rem', color:'#78350f', marginBottom:'6px' }}>Piliin ang petsa ng iyong pagdating:</div>
-                    <input style={s.input} type="date" value={counterDate} min={new Date().toISOString().split('T')[0]} onChange={e => setCounterDate(e.target.value)} />
-                    <div style={{ fontSize:'.65rem', color:'#c9943a', marginTop:'5px' }}>Ito ay magiging counter offer sa start date.</div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
           {/* SETUP */}
           <div style={s.row} onClick={() => tick('setup')}>
             <div style={toggleBox(checklist.setup)}>
@@ -421,7 +394,6 @@ export default function OfferReviewPage() {
           <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:'10px', padding:'11px 13px', marginBottom:'14px', fontSize:'.78rem', color:'#92400e', lineHeight:1.6 }}>
             <strong>Counter Offer mo:</strong><br/>
             {!checklist.salary && counterSalary && <>Sweldo: ₱{parseInt(counterSalary).toLocaleString()}/buwan<br/></>}
-            {!checklist.start_date && counterDate && <>Simula: {formatDate(counterDate)}<br/></>}
             {!checklist.transport && transportCountered && <>Transport: {transportCountered === 'full' ? 'Amo ang magbabayad' : 'Reimburse pagdating'}</>}
           </div>
         )}
