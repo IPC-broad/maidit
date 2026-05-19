@@ -51,7 +51,6 @@ export default function PartnerDashboard() {
   const [saveMsg, setSaveMsg] = useState('')
   const [saving, setSaving] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
-  const [showShareSheet, setShowShareSheet] = useState(false)
   const [savedName, setSavedName] = useState('')
   const photoRef = useRef<HTMLInputElement>(null)
 
@@ -265,7 +264,7 @@ export default function PartnerDashboard() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button
-              onClick={() => setShowShareSheet(true)}
+              onClick={() => { setTab('add'); setReferMode('choose') }}
               style={{ padding: '7px 12px', borderRadius: '50px', background: C.amber, border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, whiteSpace: 'nowrap' as const }}
             >
               + Mag-refer
@@ -432,7 +431,7 @@ export default function PartnerDashboard() {
                 </div>
               )
             })}
-            <button onClick={() => setShowShareSheet(true)} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#1a6b3c', border: 'none', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif', marginTop: '4px' }}>
+            <button onClick={() => { setTab('add'); setReferMode('choose') }} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#1a6b3c', border: 'none', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif', marginTop: '4px' }}>
               + Mag-refer ng Kasambahay
             </button>
           </>
@@ -782,44 +781,6 @@ export default function PartnerDashboard() {
         </div>
       </div>
 
-      {/* SHARE SHEET */}
-      {showShareSheet && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 50, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-          <div style={{ background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px 36px', width: '100%', maxWidth: 480 }}>
-            <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: '#e5e7eb', margin: '0 auto 20px' }} />
-            <div style={{ fontFamily: 'serif', fontSize: '20px', fontWeight: 900, color: '#1a1a1a', marginBottom: '6px' }}>I-share ang referral link mo</div>
-            <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '16px', lineHeight: 1.5 }}>
-              Pabigyan ng trabaho ang kasambahay na kakilala mo at kumita ka ng ₱500!
-            </div>
-            <div style={{ background: '#f9f6f2', borderRadius: '12px', padding: '12px 14px', marginBottom: '14px' }}>
-              <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px' }}>Ang iyong referral link</div>
-              <div style={{ fontSize: '13px', color: '#1a1a1a', wordBreak: 'break-all' as const, fontWeight: 600 }}>
-                maidit.vercel.app/signup/kasambahay?ref={referralCode}
-              </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '16px' }}>
-              <button onClick={() => { const link = `https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`; navigator.clipboard.writeText(link).catch(() => {}); setCopied(true); setTimeout(() => setCopied(false), 2000) }} style={{ padding: '12px 8px', borderRadius: '12px', background: copied ? '#f0fdf4' : '#f3f4f6', border: `1px solid ${copied ? '#bbf7d0' : '#e5e7eb'}`, color: copied ? '#1a6b3c' : '#374151', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '4px' }}>
-                <span style={{ fontSize: '20px' }}>{copied ? '✅' : '📋'}</span>
-                <span>{copied ? 'Copied!' : 'Copy Link'}</span>
-              </button>
-              <button onClick={() => { const link = encodeURIComponent(`https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`); window.open(`https://www.facebook.com/sharer/sharer.php?u=${link}`, '_blank') }} style={{ padding: '12px 8px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1877f2', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '4px' }}>
-                <span style={{ fontSize: '20px' }}>💙</span>
-                <span>Facebook</span>
-              </button>
-              <button onClick={() => { const link = encodeURIComponent(`https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`); window.open(`fb-messenger://share?link=${link}`, '_blank') }} style={{ padding: '12px 8px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#2563eb', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '4px' }}>
-                <span style={{ fontSize: '20px' }}>💬</span>
-                <span>Messenger</span>
-              </button>
-            </div>
-            <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '10px', padding: '10px 13px', marginBottom: '16px', fontSize: '12px', color: '#92400e', lineHeight: 1.65 }}>
-              📌 Sabihin sa kasambahay: "Mag-sign up sa MaidIt gamit ang link ko — libre at ligtas. May trabahong naghihintay sa iyo."
-            </div>
-            <button onClick={() => setShowShareSheet(false)} style={{ width: '100%', padding: '13px', borderRadius: '12px', background: '#f3f4f6', border: 'none', color: '#374151', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: 'sans-serif' }}>
-              Isara
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* SUCCESS FULL-SCREEN */}
       {showSuccess && (
