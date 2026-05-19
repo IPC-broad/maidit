@@ -74,10 +74,6 @@ export default function PartnerDashboard() {
     return () => { try { document.head.removeChild(link) } catch {} }
   }, [])
 
-  useEffect(() => {
-    if (tab === 'add') { setReferMode('choose') }
-    else { setReferMode(null); setManualStep(1) }
-  }, [tab])
 
   useEffect(() => {
     const init = async () => {
@@ -239,7 +235,7 @@ export default function PartnerDashboard() {
     lbl: { display: 'block', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '5px', fontFamily: sans },
     inp: { width: '100%', padding: '11px 12px', border: `1.5px solid ${C.line}`, borderRadius: '10px', fontFamily: sans, fontSize: '14px', outline: 'none', background: C.paper, color: C.ink, boxSizing: 'border-box' as const, marginBottom: '10px' },
     sel: { width: '100%', padding: '11px 12px', border: `1.5px solid ${C.line}`, borderRadius: '10px', fontFamily: sans, fontSize: '14px', outline: 'none', background: C.paper, color: C.ink, boxSizing: 'border-box' as const, marginBottom: '10px' },
-    submitBtn: { width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: C.forest, color: '#fff', fontFamily: sans, fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '8px' },
+    submitBtn: { width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: C.forest, color: '#fff', fontFamily: sans, fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '8px', minHeight: 52, WebkitAppearance: 'none' },
     skillChip: (on: boolean) => ({ display: 'block', padding: '9px 10px', borderRadius: '9px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, textAlign: 'center' as const, border: on ? `1.5px solid ${C.amber}` : `1.5px solid ${C.line}`, background: on ? C.amberSoft : C.paper, color: on ? '#92400e' : C.ink3 }),
   }
 
@@ -403,7 +399,7 @@ export default function PartnerDashboard() {
             { id: 'payouts', icon: '💳', label: 'Payouts', badge: 0 },
             { id: 'add', icon: '🎁', label: 'Mag-refer', badge: 0 },
           ] as const).map((t, i) => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, padding: '11px 4px', border: 'none', borderLeft: i > 0 ? `1px solid ${C.line}` : 'none', background: tab === t.id ? C.forest : 'transparent', cursor: 'pointer', fontFamily: sans, fontSize: '11px', fontWeight: 700, color: tab === t.id ? '#fff' : C.ink3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', position: 'relative' }}>
+            <button key={t.id} onClick={() => { setTab(t.id); if (t.id === 'add') setReferMode('choose'); else { setReferMode(null); setManualStep(1) } }} style={{ flex: 1, padding: '11px 4px', border: 'none', borderLeft: i > 0 ? `1px solid ${C.line}` : 'none', background: tab === t.id ? C.forest : 'transparent', cursor: 'pointer', fontFamily: sans, fontSize: '11px', fontWeight: 700, color: tab === t.id ? '#fff' : C.ink3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', position: 'relative' }}>
               <span style={{ fontSize: '16px' }}>{t.icon}</span>
               <span>{t.label}</span>
               {(t as any).badge > 0 && tab !== t.id && <span style={{ position: 'absolute', top: '4px', right: 'calc(50% - 18px)', background: '#dc2626', color: '#fff', borderRadius: '50%', width: '15px', height: '15px', fontSize: '9px', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{(t as any).badge}</span>}
@@ -500,7 +496,7 @@ export default function PartnerDashboard() {
 
         {/* ADD WORKER TAB */}
         {tab === 'add' && (
-          <>
+          <div style={{ position: 'relative', paddingBottom: 120, WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
             {/* === CHOOSE MODE === */}
             {referMode === 'choose' && (
               <div>
@@ -523,7 +519,7 @@ export default function PartnerDashboard() {
                   </div>
                   <button
                     onClick={() => setReferMode('share')}
-                    style={{ width: '100%', padding: '12px', borderRadius: '11px', border: 'none', background: C.forest, color: '#fff', fontFamily: sans, fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}
+                    style={{ width: '100%', padding: '12px', borderRadius: '11px', border: 'none', background: C.forest, color: '#fff', fontFamily: sans, fontSize: '14px', fontWeight: 700, cursor: 'pointer', minHeight: 52, WebkitAppearance: 'none' } as React.CSSProperties}
                   >
                     I-share ang Link →
                   </button>
@@ -541,7 +537,7 @@ export default function PartnerDashboard() {
                   </div>
                   <button
                     onClick={() => { setReferMode('manual'); setManualStep(1) }}
-                    style={{ width: '100%', padding: '12px', borderRadius: '11px', border: 'none', background: C.amber, color: '#fff', fontFamily: sans, fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}
+                    style={{ width: '100%', padding: '12px', borderRadius: '11px', border: 'none', background: C.amber, color: '#fff', fontFamily: sans, fontSize: '14px', fontWeight: 700, cursor: 'pointer', minHeight: 52, WebkitAppearance: 'none' } as React.CSSProperties}
                   >
                     Simulan ang Form →
                   </button>
@@ -778,7 +774,7 @@ export default function PartnerDashboard() {
                 )}
               </div>
             )}
-          </>
+          </div>
         )}
 
         <div style={{ textAlign: 'center', fontSize: '12px', color: '#9ca3af', marginTop: '20px' }}>
