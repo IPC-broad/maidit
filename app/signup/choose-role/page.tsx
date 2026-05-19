@@ -38,11 +38,13 @@ function ChooseRoleContent() {
     ? `?name=${encodeURIComponent(fbName)}&email=${encodeURIComponent(fbEmail)}&fb=${encodeURIComponent(fbUrl)}`
     : ''
 
+  const isFacebook = !!(fbName || fbEmail || fbUrl)
+
   const roles = [
     {
       emoji: '🏠',
       title: 'Naghahanap ng kasambahay',
-      sub: 'Post jobs, browse profiles, and hire with confidence.',
+      sub: 'I need help at home.',
       href: `/signup/homeowner${fbQuery}`,
       border: C.forestLine,
       bg: C.forestSoft,
@@ -51,20 +53,11 @@ function ChooseRoleContent() {
     {
       emoji: '👩',
       title: 'Naghahanap ng trabaho',
-      sub: 'Create your kasambahay profile and get hired by families.',
+      sub: 'Naghahanap ako ng trabaho.',
       href: `/signup/kasambahay${fbQuery}`,
       border: C.amberLine,
       bg: C.amberSoft,
       accent: C.amber,
-    },
-    {
-      emoji: '🤝',
-      title: 'Gusto kong maging Partner',
-      sub: 'Refer kasambahay and earn commissions with every hire.',
-      href: `/partner`,
-      border: C.line,
-      bg: C.paper2,
-      accent: C.ink2,
     },
   ]
 
@@ -76,17 +69,35 @@ function ChooseRoleContent() {
       <div style={{ width: '100%', maxWidth: 420 }}>
 
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 36 }}>
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{ fontFamily: serif, fontSize: 38, color: C.forestDeep, letterSpacing: '-1px', lineHeight: 1 }}>
             Maid<span style={{ color: C.amber }}>It</span>
           </div>
-          <div style={{ fontFamily: serif, fontSize: 24, color: C.ink, marginTop: 10, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
-            Who are <em style={{ color: C.amber }}>you?</em>
-          </div>
+          {isFacebook ? (
+            <div style={{ fontFamily: serif, fontSize: 24, color: C.ink, marginTop: 10, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
+              Kumusta, <em style={{ color: C.amber }}>{fbName.split(' ')[0]}!</em> 👋
+            </div>
+          ) : (
+            <div style={{ fontFamily: serif, fontSize: 24, color: C.ink, marginTop: 10, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
+              Who are <em style={{ color: C.amber }}>you?</em>
+            </div>
+          )}
           <div style={{ fontSize: 13, color: C.ink3, marginTop: 6 }}>
             Choose how you'll use MaidIt
           </div>
         </div>
+
+        {/* Facebook connected banner */}
+        {isFacebook && (
+          <div style={{
+            background: '#E6F1FB', border: '1px solid rgba(24,119,242,0.2)',
+            borderRadius: 12, padding: '10px 14px',
+            fontSize: 13, color: '#1877f2', marginBottom: 16,
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}>
+            🔗 Naka-connect ang iyong Facebook
+          </div>
+        )}
 
         {/* Role cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

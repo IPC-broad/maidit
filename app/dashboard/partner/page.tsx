@@ -40,6 +40,8 @@ type Worker = {
 export default function PartnerDashboard() {
   const router = useRouter()
   const [tab, setTab] = useState<'workers' | 'payouts' | 'add'>('workers')
+  const [referMode, setReferMode] = useState<'choose' | 'share' | 'manual' | null>(null)
+  const [manualStep, setManualStep] = useState<1 | 2 | 3>(1)
   const [partner, setPartner] = useState<any>(null)
   const [payouts, setPayouts] = useState<Payout[]>([])
   const [workers, setWorkers] = useState<Worker[]>([])
@@ -71,6 +73,11 @@ export default function PartnerDashboard() {
     document.head.appendChild(link)
     return () => { try { document.head.removeChild(link) } catch {} }
   }, [])
+
+  useEffect(() => {
+    if (tab === 'add') { setReferMode('choose') }
+    else { setReferMode(null); setManualStep(1) }
+  }, [tab])
 
   useEffect(() => {
     const init = async () => {
@@ -494,127 +501,283 @@ export default function PartnerDashboard() {
         {/* ADD WORKER TAB */}
         {tab === 'add' && (
           <>
-            <div style={{ fontFamily: sans, fontSize: '14px', color: C.ink3, marginBottom: '16px', lineHeight: 1.6 }}>
-              I-refer ang isang kasambahay sa iyong komunidad. Lahat ng fields ay kinakailangan.
-            </div>
+            {/* === CHOOSE MODE === */}
+            {referMode === 'choose' && (
+              <div>
+                <div style={{ fontFamily: serif, fontSize: '22px', color: C.forestDeep, marginBottom: '6px', letterSpacing: '-0.3px' }}>
+                  Paano mo gustong mag-refer?
+                </div>
+                <div style={{ fontSize: '13px', color: C.ink3, marginBottom: '20px', lineHeight: 1.5 }}>
+                  Pumili ng paraan na pinaka-komportable sa iyo.
+                </div>
 
-            {saveMsg && (
-              <div style={{ background: saveMsg.includes('ERROR') ? '#fef2f2' : '#f0fdf4', border: `1px solid ${saveMsg.includes('ERROR') ? '#fecaca' : '#bbf7d0'}`, borderRadius: '9px', padding: '12px 14px', fontSize: '14px', fontWeight: 600, color: saveMsg.includes('ERROR') ? '#dc2626' : '#166534', marginBottom: '12px', lineHeight: 1.5, fontFamily: sans }}>
-                {saveMsg}
+                {/* Card A — Share Link */}
+                <div style={{ background: C.paper, borderRadius: '16px', border: `1.5px solid #e2ecdb`, padding: '18px', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <div style={{ fontSize: '28px' }}>🔗</div>
+                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '3px 9px', borderRadius: '50px', background: '#f0fdf4', color: C.forest, border: `1px solid #bbf7d0` }}>Pinakamadali</span>
+                  </div>
+                  <div style={{ fontFamily: sans, fontSize: '16px', fontWeight: 700, color: C.ink, marginBottom: '4px' }}>I-share ang Link</div>
+                  <div style={{ fontSize: '13px', color: C.ink3, lineHeight: 1.5, marginBottom: '14px' }}>
+                    I-kopya o i-share ang iyong referral link sa kasambahay. Mag-sign up sila mismo.
+                  </div>
+                  <button
+                    onClick={() => setReferMode('share')}
+                    style={{ width: '100%', padding: '12px', borderRadius: '11px', border: 'none', background: C.forest, color: '#fff', fontFamily: sans, fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    I-share ang Link →
+                  </button>
+                </div>
+
+                {/* Card B — Manual Form */}
+                <div style={{ background: C.paper, borderRadius: '16px', border: `1.5px solid ${C.amberLine}`, padding: '18px', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <div style={{ fontSize: '28px' }}>📝</div>
+                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '3px 9px', borderRadius: '50px', background: C.amberSoft, color: '#92400e', border: `1px solid ${C.amberLine}` }}>Mas kumpleto</span>
+                  </div>
+                  <div style={{ fontFamily: sans, fontSize: '16px', fontWeight: 700, color: C.ink, marginBottom: '4px' }}>Idagdag nang Manu-mano</div>
+                  <div style={{ fontSize: '13px', color: C.ink3, lineHeight: 1.5, marginBottom: '14px' }}>
+                    I-fill out ang profile ng kasambahay para sa kanya. Para sa mga hindi marunong mag-sign up online.
+                  </div>
+                  <button
+                    onClick={() => { setReferMode('manual'); setManualStep(1) }}
+                    style={{ width: '100%', padding: '12px', borderRadius: '11px', border: 'none', background: C.amber, color: '#fff', fontFamily: sans, fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    Simulan ang Form →
+                  </button>
+                </div>
               </div>
             )}
 
-            {/* Worker Details card */}
-            <div style={{ background: C.paper, borderRadius: '13px', padding: '16px', border: `1px solid ${C.line}`, marginBottom: '12px' }}>
-              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.amber, marginBottom: '14px', fontFamily: sans }}>Detalye ng Kasambahay</div>
-
-              {/* Pangalan + Apelyido side by side */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={s.lbl}>Pangalan *</label>
-                  <input style={s.inp} placeholder="Maria" value={workerForm.pangalan}
-                    onChange={e => setWorkerForm(f => ({ ...f, pangalan: e.target.value.replace(/\b\w/g, (c: string) => c.toUpperCase()) }))} />
+            {/* === SHARE LINK MODE === */}
+            {referMode === 'share' && (
+              <div>
+                <button onClick={() => setReferMode('choose')} style={{ background: 'none', border: 'none', color: C.ink3, fontSize: '13px', cursor: 'pointer', padding: '0 0 12px', fontFamily: sans }}>← Bumalik</button>
+                <div style={{ fontFamily: serif, fontSize: '22px', color: C.forestDeep, marginBottom: '6px' }}>I-share ang iyong referral link</div>
+                <div style={{ fontSize: '13px', color: C.ink3, marginBottom: '16px', lineHeight: 1.5 }}>
+                  Ipakita o ipadala ang link na ito sa kasambahay na gusto mong i-refer.
                 </div>
-                <div>
-                  <label style={s.lbl}>Apelyido *</label>
-                  <input style={s.inp} placeholder="Santos" value={workerForm.apelyido}
-                    onChange={e => setWorkerForm(f => ({ ...f, apelyido: e.target.value.replace(/\b\w/g, (c: string) => c.toUpperCase()) }))} />
+
+                <div style={{ background: C.paper2, border: `1px solid ${C.line}`, borderRadius: '12px', padding: '12px 14px', marginBottom: '14px' }}>
+                  <div style={{ fontSize: '11px', color: C.ink3, marginBottom: '4px', fontFamily: sans }}>Ang iyong referral link</div>
+                  <div style={{ fontSize: '13px', color: C.ink, wordBreak: 'break-all' as const, fontWeight: 600, fontFamily: sans }}>
+                    maidit.vercel.app/signup/kasambahay?ref={referralCode}
+                  </div>
                 </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '14px' }}>
+                  <button onClick={() => { navigator.clipboard.writeText(`https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`).catch(() => {}); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+                    style={{ padding: '12px 8px', borderRadius: '12px', background: copied ? '#f0fdf4' : '#f3f4f6', border: `1px solid ${copied ? '#bbf7d0' : C.line}`, color: copied ? C.forest : C.ink, fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '4px' }}>
+                    <span style={{ fontSize: '20px' }}>{copied ? '✅' : '📋'}</span>
+                    <span>{copied ? 'Copied!' : 'Copy Link'}</span>
+                  </button>
+                  <button onClick={shareSMS}
+                    style={{ padding: '12px 8px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#2563eb', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '4px' }}>
+                    <span style={{ fontSize: '20px' }}>💬</span>
+                    <span>SMS</span>
+                  </button>
+                  <button onClick={() => { const link = encodeURIComponent(`https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`); window.open(`fb-messenger://share?link=${link}`, '_blank') }}
+                    style={{ padding: '12px 8px', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1877f2', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '4px' }}>
+                    <span style={{ fontSize: '20px' }}>💬</span>
+                    <span>Messenger</span>
+                  </button>
+                  <button onClick={() => { const link = encodeURIComponent(`https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`); window.open(`https://wa.me/?text=${link}`, '_blank') }}
+                    style={{ padding: '12px 8px', borderRadius: '12px', background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '4px' }}>
+                    <span style={{ fontSize: '20px' }}>🟢</span>
+                    <span>WhatsApp</span>
+                  </button>
+                </div>
+
+                <div style={{ background: C.amberSoft, border: `1px solid ${C.amberLine}`, borderRadius: '10px', padding: '10px 13px', marginBottom: '16px', fontSize: '12px', color: '#92400e', lineHeight: 1.65 }}>
+                  📌 Sabihin sa kasambahay: "Mag-sign up sa MaidIt gamit ang link ko — libre at ligtas. May trabahong naghihintay sa iyo."
+                </div>
+
+                <button onClick={() => { setTab('workers') }} style={{ width: '100%', padding: '13px', borderRadius: '12px', background: '#f3f4f6', border: 'none', color: C.ink, fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: sans }}>
+                  Tapos na, bumalik sa Dashboard
+                </button>
               </div>
+            )}
 
-              <label style={s.lbl}>Cellphone *</label>
-              <input style={s.inp} type="tel" placeholder="09XXXXXXXXX" maxLength={11} value={workerForm.mobile}
-                onChange={e => setWorkerForm(f => ({ ...f, mobile: e.target.value.replace(/\D/g, '').slice(0, 11) }))} />
+            {/* === MANUAL FORM MODE === */}
+            {referMode === 'manual' && (
+              <div>
+                {/* Progress header */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                  <button onClick={() => { if (manualStep === 1) setReferMode('choose'); else setManualStep((manualStep - 1) as 1 | 2 | 3) }}
+                    style={{ background: 'none', border: 'none', color: C.ink3, fontSize: '13px', cursor: 'pointer', padding: 0, fontFamily: sans }}>← Bumalik</button>
+                  <div style={{ flex: 1 }} />
+                  {[1, 2, 3].map(n => (
+                    <div key={n} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <div style={{ width: '26px', height: '26px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, fontFamily: sans, background: manualStep === n ? C.forest : manualStep > n ? '#bbf7d0' : C.line, color: manualStep === n ? '#fff' : manualStep > n ? C.forest : C.ink3 }}>{n}</div>
+                      {n < 3 && <div style={{ width: '20px', height: '2px', background: manualStep > n ? C.forest : C.line }} />}
+                    </div>
+                  ))}
+                  <div style={{ flex: 1 }} />
+                  <div style={{ fontSize: '11px', color: C.ink3, fontFamily: sans }}>{manualStep}/3</div>
+                </div>
 
-              <label style={s.lbl}>Edad *</label>
-              <input style={s.inp} type="number" placeholder="25" min={18} max={65} value={workerAge}
-                onChange={e => setWorkerAge(e.target.value)} inputMode="numeric" />
-
-              <label style={s.lbl}>Probinsya *</label>
-              <select style={s.sel} value={workerForm.province} onChange={e => setWorkerForm(f => ({ ...f, province: e.target.value }))}>
-                <option value="">Piliin ang probinsya...</option>
-                {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
-              </select>
-
-              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Kasanayan * (pumili ng isa man)</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '12px' }}>
-                {SKILLS.map(skill => (
-                  <div key={skill} style={s.skillChip(workerForm.skills.includes(skill))} onClick={() => toggleSkill(skill)}>
-                    {skill}
+                {saveMsg && (
+                  <div style={{ background: saveMsg.includes('ERROR') ? '#fef2f2' : '#f0fdf4', border: `1px solid ${saveMsg.includes('ERROR') ? '#fecaca' : '#bbf7d0'}`, borderRadius: '9px', padding: '12px 14px', fontSize: '13px', fontWeight: 600, color: saveMsg.includes('ERROR') ? '#dc2626' : '#166534', marginBottom: '12px', lineHeight: 1.5, fontFamily: sans }}>
+                    {saveMsg}
                   </div>
-                ))}
-              </div>
+                )}
 
-              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Setup *</div>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                {[['Stay-in', 'Stay-in'], ['Stay-out', 'Stay-out'], ['Pareho okay', 'Kahit alin']].map(([label, value]) => (
-                  <div
-                    key={value}
-                    onClick={() => setWorkerForm(f => ({ ...f, setup: value }))}
-                    style={{ flex: 1, padding: '9px 6px', borderRadius: '10px', border: `1.5px solid ${workerForm.setup === value ? C.forest : C.line}`, background: workerForm.setup === value ? C.forest : C.paper, color: workerForm.setup === value ? '#fff' : C.ink3, fontSize: '12px', fontWeight: 700, cursor: 'pointer', textAlign: 'center' as const, fontFamily: sans }}
-                  >
-                    {label}
+                {/* STEP 1 — Basic Info */}
+                {manualStep === 1 && (
+                  <div style={{ background: C.paper, borderRadius: '13px', padding: '16px', border: `1px solid ${C.line}` }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.amber, marginBottom: '14px', fontFamily: sans }}>Hakbang 1 — Basic Info</div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div>
+                        <label style={s.lbl}>Pangalan *</label>
+                        <input style={s.inp} placeholder="Maria" value={workerForm.pangalan}
+                          onChange={e => setWorkerForm(f => ({ ...f, pangalan: e.target.value.replace(/\b\w/g, (c: string) => c.toUpperCase()) }))} />
+                      </div>
+                      <div>
+                        <label style={s.lbl}>Apelyido *</label>
+                        <input style={s.inp} placeholder="Santos" value={workerForm.apelyido}
+                          onChange={e => setWorkerForm(f => ({ ...f, apelyido: e.target.value.replace(/\b\w/g, (c: string) => c.toUpperCase()) }))} />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div>
+                        <label style={s.lbl}>Cellphone *</label>
+                        <input style={s.inp} type="tel" placeholder="09XXXXXXXXX" maxLength={11} value={workerForm.mobile}
+                          onChange={e => setWorkerForm(f => ({ ...f, mobile: e.target.value.replace(/\D/g, '').slice(0, 11) }))} />
+                      </div>
+                      <div>
+                        <label style={s.lbl}>Edad *</label>
+                        <input style={s.inp} type="number" placeholder="25" min={18} max={65} value={workerAge}
+                          onChange={e => setWorkerAge(e.target.value)} inputMode="numeric" />
+                      </div>
+                    </div>
+
+                    <label style={s.lbl}>Probinsya *</label>
+                    <select style={s.sel} value={workerForm.province} onChange={e => setWorkerForm(f => ({ ...f, province: e.target.value }))}>
+                      <option value="">Piliin ang probinsya...</option>
+                      {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
+
+                    <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Paano kayo nagkakilala *</div>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' as const, marginBottom: '4px' }}>
+                      {['Kababayan', 'Kaibigan', 'Kapamilya', 'Estudyante', 'Iba pa'].map(opt => (
+                        <div key={opt} onClick={() => setWorkerHowReferred(opt)}
+                          style={{ padding: '8px 13px', borderRadius: '10px', border: `1.5px solid ${workerHowReferred === opt ? C.amber : C.line}`, background: workerHowReferred === opt ? C.amberSoft : C.paper, color: workerHowReferred === opt ? '#92400e' : C.ink3, fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans }}>
+                          {opt}
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        const { pangalan, apelyido, mobile, province } = workerForm
+                        if (!pangalan || !apelyido || !mobile || !province) { setSaveMsg('Pakisulat ang lahat ng required fields.'); return }
+                        if (mobile.length !== 11 || !mobile.startsWith('09')) { setSaveMsg('Pakisulat ang tamang 11-digit mobile number.'); return }
+                        if (!workerHowReferred) { setSaveMsg('Piliin kung paano kayo nagkakilala.'); return }
+                        setSaveMsg('')
+                        setManualStep(2)
+                      }}
+                      style={{ ...s.submitBtn, marginTop: '16px', background: C.forest }}
+                    >
+                      Susunod — Mga Kasanayan →
+                    </button>
                   </div>
-                ))}
-              </div>
+                )}
 
-              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Kelan pwede magsimula *</div>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' as const }}>
-                {[['Pwede na agad', 'Immediate'], ['1 linggo', 'Within 1 week'], ['1 buwan', 'Within 1 month']].map(([label, value]) => (
-                  <div
-                    key={value}
-                    onClick={() => setWorkerForm(f => ({ ...f, availability: value }))}
-                    style={{ padding: '9px 14px', borderRadius: '10px', border: `1.5px solid ${workerForm.availability === value ? C.forest : C.line}`, background: workerForm.availability === value ? C.forest : C.paper, color: workerForm.availability === value ? '#fff' : C.ink3, fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans }}
-                  >
-                    {label}
+                {/* STEP 2 — Skills */}
+                {manualStep === 2 && (
+                  <div style={{ background: C.paper, borderRadius: '13px', padding: '16px', border: `1px solid ${C.line}` }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.amber, marginBottom: '14px', fontFamily: sans }}>Hakbang 2 — Mga Kasanayan</div>
+
+                    <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Kasanayan * (pumili ng isa man)</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '14px' }}>
+                      {SKILLS.map(skill => (
+                        <div key={skill} style={s.skillChip(workerForm.skills.includes(skill))} onClick={() => toggleSkill(skill)}>{skill}</div>
+                      ))}
+                    </div>
+
+                    <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Setup *</div>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+                      {[['Stay-in', 'Stay-in'], ['Stay-out', 'Stay-out'], ['Pareho okay', 'Kahit alin']].map(([label, value]) => (
+                        <div key={value} onClick={() => setWorkerForm(f => ({ ...f, setup: value }))}
+                          style={{ flex: 1, padding: '9px 6px', borderRadius: '10px', border: `1.5px solid ${workerForm.setup === value ? C.forest : C.line}`, background: workerForm.setup === value ? C.forest : C.paper, color: workerForm.setup === value ? '#fff' : C.ink3, fontSize: '12px', fontWeight: 700, cursor: 'pointer', textAlign: 'center' as const, fontFamily: sans }}>
+                          {label}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Kelan pwede magsimula *</div>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' as const }}>
+                      {[['Pwede na agad', 'Immediate'], ['1 linggo', 'Within 1 week'], ['1 buwan', 'Within 1 month']].map(([label, value]) => (
+                        <div key={value} onClick={() => setWorkerForm(f => ({ ...f, availability: value }))}
+                          style={{ padding: '9px 14px', borderRadius: '10px', border: `1.5px solid ${workerForm.availability === value ? C.forest : C.line}`, background: workerForm.availability === value ? C.forest : C.paper, color: workerForm.availability === value ? '#fff' : C.ink3, fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans }}>
+                          {label}
+                        </div>
+                      ))}
+                    </div>
+
+                    <label style={s.lbl}>Hinahangad na Sahod (₱/buwan) *</label>
+                    <div style={{ position: 'relative', marginBottom: '14px' }}>
+                      <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontFamily: serif, fontSize: '16px', color: C.ink2, pointerEvents: 'none' }}>₱</span>
+                      <input style={{ ...s.inp, paddingLeft: '26px', marginBottom: 0 }} type="number" placeholder="9000" value={workerSalary}
+                        onChange={e => setWorkerSalary(e.target.value)} />
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        if (workerForm.skills.length === 0) { setSaveMsg('Pumili ng kahit isang kasanayan.'); return }
+                        if (!workerSalary) { setSaveMsg('Ilagay ang hinahangad na sahod.'); return }
+                        setSaveMsg('')
+                        setManualStep(3)
+                      }}
+                      style={{ ...s.submitBtn, background: C.forest }}
+                    >
+                      Susunod — Verification →
+                    </button>
                   </div>
-                ))}
-              </div>
+                )}
 
-              <label style={s.lbl}>Hinahangad na Sahod (₱/buwan) *</label>
-              <div style={{ position: 'relative', marginBottom: '10px' }}>
-                <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontFamily: serif, fontSize: '16px', color: C.ink2, pointerEvents: 'none' }}>₱</span>
-                <input style={{ ...s.inp, paddingLeft: '26px', marginBottom: 0 }} type="number" placeholder="9000" value={workerSalary}
-                  onChange={e => setWorkerSalary(e.target.value)} />
-              </div>
+                {/* STEP 3 — Huling Hakbang */}
+                {manualStep === 3 && (
+                  <div style={{ background: C.paper, borderRadius: '13px', padding: '16px', border: `1px solid ${C.line}` }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.amber, marginBottom: '14px', fontFamily: sans }}>Hakbang 3 — Huling Hakbang</div>
 
-              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Paano kayo nagkakilala *</div>
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' as const, marginBottom: '12px' }}>
-                {['Kababayan', 'Kaibigan', 'Kapamilya', 'Estudyante', 'Iba pa'].map(opt => (
-                  <div
-                    key={opt}
-                    onClick={() => setWorkerHowReferred(opt)}
-                    style={{ padding: '8px 13px', borderRadius: '10px', border: `1.5px solid ${workerHowReferred === opt ? C.amber : C.line}`, background: workerHowReferred === opt ? C.amberSoft : C.paper, color: workerHowReferred === opt ? '#92400e' : C.ink3, fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans }}
-                  >
-                    {opt}
+                    <label style={s.lbl}>Litrato ng Kasambahay (optional)</label>
+                    {workerForm.photo && <img src={workerForm.photo} alt="worker" style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', borderRadius: '10px', marginBottom: '8px' }} />}
+                    <div onClick={() => photoRef.current?.click()}
+                      style={{ background: '#fdf9f4', border: `2px dashed ${workerForm.photo ? C.forest : C.line}`, borderRadius: '11px', padding: '20px', textAlign: 'center' as const, cursor: 'pointer', marginBottom: '10px' }}>
+                      {workerForm.photo
+                        ? <><div style={{ fontSize: '18px', marginBottom: '4px' }}>✅</div><div style={{ fontSize: '13px', color: C.forest, fontWeight: 700, fontFamily: sans }}>Litrato na-upload!</div></>
+                        : <><div style={{ fontSize: '28px', marginBottom: '6px' }}>📷</div><div style={{ fontSize: '13px', fontWeight: 700, fontFamily: sans }}>I-upload ang litrato ng kasambahay</div></>
+                      }
+                    </div>
+                    <input ref={photoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhoto} />
+
+                    <div style={{ background: C.amberSoft, border: `1px solid ${C.amberLine}`, borderRadius: '10px', padding: '10px 13px', marginBottom: '10px', fontSize: '12px', color: '#92400e', lineHeight: 1.65 }}>
+                      📸 Ang litrato ay makakatulong sa mga homeowner na makilala ang kasambahay.
+                    </div>
+                    <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '10px 13px', marginBottom: '14px', fontSize: '12px', color: '#1d4ed8', lineHeight: 1.65 }}>
+                      ℹ️ Maaari pang kumpletuhin ng kasambahay ang kanyang profile sa pamamagitan ng link na ipapadala sa kanya.
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', background: C.paper, border: `1.5px solid ${workerConfirmed ? C.forest : C.line}`, borderRadius: '12px', padding: '14px', marginBottom: '14px', cursor: 'pointer' }}
+                      onClick={() => setWorkerConfirmed(!workerConfirmed)}>
+                      <div style={{ width: '22px', height: '22px', borderRadius: '6px', border: `2px solid ${workerConfirmed ? C.forest : '#d1d5db'}`, background: workerConfirmed ? C.forest : C.paper, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
+                        {workerConfirmed && <span style={{ color: '#fff', fontSize: '13px', fontWeight: 900 }}>✓</span>}
+                      </div>
+                      <div style={{ fontSize: '13px', color: C.ink, lineHeight: 1.6, fontFamily: sans }}>
+                        Pinatutunayan ko na ang kasambahay na ito ay isang tunay na tao at personal niyang ipinahahayag ang kanyang interes na maging bahagi ng MaidIt platform.
+                      </div>
+                    </div>
+
+                    <button style={{ ...s.submitBtn, opacity: saving ? .6 : 1 }} onClick={handleAddWorker} disabled={saving}>
+                      {saving ? 'Nagse-save...' : `I-refer si ${workerForm.pangalan || 'Kasambahay'} →`}
+                    </button>
                   </div>
-                ))}
+                )}
               </div>
-
-              <label style={s.lbl}>Litrato ng Kasambahay *</label>
-              {workerForm.photo && <img src={workerForm.photo} alt="worker" style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', borderRadius: '10px', marginBottom: '8px' }} />}
-              <div onClick={() => photoRef.current?.click()} style={{ background: '#fdf9f4', border: `2px dashed ${workerForm.photo ? C.forest : C.line}`, borderRadius: '11px', padding: '20px', textAlign: 'center' as const, cursor: 'pointer', marginBottom: '4px' }}>
-                {workerForm.photo
-                  ? <><div style={{ fontSize: '18px', marginBottom: '4px' }}>✅</div><div style={{ fontSize: '13px', color: C.forest, fontWeight: 700, fontFamily: sans }}>Litrato na-upload!</div></>
-                  : <><div style={{ fontSize: '28px', marginBottom: '6px' }}>📷</div><div style={{ fontSize: '13px', fontWeight: 700, fontFamily: sans }}>I-upload ang litrato ng kasambahay</div></>
-                }
-              </div>
-              <input ref={photoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhoto} />
-            </div>
-
-            {/* Confirmation */}
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', background: C.paper, border: `1.5px solid ${workerConfirmed ? C.forest : C.line}`, borderRadius: '12px', padding: '14px', marginBottom: '14px', cursor: 'pointer' }} onClick={() => setWorkerConfirmed(!workerConfirmed)}>
-              <div style={{ width: '22px', height: '22px', borderRadius: '6px', border: `2px solid ${workerConfirmed ? C.forest : '#d1d5db'}`, background: workerConfirmed ? C.forest : C.paper, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
-                {workerConfirmed && <span style={{ color: '#fff', fontSize: '13px', fontWeight: 900 }}>✓</span>}
-              </div>
-              <div style={{ fontSize: '13px', color: C.ink, lineHeight: 1.6, fontFamily: sans }}>
-                Pinatutunayan ko na ang kasambahay na ito ay isang tunay na tao at personal niyang ipinahahayag ang kanyang interes na maging bahagi ng MaidIt platform.
-              </div>
-            </div>
-
-            <button style={{ ...s.submitBtn, opacity: saving ? .6 : 1 }} onClick={handleAddWorker} disabled={saving}>
-              {saving ? 'Nagse-save...' : 'I-submit ang Kasambahay →'}
-            </button>
+            )}
           </>
         )}
 
@@ -662,23 +825,54 @@ export default function PartnerDashboard() {
         </div>
       )}
 
-      {/* SUCCESS MODAL */}
+      {/* SUCCESS FULL-SCREEN */}
       {showSuccess && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div style={{ background: '#fff', borderRadius: '16px', padding: '28px 20px', maxWidth: '320px', width: '100%', textAlign: 'center' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '12px' }}>✅</div>
-            <div style={{ fontFamily: serif, fontSize: '22px', fontWeight: 400, color: C.forest, marginBottom: '8px' }}>Na-save na!</div>
-            <div style={{ fontSize: '14px', color: C.ink, lineHeight: 1.6, marginBottom: '20px', fontFamily: sans }}>
-              Si <strong>{savedName}</strong> ay naidagdag na. Kapag natanggap niya ang SMS confirmation at nag-confirm, makikita na siya ng mga homeowner.
+        <div style={{ position: 'fixed', inset: 0, background: C.paper2, zIndex: 50, overflowY: 'auto', padding: '32px 20px', fontFamily: sans }}>
+          <div style={{ maxWidth: 420, margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+              <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>🎉</div>
+              <div style={{ fontFamily: serif, fontSize: '26px', color: C.forest, letterSpacing: '-0.3px', marginBottom: '8px' }}>
+                Na-refer na si {savedName}!
+              </div>
+              <div style={{ fontSize: '14px', color: C.ink3, lineHeight: 1.6 }}>
+                Makakatanggap ka ng <strong style={{ color: C.forest }}>₱500</strong> kapag na-hire siya ng isang homeowner.
+              </div>
             </div>
+
+            <div style={{ background: C.paper, borderRadius: '14px', border: `1px solid ${C.line}`, padding: '14px 16px', marginBottom: '14px' }}>
+              <div style={{ fontSize: '11px', color: C.ink3, marginBottom: '4px' }}>I-share din ang referral link mo</div>
+              <div style={{ fontSize: '13px', color: C.ink, wordBreak: 'break-all' as const, fontWeight: 600, marginBottom: '10px' }}>
+                maidit.vercel.app/signup/kasambahay?ref={referralCode}
+              </div>
+              <button onClick={() => { navigator.clipboard.writeText(`https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`).catch(() => {}); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+                style={{ width: '100%', padding: '10px', borderRadius: '9px', border: 'none', background: copied ? C.forest : '#f0fdf4', color: copied ? '#fff' : C.forest, fontFamily: sans, fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                {copied ? '✓ Copied!' : '📋 Copy Link'}
+              </button>
+            </div>
+
+            <div style={{ background: C.paper, borderRadius: '14px', border: `1px solid ${C.line}`, padding: '14px 16px', marginBottom: '20px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: C.ink, marginBottom: '10px' }}>Susunod na hakbang:</div>
+              {[
+                ['1', 'Mag-aabiso kami kay ' + savedName + ' na nag-refer ka sa kanya.'],
+                ['2', 'Kapag nag-confirm siya, makikita na siya ng mga homeowner.'],
+                ['3', 'Kapag na-hire siya, automatic na darating ang iyong ₱500 payout.'],
+              ].map(([num, text]) => (
+                <div key={num} style={{ display: 'flex', gap: '10px', marginBottom: '8px', alignItems: 'flex-start' }}>
+                  <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: C.forest, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, flexShrink: 0 }}>{num}</div>
+                  <div style={{ fontSize: '13px', color: C.ink2, lineHeight: 1.5 }}>{text}</div>
+                </div>
+              ))}
+            </div>
+
             <button onClick={async () => {
               setShowSuccess(false)
+              setReferMode(null)
               const { supabase } = await import('../../../lib/supabase')
               const { data: workersData } = await supabase.from('kasambahay').select('*, profiles(*)').eq('referred_by', partner.id)
               setWorkers(workersData || [])
               setTab('workers')
-            }} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: C.forest, border: 'none', color: '#fff', fontFamily: sans, fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>
-              Tingnan ang Workers
+            }} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: C.forest, border: 'none', color: '#fff', fontFamily: sans, fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>
+              Bumalik sa Dashboard →
             </button>
           </div>
         </div>

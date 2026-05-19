@@ -151,6 +151,34 @@ function LoginForm() {
             </div>
           )}
 
+          {/* Facebook — TOP */}
+          <button
+            onClick={handleFacebookLogin}
+            disabled={fbLoading}
+            style={{
+              width: '100%', height: 52, borderRadius: 14, border: 'none',
+              background: '#1877f2', color: '#fff',
+              fontFamily: sans, fontSize: 15, fontWeight: 600,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              cursor: fbLoading ? 'not-allowed' : 'pointer',
+              opacity: fbLoading ? 0.7 : 1, transition: 'opacity .15s',
+              boxShadow: '0 4px 14px -6px rgba(24,119,242,0.45)',
+            }}
+          >
+            <FacebookIcon />
+            {fbLoading ? 'Redirecting…' : 'Mag-login gamit ang Facebook'}
+          </button>
+          <div style={{ textAlign: 'center', fontSize: 12, color: C.ink3, marginTop: 6, marginBottom: 4 }}>
+            Pinakamabilis na paraan ng pag-login
+          </div>
+
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0' }}>
+            <div style={{ flex: 1, height: 1, background: C.line }} />
+            <span style={{ fontSize: 12, color: C.ink4, whiteSpace: 'nowrap' }}>o mag-login gamit ang email/mobile</span>
+            <div style={{ flex: 1, height: 1, background: C.line }} />
+          </div>
+
           {/* Credential input */}
           <div style={{ marginBottom: 14 }}>
             <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: C.ink3, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 7 }}>
@@ -207,30 +235,6 @@ function LoginForm() {
             }}
           >
             {loading ? 'Signing in…' : <><span>Sign in</span> <IcArrowRight /></>}
-          </button>
-
-          {/* Divider */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0' }}>
-            <div style={{ flex: 1, height: 1, background: C.line }} />
-            <span style={{ fontSize: 12, color: C.ink4, whiteSpace: 'nowrap' }}>— o kaya —</span>
-            <div style={{ flex: 1, height: 1, background: C.line }} />
-          </div>
-
-          {/* Facebook */}
-          <button
-            onClick={handleFacebookLogin}
-            disabled={fbLoading}
-            style={{
-              width: '100%', height: 50, borderRadius: 14, border: 'none',
-              background: '#1877f2', color: '#fff',
-              fontFamily: sans, fontSize: 14, fontWeight: 600,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-              cursor: fbLoading ? 'not-allowed' : 'pointer',
-              opacity: fbLoading ? 0.7 : 1, transition: 'opacity .15s',
-            }}
-          >
-            <FacebookIcon />
-            {fbLoading ? 'Redirecting…' : 'Continue with Facebook'}
           </button>
         </div>
 

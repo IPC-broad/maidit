@@ -95,14 +95,24 @@ export default function AuthCallbackPage() {
       <div style={{ fontFamily: serif, fontSize: 32, color: C.forest, letterSpacing: '-0.5px' }}>
         Maid<span style={{ color: C.amber }}>It</span>
       </div>
-      <div style={{ fontSize: 14, color: C.ink3 }}>{status}</div>
       <div style={{
-        width: 36, height: 36, borderRadius: '50%',
-        border: `3px solid ${C.forestSoft}`,
-        borderTopColor: C.forest,
-        animation: 'spin 0.8s linear infinite',
-      }} />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        width: 56, height: 56, borderRadius: '50%',
+        background: '#1877f2',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        animation: 'fbpulse 1.4s ease-in-out infinite',
+        boxShadow: '0 0 0 0 rgba(24,119,242,0.4)',
+      }}>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+      </div>
+      <div style={{ fontFamily: serif, fontSize: 18, color: '#1877f2', letterSpacing: '-0.01em' }}>
+        Kinokonekta ang Facebook...
+      </div>
+      <div style={{ fontSize: 14, color: C.ink3 }}>
+        Sandali lang. Kinukuha ang iyong impormasyon.
+      </div>
+      <style>{`@keyframes fbpulse { 0%,100% { box-shadow: 0 0 0 0 rgba(24,119,242,0.4); } 50% { box-shadow: 0 0 0 12px rgba(24,119,242,0); } }`}</style>
     </div>
   )
 }
