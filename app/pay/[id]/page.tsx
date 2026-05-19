@@ -22,13 +22,13 @@ export default function PayPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
-      const { data: prof } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
-
-      const isTester = !!(
-        prof?.full_name?.toLowerCase().includes('test') ||
-        user?.email?.toLowerCase().includes('test')
-      )
-      console.log('[pay] isTester:', isTester, prof?.full_name, user?.email)
+      const TEST_EMAILS = [
+        'test@maidit.com',
+        'homeowner@maidit.app',
+        'test.kasambahay@maidit.app',
+        'partner@maidit.com',
+      ]
+      const isTester = TEST_EMAILS.includes(user?.email ?? '')
       setIsTester(isTester)
 
       const { data } = await supabase
@@ -309,33 +309,22 @@ export default function PayPage() {
           </button>
         )}
 
-        {/* Tester skip button — TEMPORARY, remove by 2026-07-01 */}
+        {/* Test account skip — TEMPORARY, remove by 2026-07-01 */}
         {isTester && (
           <button
-            style={{ ...s.btnOutline, marginBottom: '10px', opacity: skipLoading ? .6 : 1 }}
+            style={{ width: '100%', height: '52px', borderRadius: '12px', border: 'none', background: '#c9943a', color: '#fff', fontFamily: 'sans-serif', fontSize: '1rem', fontWeight: 700, cursor: skipLoading ? 'not-allowed' : 'pointer', marginBottom: '10px', opacity: skipLoading ? .6 : 1 }}
             disabled={skipLoading}
             onClick={async () => {
               setSkipLoading(true)
-              try {
-                const res = await fetch('/api/test-webhook-trigger', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ offer_id: offerId, action: 'simulate_payment' }),
-                })
-                const data = await res.json()
-                if (data.success) {
-                  router.push(`/arrival/${offerId}`)
-                } else {
-                  alert(`Simulation failed: ${data.error || 'unknown error'}`)
-                  setSkipLoading(false)
-                }
-              } catch (e: any) {
-                alert(`Error: ${e?.message}`)
-                setSkipLoading(false)
-              }
+              const { supabase } = await import('../../../lib/supabase')
+              await supabase.from('offers').update({
+                status: 'paid',
+                paid_at: new Date().toISOString(),
+              }).eq('id', offerId)
+              router.push(`/arrival/${offerId}`)
             }}
           >
-            {skipLoading ? 'Processing…' : 'Skip Payment for Testing →'}
+            {skipLoading ? 'Processing…' : 'Skip Payment (Test Account) →'}
           </button>
         )}
 

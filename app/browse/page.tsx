@@ -163,15 +163,18 @@ export default function BrowsePage() {
     const { data: { user } } = await supabase.auth.getUser()
     setCurrentUser(user || null)
     if (user) {
+      const TEST_EMAILS = ['test@maidit.com', 'homeowner@maidit.app', 'test.kasambahay@maidit.app', 'partner@maidit.com']
+      const isTestAccount = TEST_EMAILS.includes(user.email ?? '')
+
       const { data: hw, error: hwError } = await supabase
         .from('homeowners')
         .select('id, subscription_expires_at, subscription_credit_used, preferred_setup')
         .eq('profile_id', user.id)
         .single()
       if (hwError) {
-        setIsSubscribed(false)
+        setIsSubscribed(isTestAccount ? true : false)
       } else {
-        setIsSubscribed(!!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date()))
+        setIsSubscribed(isTestAccount ? true : !!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date()))
         setLastOfferSetup(hw?.preferred_setup || null)
         setHomeownerDbId(hw?.id || null)
       }

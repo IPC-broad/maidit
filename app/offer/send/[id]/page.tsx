@@ -112,8 +112,10 @@ export default function SendOfferPage() {
       if (!user) { router.push('/login'); return }
       const { data: kbData } = await supabase.from('kasambahay').select('*, profiles(full_name, mobile, city)').eq('id', kasambahayId).single()
       setKb(kbData)
+      const TEST_EMAILS = ['test@maidit.com', 'homeowner@maidit.app', 'test.kasambahay@maidit.app', 'partner@maidit.com']
+      const isTestAccount = TEST_EMAILS.includes(user.email ?? '')
       const { data: hw } = await supabase.from('homeowners').select('id, subscription_expires_at').eq('profile_id', user.id).single()
-      const subscribed = !!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date())
+      const subscribed = isTestAccount || !!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date())
       if (!subscribed) setShowPaywall(true)
       if (hw?.id) setHwId(hw.id)
       const { data: prof } = await supabase.from('profiles').select('city').eq('id', user.id).single()

@@ -48,6 +48,10 @@ export default function AdminTestPanel() {
   const [reminderRunning, setReminderRunning] = useState(false)
   const [reminderResult, setReminderResult] = useState<{ processed: number; reminders_sent: number; flagged: number } | null>(null)
 
+  type SetupResult = { email: string; status: 'created' | 'exists' | 'error'; detail?: string }
+  const [setupResults, setSetupResults] = useState<SetupResult[]>([])
+  const [settingUp, setSettingUp] = useState(false)
+
   const [profiles, setProfiles] = useState<any[]>([])
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [deletingAll, setDeletingAll] = useState(false)
@@ -55,7 +59,7 @@ export default function AdminTestPanel() {
   const [homeowners, setHomeowners] = useState<any[]>([])
   const [subUpdating, setSubUpdating] = useState<string | null>(null)
 
-  const PROTECTED_EMAILS = ['test@maidit.com', 'test.kasambahay@maidit.app', 'partner@maidit.com']
+  const PROTECTED_EMAILS = ['test@maidit.com', 'homeowner@maidit.app', 'test.kasambahay@maidit.app', 'partner@maidit.com']
 
   const loadProfiles = async () => {
     const res = await fetch('/api/admin/list-profiles')
@@ -326,6 +330,50 @@ export default function AdminTestPanel() {
     setUpdating(null)
   }
 
+  const setupTestAccounts = async () => {
+    setSettingUp(true)
+    setSetupResults([])
+    const { supabase } = await import('../../../lib/supabase')
+    const accounts = [
+      { email: 'test@maidit.com',              password: 'test1234', role: 'homeowner',   name: 'Test Homeowner' },
+      { email: 'homeowner@maidit.app',          password: 'test1234', role: 'homeowner',   name: 'Test Homeowner 2' },
+      { email: 'test.kasambahay@maidit.app',    password: 'test1234', role: 'kasambahay',  name: 'Test Kasambahay' },
+      { email: 'partner@maidit.com',            password: 'test1234', role: 'partner',     name: 'Test Partner' },
+    ]
+    const results: SetupResult[] = []
+    for (const acct of accounts) {
+      try {
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email: acct.email, password: acct.password })
+        let userId = signUpData?.user?.id
+        if (signUpError) {
+          if (signUpError.message?.toLowerCase().includes('already')) {
+            results.push({ email: acct.email, status: 'exists', detail: 'Auth user already registered' })
+            continue
+          }
+          results.push({ email: acct.email, status: 'error', detail: signUpError.message })
+          continue
+        }
+        if (!userId) { results.push({ email: acct.email, status: 'error', detail: 'No user ID returned' }); continue }
+        await supabase.from('profiles').upsert({ id: userId, role: acct.role, full_name: acct.name, mobile: '', city: 'Metro Manila', verified: true }, { onConflict: 'id' })
+        if (acct.role === 'homeowner') {
+          const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+          await supabase.from('homeowners').upsert({ profile_id: userId, preferred_setup: 'Stay-in', scope: [], subscription_expires_at: expiresAt, subscription_credit_used: false }, { onConflict: 'profile_id' })
+        } else if (acct.role === 'kasambahay') {
+          await supabase.from('kasambahay').upsert({ profile_id: userId, status: 'available', skills: [], province: 'Metro Manila', is_verified: true }, { onConflict: 'profile_id' })
+        } else if (acct.role === 'partner') {
+          await supabase.from('partners').upsert({ profile_id: userId, referral_code: 'TEST-PARTNER', tier: 'standard', balance: 0 }, { onConflict: 'profile_id' })
+        }
+        results.push({ email: acct.email, status: 'created' })
+      } catch (e: any) {
+        results.push({ email: acct.email, status: 'error', detail: e?.message })
+      }
+    }
+    setSetupResults(results)
+    setSettingUp(false)
+    await loadProfiles()
+    await loadHomeowners()
+  }
+
   const simulatePayment = async () => {
     if (!selectedSimOffer) return
     setSimulating(true)
@@ -385,6 +433,34 @@ export default function AdminTestPanel() {
             Refresh
           </button>
         </div>
+      </div>
+
+      {/* ── SETUP TEST ACCOUNTS ── */}
+      <div style={{ ...s.secTitle, marginTop: '24px' }}>🔧 Setup Test Accounts</div>
+      <div style={s.card}>
+        <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '12px', lineHeight: 1.6 }}>
+          Creates test@maidit.com, homeowner@maidit.app, test.kasambahay@maidit.app, partner@maidit.com with password <strong>test1234</strong>. Homeowners get 1-year subscription. Safe to run multiple times.
+        </div>
+        <button
+          onClick={setupTestAccounts}
+          disabled={settingUp}
+          style={{ padding: '9px 16px', borderRadius: '8px', background: settingUp ? '#e5e7eb' : '#c9943a', color: settingUp ? '#9ca3af' : '#fff', border: 'none', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: settingUp ? 'default' : 'pointer', marginBottom: setupResults.length > 0 ? '12px' : 0 }}
+        >
+          {settingUp ? 'Setting up…' : '⚙️ Setup Test Accounts'}
+        </button>
+        {setupResults.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {setupResults.map(r => (
+              <div key={r.email} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', padding: '7px 10px', borderRadius: '8px', background: r.status === 'created' ? '#f0fdf4' : r.status === 'exists' ? '#faf8f5' : '#fef2f2', border: `1px solid ${r.status === 'created' ? '#bbf7d0' : r.status === 'exists' ? '#ede8e0' : '#fecaca'}` }}>
+                <span style={{ fontWeight: 700, color: r.status === 'created' ? '#1a6b3c' : r.status === 'exists' ? '#9ca3af' : '#dc2626' }}>
+                  {r.status === 'created' ? '✓ Created' : r.status === 'exists' ? '— Already exists' : '✗ Error'}
+                </span>
+                <span style={{ color: '#374151', fontFamily: 'monospace' }}>{r.email}</span>
+                {r.detail && <span style={{ color: '#9ca3af', fontSize: '11px' }}>{r.detail}</span>}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── OFFERS ── */}
