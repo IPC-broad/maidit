@@ -789,7 +789,7 @@ export default function BrowsePage() {
             {/* Logged-out: blurred remainder + unlock wall */}
             {lockedCards.length > 0 && (
               <div style={{ position: 'relative', width: '100%' }}>
-                <div style={{ filter: 'blur(3.5px)', pointerEvents: 'none', userSelect: 'none' as const, width: '100%' }}>
+                <div style={{ filter: 'blur(6px)', pointerEvents: 'none', userSelect: 'none' as const, width: '100%' }}>
                   {lockedCards.slice(0, 2).map(renderKBCard)}
                 </div>
                 <div style={{
@@ -833,16 +833,16 @@ export default function BrowsePage() {
                     </div>
 
                     <h2 style={{
-                      margin: 0, fontFamily: serif, fontSize: 26, lineHeight: 1.15,
+                      margin: 0, fontFamily: serif, fontSize: 24, lineHeight: 1.15,
                       color: C.forestDeep, textAlign: 'center', letterSpacing: '-0.02em',
                     }}>
-                      See <em style={{ color: C.amber }}>every</em> kasambahay.
+                      🔒 See all available helpers
                     </h2>
                     <p style={{
                       margin: '8px auto 18px', maxWidth: 280, textAlign: 'center',
                       fontSize: 13.5, lineHeight: 1.45, color: C.ink2,
                     }}>
-                      Create a free account to unlock full profiles, save favorites, and send offers.
+                      Create a free account to view full profiles and send offers.
                     </p>
 
                     <button
@@ -853,19 +853,24 @@ export default function BrowsePage() {
                         fontSize: 14.5, fontWeight: 600, letterSpacing: '-0.005em', border: 'none',
                         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                         cursor: 'pointer', boxShadow: '0 4px 14px -6px rgba(39,80,10,0.55)',
+                        marginBottom: 10,
                       }}
                     >
-                      Create Free Account <IcArrowRight />
+                      Sign Up Free →
                     </button>
-                    <div style={{ marginTop: 10, textAlign: 'center', fontSize: 12.5, color: C.ink3 }}>
-                      Already have one?{' '}
-                      <span
-                        onClick={() => router.push('/login')}
-                        style={{ color: C.forest, fontWeight: 600, cursor: 'pointer' }}
-                      >
-                        Sign in
-                      </span>
-                    </div>
+                    <button
+                      onClick={() => router.push('/login')}
+                      style={{
+                        width: '100%', height: 44, borderRadius: 14,
+                        background: 'transparent', color: C.forestDeep, fontFamily: sans,
+                        fontSize: 14, fontWeight: 600, letterSpacing: '-0.005em',
+                        border: `1.5px solid ${C.forestLine}`,
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Log In
+                    </button>
                   </div>
                 </div>
               </div>

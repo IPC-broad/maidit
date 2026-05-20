@@ -53,11 +53,6 @@ const trustItems = [
   },
 ]
 
-const features = [
-  'Send up to 10 job offers',
-  'Post 1 job listing',
-  'Discounted hiring fee',
-]
 
 export default function HomeownerLanding() {
   const router = useRouter()
@@ -166,7 +161,7 @@ export default function HomeownerLanding() {
           gap: 10,
         }}>
           <button
-            onClick={() => router.push('/browse')}
+            onClick={() => router.push('/signup/homeowner')}
             style={{
               background: C.paper,
               color: C.forestDeep,
@@ -180,7 +175,7 @@ export default function HomeownerLanding() {
               width: '100%',
             }}
           >
-            Browse Kasambahay Profiles →
+            Sign Up Free →
           </button>
           <button
             onClick={() => router.push('/dashboard/homeowner/post-job')}
@@ -289,7 +284,7 @@ export default function HomeownerLanding() {
         </div>
       </section>
 
-      {/* ₱499 CTA card */}
+      {/* Bottom CTA card */}
       <div style={{
         margin: '20px 22px',
         borderRadius: 22,
@@ -313,32 +308,17 @@ export default function HomeownerLanding() {
           START HIRING
         </div>
 
-        {/* Price */}
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 16 }}>
-          <span style={{
-            fontFamily: serif,
-            fontSize: 52,
-            color: C.amber,
-            lineHeight: 1,
-          }}>
-            ₱499
-          </span>
-          <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)' }}>/month</span>
+        <div style={{ fontFamily: serif, fontSize: 28, color: '#ffffff', lineHeight: 1.2, marginBottom: 8 }}>
+          Find your kasambahay{' '}
+          <span style={{ fontStyle: 'italic', color: C.amber }}>today.</span>
         </div>
-
-        {/* Features */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-          {features.map((f) => (
-            <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14 }}>
-              <span style={{ color: C.amber, fontWeight: 700 }}>✓</span>
-              <span>{f}</span>
-            </div>
-          ))}
+        <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', marginBottom: 20, lineHeight: 1.5 }}>
+          Browse real profiles, send job offers, and hire with confidence.
         </div>
 
         {/* CTA button */}
         <button
-          onClick={() => router.push('/browse')}
+          onClick={() => router.push('/signup/homeowner')}
           style={{
             background: C.paper,
             color: C.forestDeep,
@@ -350,10 +330,9 @@ export default function HomeownerLanding() {
             cursor: 'pointer',
             width: '100%',
             fontFamily: sans,
-            marginTop: 20,
           }}
         >
-          Browse Kasambahay Profiles →
+          Sign Up Free →
         </button>
 
         {/* Fine print */}
@@ -363,7 +342,7 @@ export default function HomeownerLanding() {
           textAlign: 'center',
           marginTop: 10,
         }}>
-          No commitment. Cancel anytime.
+          Free to get started.
         </div>
       </div>
 
