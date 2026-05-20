@@ -161,7 +161,7 @@ export default function HomeownerLanding() {
           gap: 10,
         }}>
           <button
-            onClick={() => router.push('/signup/homeowner')}
+            onClick={() => router.push('/browse')}
             style={{
               background: C.paper,
               color: C.forestDeep,
@@ -175,7 +175,7 @@ export default function HomeownerLanding() {
               width: '100%',
             }}
           >
-            Sign Up Free →
+            Browse Kasambahay Profiles →
           </button>
           <button
             onClick={() => router.push('/dashboard/homeowner/post-job')}
