@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "MaidIt",
   description: "Ang trusted kasambahay marketplace sa Pilipinas",
+  openGraph: {
+    images: ['/icon-512.png'],
+  },
 };
 
 export default function RootLayout({
