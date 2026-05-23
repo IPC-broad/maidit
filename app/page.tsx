@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 const C = {
   forest: '#27500A', forestDeep: '#1c3b07', forestSoft: '#f0f5ec', forestLine: '#e2ecdb',
@@ -65,44 +66,60 @@ export default function Home() {
 
       {/* Hero */}
       <section style={{
-        background: 'linear-gradient(175deg, #1c3b07 0%, #27500A 60%, #2d5c0c 100%)',
+        position: 'relative',
+        overflow: 'hidden',
         padding: '36px 22px 32px',
         textAlign: 'center',
       }}>
-        {/* Amber eyebrow badge */}
+        <Image
+          src="https://images.unsplash.com/photo-1560472355-536de3962603?w=800&h=600&fit=crop"
+          fill
+          style={{ objectFit: 'cover', objectPosition: 'center' }}
+          alt=""
+          priority
+        />
+        {/* Gradient overlay */}
         <div style={{
-          display: 'inline-block',
-          background: C.amber,
-          borderRadius: 50,
-          padding: '4px 14px',
-          fontSize: 11,
-          fontWeight: 700,
-          color: '#fff',
-          letterSpacing: '0.04em',
-          textTransform: 'uppercase' as const,
-          marginBottom: 14,
-        }}>
-          Trusted · Verified · Safe
-        </div>
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(175deg, rgba(28,59,7,0.82) 0%, rgba(28,59,7,0.55) 40%, rgba(28,59,7,0.80) 100%)',
+        }} />
+        {/* Hero content */}
+        <div style={{ position: 'relative', zIndex: 1, padding: '36px 22px 32px', textAlign: 'center' }}>
+          {/* Amber eyebrow badge */}
+          <div style={{
+            display: 'inline-block',
+            background: C.amber,
+            borderRadius: 50,
+            padding: '4px 14px',
+            fontSize: 11,
+            fontWeight: 700,
+            color: '#fff',
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase' as const,
+            marginBottom: 14,
+          }}>
+            Trusted · Verified · Safe
+          </div>
 
-        {/* Tagline */}
-        <div style={{
-          fontFamily: serif,
-          fontSize: 34,
-          fontStyle: 'italic',
-          color: '#ffffff',
-          lineHeight: 1.2,
-          marginBottom: 10,
-        }}>
-          Find <span style={{ color: C.amber }}>trusted</span> help for your family.
-        </div>
+          {/* Tagline */}
+          <div style={{
+            fontFamily: serif,
+            fontSize: 34,
+            fontStyle: 'italic',
+            color: '#ffffff',
+            lineHeight: 1.2,
+            marginBottom: 10,
+          }}>
+            Find <span style={{ color: C.amber }}>trusted</span> help for your family.
+          </div>
 
-        {/* Subtext */}
-        <div style={{
-          fontSize: 14,
-          color: 'rgba(255,255,255,0.7)',
-        }}>
-          Verified kasambahay. Real families. Safe hiring.
+          {/* Subtext */}
+          <div style={{
+            fontSize: 14,
+            color: 'rgba(255,255,255,0.7)',
+          }}>
+            Verified kasambahay. Real families. Safe hiring.
+          </div>
         </div>
       </section>
 
@@ -151,24 +168,33 @@ export default function Home() {
           }}
         >
           <div style={{
-            background: 'linear-gradient(135deg, #1c3b07 0%, #27500A 100%)',
-            height: 80,
-            padding: '18px 18px 0',
+            position: 'relative',
+            overflow: 'hidden',
+            height: 110,
           }}>
-            <div style={{
-              fontFamily: serif,
-              fontSize: 24,
-              color: '#ffffff',
-              lineHeight: 1.1,
-            }}>
-              I need help at home.
-            </div>
-            <div style={{
-              fontSize: 13,
-              color: 'rgba(255,255,255,0.75)',
-              marginTop: 4,
-            }}>
-              Browse verified kasambahay profiles.
+            <Image
+              src="https://images.unsplash.com/photo-1560472355-536de3962603?w=400&h=120&fit=crop"
+              fill
+              style={{ objectFit: 'cover', objectPosition: 'center' }}
+              alt=""
+            />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(28,59,7,0.78) 0%, rgba(39,80,10,0.65) 100%)' }} />
+            <div style={{ position: 'relative', zIndex: 1, padding: '18px 18px 0' }}>
+              <div style={{
+                fontFamily: serif,
+                fontSize: 24,
+                color: '#ffffff',
+                lineHeight: 1.1,
+              }}>
+                I need help at home.
+              </div>
+              <div style={{
+                fontSize: 13,
+                color: 'rgba(255,255,255,0.75)',
+                marginTop: 4,
+              }}>
+                Browse verified kasambahay profiles.
+              </div>
             </div>
           </div>
           <div style={{
@@ -186,7 +212,7 @@ export default function Home() {
 
         {/* Card 2 — Kasambahay */}
         <div
-          onClick={() => router.push('/signup/kasambahay')}
+          onClick={() => router.push('/kasambahay-landing')}
           style={{
             background: C.paper,
             border: `1px solid ${C.line}`,
@@ -197,24 +223,33 @@ export default function Home() {
           }}
         >
           <div style={{
-            background: 'linear-gradient(135deg, #8a6418 0%, #c9943a 100%)',
-            height: 80,
-            padding: '18px 18px 0',
+            position: 'relative',
+            overflow: 'hidden',
+            height: 110,
           }}>
-            <div style={{
-              fontFamily: serif,
-              fontSize: 24,
-              color: '#ffffff',
-              lineHeight: 1.1,
-            }}>
-              Naghahanap ako ng trabaho.
-            </div>
-            <div style={{
-              fontSize: 13,
-              color: 'rgba(255,255,255,0.75)',
-              marginTop: 4,
-            }}>
-              Mag-sign up. Libre. Walang bayad.
+            <Image
+              src="https://images.unsplash.com/photo-1608889825205-eebdb9fc5806?w=400&h=120&fit=crop"
+              fill
+              style={{ objectFit: 'cover', objectPosition: 'center' }}
+              alt=""
+            />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(138,100,24,0.78) 0%, rgba(201,148,58,0.65) 100%)' }} />
+            <div style={{ position: 'relative', zIndex: 1, padding: '18px 18px 0' }}>
+              <div style={{
+                fontFamily: serif,
+                fontSize: 24,
+                color: '#ffffff',
+                lineHeight: 1.1,
+              }}>
+                Naghahanap ako ng trabaho.
+              </div>
+              <div style={{
+                fontSize: 13,
+                color: 'rgba(255,255,255,0.75)',
+                marginTop: 4,
+              }}>
+                Mag-sign up. Libre. Walang bayad.
+              </div>
             </div>
           </div>
           <div style={{

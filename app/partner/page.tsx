@@ -229,11 +229,15 @@ export default function PartnerPage() {
   if (step === 'landing') return (
     <div style={{ minHeight: '100vh', background: C.paper2, fontFamily: sans, color: C.ink }}>
 
-      {/* HERO — full dark forest gradient */}
-      <div style={{
-        background: `linear-gradient(175deg, ${C.forestDark} 0%, ${C.forestDeep} 50%, ${C.forest} 100%)`,
-        padding: '0 0 36px',
-      }}>
+      {/* HERO — photo background */}
+      <div style={{ position: 'relative', overflow: 'hidden' }}>
+        <img
+          src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=800&h=400&fit=crop&crop=faces"
+          alt=""
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(28,59,7,0.35) 0%, rgba(28,59,7,0.88) 100%)' }} />
+        <div style={{ position: 'relative', zIndex: 1 }}>
 
         {/* Sticky nav inside hero */}
         <div style={{
@@ -266,16 +270,16 @@ export default function PartnerPage() {
           {/* Eyebrow badge */}
           <div style={{
             display: 'inline-block',
-            background: 'rgba(201,148,58,.18)',
-            border: '1px solid rgba(201,148,58,.35)',
+            background: 'rgba(255,255,255,0.18)',
+            border: '1px solid rgba(255,255,255,0.3)',
             borderRadius: '50px',
             padding: '5px 14px',
             fontSize: '11px', fontWeight: 700,
-            color: C.amber,
+            color: '#fff',
             letterSpacing: '0.04em',
             marginBottom: '18px',
           }}>
-            🤝 Community Partner Program
+            ✨ Kumita habang nakakatulong
           </div>
 
           {/* Headline */}
@@ -319,29 +323,36 @@ export default function PartnerPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               {/* Left — Referral */}
               <div style={{
-                background: 'rgba(255,255,255,.12)',
-                border: '1px solid rgba(255,255,255,.2)',
+                background: '#f0f5ec',
+                border: '1px solid #e2ecdb',
                 borderRadius: '14px', padding: '14px 12px',
                 textAlign: 'left' as const,
               }}>
-                <div style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: 'rgba(255,255,255,.5)', marginBottom: '8px' }}>
+                <div style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: '#27500A', marginBottom: '8px' }}>
                   REFERRAL FEE
                 </div>
-                <div style={{ fontFamily: serif, fontSize: '28px', color: '#fff', lineHeight: 1, marginBottom: '6px' }}>
+                <div style={{ fontFamily: serif, fontSize: '28px', color: '#1c3b07', lineHeight: 1, marginBottom: '6px' }}>
                   ₱500
                 </div>
-                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.62)', lineHeight: 1.5 }}>
+                <div style={{ fontSize: '11px', color: '#4a4a3a', lineHeight: 1.5 }}>
                   Sa bawat kasambahay na ma-hire — lahat ng lugar
                 </div>
               </div>
 
               {/* Right — Bonus */}
               <div style={{
-                background: 'rgba(201,148,58,.2)',
-                border: '1px solid rgba(201,148,58,.4)',
+                background: '#c9943a',
+                border: 'none',
                 borderRadius: '14px', padding: '14px 12px',
                 textAlign: 'left' as const,
+                position: 'relative' as const,
               }}>
+                <div style={{
+                  position: 'absolute', top: 8, right: 8,
+                  background: 'rgba(255,255,255,0.25)', borderRadius: 50,
+                  padding: '2px 8px', fontSize: 9, fontWeight: 800,
+                  color: '#fff', letterSpacing: '0.06em',
+                }}>NEW</div>
                 <div style={{
                   display: 'inline-block',
                   background: C.amber, borderRadius: '50px',
@@ -352,15 +363,19 @@ export default function PartnerPage() {
                 }}>
                   BONUS
                 </div>
-                <div style={{ fontFamily: serif, fontSize: '28px', color: C.amber, lineHeight: 1, marginBottom: '6px' }}>
+                <div style={{ fontFamily: serif, fontSize: '28px', color: '#fff', lineHeight: 1, marginBottom: '6px' }}>
                   +₱500
                 </div>
-                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.62)', lineHeight: 1.5 }}>
+                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.88)', lineHeight: 1.5 }}>
                   Transport assistance — Leyte, Samar, at Bicol lang
                 </div>
               </div>
             </div>
+            <div style={{ fontSize: 10.5, fontStyle: 'italic', color: 'rgba(255,255,255,0.55)', marginTop: 10, textAlign: 'left' as const, lineHeight: 1.5 }}>
+              *Transport bonus para lang sa kasambahay na galing Leyte, Samar at Bicol.
+            </div>
           </div>
+        </div>
         </div>
       </div>
 
@@ -410,11 +425,14 @@ export default function PartnerPage() {
       {/* CTA CARD */}
       <div style={{
         margin: '0 18px 40px',
-        background: `linear-gradient(150deg, ${C.forestDeep} 0%, ${C.forest} 100%)`,
+        background: '#1c3b07',
         borderRadius: '20px', padding: '24px 20px',
+        position: 'relative', overflow: 'hidden',
       }}>
+        <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,148,58,0.35) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ fontStyle: 'italic', fontSize: 13, color: 'rgba(255,255,255,0.55)', marginBottom: 6 }}>Simulan na ngayon —</div>
         <div style={{ fontFamily: serif, fontSize: '22px', color: '#fff', marginBottom: '14px', lineHeight: 1.3 }}>
-          Handa ka nang tumulong at kumita?
+          Maging Community Partner.
         </div>
         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '7px', marginBottom: '20px' }}>
           {['Libre ang pagsali.', 'Marami ka pang matutulungang pamilya.'].map((line, i) => (

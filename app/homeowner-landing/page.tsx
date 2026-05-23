@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 const C = {
   forest: '#27500A', forestDeep: '#1c3b07', forestSoft: '#f0f5ec', forestLine: '#e2ecdb',
@@ -56,6 +57,20 @@ const trustItems = [
 
 export default function HomeownerLanding() {
   const router = useRouter()
+  const [kbProfiles, setKbProfiles] = useState<any[]>([])
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      const { supabase } = await import('../../lib/supabase')
+      const { data } = await supabase
+        .from('kasambahay')
+        .select('id, profile_id, asking_salary, setup, age, profiles:profile_id(full_name)')
+        .eq('is_verified', true)
+        .limit(2)
+      setKbProfiles(data || [])
+    }
+    fetchProfiles()
+  }, [])
 
   useEffect(() => {
     const link = document.createElement('link')
@@ -107,93 +122,168 @@ export default function HomeownerLanding() {
       </nav>
 
       {/* Hero */}
-      <section style={{
-        background: 'linear-gradient(175deg, #1c3b07 0%, #27500A 60%, #2d5c0c 100%)',
-        padding: '48px 22px 40px',
-        textAlign: 'center',
-      }}>
-        {/* Eyebrow */}
+      <section style={{ position: 'relative', overflow: 'hidden', minHeight: 320 }}>
+        <Image
+          src="https://images.unsplash.com/photo-1560472355-536de3962603?w=800&h=400&fit=crop"
+          fill
+          style={{ objectFit: 'cover', objectPosition: 'center top' }}
+          alt=""
+          priority
+        />
+        {/* Overlay */}
         <div style={{
-          display: 'inline-block',
-          background: 'rgba(255,255,255,0.2)',
-          color: '#ffffff',
-          fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-          borderRadius: 50,
-          padding: '5px 12px',
-          marginBottom: 18,
-        }}>
-          For Homeowners
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to bottom, rgba(28,59,7,0.25) 0%, rgba(28,59,7,0.85) 100%)',
+        }} />
+        {/* Content */}
+        <div style={{ position: 'relative', zIndex: 1, padding: '48px 22px 40px', textAlign: 'center' }}>
+          {/* Eyebrow */}
+          <div style={{
+            display: 'inline-block',
+            background: 'rgba(201,148,58,0.22)',
+            color: '#fde8c0',
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            borderRadius: 50,
+            padding: '5px 12px',
+            marginBottom: 18,
+            border: '1px solid rgba(201,148,58,0.35)',
+          }}>
+            For Homeowners
+          </div>
+
+          {/* H1 */}
+          <h1 style={{
+            fontFamily: serif,
+            fontSize: 36,
+            color: '#ffffff',
+            letterSpacing: '-0.02em',
+            lineHeight: 1.2,
+            margin: '0 0 8px',
+            fontWeight: 400,
+          }}>
+            Find your trusted kasambahay{' '}
+            <span style={{ fontStyle: 'italic', color: C.amber }}>safely.</span>
+          </h1>
+
+          {/* Subtext */}
+          <p style={{
+            fontSize: 14,
+            color: 'rgba(255,255,255,0.75)',
+            marginTop: 8,
+            marginBottom: 0,
+          }}>
+            Browse real profiles. Hire with confidence.
+          </p>
+
+          {/* Action buttons */}
+          <div style={{
+            maxWidth: 320,
+            margin: '24px auto 0',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10,
+          }}>
+            <button
+              onClick={() => router.push('/browse')}
+              style={{
+                background: C.paper,
+                color: C.forestDeep,
+                height: 52,
+                borderRadius: 14,
+                fontSize: 15,
+                fontWeight: 700,
+                border: 'none',
+                cursor: 'pointer',
+                fontFamily: sans,
+                width: '100%',
+              }}
+            >
+              Browse Kasambahay Profiles →
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/homeowner/post-job')}
+              style={{
+                background: 'rgba(255,255,255,0.15)',
+                color: '#ffffff',
+                border: '1.5px solid rgba(255,255,255,0.35)',
+                height: 48,
+                borderRadius: 14,
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontFamily: sans,
+                width: '100%',
+              }}
+            >
+              Post a Job
+            </button>
+          </div>
         </div>
+      </section>
 
-        {/* H1 */}
-        <h1 style={{
-          fontFamily: serif,
-          fontSize: 36,
-          color: '#ffffff',
-          letterSpacing: '-0.02em',
-          lineHeight: 1.2,
-          margin: '0 0 8px',
-          fontWeight: 400,
-        }}>
-          Find your trusted kasambahay{' '}
-          <span style={{ fontStyle: 'italic', color: C.amber }}>safely.</span>
-        </h1>
-
-        {/* Subtext */}
-        <p style={{
-          fontSize: 14,
-          color: 'rgba(255,255,255,0.75)',
-          marginTop: 8,
-          marginBottom: 0,
-        }}>
-          Browse real profiles. Hire with confidence.
-        </p>
-
-        {/* Action buttons */}
-        <div style={{
-          maxWidth: 320,
-          margin: '24px auto 0',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 10,
-        }}>
-          <button
-            onClick={() => router.push('/browse')}
-            style={{
-              background: C.paper,
-              color: C.forestDeep,
-              height: 52,
-              borderRadius: 14,
-              fontSize: 15,
-              fontWeight: 700,
-              border: 'none',
-              cursor: 'pointer',
-              fontFamily: sans,
-              width: '100%',
-            }}
-          >
-            Browse Kasambahay Profiles →
-          </button>
-          <button
-            onClick={() => router.push('/dashboard/homeowner/post-job')}
-            style={{
-              background: 'rgba(255,255,255,0.15)',
-              color: '#ffffff',
-              border: '1.5px solid rgba(255,255,255,0.35)',
-              height: 48,
-              borderRadius: 14,
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: 'pointer',
-              fontFamily: sans,
-              width: '100%',
-            }}
-          >
-            Post a Job
-          </button>
+      {/* Kasambahay preview carousel */}
+      <section style={{ padding: '28px 22px 8px', background: '#faf9f5' }}>
+        <div style={{ fontFamily: serif, fontSize: 22, color: '#1c3b07', marginBottom: 4, letterSpacing: '-0.01em' }}>
+          Some wonderful people looking for a home.
+        </div>
+        <div style={{ fontSize: 13, color: '#8a8a7a', marginBottom: 16 }}>Verified profiles on MaidIt.</div>
+        <div
+          style={{
+            display: 'flex', gap: 14, overflowX: 'auto',
+            scrollbarWidth: 'none', paddingBottom: 4,
+          }}
+        >
+          {kbProfiles.map((kb: any) => {
+            const fullName = kb.profiles?.full_name || ''
+            const firstName = fullName.split(' ')[0] || ''
+            const lastInit = fullName.split(' ')[1]?.[0]
+            const displayName = lastInit ? `${firstName} ${lastInit}.` : firstName
+            const selfieUrl = kb.profile_id
+              ? `https://xlagwtsrjbylhxfozoem.supabase.co/storage/v1/object/public/Selfies/${kb.profile_id}/selfie.png`
+              : null
+            return (
+              <div key={kb.id} style={{
+                flexShrink: 0, width: 180,
+                background: '#ffffff', borderRadius: 18,
+                border: '1px solid #ebe9e2',
+                overflow: 'hidden',
+                boxShadow: '0 10px 24px -10px rgba(28,59,7,0.18)',
+              }}>
+                {/* Photo */}
+                <div style={{ height: 130, background: 'linear-gradient(155deg, #fde8c0 0%, #e8c47a 100%)', position: 'relative', overflow: 'hidden' }}>
+                  {selfieUrl && (
+                    <img
+                      src={selfieUrl}
+                      alt={displayName}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                    />
+                  )}
+                </div>
+                {/* Info */}
+                <div style={{ padding: '12px 12px 14px' }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#1a1a14', marginBottom: 2 }}>
+                    {displayName}{kb.age ? <span style={{ color: '#8a8a7a', fontWeight: 400 }}>, {kb.age}</span> : null}
+                  </div>
+                  <div style={{ fontSize: 11.5, color: '#4a4a3a', marginBottom: 8 }}>
+                    {kb.setup || 'Kasambahay'}
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#27500A' }}>
+                    ₱{kb.asking_salary?.toLocaleString() || '—'}<span style={{ fontSize: 11, fontWeight: 400, color: '#8a8a7a' }}>/mo</span>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        <div
+          onClick={() => router.push('/browse')}
+          style={{ marginTop: 14, fontSize: 13, fontWeight: 600, color: '#27500A', cursor: 'pointer' }}
+        >
+          See all profiles →
         </div>
       </section>
 
