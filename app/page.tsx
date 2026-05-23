@@ -72,7 +72,7 @@ export default function Home() {
         textAlign: 'center',
       }}>
         <Image
-          src="https://images.unsplash.com/photo-1560472355-536de3962603?w=800&h=600&fit=crop"
+          src="/photos/hero-family.jpg"
           fill
           style={{ objectFit: 'cover', objectPosition: 'center' }}
           alt=""
@@ -173,7 +173,7 @@ export default function Home() {
             height: 110,
           }}>
             <Image
-              src="https://images.unsplash.com/photo-1560472355-536de3962603?w=400&h=120&fit=crop"
+              src="/photos/hero-family.jpg"
               fill
               style={{ objectFit: 'cover', objectPosition: 'center' }}
               alt=""
@@ -228,7 +228,7 @@ export default function Home() {
             height: 110,
           }}>
             <Image
-              src="https://images.unsplash.com/photo-1608889825205-eebdb9fc5806?w=400&h=120&fit=crop"
+              src="/photos/hero-kasambahay.jpg"
               fill
               style={{ objectFit: 'cover', objectPosition: 'center' }}
               alt=""

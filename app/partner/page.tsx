@@ -232,7 +232,7 @@ export default function PartnerPage() {
       {/* HERO — photo background */}
       <div style={{ position: 'relative', overflow: 'hidden' }}>
         <img
-          src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=800&h=400&fit=crop&crop=faces"
+          src="/photos/hero-partner.jpg"
           alt=""
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
         />

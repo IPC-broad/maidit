@@ -124,7 +124,7 @@ export default function HomeownerLanding() {
       {/* Hero */}
       <section style={{ position: 'relative', overflow: 'hidden', minHeight: 320 }}>
         <Image
-          src="https://images.unsplash.com/photo-1560472355-536de3962603?w=800&h=400&fit=crop"
+          src="/photos/hero-family.jpg"
           fill
           style={{ objectFit: 'cover', objectPosition: 'center top' }}
           alt=""

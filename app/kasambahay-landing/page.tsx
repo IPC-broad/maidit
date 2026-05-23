@@ -48,7 +48,7 @@ export default function KasambahayLanding() {
       {/* Photo Hero */}
       <section style={{ position: 'relative', overflow: 'hidden', minHeight: 340 }}>
         <Image
-          src="https://images.unsplash.com/photo-1608889825205-eebdb9fc5806?w=800&h=500&fit=crop&crop=faces"
+          src="/photos/hero-kasambahay.jpg"
           fill
           style={{ objectFit: 'cover', objectPosition: 'center top' }}
           alt=""
