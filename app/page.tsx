@@ -74,7 +74,7 @@ export default function Home() {
         <Image
           src="/photos/hero-family.jpg"
           fill
-          style={{ objectFit: 'cover', objectPosition: 'center' }}
+          style={{ objectFit: 'cover', objectPosition: 'center', maxHeight: '420px' }}
           alt=""
           priority
         />
@@ -159,52 +159,38 @@ export default function Home() {
         <div
           onClick={() => router.push('/homeowner-landing')}
           style={{
-            background: C.paper,
-            border: `1px solid ${C.line}`,
+            background: 'linear-gradient(135deg, #1c3b07 0%, #27500A 100%)',
             borderRadius: 20,
             overflow: 'hidden',
             cursor: 'pointer',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+            minHeight: 120,
+            display: 'flex',
+            flexDirection: 'column' as const,
+            justifyContent: 'space-between',
+            padding: '18px 18px 14px',
           }}
         >
-          <div style={{
-            position: 'relative',
-            overflow: 'hidden',
-            height: 110,
-          }}>
-            <Image
-              src="/photos/hero-family.jpg"
-              fill
-              style={{ objectFit: 'cover', objectPosition: 'center' }}
-              alt=""
-            />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(28,59,7,0.78) 0%, rgba(39,80,10,0.65) 100%)' }} />
-            <div style={{ position: 'relative', zIndex: 1, padding: '18px 18px 0' }}>
-              <div style={{
-                fontFamily: serif,
-                fontSize: 24,
-                color: '#ffffff',
-                lineHeight: 1.1,
-              }}>
-                I need help at home.
-              </div>
-              <div style={{
-                fontSize: 13,
-                color: 'rgba(255,255,255,0.75)',
-                marginTop: 4,
-              }}>
-                Browse verified kasambahay profiles.
-              </div>
+          <div>
+            <div style={{
+              fontFamily: serif,
+              fontSize: 24,
+              color: '#ffffff',
+              lineHeight: 1.1,
+            }}>
+              I need help at home.
+            </div>
+            <div style={{
+              fontSize: 13,
+              color: 'rgba(255,255,255,0.75)',
+              marginTop: 4,
+            }}>
+              Browse verified kasambahay profiles.
             </div>
           </div>
-          <div style={{
-            padding: '14px 18px',
-            display: 'flex',
-            justifyContent: 'flex-end',
-          }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <span style={{
               fontSize: 20,
-              color: C.forest,
+              color: '#ffffff',
               fontWeight: 700,
             }}>→</span>
           </div>
@@ -214,52 +200,38 @@ export default function Home() {
         <div
           onClick={() => router.push('/kasambahay-landing')}
           style={{
-            background: C.paper,
-            border: `1px solid ${C.line}`,
+            background: 'linear-gradient(135deg, #8a6418 0%, #c9943a 100%)',
             borderRadius: 20,
             overflow: 'hidden',
             cursor: 'pointer',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+            minHeight: 120,
+            display: 'flex',
+            flexDirection: 'column' as const,
+            justifyContent: 'space-between',
+            padding: '18px 18px 14px',
           }}
         >
-          <div style={{
-            position: 'relative',
-            overflow: 'hidden',
-            height: 110,
-          }}>
-            <Image
-              src="/photos/hero-kasambahay.jpg"
-              fill
-              style={{ objectFit: 'cover', objectPosition: 'center' }}
-              alt=""
-            />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(138,100,24,0.78) 0%, rgba(201,148,58,0.65) 100%)' }} />
-            <div style={{ position: 'relative', zIndex: 1, padding: '18px 18px 0' }}>
-              <div style={{
-                fontFamily: serif,
-                fontSize: 24,
-                color: '#ffffff',
-                lineHeight: 1.1,
-              }}>
-                Naghahanap ako ng trabaho.
-              </div>
-              <div style={{
-                fontSize: 13,
-                color: 'rgba(255,255,255,0.75)',
-                marginTop: 4,
-              }}>
-                Mag-sign up. Libre. Walang bayad.
-              </div>
+          <div>
+            <div style={{
+              fontFamily: serif,
+              fontSize: 24,
+              color: '#ffffff',
+              lineHeight: 1.1,
+            }}>
+              Naghahanap ako ng trabaho.
+            </div>
+            <div style={{
+              fontSize: 13,
+              color: 'rgba(255,255,255,0.75)',
+              marginTop: 4,
+            }}>
+              Mag-sign up. Libre. Walang bayad.
             </div>
           </div>
-          <div style={{
-            padding: '14px 18px',
-            display: 'flex',
-            justifyContent: 'flex-end',
-          }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <span style={{
               fontSize: 20,
-              color: C.amber,
+              color: '#ffffff',
               fontWeight: 700,
             }}>→</span>
           </div>
