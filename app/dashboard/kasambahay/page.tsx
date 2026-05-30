@@ -267,12 +267,82 @@ export default function KBDashboard() {
           )}
 
           {jobs.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '52px 24px 40px' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '14px' }}>🧹</div>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: '#374151', marginBottom: '6px' }}>Walang available na trabaho ngayon.</div>
-              <div style={{ fontSize: '12px', color: '#9ca3af', lineHeight: 1.7 }}>Mag-check ulit mamaya para sa mga bagong trabaho.</div>
-            </div>
-          )}
+  <div>
+    {/* Activity strip */}
+    <div style={{ background: 'linear-gradient(135deg, #f0f5ec, #e8f0e0)', border: '1px solid #c8e0b0', borderRadius: 16, padding: '14px 16px', margin: '14px 0 12px', display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#27a040', flexShrink: 0, boxShadow: '0 0 0 3px rgba(39,160,64,0.2)' }} />
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#1c3b07' }}>Active ang platform ngayon</div>
+        <div style={{ fontSize: 11, color: '#8a8a7a', marginTop: 1 }}>Naghahanap ng kasambahay ang mga pamilya</div>
+      </div>
+      <div style={{ fontFamily: 'serif', fontSize: 20, color: '#27500A', fontWeight: 400 }}>{activeHomeowners}+</div>
+    </div>
+
+    {/* Ready state */}
+    <div style={{ background: '#fff', border: '1px solid #e8e4db', borderRadius: 18, padding: '22px 18px', textAlign: 'center' as const, marginBottom: 12 }}>
+      <div style={{ fontSize: 40, marginBottom: 12 }}>🏡</div>
+      <div style={{ fontFamily: 'serif', fontSize: 20, color: '#1c3b07', marginBottom: 6, lineHeight: 1.2 }}>Handa ka na.<br/>Abangan ang offer.</div>
+      <div style={{ fontSize: 13, color: '#8a8a7a', lineHeight: 1.6, maxWidth: 260, margin: '0 auto' }}>Naka-set up na ang iyong profile. Magpapadala ng offer ang mga pamilya na naghahanap ng katulad mo.</div>
+    </div>
+
+    {/* Nearby families */}
+    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#8a8a7a', margin: '16px 0 10px' }}>Mga pamilya sa paligid mo</div>
+    {nearbyFamilies.slice(0, 3).map((f: any, i: number) => (
+      <div key={i} style={{ background: '#fff', border: '1px solid #e8e4db', borderRadius: 14, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#f0f5ec', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>🏠</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a14' }}>Pamilya sa {f.municipality || f.province || 'Metro Manila'}</div>
+          <div style={{ fontSize: 11, color: '#8a8a7a', marginTop: 2 }}>Naghahanap ng kasambahay</div>
+        </div>
+        <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: 'linear-gradient(to right, transparent, rgba(250,249,245,0.95))', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 12 }}>🔒</div>
+      </div>
+    ))}
+    {nearbyFamilies.length === 0 && [0,1,2].map(i => (
+      <div key={i} style={{ background: '#fff', border: '1px solid #e8e4db', borderRadius: 14, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#f0f5ec', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>🏠</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a14' }}>Pamilya sa Metro Manila</div>
+          <div style={{ fontSize: 11, color: '#8a8a7a', marginTop: 2 }}>Naghahanap ng kasambahay</div>
+        </div>
+        <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: 'linear-gradient(to right, transparent, rgba(250,249,245,0.95))', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 12 }}>🔒</div>
+      </div>
+    ))}
+    <div style={{ fontSize: 11, color: '#8a8a7a', textAlign: 'center' as const, margin: '8px 0 14px' }}>I-complete ang iyong profile para makita ang buong detalye</div>
+
+    {/* Complete profile CTA */}
+    {profilePct < 100 && (
+      <div style={{ background: 'linear-gradient(135deg, #a87528, #c9943a)', borderRadius: 18, padding: '18px', display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontFamily: 'serif', fontSize: 17, color: '#fff', lineHeight: 1.2, marginBottom: 3 }}>I-complete ang profile mo.</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.8)', lineHeight: 1.4 }}>Mas maraming offer ang matatanggap mo kapag kumpleto ang iyong profile.</div>
+        </div>
+        <div style={{ background: '#fff', color: '#a87528', borderRadius: 50, padding: '8px 14px', fontSize: 11, fontWeight: 700, flexShrink: 0, cursor: 'pointer' }} onClick={() => setShowProfile(true)}>I-edit →</div>
+      </div>
+    )}
+
+    {/* Tips */}
+    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#8a8a7a', margin: '16px 0 10px' }}>Mga tips para sa iyo</div>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+      <div style={{ background: '#fff', border: '1px solid #e8e4db', borderRadius: 14, padding: '14px 13px' }}>
+        <div style={{ fontSize: 20, marginBottom: 6 }}>📸</div>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#1a1a14', marginBottom: 3 }}>Mag-submit ng valid ID</div>
+        <div style={{ fontSize: 11, color: '#8a8a7a', lineHeight: 1.5 }}>Mas mapagkakatiwalaan ka ng mga pamilya kapag may ID verification.</div>
+      </div>
+      <div style={{ background: '#fff', border: '1px solid #e8e4db', borderRadius: 14, padding: '14px 13px' }}>
+        <div style={{ fontSize: 20, marginBottom: 6 }}>💰</div>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#1a1a14', marginBottom: 3 }}>I-review ang iyong sweldo</div>
+        <div style={{ fontSize: 11, color: '#8a8a7a', lineHeight: 1.5 }}>Siguraduhing angkop ang iyong hinihinging sahod sa iyong skills.</div>
+      </div>
+    </div>
+    <div style={{ background: '#fff', border: '1px solid #e8e4db', borderRadius: 14, padding: '14px 13px', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+      <div style={{ fontSize: 22, flexShrink: 0 }}>⚡</div>
+      <div>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#1a1a14', marginBottom: 3 }}>3× mas mabilis makakuha ng offer</div>
+        <div style={{ fontSize: 11, color: '#8a8a7a', lineHeight: 1.5 }}>Ang mga kasambahay na may kumpleto ang profile ay 3× mas mabilis na makakuha ng offer. Kumpletuhin na ngayon.</div>
+      </div>
+    </div>
+  </div>
+)}
           {jobs.map((job: any) => (
             <div key={job.id} style={s.card}>
               <div style={{ padding: '13px 14px' }}>
