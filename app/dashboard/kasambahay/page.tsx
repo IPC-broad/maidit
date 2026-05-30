@@ -240,31 +240,6 @@ export default function KBDashboard() {
         <div style={{ padding: '14px 14px 32px' }}>
           <div style={{ fontFamily: 'serif', fontSize: '17px', fontWeight: 900, marginBottom: '2px' }}>Mga Trabaho</div>
           <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '14px' }}>{jobs.length} trabaho ang available</div>
-          {isHired && (
-            <div style={{ background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: '14px', padding: '16px', marginBottom: '16px' }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '4px' }}>I-refer ang Kaibigan</div>
-              <div style={{ fontSize: '13px', color: '#1a1a1a', fontWeight: 600, marginBottom: '4px' }}>I-share ang iyong referral link at makakuha ng rewards</div>
-              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '12px', lineHeight: 1.5 }}>Ipadala ang iyong unique link sa mga kaibigan na naghahanap ng trabaho bilang kasambahay.</div>
-              <div style={{ background: '#fff', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '9px 12px', fontSize: '12px', fontFamily: 'monospace', color: '#1a6b3c', wordBreak: 'break-all' as const, marginBottom: '10px' }}>
-                {referralLink}
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '7px' }}>
-                <button
-                  onClick={() => { navigator.clipboard.writeText(referralLink).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2500) }) }}
-                  style={{ width: '100%', padding: '11px', borderRadius: '10px', border: 'none', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
-                >
-                  {copied ? '✅ Nakopya!' : '📋 Kopyahin ang Link'}
-                </button>
-                <a
-                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`}
-                  target="_blank" rel="noreferrer"
-                  style={{ width: '100%', padding: '11px', borderRadius: '10px', border: 'none', background: '#1877f2', color: '#fff', fontFamily: 'sans-serif', fontSize: '13px', fontWeight: 700, cursor: 'pointer', textAlign: 'center' as const, textDecoration: 'none', display: 'block', boxSizing: 'border-box' as const }}
-                >
-                  Share sa Facebook
-                </a>
-              </div>
-            </div>
-          )}
 
           {jobs.length === 0 && (
   <div>
