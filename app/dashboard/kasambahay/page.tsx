@@ -1,6 +1,4 @@
-// KASAMBAHAY PAGE — All UI text must be in Taglish (Filipino/English mix)
-// DO NOT translate to English during audits
-// Homeowner pages = English, Kasambahay pages = Taglish
+// KASAMBAHAY PAGE — TAGLISH ONLY
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -21,6 +19,8 @@ export default function KBDashboard() {
   const [uploadingClearance, setUploadingClearance] = useState(false)
   const [uploadMsg, setUploadMsg] = useState('')
   const [copied, setCopied] = useState(false)
+  const [activeHomeowners, setActiveHomeowners] = useState(14)
+  const [nearbyFamilies, setNearbyFamilies] = useState<any[]>([])
 
   useEffect(() => {
     const init = async () => {
@@ -47,6 +47,18 @@ export default function KBDashboard() {
           setAppliedJobs(appliedJobsData || [])
         }
       }
+      const { count: hwCount } = await supabase
+        .from('homeowners')
+        .select('id', { count: 'exact', head: true })
+        .eq('has_subscription', true)
+      if (hwCount) setActiveHomeowners(hwCount)
+
+      const { data: nearbyData } = await supabase
+        .from('homeowners')
+        .select('province, municipality')
+        .limit(3)
+      setNearbyFamilies(nearbyData || [])
+
       setLoading(false)
     }
     init()
@@ -132,6 +144,15 @@ export default function KBDashboard() {
 
   if (loading) return <div style={{ minHeight: '100vh', background: '#faf8f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif', color: '#9ca3af' }}>Loading...</div>
 
+  const profileItems = [
+    { done: !!kb?.facebook_url,  label: 'I-connect ang Facebook' },
+    { done: !!kb?.is_verified,   label: 'I-submit ang valid ID' },
+    { done: !!kb?.how_referred,  label: 'Sabihin kung paano mo nalaman ang MaidIt' },
+  ]
+  const completedCount = profileItems.filter(i => i.done).length
+  const profilePct = Math.round((completedCount / 3) * 100)
+  const missingItems = profileItems.filter(i => !i.done)
+
   const METRO_MANILA = ['Manila','Quezon City','Makati','Pasig','Taguig','Mandaluyong','San Juan','Marikina','Pasay','Parañaque','Las Piñas','Muntinlupa','Caloocan','Malabon','Navotas','Valenzuela','Pateros']
   const hwLocationLabel = (city: string) => !city ? null : METRO_MANILA.includes(city) ? 'Metro Manila' : city
 
@@ -171,6 +192,23 @@ export default function KBDashboard() {
         </div>
         <button onClick={() => setShowProfile(true)} style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '6px 12px', color: '#1a6b3c', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>Profile Ko</button>
       </div>
+
+      {profilePct < 100 && (
+        <div style={{ background: '#fff', borderBottom: '1px solid #ede8e0', padding: '11px 16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#374151' }}>Profile mo</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#c9943a' }}>{profilePct}%</span>
+          </div>
+          <div style={{ background: '#f3f4f6', borderRadius: '4px', height: '6px', marginBottom: '8px' }}>
+            <div style={{ width: `${profilePct}%`, height: '100%', background: 'linear-gradient(90deg, #f59e0b, #d97706)', borderRadius: '4px', transition: 'width .3s' }} />
+          </div>
+          <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' as const }}>
+            {missingItems.map((item, i) => (
+              <span key={i} style={{ fontSize: '10px', padding: '3px 8px', borderRadius: '50px', background: '#fef3e2', color: '#92400e', fontWeight: 600 }}>+ {item.label}</span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {pendingOffers > 0 && (
         <div style={{ background: '#fef3e2', borderBottom: '1px solid #fde8c0', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => setTab('offers')}>
@@ -271,9 +309,73 @@ export default function KBDashboard() {
           <div style={{ fontFamily: 'serif', fontSize: '17px', fontWeight: 900, marginBottom: '12px' }}>Bago at Aktibong Offer</div>
 
           {activeOffers.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '40px 20px', marginBottom: '8px' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📭</div>
-              <div style={{ color: '#9ca3af', fontSize: '13px', lineHeight: 1.7 }}>Wala pang Offer</div>
+            <div>
+              {/* Platform activity strip */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 14px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0', marginBottom: '12px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a', flexShrink: 0, boxShadow: '0 0 0 3px rgba(22,163,74,0.25)' }} />
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#166534' }}>Active ang platform ngayon</div>
+                  <div style={{ fontSize: '11px', color: '#16a34a' }}>Naghahanap ng kasambahay ang mga pamilya · {activeHomeowners}+ homeowners</div>
+                </div>
+              </div>
+
+              {/* Ready state card */}
+              <div style={{ background: '#fff', border: '1px solid #ede8e0', borderRadius: '14px', padding: '22px 16px', textAlign: 'center' as const, marginBottom: '12px' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '10px' }}>🏡</div>
+                <div style={{ fontFamily: 'serif', fontSize: '17px', fontWeight: 900, color: '#1a1a1a', marginBottom: '6px' }}>Handa ka na. Abangan ang offer.</div>
+                <div style={{ fontSize: '12px', color: '#6b7280', lineHeight: 1.6 }}>Naka-set up na ang iyong profile. Magpapadala ng offer ang mga pamilya na naghahanap ng katulad mo.</div>
+              </div>
+
+              {/* Blurred nearby families */}
+              <div style={{ marginBottom: '12px' }}>
+                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '8px' }}>Mga pamilya sa paligid mo</div>
+                {(nearbyFamilies.length > 0 ? nearbyFamilies : [{municipality:'Lungsod sa Maynila'},{municipality:'Pamilya sa Quezon City'},{municipality:'Lugar sa Makati'}]).map((hw: any, i: number) => (
+                  <div key={i} style={{ position: 'relative', marginBottom: '8px' }}>
+                    <div style={{ background: '#fff', border: '1px solid #ede8e0', borderRadius: '12px', padding: '12px 48px 12px 14px' }}>
+                      <div style={{ filter: 'blur(3px)', pointerEvents: 'none', userSelect: 'none' as const }}>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a1a1a' }}>{hw.municipality || hw.province || 'Pilipinas'}</div>
+                        <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>Naghahanap ng kasambahay</div>
+                      </div>
+                    </div>
+                    <div style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px' }}>🔒</div>
+                  </div>
+                ))}
+                <div style={{ fontSize: '11px', color: '#9ca3af', textAlign: 'center' as const, marginTop: '2px' }}>I-complete ang iyong profile para makita ang buong detalye</div>
+              </div>
+
+              {/* Complete profile CTA — only if progress < 100% */}
+              {profilePct < 100 && (
+                <div style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', borderRadius: '14px', padding: '16px', marginBottom: '12px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 900, color: '#fff', marginBottom: '4px' }}>I-complete ang profile mo.</div>
+                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.88)', marginBottom: '12px', lineHeight: 1.5 }}>Mas maraming offer ang matatanggap mo kapag kumpleto ang iyong profile.</div>
+                  <button onClick={() => setShowProfile(true)} style={{ background: '#fff', color: '#d97706', border: 'none', borderRadius: '9px', padding: '9px 16px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>I-edit →</button>
+                </div>
+              )}
+
+              {/* Tips section */}
+              <div>
+                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '8px' }}>Mga tips para sa iyo</div>
+                <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
+                  <div style={{ background: '#fff', border: '1px solid #ede8e0', borderRadius: '12px', padding: '12px 14px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '20px', flexShrink: 0 }}>📸</span>
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: '#1a1a1a', marginBottom: '2px' }}>Mag-submit ng valid ID</div>
+                      <div style={{ fontSize: '11px', color: '#6b7280', lineHeight: 1.5 }}>Mas mapagkakatiwalaan ka ng mga pamilya kapag may ID verification.</div>
+                    </div>
+                  </div>
+                  <div style={{ background: '#fff', border: '1px solid #ede8e0', borderRadius: '12px', padding: '12px 14px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '20px', flexShrink: 0 }}>💰</span>
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: '#1a1a1a', marginBottom: '2px' }}>Itakda ang tamang sweldo</div>
+                      <div style={{ fontSize: '11px', color: '#6b7280', lineHeight: 1.5 }}>I-review ang iyong hinihinging sahod — siguraduhing naaayon ito sa market rates.</div>
+                    </div>
+                  </div>
+                  <div style={{ background: 'linear-gradient(135deg, #fef3e2, #fff8ed)', border: '1px solid #fde8c0', borderRadius: '12px', padding: '12px 14px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '20px', flexShrink: 0 }}>⚡</span>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#92400e' }}>Ang mga kasambahay na may kumpleto ang profile ay 3× mas mabilis na makakuha ng offer</div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
