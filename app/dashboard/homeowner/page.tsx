@@ -84,9 +84,9 @@ export default function HWDashboard() {
           pets, urgency, start_date, transport_service,
           transport_direct_type, fare_estimate, fare_countered,
           created_at, arrived_at, rematch_available, rematch_expires_at,
-          estimated_arrival, kasambahay_id,
+          estimated_arrival, kasambahay_id, negotiated_by,
           kasambahay:kasambahay_id(
-            id, province, setup, selfie_url, asking_salary,
+            id, province, setup, selfie_url, asking_salary, proxy_mode,
             profile:profile_id(full_name, mobile)
           )
         `)
@@ -327,7 +327,9 @@ export default function HWDashboard() {
             </div>
           )}
           {offers.map((offer: any) => {
-            const st = offerStatusMap[offer.status] || { label: offer.status, bg: '#f3f4f6', color: '#6b7280' }
+            const st = offer.status === 'countered' && offer.negotiated_by === 'partner'
+              ? { label: 'Counter from Partner', bg: '#fef3e2', color: '#c9943a' }
+              : offerStatusMap[offer.status] || { label: offer.status, bg: '#f3f4f6', color: '#6b7280' }
             const kbName = offer.kasambahay?.profile?.full_name || 'Kasambahay'
             const kbMobile = offer.kasambahay?.profile?.mobile
             const isPaid = ['paid','active'].includes(offer.status)
@@ -362,6 +364,15 @@ export default function HWDashboard() {
             return (
               <div key={offer.id} style={{ background:'#fff', borderRadius:'13px', border:'1px solid #ede8e0', ...(offer.status === 'countered' ? { borderLeft:'4px solid #dc2626' } : {}), overflow:'hidden', marginBottom:'12px' }}>
                 <div style={{ padding:'13px 14px' }}>
+                  {offer.kasambahay?.proxy_mode && (
+                    <div style={{ background:'#fef3e2', border:'1px solid #e8d4a0', borderRadius:'12px', padding:'10px 12px', marginBottom:'10px', display:'flex', gap:'10px', alignItems:'flex-start' }}>
+                      <span style={{ fontSize:'18px', flexShrink:0 }}>🤝</span>
+                      <div>
+                        <div style={{ fontSize:'11px', fontWeight:700, color:'#92400e' }}>Represented by Community Partner</div>
+                        <div style={{ fontSize:'10px', color:'#6b7280', lineHeight:1.5, marginTop:'2px' }}>This kasambahay is represented by a verified Community Partner who will negotiate on her behalf with her full knowledge and consent.</div>
+                      </div>
+                    </div>
+                  )}
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'8px' }}>
                     <div>
                       <div style={{ fontWeight:700, fontSize:'14px', marginBottom:'2px' }}>{kbName}</div>
@@ -395,7 +406,7 @@ export default function HWDashboard() {
                   )}
                   {offer.status === 'countered' && (
                     <div style={{ background:'#fff5f5', border:'1.5px solid #fca5a5', borderRadius:'12px', padding:'14px', marginBottom:'12px' }}>
-                      <div style={{ fontSize:'13px', fontWeight:800, color:'#dc2626', marginBottom:'12px' }}>⚠️ Counter Offer Received</div>
+                      <div style={{ fontSize:'13px', fontWeight:800, color:'#dc2626', marginBottom:'12px' }}>⚠️ {offer.negotiated_by === 'partner' ? 'Counter from Partner' : 'Counter Offer Received'}</div>
                       <div style={{ display:'flex', flexDirection:'column' as const, gap:'9px', marginBottom:'14px' }}>
                         {offer.fare_countered && offer.fare_countered !== offer.salary ? (
                           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
