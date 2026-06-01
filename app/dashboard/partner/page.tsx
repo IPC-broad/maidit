@@ -52,6 +52,10 @@ export default function PartnerDashboard() {
   const [saving, setSaving] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [savedName, setSavedName] = useState('')
+  const [counterSheet, setCounterSheet] = useState<string | null>(null)
+  const [counterSalaryInput, setCounterSalaryInput] = useState('')
+  const [counterDateInput, setCounterDateInput] = useState('')
+  const [proxyActioning, setProxyActioning] = useState<string | null>(null)
   const photoRef = useRef<HTMLInputElement>(null)
 
   const [workerForm, setWorkerForm] = useState({
@@ -93,7 +97,7 @@ export default function PartnerDashboard() {
       const workerIds = (workersData || []).map((w: any) => w.id)
       if (workerIds.length > 0) {
         const { data: offersData } = await supabase
-          .from('offers').select('id, kasambahay_id, status')
+          .from('offers').select('id, kasambahay_id, status, salary, setup, city, start_date, scope, urgency')
           .in('kasambahay_id', workerIds)
           .in('status', ['pending', 'countered', 'agreed'])
         setWorkerOffers(offersData || [])
@@ -419,17 +423,87 @@ export default function PartnerDashboard() {
               </div>
             ) : workers.map((w: any) => {
               const st = statusLabel[w.status] || statusLabel.draft
-              const hasOffer = workerOffers.some(o => o.kasambahay_id === w.id)
+              const isProxy = w.proxy_mode && w.proxy_partner_id === partner.profile_id
+              const pendingOffer = isProxy ? workerOffers.find((o: any) => o.kasambahay_id === w.id && o.status === 'pending') : undefined
               return (
                 <div key={w.id} style={{ background: '#fff', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px', border: '1px solid #ede8e0' }}>
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#fef3e2', border: '2px solid #fde8c0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>👩</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: '15px', color: '#111827' }}>{w.profiles?.full_name}</div>
-                      <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '1px' }}>{w.province}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '1px' }}>
+                        <span style={{ fontSize: '12px', color: '#6b7280' }}>{w.province}</span>
+                        {isProxy && <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 7px', borderRadius: '4px', background: C.amberSoft, color: '#92400e', border: `1px solid ${C.amberLine}` }}>Proxy</span>}
+                      </div>
                     </div>
                     <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: st.bg, color: st.color, whiteSpace: 'nowrap' as const, border: `1px solid ${st.color}30` }}>{st.label}</span>
                   </div>
+                  {isProxy && pendingOffer && (
+                    <div style={{ marginTop: '12px', borderTop: `1px solid ${C.line}`, paddingTop: '12px' }}>
+                      <div style={{ background: C.amberSoft, border: `1px solid ${C.amberLine}`, borderRadius: '10px', padding: '8px 12px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '16px' }}>🤝</span>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#92400e', fontFamily: sans }}>May offer para sa kanya — ikaw ang kumakatawan</span>
+                      </div>
+                      <div style={{ background: C.paper2, borderRadius: '10px', padding: '10px 12px', marginBottom: '10px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                          <div>
+                            <div style={{ fontSize: '10px', color: C.ink3, marginBottom: '2px', fontFamily: sans }}>Salary</div>
+                            <div style={{ fontFamily: serif, fontSize: '16px', fontWeight: 400, color: C.forest }}>₱{pendingOffer.salary?.toLocaleString()}<span style={{ fontSize: '10px', color: C.ink3 }}>/buwan</span></div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '10px', color: C.ink3, marginBottom: '2px', fontFamily: sans }}>Lokasyon</div>
+                            <div style={{ fontSize: '13px', fontWeight: 700, fontFamily: sans }}>{pendingOffer.city || '—'}</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '10px', color: C.ink3, marginBottom: '2px', fontFamily: sans }}>Setup</div>
+                            <div style={{ fontSize: '13px', fontWeight: 700, fontFamily: sans }}>{pendingOffer.setup || '—'}</div>
+                          </div>
+                          {pendingOffer.start_date && (
+                            <div>
+                              <div style={{ fontSize: '10px', color: C.ink3, marginBottom: '2px', fontFamily: sans }}>Simula</div>
+                              <div style={{ fontSize: '12px', fontWeight: 600, fontFamily: sans }}>{pendingOffer.start_date}</div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
+                        <button
+                          disabled={!!proxyActioning}
+                          onClick={async () => {
+                            setProxyActioning(pendingOffer.id)
+                            const { supabase } = await import('../../../lib/supabase')
+                            await supabase.from('offers').update({ status: 'agreed', negotiated_by: 'partner' }).eq('id', pendingOffer.id)
+                            setWorkerOffers(prev => prev.filter((o: any) => o.id !== pendingOffer.id))
+                            setProxyActioning(null)
+                          }}
+                          style={{ flex: 1, padding: '10px 6px', borderRadius: '10px', border: 'none', background: C.forest, color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, opacity: proxyActioning ? 0.6 : 1 }}
+                        >Tanggapin ✓</button>
+                        <button
+                          disabled={!!proxyActioning}
+                          onClick={() => {
+                            setCounterSalaryInput(w.asking_salary ? String(w.asking_salary) : '')
+                            setCounterDateInput('')
+                            setCounterSheet(pendingOffer.id)
+                          }}
+                          style={{ flex: 1, padding: '10px 6px', borderRadius: '10px', border: `1.5px solid ${C.forest}`, background: 'transparent', color: C.forest, fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans }}
+                        >I-counter</button>
+                        <button
+                          disabled={!!proxyActioning}
+                          onClick={async () => {
+                            setProxyActioning(pendingOffer.id)
+                            const { supabase } = await import('../../../lib/supabase')
+                            await supabase.from('offers').update({ status: 'declined', negotiated_by: 'partner' }).eq('id', pendingOffer.id)
+                            setWorkerOffers(prev => prev.filter((o: any) => o.id !== pendingOffer.id))
+                            setProxyActioning(null)
+                          }}
+                          style={{ flex: 1, padding: '10px 6px', borderRadius: '10px', border: `1.5px solid ${C.line}`, background: 'transparent', color: C.ink3, fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: sans }}
+                        >Tanggihan</button>
+                      </div>
+                      <div style={{ background: C.amberSoft, border: `1px solid ${C.amberLine}`, borderRadius: '10px', padding: '9px 12px', fontSize: '11px', color: '#92400e', lineHeight: 1.5, fontFamily: sans }}>
+                        Ikaw ang kumakatawan sa kanya. Siguraduhing nakausap mo na siya bago mag-accept o mag-counter.
+                      </div>
+                    </div>
+                  )}
                 </div>
               )
             })}
@@ -783,6 +857,51 @@ export default function PartnerDashboard() {
         </div>
       </div>
 
+
+      {/* COUNTER BOTTOM SHEET */}
+      {counterSheet && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 50, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }} onClick={() => !proxyActioning && setCounterSheet(null)}>
+          <div onClick={e => e.stopPropagation()} style={{ background: C.paper, borderRadius: '20px 20px 0 0', padding: '24px 20px 48px', width: '100%', maxWidth: 480, fontFamily: sans }}>
+            <div style={{ width: '40px', height: '4px', background: C.line, borderRadius: '2px', margin: '0 auto 20px' }} />
+            <div style={{ fontFamily: serif, fontSize: '20px', color: C.forestDeep, marginBottom: '4px' }}>I-counter ang Offer</div>
+            <div style={{ fontSize: '13px', color: C.ink3, marginBottom: '16px', fontFamily: sans }}>Ilagay ang iyong proposed na terms.</div>
+
+            <label style={s.lbl}>Proposed na Sweldo (₱/buwan)</label>
+            <div style={{ position: 'relative', marginBottom: '14px' }}>
+              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontFamily: serif, fontSize: '16px', color: C.ink2, pointerEvents: 'none' as const }}>₱</span>
+              <input style={{ ...s.inp, paddingLeft: '28px', marginBottom: 0 }} type="number" placeholder="9000" value={counterSalaryInput} onChange={e => setCounterSalaryInput(e.target.value)} inputMode="numeric" />
+            </div>
+
+            <label style={s.lbl}>Proposed na Simula (optional)</label>
+            <input style={s.inp} type="date" value={counterDateInput} onChange={e => setCounterDateInput(e.target.value)} />
+
+            <div style={{ background: C.amberSoft, border: `1px solid ${C.amberLine}`, borderRadius: '10px', padding: '9px 12px', marginBottom: '16px', fontSize: '12px', color: '#92400e', lineHeight: 1.5, fontFamily: sans }}>
+              Makikita ng homeowner na ikaw ang nag-counter bilang proxy.
+            </div>
+
+            <button
+              disabled={!counterSalaryInput || !!proxyActioning}
+              onClick={async () => {
+                if (!counterSalaryInput) return
+                setProxyActioning(counterSheet)
+                const { supabase } = await import('../../../lib/supabase')
+                await supabase.from('offers').update({
+                  status: 'countered',
+                  fare_countered: parseInt(counterSalaryInput),
+                  ...(counterDateInput ? { estimated_arrival: counterDateInput } : {}),
+                  negotiated_by: 'partner',
+                }).eq('id', counterSheet)
+                setWorkerOffers(prev => prev.filter((o: any) => o.id !== counterSheet))
+                setCounterSheet(null)
+                setProxyActioning(null)
+              }}
+              style={{ ...s.submitBtn, background: C.amber, opacity: !counterSalaryInput || !!proxyActioning ? 0.5 : 1 }}
+            >
+              {proxyActioning === counterSheet ? 'Nagse-save...' : 'I-submit ang Counter →'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* SUCCESS FULL-SCREEN */}
       {showSuccess && (
