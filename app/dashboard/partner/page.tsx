@@ -68,6 +68,8 @@ export default function PartnerDashboard() {
   const [workerAge, setWorkerAge] = useState('')
   const [workerHowReferred, setWorkerHowReferred] = useState('')
   const [workerSalary, setWorkerSalary] = useState('')
+  const [step1Errors, setStep1Errors] = useState<Record<string, string>>({})
+  const [step2Errors, setStep2Errors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     const link = document.createElement('link')
@@ -408,9 +410,8 @@ export default function PartnerDashboard() {
           {([
             { id: 'workers', icon: '👥', label: 'Workers', badge: newlyConfirmed },
             { id: 'payouts', icon: '💳', label: 'Payouts', badge: 0 },
-            { id: 'add', icon: '🎁', label: 'Mag-refer', badge: 0 },
           ] as const).map((t, i) => (
-            <button key={t.id} onClick={() => { setTab(t.id); if (t.id === 'add') setReferMode('choose'); else { setReferMode(null); setManualStep(1) } }} style={{ flex: 1, padding: '11px 4px', border: 'none', borderLeft: i > 0 ? `1px solid ${C.line}` : 'none', background: tab === t.id ? C.forest : 'transparent', cursor: 'pointer', fontFamily: sans, fontSize: '11px', fontWeight: 700, color: tab === t.id ? '#fff' : C.ink3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', position: 'relative' }}>
+            <button key={t.id} onClick={() => { setTab(t.id); setReferMode(null); setManualStep(1) }} style={{ flex: 1, padding: '11px 4px', border: 'none', borderLeft: i > 0 ? `1px solid ${C.line}` : 'none', background: tab === t.id ? C.forest : 'transparent', cursor: 'pointer', fontFamily: sans, fontSize: '11px', fontWeight: 700, color: tab === t.id ? '#fff' : C.ink3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', position: 'relative' }}>
               <span style={{ fontSize: '16px' }}>{t.icon}</span>
               <span>{t.label}</span>
               {(t as any).badge > 0 && tab !== t.id && <span style={{ position: 'absolute', top: '4px', right: 'calc(50% - 18px)', background: '#dc2626', color: '#fff', borderRadius: '50%', width: '15px', height: '15px', fontSize: '9px', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{(t as any).badge}</span>}
@@ -513,9 +514,56 @@ export default function PartnerDashboard() {
                 </div>
               )
             })}
-            <button onClick={() => { setTab('add'); setReferMode('choose') }} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#1a6b3c', border: 'none', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif', marginTop: '4px' }}>
-              + Mag-refer ng Kasambahay
-            </button>
+            {/* Inline refer cards */}
+            <div style={{ marginTop: '8px' }}>
+              <div style={{ fontFamily: sans, fontSize: '12px', fontWeight: 700, color: C.ink3, textTransform: 'uppercase' as const, letterSpacing: '.07em', marginBottom: '10px' }}>Mag-refer ng Kasambahay</div>
+
+              {/* Card A — Manual Form */}
+              <div style={{ background: C.paper, borderRadius: '14px', border: `1.5px solid ${C.amberLine}`, padding: '16px', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '22px' }}>📝</span>
+                  <div style={{ fontFamily: sans, fontSize: '14px', fontWeight: 700, color: C.ink }}>Idagdag nang Manu-mano</div>
+                </div>
+                <div style={{ fontSize: '12px', color: C.ink3, lineHeight: 1.5, marginBottom: '12px' }}>Ikaw ang mag-fill ng form para sa kasambahay.</div>
+                <button
+                  onClick={() => { setTab('add'); setReferMode('manual'); setManualStep(1) }}
+                  style={{ width: '100%', padding: '11px', borderRadius: '10px', border: 'none', background: C.amber, color: '#fff', fontFamily: sans, fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Simulan ang Form →
+                </button>
+              </div>
+
+              {/* Card B — Share Link */}
+              <div style={{ background: C.paper, borderRadius: '14px', border: `1.5px solid #e2ecdb`, padding: '16px', marginBottom: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '22px' }}>🔗</span>
+                  <div style={{ fontFamily: sans, fontSize: '14px', fontWeight: 700, color: C.ink }}>I-share ang Link</div>
+                </div>
+                <div style={{ fontSize: '12px', color: C.ink3, lineHeight: 1.5, marginBottom: '12px' }}>I-kopya o i-share ang iyong referral link sa kasambahay.</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <button onClick={() => { navigator.clipboard.writeText(`https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`).catch(() => {}); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+                    style={{ padding: '10px 6px', borderRadius: '10px', background: copied ? '#f0fdf4' : '#f3f4f6', border: `1px solid ${copied ? '#bbf7d0' : C.line}`, color: copied ? C.forest : C.ink, fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '3px' }}>
+                    <span style={{ fontSize: '18px' }}>{copied ? '✅' : '📋'}</span>
+                    <span>{copied ? 'Copied!' : 'Copy Link'}</span>
+                  </button>
+                  <button onClick={shareSMS}
+                    style={{ padding: '10px 6px', borderRadius: '10px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#2563eb', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '3px' }}>
+                    <span style={{ fontSize: '18px' }}>💬</span>
+                    <span>SMS</span>
+                  </button>
+                  <button onClick={() => { const l = encodeURIComponent(`https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`); window.open(`fb-messenger://share?link=${l}`, '_blank') }}
+                    style={{ padding: '10px 6px', borderRadius: '10px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1877f2', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '3px' }}>
+                    <span style={{ fontSize: '18px' }}>💬</span>
+                    <span>Messenger</span>
+                  </button>
+                  <button onClick={() => { const l = encodeURIComponent(`https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`); window.open(`https://wa.me/?text=${l}`, '_blank') }}
+                    style={{ padding: '10px 6px', borderRadius: '10px', background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '3px' }}>
+                    <span style={{ fontSize: '18px' }}>🟢</span>
+                    <span>WhatsApp</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </>
         )}
 
@@ -707,34 +755,39 @@ export default function PartnerDashboard() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div>
                         <label style={s.lbl}>Pangalan *</label>
-                        <input style={s.inp} placeholder="Maria" value={workerForm.pangalan}
+                        <input style={{ ...s.inp, borderColor: step1Errors.pangalan ? '#dc2626' : undefined }} placeholder="Maria" value={workerForm.pangalan}
                           onChange={e => setWorkerForm(f => ({ ...f, pangalan: e.target.value.replace(/\b\w/g, (c: string) => c.toUpperCase()) }))} />
+                        {step1Errors.pangalan && <span style={{ color: '#dc2626', fontSize: '11px' }}>{step1Errors.pangalan}</span>}
                       </div>
                       <div>
                         <label style={s.lbl}>Apelyido *</label>
-                        <input style={s.inp} placeholder="Santos" value={workerForm.apelyido}
+                        <input style={{ ...s.inp, borderColor: step1Errors.apelyido ? '#dc2626' : undefined }} placeholder="Santos" value={workerForm.apelyido}
                           onChange={e => setWorkerForm(f => ({ ...f, apelyido: e.target.value.replace(/\b\w/g, (c: string) => c.toUpperCase()) }))} />
+                        {step1Errors.apelyido && <span style={{ color: '#dc2626', fontSize: '11px' }}>{step1Errors.apelyido}</span>}
                       </div>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div>
                         <label style={s.lbl}>Cellphone *</label>
-                        <input style={s.inp} type="tel" placeholder="09XXXXXXXXX" maxLength={11} value={workerForm.mobile}
+                        <input style={{ ...s.inp, borderColor: step1Errors.mobile ? '#dc2626' : undefined }} type="tel" placeholder="09XXXXXXXXX" maxLength={11} value={workerForm.mobile}
                           onChange={e => setWorkerForm(f => ({ ...f, mobile: e.target.value.replace(/\D/g, '').slice(0, 11) }))} />
+                        {step1Errors.mobile && <span style={{ color: '#dc2626', fontSize: '11px' }}>{step1Errors.mobile}</span>}
                       </div>
                       <div>
                         <label style={s.lbl}>Edad *</label>
-                        <input style={s.inp} type="number" placeholder="25" min={18} max={65} value={workerAge}
+                        <input style={{ ...s.inp, borderColor: step1Errors.edad ? '#dc2626' : undefined }} type="number" placeholder="25" min={18} max={65} value={workerAge}
                           onChange={e => setWorkerAge(e.target.value)} inputMode="numeric" />
+                        {step1Errors.edad && <span style={{ color: '#dc2626', fontSize: '11px' }}>{step1Errors.edad}</span>}
                       </div>
                     </div>
 
                     <label style={s.lbl}>Probinsya *</label>
-                    <select style={s.sel} value={workerForm.province} onChange={e => setWorkerForm(f => ({ ...f, province: e.target.value }))}>
+                    <select style={{ ...s.sel, borderColor: step1Errors.province ? '#dc2626' : undefined }} value={workerForm.province} onChange={e => setWorkerForm(f => ({ ...f, province: e.target.value }))}>
                       <option value="">Piliin ang probinsya...</option>
                       {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
+                    {step1Errors.province && <span style={{ color: '#dc2626', fontSize: '11px', display: 'block', marginTop: '-8px', marginBottom: '8px' }}>{step1Errors.province}</span>}
 
                     <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Paano kayo nagkakilala *</div>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' as const, marginBottom: '4px' }}>
@@ -745,14 +798,21 @@ export default function PartnerDashboard() {
                         </div>
                       ))}
                     </div>
+                    {step1Errors.howReferred && <span style={{ color: '#dc2626', fontSize: '11px', display: 'block', marginBottom: '8px' }}>{step1Errors.howReferred}</span>}
 
                     <button
                       onClick={() => {
                         const { pangalan, apelyido, mobile, province } = workerForm
-                        if (!pangalan || !apelyido || !mobile || !province) { setSaveMsg('Pakisulat ang lahat ng required fields.'); return }
-                        if (mobile.length !== 11 || !mobile.startsWith('09')) { setSaveMsg('Pakisulat ang tamang 11-digit mobile number.'); return }
-                        if (!workerHowReferred) { setSaveMsg('Piliin kung paano kayo nagkakilala.'); return }
-                        setSaveMsg('')
+                        const age = parseInt(workerAge)
+                        const errs: Record<string, string> = {}
+                        if (!pangalan) errs.pangalan = 'Kailangan ang pangalan'
+                        if (!apelyido) errs.apelyido = 'Kailangan ang apelyido'
+                        if (!mobile || mobile.length !== 11 || !mobile.startsWith('09')) errs.mobile = 'Ilagay ang tamang 11-digit na numero'
+                        if (!workerAge || isNaN(age) || age < 18 || age > 65) errs.edad = 'Edad dapat 18–65'
+                        if (!province) errs.province = 'Piliin ang probinsya'
+                        if (!workerHowReferred) errs.howReferred = 'Piliin kung paano nagkakilala'
+                        if (Object.keys(errs).length > 0) { setStep1Errors(errs); return }
+                        setStep1Errors({})
                         setManualStep(2)
                       }}
                       style={{ ...s.submitBtn, marginTop: '16px', background: C.forest }}
@@ -768,14 +828,16 @@ export default function PartnerDashboard() {
                     <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.amber, marginBottom: '14px', fontFamily: sans }}>Hakbang 2 — Mga Kasanayan</div>
 
                     <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Kasanayan * (pumili ng isa man)</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '14px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '4px' }}>
                       {SKILLS.map(skill => (
                         <div key={skill} style={s.skillChip(workerForm.skills.includes(skill))} onClick={() => toggleSkill(skill)}>{skill}</div>
                       ))}
                     </div>
+                    {step2Errors.skills && <span style={{ color: '#dc2626', fontSize: '11px', display: 'block', marginBottom: '10px' }}>{step2Errors.skills}</span>}
+                    {!step2Errors.skills && <div style={{ marginBottom: '10px' }} />}
 
                     <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Setup *</div>
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '4px' }}>
                       {[['Stay-in', 'Stay-in'], ['Stay-out', 'Stay-out'], ['Pareho okay', 'Kahit alin']].map(([label, value]) => (
                         <div key={value} onClick={() => setWorkerForm(f => ({ ...f, setup: value }))}
                           style={{ flex: 1, padding: '9px 6px', borderRadius: '10px', border: `1.5px solid ${workerForm.setup === value ? C.forest : C.line}`, background: workerForm.setup === value ? C.forest : C.paper, color: workerForm.setup === value ? '#fff' : C.ink3, fontSize: '12px', fontWeight: 700, cursor: 'pointer', textAlign: 'center' as const, fontFamily: sans }}>
@@ -783,9 +845,11 @@ export default function PartnerDashboard() {
                         </div>
                       ))}
                     </div>
+                    {step2Errors.setup && <span style={{ color: '#dc2626', fontSize: '11px', display: 'block', marginBottom: '10px' }}>{step2Errors.setup}</span>}
+                    {!step2Errors.setup && <div style={{ marginBottom: '10px' }} />}
 
                     <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.07em', color: C.ink3, marginBottom: '8px', fontFamily: sans }}>Kelan pwede magsimula *</div>
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' as const }}>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' as const }}>
                       {[['Pwede na agad', 'Immediate'], ['1 linggo', 'Within 1 week'], ['1 buwan', 'Within 1 month']].map(([label, value]) => (
                         <div key={value} onClick={() => setWorkerForm(f => ({ ...f, availability: value }))}
                           style={{ padding: '9px 14px', borderRadius: '10px', border: `1.5px solid ${workerForm.availability === value ? C.forest : C.line}`, background: workerForm.availability === value ? C.forest : C.paper, color: workerForm.availability === value ? '#fff' : C.ink3, fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans }}>
@@ -793,19 +857,27 @@ export default function PartnerDashboard() {
                         </div>
                       ))}
                     </div>
+                    {step2Errors.availability && <span style={{ color: '#dc2626', fontSize: '11px', display: 'block', marginBottom: '10px' }}>{step2Errors.availability}</span>}
+                    {!step2Errors.availability && <div style={{ marginBottom: '10px' }} />}
 
                     <label style={s.lbl}>Hinahangad na Sahod (₱/buwan) *</label>
-                    <div style={{ position: 'relative', marginBottom: '14px' }}>
+                    <div style={{ position: 'relative', marginBottom: '4px' }}>
                       <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontFamily: serif, fontSize: '16px', color: C.ink2, pointerEvents: 'none' }}>₱</span>
-                      <input style={{ ...s.inp, paddingLeft: '26px', marginBottom: 0 }} type="number" placeholder="9000" value={workerSalary}
+                      <input style={{ ...s.inp, paddingLeft: '26px', marginBottom: 0, borderColor: step2Errors.salary ? '#dc2626' : undefined }} type="number" placeholder="9000" value={workerSalary}
                         onChange={e => setWorkerSalary(e.target.value)} />
                     </div>
+                    {step2Errors.salary && <span style={{ color: '#dc2626', fontSize: '11px', display: 'block', marginBottom: '10px' }}>{step2Errors.salary}</span>}
+                    {!step2Errors.salary && <div style={{ marginBottom: '10px' }} />}
 
                     <button
                       onClick={() => {
-                        if (workerForm.skills.length === 0) { setSaveMsg('Pumili ng kahit isang kasanayan.'); return }
-                        if (!workerSalary) { setSaveMsg('Ilagay ang hinahangad na sahod.'); return }
-                        setSaveMsg('')
+                        const errs: Record<string, string> = {}
+                        if (workerForm.skills.length === 0) errs.skills = 'Pumili ng kahit isang kasanayan'
+                        if (!workerForm.setup) errs.setup = 'Piliin ang setup'
+                        if (!workerForm.availability) errs.availability = 'Piliin ang availability'
+                        if (!workerSalary) errs.salary = 'Ilagay ang hinahangad na sahod'
+                        if (Object.keys(errs).length > 0) { setStep2Errors(errs); return }
+                        setStep2Errors({})
                         setManualStep(3)
                       }}
                       style={{ ...s.submitBtn, background: C.forest }}
