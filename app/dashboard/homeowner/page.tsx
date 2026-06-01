@@ -287,6 +287,7 @@ export default function HWDashboard() {
                 </div>
                 <div style={{ display:'flex', gap:'4px', flexWrap:'wrap', marginBottom:'9px' }}>
                   {isProvince(kb.province) && <span style={{ fontSize:'.6rem', fontWeight:700, padding:'2px 7px', borderRadius:'4px', background:'#eff6ff', color:'#2563eb' }}>Province · Transpo Needed</span>}
+                  {kb.proxy_mode && <span style={{ fontSize:'9px', fontWeight:700, padding:'2px 7px', borderRadius:'4px', background:'#fef3e2', color:'#c9943a', border:'1px solid #fde8c0' }}>Kinakatawan ng Partner</span>}
                 </div>
                 <div style={{ display:'flex', gap:'4px', flexWrap:'wrap', marginBottom:'9px' }}>
                   {kb.skills?.map((skill: string) => (
