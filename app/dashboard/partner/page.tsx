@@ -88,6 +88,7 @@ export default function PartnerDashboard() {
       const { data: partnerData } = await supabase
         .from('partners').select('*, profiles(*)').eq('profile_id', user.id).single()
       if (!partnerData) { router.push('/'); return }
+      if (partnerData.approved === false) { router.push('/partner/pending'); return }
       setPartner(partnerData)
       const { data: payoutsData } = await supabase.from('payouts')
         .select('*, offer:offers(kasambahay_profile:profiles!offers_kasambahay_id_fkey(full_name), homeowner_profile:profiles!offers_homeowner_id_fkey(full_name))')

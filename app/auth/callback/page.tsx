@@ -77,7 +77,9 @@ export default function AuthCallbackPage() {
       } else if (profile.role === 'kasambahay') {
         router.push('/dashboard/kasambahay')
       } else if (profile.role === 'partner') {
-        router.push('/dashboard/partner')
+        const { data: partnerRow } = await supabase
+          .from('partners').select('approved').eq('profile_id', user.id).single()
+        router.push(partnerRow?.approved === true ? '/dashboard/partner' : '/partner/pending')
       } else {
         router.push('/dashboard/homeowner')
       }

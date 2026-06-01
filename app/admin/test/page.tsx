@@ -36,6 +36,7 @@ export default function AdminTestPanel() {
   const [updating, setUpdating] = useState<string | null>(null)
   const [msg, setMsg] = useState('')
   const [balanceInputs, setBalanceInputs] = useState<Record<string, string>>({})
+  const [approvingId, setApprovingId] = useState<string | null>(null)
 
   type TestResult = { pass: boolean; ms: number; detail?: string } | null
   const [paymentTests, setPaymentTests] = useState<Record<string, TestResult>>({})
@@ -315,6 +316,16 @@ export default function AdminTestPanel() {
     setTimeout(() => setMsg(''), 2000)
     await load()
     setUpdating(null)
+  }
+
+  const approvePartner = async (partnerId: string) => {
+    setApprovingId(partnerId)
+    const { supabase } = await import('../../../lib/supabase')
+    await supabase.from('partners').update({ approved: true }).eq('id', partnerId)
+    setMsg('✅ Partner approved.')
+    setTimeout(() => setMsg(''), 2500)
+    await load()
+    setApprovingId(null)
   }
 
   const adjustBalance = async (partnerId: string) => {
@@ -812,6 +823,46 @@ export default function AdminTestPanel() {
       })}
 
       {/* ── PARTNERS ── */}
+      {/* Pending partner approvals */}
+      {(() => {
+        const pending = partners.filter(p => p.approved !== true)
+        if (pending.length === 0) return null
+        return (
+          <>
+            <div style={{ ...s.secTitle, marginTop: '24px', color: '#92400e' }}>⏳ Pending Partner Approvals ({pending.length})</div>
+            {pending.map(p => {
+              const pName = p.profiles?.full_name || 'Unknown'
+              const pMobile = p.profiles?.mobile || '—'
+              const pProvince = p.province || p.profiles?.city || '—'
+              const signedUp = p.created_at ? new Date(p.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
+              return (
+                <div key={p.id} style={{ ...s.card, border: '1.5px solid #fde8c0', background: '#fef9f0' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '2px' }}>{pName}</div>
+                      <div style={{ fontSize: '11px', color: '#9ca3af' }}>{pMobile}</div>
+                      <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>
+                        {pProvince} · Signed up {signedUp}
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>
+                        Code: <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#c9943a' }}>{p.referral_code || '—'}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => approvePartner(p.id)}
+                      disabled={approvingId === p.id}
+                      style={{ padding: '7px 16px', borderRadius: '8px', border: 'none', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, cursor: 'pointer', opacity: approvingId === p.id ? 0.6 : 1 }}
+                    >
+                      {approvingId === p.id ? '...' : '✓ Approve'}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </>
+        )
+      })()}
+
       <div style={{ ...s.secTitle, marginTop: '24px' }}>🤝 Partners ({partners.length})</div>
 
       {!loading && partners.length === 0 && (
