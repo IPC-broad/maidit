@@ -178,6 +178,8 @@ export default function PartnerDashboard() {
       num_children: parseInt(workerForm.num_children) || 0,
       availability: workerForm.availability,
       has_nbi: workerForm.has_nbi, govt_id_types: workerForm.govt_id_types,
+      proxy_mode: true,
+      proxy_partner_id: partner.profile_id,
     }
     if (workerAge) kasambahayRow.age = parseInt(workerAge)
     if (workerSalary) kasambahayRow.asking_salary = parseInt(workerSalary)
