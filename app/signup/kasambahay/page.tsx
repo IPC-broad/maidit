@@ -292,6 +292,20 @@ export default function KasambahaySignup() {
       } catch {}
     }
 
+    // Auto-revoke proxy if another profile with same mobile was partner-managed
+    const { data: existingProfiles } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('mobile', form.mobile)
+      .neq('id', userId)
+    const existingIds = (existingProfiles || []).map((p: any) => p.id)
+    if (existingIds.length > 0) {
+      await supabase.from('kasambahay')
+        .update({ proxy_mode: false, proxy_partner_id: null })
+        .in('profile_id', existingIds)
+        .eq('proxy_mode', true)
+    }
+
     setLoading(false)
     setSuccess(true)
   }
