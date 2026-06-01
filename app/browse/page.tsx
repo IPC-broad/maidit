@@ -186,17 +186,18 @@ export default function BrowsePage() {
       setHomeownerCity(prof?.city || null)
       setHomeownerProvince(prof?.city || null)
     }
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('kasambahay')
       .select(`
         id, profile_id, asking_salary, setup, skills, experience,
         province, available_from, selfie_url, status, availability,
         has_govt_id, has_nbi, age, facebook_url, civil_status, num_children, referred_by,
         profile:profile_id (
-          full_name, selfie_url, city
+          full_name, mobile
         )
       `)
       .limit(20)
+    console.log('[browse] data:', data, 'error:', error)
     setProfiles(data || [])
     setLoading(false)
   }
