@@ -86,7 +86,7 @@ export default function HWDashboard() {
           created_at, arrived_at, rematch_available, rematch_expires_at,
           estimated_arrival, kasambahay_id, negotiated_by,
           kasambahay:kasambahay_id(
-            id, province, setup, selfie_url, asking_salary, proxy_mode,
+            id, province, setup, selfie_url, asking_salary,
             profile:profile_id(full_name, mobile)
           )
         `)
