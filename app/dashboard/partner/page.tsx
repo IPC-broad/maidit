@@ -172,6 +172,7 @@ export default function PartnerDashboard() {
       full_name, mobile, city: province, role: 'kasambahay', verified: false
     }).select().single()
     if (profileError || !profile) {
+      console.error('[partner-add] profiles insert error:', { code: profileError?.code, message: profileError?.message, details: profileError?.details, hint: profileError?.hint, full: profileError })
       setSaveMsg('Hindi ma-save. Subukan ulit.')
       setSaving(false); return
     }
@@ -188,7 +189,12 @@ export default function PartnerDashboard() {
     if (workerAge) kasambahayRow.age = parseInt(workerAge)
     if (workerSalary) kasambahayRow.asking_salary = parseInt(workerSalary)
     if (workerHowReferred) kasambahayRow.how_referred = workerHowReferred
-    await supabase.from('kasambahay').insert(kasambahayRow)
+    const { error: kasambahayError } = await supabase.from('kasambahay').insert(kasambahayRow)
+    if (kasambahayError) {
+      console.error('[partner-add] kasambahay insert error:', { code: kasambahayError.code, message: kasambahayError.message, details: kasambahayError.details, hint: kasambahayError.hint, full: kasambahayError })
+      setSaveMsg(`ERROR sa pag-save ng kasambahay: ${kasambahayError.message}`)
+      setSaving(false); return
+    }
 
     // Upload photo if present
     if (workerForm.photo && profile.id) {
