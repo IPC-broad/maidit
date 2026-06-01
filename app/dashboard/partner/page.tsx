@@ -515,8 +515,8 @@ export default function PartnerDashboard() {
               )
             })}
             {/* Inline refer cards */}
-            <div style={{ marginTop: '8px' }}>
-              <div style={{ fontFamily: sans, fontSize: '12px', fontWeight: 700, color: C.ink3, textTransform: 'uppercase' as const, letterSpacing: '.07em', marginBottom: '10px' }}>Mag-refer ng Kasambahay</div>
+            <div style={{ marginTop: '8px', background: '#f0f5ec', border: '1px solid #c8e0b0', borderRadius: '16px', padding: '14px', marginBottom: '16px' }}>
+              <div style={{ fontFamily: sans, fontSize: '10px', fontWeight: 700, color: C.forest, textTransform: 'uppercase' as const, letterSpacing: '.08em', marginBottom: '10px' }}>Mag-refer ng Kasambahay</div>
 
               {/* Card A — Manual Form */}
               <div style={{ background: C.paper, borderRadius: '14px', border: `1.5px solid ${C.amberLine}`, padding: '16px', marginBottom: '10px' }}>
@@ -529,7 +529,7 @@ export default function PartnerDashboard() {
                   onClick={() => { setTab('add'); setReferMode('manual'); setManualStep(1) }}
                   style={{ width: '100%', padding: '11px', borderRadius: '10px', border: 'none', background: C.amber, color: '#fff', fontFamily: sans, fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
                 >
-                  Simulan ang Form →
+                  Mag-refer ng Kasambahay →
                 </button>
               </div>
 
