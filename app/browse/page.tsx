@@ -189,9 +189,9 @@ export default function BrowsePage() {
     const { data, error } = await supabase
       .from('kasambahay')
       .select(`
-        id, profile_id, asking_salary, setup, skills, experience,
-        province, available_from, selfie_url, status, availability,
-        has_govt_id, has_nbi, age, facebook_url, civil_status, num_children, referred_by,
+        id, profile_id, asking_salary, setup_preference, skills,
+        province, selfie_url, availability, referred_by,
+        is_verified, edad, how_referred, partner_photo_url, facebook_url,
         profile:profile_id (
           full_name, mobile
         )
@@ -264,8 +264,8 @@ export default function BrowsePage() {
       if (!name.includes(q) && !city.includes(q) && !province.includes(q) && !skillStr.includes(q)) return false
     }
     if (filter === 'Lahat' || filter === 'More') return true
-    if (filter === 'Stay-in') return p.setup === 'Stay-in'
-    if (filter === 'Stay-out') return p.setup === 'Stay-out'
+    if (filter === 'Stay-in') return p.setup_preference === 'Stay-in'
+    if (filter === 'Stay-out') return p.setup_preference === 'Stay-out'
     if (filter === 'Nearby') {
       if (!currentUser || !homeownerProvince) return false
       return (p.province || '').toLowerCase() === homeownerProvince.toLowerCase()
@@ -276,17 +276,17 @@ export default function BrowsePage() {
   const scoreCard = (kb: any): number => {
     const selfieUrl = kb.profile?.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
     const hasSelfie = !!selfieUrl
-    const hasGovtId = !!kb.govt_id
+    const hasGovtId = !!kb.is_verified
     const hasSkills = !!(kb.skills && kb.skills.length > 0)
     const avail = (kb.availability || '').toLowerCase()
     const isImmediate = avail === 'immediate' || avail === 'asap'
     if (currentUser) {
       let score = 0
-      const kbCity = (kb.profile?.city || kb.province || '').toLowerCase()
+      const kbCity = (kb.province || '').toLowerCase()
       const kbProvince = (kb.province || '').toLowerCase()
       if (homeownerCity && kbCity && kbCity === homeownerCity.toLowerCase()) score += 3
       if (homeownerProvince && kbProvince && kbProvince === homeownerProvince.toLowerCase()) score += 2
-      if (lastOfferSetup && kb.setup && kb.setup.toLowerCase() === lastOfferSetup.toLowerCase()) score += 2
+      if (lastOfferSetup && kb.setup_preference && kb.setup_preference.toLowerCase() === lastOfferSetup.toLowerCase()) score += 2
       if (hasSelfie) score += 1
       if (hasGovtId) score += 1
       if (hasSkills) score += 1
@@ -322,21 +322,9 @@ export default function BrowsePage() {
     const skills: string[] = kb.skills || []
     const visibleSkills = skills.slice(0, 3)
     const extraSkills = skills.length - 3
-    const selfieUrl = kb.profile?.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
+    const selfieUrl = kb.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
     const showPhoto = !!(selfieUrl && !imgErrors[kb.id])
     const availLabel = kb.availability || null
-    const expRaw = kb.experience
-    const expYears = (!expRaw || expRaw === 'Baguhan' || expRaw === 0 || expRaw === '0') ? null
-      : typeof expRaw === 'number' ? expRaw : parseInt(expRaw) || null
-    const expDisplay = (!expRaw || expRaw === 'Baguhan' || expRaw === '0' || expRaw === 0)
-      ? 'No experience yet'
-      : `${expRaw} exp`
-    const nc = kb.num_children
-    const familyLine = [
-      kb.civil_status || null,
-      nc === 0 ? 'No children' : nc === 1 ? '1 child' : nc > 1 ? `${nc} children` : null,
-    ].filter(Boolean).join(' · ')
-    const infoLine = [expDisplay, familyLine || null].filter(Boolean).join(' · ')
     const kbProvince = kb.province || ''
     const location = kbProvince || 'Province not set'
     const isNearby = !!(homeownerProvince && kbProvince && kbProvince.toLowerCase() === homeownerProvince.toLowerCase())
@@ -412,16 +400,10 @@ export default function BrowsePage() {
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6 }}>
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 17, fontWeight: 600, color: C.ink, letterSpacing: '-0.012em', lineHeight: 1.2 }}>
-                  {displayName}{kb.age ? <span style={{ color: C.ink3, fontWeight: 400 }}>, {kb.age}</span> : null}
+                  {displayName}{kb.edad ? <span style={{ color: C.ink3, fontWeight: 400 }}>, {kb.edad}</span> : null}
                 </div>
                 <div style={{ fontSize: 12.5, color: C.ink2, marginTop: 2, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontWeight: 500 }}>Kasambahay{kb.setup ? ` · ${kb.setup}` : ''}</span>
-                  {expYears !== null && (
-                    <>
-                      <span style={{ width: 3, height: 3, borderRadius: '50%', background: C.ink4, display: 'inline-block', flexShrink: 0 }} />
-                      <span>{expYears} yr{expYears !== 1 ? 's' : ''}</span>
-                    </>
-                  )}
+                  <span style={{ fontWeight: 500 }}>Kasambahay{kb.setup_preference ? ` · ${kb.setup_preference}` : ''}</span>
                 </div>
                 {kb.referred_by && (
                   <div style={{
@@ -499,10 +481,6 @@ export default function BrowsePage() {
               </div>
             )}
 
-            {/* experience + family line */}
-            <div style={{ marginTop: 8, fontSize: 11, color: C.ink3, lineHeight: 1.4 }}>
-              {infoLine}
-            </div>
           </div>
         </div>
 
@@ -964,16 +942,8 @@ export default function BrowsePage() {
         const kb = profileModalKb
         const fullName = kb.profile?.full_name || ''
         const initials = fullName.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase() || '?'
-        const selfieUrl = kb.profile?.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
+        const selfieUrl = kb.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
         const skills: string[] = kb.skills || []
-        const numKids = kb.num_children
-        const childrenLabel = (!numKids || numKids === '0' || numKids === 0)
-          ? 'No children' : `${numKids} ${parseInt(String(numKids)) === 1 ? 'child' : 'children'}`
-        const expRaw = kb.experience
-        const expLabel = (!expRaw || expRaw === 'Baguhan' || expRaw === 0 || expRaw === '0')
-          ? 'No experience yet'
-          : typeof expRaw === 'number' ? `${expRaw} year${expRaw !== 1 ? 's' : ''} experience`
-          : `${expRaw} experience`
         return (
           <div
             style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 300, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
@@ -1013,15 +983,12 @@ export default function BrowsePage() {
                 </div>
                 <div style={{ fontFamily: serif, fontSize: 22, color: C.ink, letterSpacing: '-0.015em', marginBottom: 4 }}>{fullName}</div>
                 <div style={{ fontSize: 13, color: C.ink3, marginBottom: 12 }}>
-                  {kb.age ? `${kb.age} y/o · ` : ''}{kb.province || 'Province not specified'}
+                  {kb.edad ? `${kb.edad} y/o · ` : ''}{kb.province || 'Province not specified'}
                 </div>
                 {/* badges */}
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' as const, justifyContent: 'center' }}>
-                  {kb.has_govt_id && (
-                    <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 10px', borderRadius: 50, background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe' }}>🛡️ ID Verified</span>
-                  )}
-                  {kb.has_nbi && (
-                    <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 10px', borderRadius: 50, background: C.forestSoft, color: C.forest, border: `1px solid ${C.forestLine}` }}>✅ NBI Cleared</span>
+                  {kb.is_verified && (
+                    <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 10px', borderRadius: 50, background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe' }}>🛡️ Verified</span>
                   )}
                   {selfieUrl && (
                     <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 10px', borderRadius: 50, background: C.forestSoft, color: C.forest, border: `1px solid ${C.forestLine}` }}>
@@ -1036,21 +1003,7 @@ export default function BrowsePage() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                   <div style={{ background: C.paper2, borderRadius: 12, padding: '11px 12px' }}>
                     <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: C.ink3, marginBottom: 4 }}>Setup</div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{kb.setup || '—'}</div>
-                  </div>
-                  <div style={{ background: C.paper2, borderRadius: 12, padding: '11px 12px' }}>
-                    <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: C.ink3, marginBottom: 4 }}>Experience</div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{expLabel}</div>
-                  </div>
-                  {kb.civil_status && (
-                    <div style={{ background: C.paper2, borderRadius: 12, padding: '11px 12px' }}>
-                      <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: C.ink3, marginBottom: 4 }}>Civil Status</div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{kb.civil_status}</div>
-                    </div>
-                  )}
-                  <div style={{ background: C.paper2, borderRadius: 12, padding: '11px 12px' }}>
-                    <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: C.ink3, marginBottom: 4 }}>Children</div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{childrenLabel}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{kb.setup_preference || '—'}</div>
                   </div>
                   {kb.availability && (
                     <div style={{ background: C.paper2, borderRadius: 12, padding: '11px 12px', gridColumn: '1 / -1' }}>
