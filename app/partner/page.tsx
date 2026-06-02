@@ -629,7 +629,7 @@ export default function PartnerPage() {
 
         <div style={{ background: C.amberSoft, border: `1px solid ${C.amberLine}`, borderRadius: '10px', padding: '12px 14px', marginBottom: '16px', fontSize: '13px', color: '#78350f', lineHeight: 1.65 }}>
           Sa pag-submit, sumasang-ayon ka na ang lahat ng transaksyon ay dumaan sa MaidIt platform. Bawal ang hiwalay na placement fee.<br /><br />
-          If the kasambahay leaves within 30 days, the ₱500 recruitment fee will be adjusted from your next payout.
+          Kung ang kasambahay ay aalis sa loob ng 30 araw, ang ₱500 na recruitment fee ay ibabawas sa iyong susunod na kita.
         </div>
 
         <button style={{ ...s.goldBtn, opacity: submitting2 ? .6 : 1 }} onClick={handleStep2} disabled={submitting2}>

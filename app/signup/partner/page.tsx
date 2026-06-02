@@ -141,39 +141,8 @@ export default function PartnerSignupPage() {
   }
 
   if (success) {
-    return (
-      <div style={{ minHeight: '100vh', background: C.paper2, fontFamily: sans, color: C.ink, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 18px' }}>
-        <div style={{ background: C.forestSoft, border: `1.5px solid ${C.forestLine}`, borderRadius: 20, padding: '40px 28px', textAlign: 'center', maxWidth: 380, width: '100%' }}>
-          <div style={{ fontSize: 52, marginBottom: 16 }}>✅</div>
-          <h1 style={{ fontFamily: serif, fontSize: 28, color: C.forestDeep, margin: '0 0 12px', lineHeight: 1.2 }}>
-            Ikaw ay isang Partner na!
-          </h1>
-          <p style={{ fontSize: 15, color: C.ink2, margin: '0 0 8px', lineHeight: 1.5 }}>
-            Ang iyong referral code ay makikita sa iyong dashboard.
-          </p>
-          <p style={{ fontSize: 13, color: C.ink3, margin: '0 0 28px', lineHeight: 1.5 }}>
-            Mag-login gamit ang iyong cellphone number at password.
-          </p>
-          <button
-            onClick={() => router.push('/dashboard/partner')}
-            style={{
-              width: '100%',
-              height: 52,
-              background: C.forest,
-              color: C.paper,
-              border: 'none',
-              borderRadius: 14,
-              fontSize: 16,
-              fontWeight: 700,
-              fontFamily: sans,
-              cursor: 'pointer',
-            }}
-          >
-            Pumunta sa Dashboard →
-          </button>
-        </div>
-      </div>
-    )
+    router.push('/partner/pending')
+    return null
   }
 
   const provinceList = Object.keys(provinces as Record<string, string[]>).sort()
