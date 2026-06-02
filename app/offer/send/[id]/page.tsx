@@ -288,6 +288,17 @@ export default function SendOfferPage() {
           <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, padding: '11px 14px', fontSize: 13, color: '#dc2626', marginBottom: 20 }}>{error}</div>
         )}
 
+      {/* ── PROXY BANNER ── */}
+      {kb?.proxy_mode && (
+        <div style={{ margin: '12px 18px 0', background: '#fbf3e2', border: '1px solid #e8d4a0', borderRadius: 12, padding: '12px 14px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+          <span style={{ fontSize: '1rem', flexShrink: 0 }}>🤝</span>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#a87528', marginBottom: 3 }}>Represented by a Community Partner</div>
+            <div style={{ fontSize: 12, color: '#4a4a3a', lineHeight: 1.6 }}>This kasambahay is represented by a verified Community Partner who will negotiate and respond to offers on her behalf. You will be notified of any updates directly through this platform.</div>
+          </div>
+        </div>
+      )}
+
         {/* ──────────── SECTION 1: THE JOB ──────────── */}
         <SectionHeader eyebrow="THE JOB" pre="What you're " italic="offering" post="." />
 

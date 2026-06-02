@@ -296,6 +296,9 @@ export default function HWDashboard() {
                       {profileNames[kb.profile_id] || 'Kasambahay'}
                       {kb.edad && <span style={{ fontSize:'.72rem', fontWeight:500, color:'#9ca3af', marginLeft:'5px' }}>{kb.edad} yrs old</span>}
                     </div>
+                    {kb.referred_by && (
+                      <span style={{ fontSize: '9px', fontWeight: 700, padding: '3px 9px', borderRadius: '50px', background: '#f0f5ec', color: '#27500A', border: '1px solid #c8e0b0', display: 'inline-block', marginTop: '2px' }}>Community Partner</span>
+                    )}
                     <div style={{ fontSize:'.68rem', color:'#6b7280' }}>{kb.province} · {kb.setup}</div>
                   </div>
                   <div style={{ textAlign:'right' }}>

@@ -416,16 +416,16 @@ export default function BrowsePage() {
                   <div style={{
                     display: 'inline-flex', alignItems: 'center',
                     marginTop: 5,
-                    padding: '2px 9px',
-                    background: C.amberSoft,
-                    border: `1px solid ${C.amberLine}`,
+                    padding: '3px 9px',
+                    background: '#f0f5ec',
+                    border: '1px solid #c8e0b0',
                     borderRadius: 999,
-                    fontSize: 10.5,
-                    fontWeight: 600,
-                    color: C.amberDeep,
+                    fontSize: 9,
+                    fontWeight: 700,
+                    color: '#27500A',
                     letterSpacing: '0.01em',
                   }}>
-                    🤝 Via Community Partner
+                    Community Partner
                   </div>
                 )}
               </div>

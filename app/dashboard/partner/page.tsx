@@ -33,8 +33,10 @@ type Payout = {
   offer: { kasambahay_profile: { full_name: string }; homeowner_profile: { full_name: string } }
 }
 type Worker = {
-  id: string; province: string; skills: string[]; status: string; confirmed_at?: string
-  profiles: { full_name: string; mobile: string }
+  id: string; province: string; skills: string[]; status?: string; confirmed_at?: string
+  profile_id?: string; asking_salary?: number; setup?: string; selfie_url?: string
+  availability?: string; edad?: number; referred_by?: string; proxy_mode?: boolean; proxy_partner_id?: string
+  profiles?: { full_name: string; mobile: string }
 }
 
 export default function PartnerDashboard() {
@@ -70,6 +72,7 @@ export default function PartnerDashboard() {
   const [workerSalary, setWorkerSalary] = useState('')
   const [step1Errors, setStep1Errors] = useState<Record<string, string>>({})
   const [step2Errors, setStep2Errors] = useState<Record<string, string>>({})
+  const [profileNames, setProfileNames] = useState<Record<string, string>>({})
 
   useEffect(() => {
     const link = document.createElement('link')
@@ -95,7 +98,22 @@ export default function PartnerDashboard() {
         .eq('partner_id', partnerData.id).order('due_at', { ascending: false })
       setPayouts(payoutsData || [])
       const { data: workersData } = await supabase.from('kasambahay')
-        .select('*, profiles(*)').eq('referred_by', partnerData.id)
+        .select('id, profile_id, asking_salary, setup, skills, province, selfie_url, availability, edad, referred_by, proxy_mode, proxy_partner_id')
+        .eq('referred_by', partnerData.referral_code)
+      const wProfileIds = (workersData || []).map((w: any) => w.profile_id).filter(Boolean)
+      if (wProfileIds.length > 0) {
+        const { data: wProfileData } = await supabase.from('profiles').select('id, full_name').in('id', wProfileIds)
+        const wProfileMap: Record<string, string> = {}
+        ;(wProfileData || []).forEach((p: any) => {
+          if (p.full_name) {
+            const parts = p.full_name.trim().split(' ')
+            const first = parts[0]
+            const lastInitial = parts.length > 1 ? parts[parts.length - 1][0] + '.' : ''
+            wProfileMap[p.id] = lastInitial ? `${first} ${lastInitial}` : first
+          }
+        })
+        setProfileNames(wProfileMap)
+      }
       setWorkers(workersData || [])
       const workerIds = (workersData || []).map((w: any) => w.id)
       if (workerIds.length > 0) {
@@ -173,37 +191,15 @@ export default function PartnerDashboard() {
     const full_name = `${pangalan} ${apelyido}`
     console.log('[manual-add] step 1 — inserting profile', { full_name, mobile, province })
     const { data: profile, error: profileError } = await supabase.from('profiles').insert({
-      full_name, mobile, city: province, role: 'kasambahay', verified: false
+      full_name, mobile, role: 'kasambahay'
     }).select().single()
     console.log('[manual-add] profile result:', { profile, profileError })
     if (profileError || !profile) {
-      console.error('[partner-add] profiles insert error:', { code: profileError?.code, message: profileError?.message, details: profileError?.details, hint: profileError?.hint, full: profileError })
+      console.error('[partner-add] profiles insert error:', profileError)
       setSaveMsg('Hindi ma-save. Subukan ulit.')
       setSaving(false); return
     }
-    const kasambahayRow: any = {
-      profile_id: profile.id, province, skills: workerForm.skills,
-      referred_by: partner.id, status: 'available',
-      setup: workerForm.setup, civil_status: workerForm.civil_status,
-      num_children: parseInt(workerForm.num_children) || 0,
-      availability: workerForm.availability,
-      has_nbi: workerForm.has_nbi, govt_id_types: workerForm.govt_id_types,
-      proxy_mode: true,
-      proxy_partner_id: partner.profile_id,
-    }
-    if (workerAge) kasambahayRow.age = parseInt(workerAge)
-    if (workerSalary) kasambahayRow.asking_salary = parseInt(workerSalary)
-    if (workerHowReferred) kasambahayRow.how_referred = workerHowReferred
-    console.log('[manual-add] step 2 — inserting kasambahay', kasambahayRow)
-    const { error: kasambahayError } = await supabase.from('kasambahay').insert(kasambahayRow)
-    console.log('[manual-add] kasambahay result:', { kasambahayError })
-    if (kasambahayError) {
-      console.error('[partner-add] kasambahay insert error:', { code: kasambahayError.code, message: kasambahayError.message, details: kasambahayError.details, hint: kasambahayError.hint, full: kasambahayError })
-      setSaveMsg(`ERROR sa pag-save ng kasambahay: ${kasambahayError.message}`)
-      setSaving(false); return
-    }
-
-    // Upload photo if present
+    let photoUrl: string | null = null
     if (workerForm.photo && profile.id) {
       try {
         const blob = await fetch(workerForm.photo).then(r => r.blob())
@@ -212,11 +208,32 @@ export default function PartnerDashboard() {
           .upload(`${profile.id}/photo.png`, blob, { upsert: true, contentType: 'image/png' })
         if (uploadData) {
           const { data: { publicUrl } } = supabase.storage.from('kasambahay-photos').getPublicUrl(`${profile.id}/photo.png`)
-          await supabase.from('kasambahay').update({ partner_photo_url: publicUrl }).eq('profile_id', profile.id)
+          photoUrl = publicUrl
         }
       } catch {}
     }
-
+    const kasambahayRow: any = {
+      profile_id: profile.id,
+      referred_by: partner.referral_code,
+      proxy_mode: true,
+      proxy_partner_id: partner.profile_id,
+      skills: workerForm.skills,
+      setup: workerForm.setup,
+      availability: workerForm.availability,
+      province: workerForm.province,
+      partner_photo_url: photoUrl || null,
+    }
+    if (workerAge) kasambahayRow.edad = parseInt(workerAge)
+    if (workerSalary) kasambahayRow.asking_salary = parseInt(workerSalary)
+    if (workerHowReferred) kasambahayRow.how_referred = workerHowReferred
+    console.log('[manual-add] step 2 — inserting kasambahay', kasambahayRow)
+    const { error: kasambahayError } = await supabase.from('kasambahay').insert(kasambahayRow)
+    console.log('[manual-add] kasambahay result:', { kasambahayError })
+    if (kasambahayError) {
+      console.error('[partner-add] kasambahay insert error:', kasambahayError)
+      setSaveMsg(`ERROR sa pag-save ng kasambahay: ${kasambahayError.message}`)
+      setSaving(false); return
+    }
     setSavedName(pangalan)
     setShowSuccess(true)
     setSaving(false)
@@ -442,7 +459,7 @@ export default function PartnerDashboard() {
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#fef3e2', border: '2px solid #fde8c0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>👩</div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 700, fontSize: '15px', color: '#111827' }}>{w.profiles?.full_name}</div>
+                      <div style={{ fontWeight: 700, fontSize: '15px', color: '#111827' }}>{profileNames[w.profile_id] || 'Kasambahay'}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '1px' }}>
                         <span style={{ fontSize: '12px', color: '#6b7280' }}>{w.province}</span>
                         {isProxy && <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 7px', borderRadius: '4px', background: C.amberSoft, color: '#92400e', border: `1px solid ${C.amberLine}` }}>Proxy</span>}
@@ -973,8 +990,8 @@ export default function PartnerDashboard() {
                 const { supabase } = await import('../../../lib/supabase')
                 await supabase.from('offers').update({
                   status: 'countered',
-                  fare_countered: parseInt(counterSalaryInput),
-                  ...(counterDateInput ? { estimated_arrival: counterDateInput } : {}),
+                  counter_salary: parseInt(counterSalaryInput),
+                  ...(counterDateInput ? { counter_start_date: counterDateInput } : {}),
                   negotiated_by: 'partner',
                 }).eq('id', counterSheet)
                 setWorkerOffers(prev => prev.filter((o: any) => o.id !== counterSheet))
@@ -1032,7 +1049,9 @@ export default function PartnerDashboard() {
               setShowSuccess(false)
               setReferMode(null)
               const { supabase } = await import('../../../lib/supabase')
-              const { data: workersData } = await supabase.from('kasambahay').select('*, profiles(*)').eq('referred_by', partner.id)
+              const { data: workersData } = await supabase.from('kasambahay')
+                .select('id, profile_id, asking_salary, setup, skills, province, selfie_url, availability, edad, referred_by, proxy_mode, proxy_partner_id')
+                .eq('referred_by', partner.referral_code)
               setWorkers(workersData || [])
               setTab('workers')
             }} style={{ width: '100%', padding: '14px', borderRadius: '12px', background: C.forest, border: 'none', color: '#fff', fontFamily: sans, fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>

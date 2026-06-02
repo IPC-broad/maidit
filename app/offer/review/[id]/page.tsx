@@ -44,7 +44,7 @@ export default function OfferReviewPage() {
       if (!user) { router.push('/login'); return }
       const { data } = await supabase
         .from('offers')
-        .select('*, urgency, start_date, household, pets, scope, transport_service, transport_direct_type, homeowners(*, profiles(*))')
+        .select('*, urgency, start_date, household, pets, scope, transport_service, transport_direct_type, homeowners(*, profiles(*)), kasambahay:kasambahay_id(proxy_mode)')
         .eq('id', offerId)
         .single()
       setOffer(data)
@@ -218,6 +218,16 @@ export default function OfferReviewPage() {
         <button style={s.back} onClick={() => router.back()}>←</button>
         <span style={{ fontFamily:'serif', fontSize:'1rem', fontWeight:900, color:'#1a1a1a' }}>I-review ang Offer</span>
       </div>
+
+      {offer?.kasambahay?.proxy_mode && (
+        <div style={{ margin: '12px 16px 0', background: '#fbf3e2', border: '1px solid #e8d4a0', borderRadius: '12px', padding: '12px 14px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+          <span style={{ fontSize: '1rem', flexShrink: 0 }}>🤝</span>
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#a87528', marginBottom: '3px' }}>Represented by a Community Partner</div>
+            <div style={{ fontSize: '12px', color: '#4a4a3a', lineHeight: 1.6 }}>This kasambahay is represented by a verified Community Partner who will negotiate and respond to offers on her behalf. You will be notified of any updates directly through this platform.</div>
+          </div>
+        </div>
+      )}
 
       <div style={s.body}>
         <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, marginBottom:'4px' }}>Job Offer mula sa {hwCity}</div>
