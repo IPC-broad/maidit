@@ -194,7 +194,7 @@ export default function BrowsePage() {
         id, profile_id, asking_salary, setup, skills,
         province, selfie_url, availability, referred_by,
         has_govt_id, has_nbi, edad, how_referred, partner_photo_url,
-        facebook_url, proxy_mode,
+        facebook_url,
         profile:profile_id (
           full_name, mobile
         )
