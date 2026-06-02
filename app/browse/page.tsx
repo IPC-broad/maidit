@@ -159,9 +159,11 @@ export default function BrowsePage() {
   const [profileModalKb, setProfileModalKb] = useState<any>(null)
 
   const load = async () => {
+    console.log('[browse] load() called, currentUser will be set after auth check')
     const { supabase } = await import('../../lib/supabase')
     const { data: { user } } = await supabase.auth.getUser()
     setCurrentUser(user || null)
+    console.log('[browse] currentUser:', user?.id ?? 'not logged in')
     if (user) {
       const TEST_EMAILS = ['test@maidit.com', 'homeowner@maidit.app', 'test.kasambahay@maidit.app', 'partner@maidit.com']
       const isTestAccount = TEST_EMAILS.includes(user.email ?? '')
@@ -198,6 +200,7 @@ export default function BrowsePage() {
         )
       `)
       .limit(20)
+    console.log('[browse] query result — count:', data?.length, 'error:', error?.message)
     setProfiles(data || [])
     setLoading(false)
   }
