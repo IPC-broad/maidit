@@ -188,24 +188,11 @@ export default function BrowsePage() {
       setHomeownerCity(prof?.city || null)
       setHomeownerProvince(prof?.city || null)
     }
-    const { createClient } = await import('@supabase/supabase-js')
-    const anonClient = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-    const { data, error } = await anonClient
+    const { data, error } = await supabase
       .from('kasambahay')
-      .select(`
-        id, profile_id, asking_salary, setup, skills,
-        province, selfie_url, availability, referred_by,
-        has_govt_id, has_nbi, edad, how_referred, partner_photo_url,
-        facebook_url,
-        profile:profile_id (
-          full_name, mobile
-        )
-      `)
+      .select('id, profile_id, asking_salary, setup, skills, province, selfie_url, availability, edad')
       .limit(20)
-    console.log('[browse] anon query — count:', data?.length, 'error:', error?.message)
+    console.log('[browse-v2] count:', data?.length, 'error:', error?.message, 'raw:', JSON.stringify(data?.slice(0,1)))
     setProfiles(data || [])
     setLoading(false)
   }
@@ -264,8 +251,8 @@ export default function BrowsePage() {
     if (passed[p.id]) return false
     if (search) {
       const q = search.toLowerCase()
-      const name = (p.profile?.full_name || '').toLowerCase()
-      const city = (p.profile?.city || p.province || '').toLowerCase()
+      const name = (p.profile_id || '').toLowerCase()
+      const city = (p.province || '').toLowerCase()
       const province = (p.province || '').toLowerCase()
       const skillStr = (p.skills || []).join(' ').toLowerCase()
       if (!name.includes(q) && !city.includes(q) && !province.includes(q) && !skillStr.includes(q)) return false
@@ -281,7 +268,7 @@ export default function BrowsePage() {
   })
 
   const scoreCard = (kb: any): number => {
-    const selfieUrl = kb.profile?.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
+    const selfieUrl = kb.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
     const hasSelfie = !!selfieUrl
     const hasGovtId = !!kb.has_govt_id
     const hasSkills = !!(kb.skills && kb.skills.length > 0)
@@ -321,7 +308,7 @@ export default function BrowsePage() {
   })
 
   const renderKBCard = (kb: any) => {
-    const fullName = kb.profile?.full_name || ''
+    const fullName = kb.profile_id || ''
     const firstName = fullName.split(' ')[0] || ''
     const lastInit = fullName.split(' ')[1]?.[0]
     const displayName = lastInit ? `${firstName} ${lastInit}.` : firstName
@@ -801,7 +788,7 @@ export default function BrowsePage() {
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
                       <div style={{ display: 'flex' }}>
                         {lockedCards.slice(0, 3).map((kb: any, i: number) => {
-                          const fn = kb.profile?.full_name || ''
+                          const fn = kb.profile_id || ''
                           const ini = fn.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase() || '?'
                           return (
                             <div key={kb.id} style={{ marginLeft: i === 0 ? 0 : -14, zIndex: 5 - i }}>
@@ -947,7 +934,7 @@ export default function BrowsePage() {
       {/* ── FULL PROFILE MODAL ── */}
       {profileModalKb && (() => {
         const kb = profileModalKb
-        const fullName = kb.profile?.full_name || ''
+        const fullName = kb.profile_id || ''
         const initials = fullName.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase() || '?'
         const selfieUrl = kb.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
         const skills: string[] = kb.skills || []
