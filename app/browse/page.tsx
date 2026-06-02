@@ -145,6 +145,7 @@ export default function BrowsePage() {
   const [filter, setFilter] = useState('Lahat')
   const [search, setSearch] = useState('')
   const [passed, setPassed] = useState<Record<string, boolean>>({})
+  const [profileNames, setProfileNames] = useState<Record<string, string>>({})
   const [saved, setSaved] = useState<Record<string, boolean>>({})
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({})
   const [offersLoaded, setOffersLoaded] = useState(false)
@@ -193,6 +194,18 @@ export default function BrowsePage() {
       .select('id, profile_id, asking_salary, setup, skills, province, selfie_url, availability, edad')
       .limit(20)
     console.log('[browse-v2] count:', data?.length, 'error:', error?.message, 'raw:', JSON.stringify(data?.slice(0,1)))
+    const profileIds = (data || []).map((k: any) => k.profile_id).filter(Boolean)
+    const { data: profileData } = await supabase.from('profiles').select('id, full_name').in('id', profileIds)
+    const profileMap: Record<string, string> = {}
+    ;(profileData || []).forEach((p: any) => {
+      if (p.full_name) {
+        const parts = p.full_name.trim().split(' ')
+        const first = parts[0]
+        const lastInitial = parts.length > 1 ? parts[parts.length - 1][0] + '.' : ''
+        profileMap[p.id] = lastInitial ? `${first} ${lastInitial}` : first
+      }
+    })
+    setProfileNames(profileMap)
     setProfiles(data || [])
     setLoading(false)
   }
@@ -251,7 +264,7 @@ export default function BrowsePage() {
     if (passed[p.id]) return false
     if (search) {
       const q = search.toLowerCase()
-      const name = (p.profile_id || '').toLowerCase()
+      const name = (profileNames[p.profile_id] || '').toLowerCase()
       const city = (p.province || '').toLowerCase()
       const province = (p.province || '').toLowerCase()
       const skillStr = (p.skills || []).join(' ').toLowerCase()
@@ -308,7 +321,7 @@ export default function BrowsePage() {
   })
 
   const renderKBCard = (kb: any) => {
-    const fullName = kb.profile_id || ''
+    const fullName = profileNames[kb.profile_id] || 'Kasambahay'
     const firstName = fullName.split(' ')[0] || ''
     const lastInit = fullName.split(' ')[1]?.[0]
     const displayName = lastInit ? `${firstName} ${lastInit}.` : firstName
@@ -788,7 +801,7 @@ export default function BrowsePage() {
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
                       <div style={{ display: 'flex' }}>
                         {lockedCards.slice(0, 3).map((kb: any, i: number) => {
-                          const fn = kb.profile_id || ''
+                          const fn = profileNames[kb.profile_id] || ''
                           const ini = fn.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase() || '?'
                           return (
                             <div key={kb.id} style={{ marginLeft: i === 0 ? 0 : -14, zIndex: 5 - i }}>
@@ -934,7 +947,7 @@ export default function BrowsePage() {
       {/* ── FULL PROFILE MODAL ── */}
       {profileModalKb && (() => {
         const kb = profileModalKb
-        const fullName = kb.profile_id || ''
+        const fullName = profileNames[kb.profile_id] || 'Kasambahay'
         const initials = fullName.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase() || '?'
         const selfieUrl = kb.selfie_url || (kb.profile_id ? `${STORAGE}/${kb.profile_id}/selfie.png` : null)
         const skills: string[] = kb.skills || []

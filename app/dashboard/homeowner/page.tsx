@@ -27,6 +27,7 @@ export default function HWDashboard() {
   const [rematchDone, setRematchDone] = useState(false)
   const [cancelModal, setCancelModal] = useState<string | null>(null)
   const [cancelSubmitting, setCancelSubmitting] = useState(false)
+  const [profileNames, setProfileNames] = useState<Record<string, string>>({})
 
   useEffect(() => {
     const init = async () => {
@@ -39,6 +40,18 @@ export default function HWDashboard() {
         has_govt_id, has_nbi, edad, how_referred,
         partner_photo_url, facebook_url
       `)
+      const profileIds = (data || []).map((k: any) => k.profile_id).filter(Boolean)
+      const { data: profileData } = await supabase.from('profiles').select('id, full_name').in('id', profileIds)
+      const profileMap: Record<string, string> = {}
+      ;(profileData || []).forEach((p: any) => {
+        if (p.full_name) {
+          const parts = p.full_name.trim().split(' ')
+          const first = parts[0]
+          const lastInitial = parts.length > 1 ? parts[parts.length - 1][0] + '.' : ''
+          profileMap[p.id] = lastInitial ? `${first} ${lastInitial}` : first
+        }
+      })
+      setProfileNames(profileMap)
       setProfiles(data || [])
       let hw: any = null
       if (user) {
@@ -280,7 +293,7 @@ export default function HWDashboard() {
                   </div>
                   <div style={{ flex:1 }}>
                     <div style={{ fontWeight:700, fontSize:'.9rem', color:'#111827' }}>
-                      {kb.profile_id}
+                      {profileNames[kb.profile_id] || 'Kasambahay'}
                       {kb.edad && <span style={{ fontSize:'.72rem', fontWeight:500, color:'#9ca3af', marginLeft:'5px' }}>{kb.edad} yrs old</span>}
                     </div>
                     <div style={{ fontSize:'.68rem', color:'#6b7280' }}>{kb.province} · {kb.setup}</div>
@@ -517,7 +530,7 @@ export default function HWDashboard() {
           )}
           {applicants.map((app: any) => {
             const kb = app.kasambahay
-            const kbName = kb?.profile_id || 'Kasambahay'
+            const kbName = profileNames[kb?.profile_id] || 'Kasambahay'
             return (
               <div key={app.id} style={{ background:'#fff', borderRadius:'14px', border:'1px solid #ede8e0', overflow:'hidden', marginBottom:'12px' }}>
                 <div style={{ padding:'13px 14px' }}>
