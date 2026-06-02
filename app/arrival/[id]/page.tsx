@@ -211,6 +211,19 @@ export default function ArrivalPage() {
           </div>
         </div>
 
+        {/* Transport recovery notice */}
+        {offer.transport_service === true && (
+          <div style={{ background: '#fbf3e2', border: '1px solid #e8d4a0', borderRadius: '12px', padding: '12px 14px', marginBottom: '14px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '1rem', flexShrink: 0 }}>🚌</span>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#8a6418', marginBottom: '4px' }}>Transport Assistance — Recovery Notice</div>
+              <div style={{ fontSize: '12px', color: '#374151', lineHeight: 1.6 }}>
+                MaidIt arranged transport for this kasambahay (₱3,500 transport + ₱1,000 travel allowance + ₱500 MaidIt fee). The ₱500 MaidIt assistance fee is non-refundable under any circumstance. If the kasambahay leaves within 6 months without justifiable reason, you may recover ₱4,000 directly from her.
+              </div>
+            </div>
+          </div>
+        )}
+
         <ContactCard />
 
         <button
@@ -265,6 +278,19 @@ export default function ArrivalPage() {
             </div>
           ))}
         </div>
+
+        {/* Transport recovery notice */}
+        {offer.transport_service === true && (
+          <div style={{ background: '#fbf3e2', border: '1px solid #e8d4a0', borderRadius: '12px', padding: '12px 14px', marginBottom: '14px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '1rem', flexShrink: 0 }}>🚌</span>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#8a6418', marginBottom: '4px' }}>Transport Assistance — Recovery Notice</div>
+              <div style={{ fontSize: '12px', color: '#374151', lineHeight: 1.6 }}>
+                MaidIt arranged transport for this kasambahay (₱3,500 transport + ₱1,000 travel allowance + ₱500 MaidIt fee). The ₱500 MaidIt assistance fee is non-refundable under any circumstance. If the kasambahay leaves within 6 months without justifiable reason, you may recover ₱4,000 directly from her.
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Contact card */}
         <ContactCard />

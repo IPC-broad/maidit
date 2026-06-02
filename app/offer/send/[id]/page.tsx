@@ -645,6 +645,15 @@ export default function SendOfferPage() {
                 </div>
               </div>
             )}
+            {isMaidIt && (
+              <div style={{ background: '#fbf3e2', border: '1px solid #e8d4a0', borderRadius: 12, padding: '12px 14px', marginTop: 12, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ fontSize: '1rem', flexShrink: 0 }}>🚌</span>
+                <div style={{ fontSize: 12, color: '#374151', lineHeight: 1.6 }}>
+                  <strong style={{ color: '#8a6418' }}>₱3,500 transport + ₱1,000 travel allowance + ₱500 MaidIt fee.</strong>{' '}
+                  Non-refundable. If kasambahay leaves within 6 months without justifiable reason, you may recover ₱4,000 directly from her.
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
