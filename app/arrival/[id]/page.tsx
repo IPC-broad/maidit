@@ -218,7 +218,7 @@ export default function ArrivalPage() {
             <div>
               <div style={{ fontSize: '13px', fontWeight: 700, color: '#8a6418', marginBottom: '4px' }}>Transport Assistance — Recovery Notice</div>
               <div style={{ fontSize: '12px', color: '#374151', lineHeight: 1.6 }}>
-                MaidIt arranged transport for this kasambahay (₱3,500 transport + ₱1,000 travel allowance + ₱500 MaidIt fee). The ₱500 MaidIt assistance fee is non-refundable under any circumstance. If the kasambahay leaves within 6 months without justifiable reason, you may recover ₱4,000 directly from her.
+                If the kasambahay leaves without justifiable reason within 6 months of employment, you may recover transport assistance costs directly from her pursuant to RA 10361. MaidIt is not involved in this recovery — it is solely between you and the kasambahay.
               </div>
             </div>
           </div>
@@ -286,7 +286,7 @@ export default function ArrivalPage() {
             <div>
               <div style={{ fontSize: '13px', fontWeight: 700, color: '#8a6418', marginBottom: '4px' }}>Transport Assistance — Recovery Notice</div>
               <div style={{ fontSize: '12px', color: '#374151', lineHeight: 1.6 }}>
-                MaidIt arranged transport for this kasambahay (₱3,500 transport + ₱1,000 travel allowance + ₱500 MaidIt fee). The ₱500 MaidIt assistance fee is non-refundable under any circumstance. If the kasambahay leaves within 6 months without justifiable reason, you may recover ₱4,000 directly from her.
+                If the kasambahay leaves without justifiable reason within 6 months of employment, you may recover transport assistance costs directly from her pursuant to RA 10361. MaidIt is not involved in this recovery — it is solely between you and the kasambahay.
               </div>
             </div>
           </div>

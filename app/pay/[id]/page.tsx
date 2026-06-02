@@ -263,7 +263,7 @@ export default function PayPage() {
             <div>
               <div style={{ fontSize: '.74rem', fontWeight: 700, color: '#92400e', marginBottom: '3px' }}>Transport coordination</div>
               <div style={{ fontSize: '.72rem', color: '#78350f', lineHeight: 1.6 }}>
-                Transport coordination is considered completed once the kasambahay has safely arrived. Rematch within 30 days remains free, but transport for replacement is separate.
+                If the kasambahay leaves without justifiable reason within 6 months of employment, you may recover transport assistance costs directly from her pursuant to RA 10361. MaidIt is not involved in this recovery — it is solely between you and the kasambahay.
               </div>
             </div>
           </div>
