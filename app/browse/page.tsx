@@ -198,7 +198,6 @@ export default function BrowsePage() {
         )
       `)
       .limit(20)
-    console.log('[browse] data:', data, 'error:', error)
     setProfiles(data || [])
     setLoading(false)
   }
