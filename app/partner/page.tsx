@@ -542,59 +542,16 @@ export default function PartnerPage() {
     </div>
   )
 
-  // ─── REFERRAL LINK ───
-  if (step === 'reflink') return (
-    <div style={s.wrap}>
-      <nav style={s.nav}>
-        <span style={{ fontFamily: serif, fontSize: '18px', color: C.ink }}>Maid<span style={{ color: C.amber }}>It</span></span>
-      </nav>
-      <div style={{ padding: '36px 18px 48px', textAlign: 'center' }}>
-        <div style={{ fontSize: '40px', marginBottom: '12px' }}>🎉</div>
-        <h1 style={{ fontFamily: serif, fontSize: '24px', color: C.forestDeep, marginBottom: '8px' }}>Eto na ang referral code mo!</h1>
-        <p style={{ fontSize: '14px', color: C.ink3, lineHeight: 1.7, marginBottom: '24px' }}>
-          Simulan nang kumita — mag-refer ng kakilalang naghahanap ng trabaho, may <strong style={{ color: C.ink }}>₱500</strong> ka sa bawat successful hire!
-        </p>
-
-        <div style={{ background: C.paper, border: `1px solid ${C.amberLine}`, borderRadius: '13px', padding: '16px', marginBottom: '14px', textAlign: 'left' }}>
-          <div style={{ fontSize: '10px', color: C.ink3, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: '6px' }}>Referral Code</div>
-          <div style={{ fontFamily: serif, fontSize: '22px', color: C.amber, letterSpacing: '1px', marginBottom: '4px' }}>{refCode}</div>
-          <div style={{ fontSize: '12px', color: C.ink3, marginBottom: '12px' }}>maidit.vercel.app/signup/kasambahay?ref={refCode}</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            <button onClick={copyLink} style={{ padding: '10px', borderRadius: '9px', background: copied ? '#f0fdf4' : C.amberSoft, border: `1px solid ${copied ? '#bbf7d0' : C.amberLine}`, color: copied ? '#16a34a' : C.amber, fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans }}>
-              {copied ? '✅ Copied!' : '📋 Copy Link'}
-            </button>
-            <button onClick={shareSMS} style={{ padding: '10px', borderRadius: '9px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#2563eb', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans }}>📲 Share</button>
-          </div>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '20px' }}>
-          <button onClick={shareSMS} style={{ padding: '11px', borderRadius: '10px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#2563eb', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans }}>💬 Text Message</button>
-          <button onClick={shareMessenger} style={{ padding: '11px', borderRadius: '10px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#2563eb', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans }}>💙 Messenger</button>
-        </div>
-
-        <div style={{ background: C.amberSoft, border: `1px solid ${C.amberLine}`, borderRadius: '12px', padding: '14px', marginBottom: '20px', textAlign: 'left' }}>
-          <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', color: C.ink3, marginBottom: '10px' }}>Susunod na hakbang</div>
-          {[
-            'I-share ang referral link sa mga kasambahay na kakilala mo',
-            'Kumpletuhin ang iyong profile para makatanggap ng payout',
-            'I-upload ang mga kasambahay sa iyong dashboard',
-          ].map((txt, i) => (
-            <div key={i} style={{ display: 'flex', gap: '9px', marginBottom: i < 2 ? '9px' : 0, alignItems: 'flex-start' }}>
-              <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: C.amberLine, color: C.amber, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800, flexShrink: 0 }}>{i + 1}</div>
-              <span style={{ fontSize: '13px', color: C.ink3, lineHeight: 1.5 }}>{txt}</span>
-            </div>
-          ))}
-        </div>
-
-        <button style={{ ...s.goldBtn, marginBottom: '10px' }} onClick={() => setStep('step2')}>Kumpletuhin ang Profile Ko →</button>
-      </div>
-    </div>
-  )
+  // ─── REFERRAL LINK (deprecated — redirects immediately) ───
+  if (step === 'reflink') {
+    router.push('/partner/pending')
+    return null
+  }
 
   // ─── STEP 2 ───
   if (step === 'step2') return (
     <div style={s.wrap}>
-      <NavBar back={() => setStep('reflink')} title="Kumpletuhin ang Profile" sub="Hakbang 2 ng 2 · Para sa payout" />
+      <NavBar back={() => router.push('/partner/pending')} title="Kumpletuhin ang Profile" sub="Hakbang 2 ng 2 · Para sa payout" />
       <div style={s.body}>
         <div style={{ fontFamily: serif, fontSize: '20px', color: C.ink, marginBottom: '6px' }}>Halos tapos na! 🙌</div>
         <div style={{ fontSize: '14px', color: C.ink3, marginBottom: '22px', lineHeight: 1.6 }}>Kailangan namin ng ilang detalye para mapadala ang iyong kita.</div>

@@ -171,9 +171,11 @@ export default function PartnerDashboard() {
       setSaving(false); return
     }
     const full_name = `${pangalan} ${apelyido}`
+    console.log('[manual-add] step 1 — inserting profile', { full_name, mobile, province })
     const { data: profile, error: profileError } = await supabase.from('profiles').insert({
       full_name, mobile, city: province, role: 'kasambahay', verified: false
     }).select().single()
+    console.log('[manual-add] profile result:', { profile, profileError })
     if (profileError || !profile) {
       console.error('[partner-add] profiles insert error:', { code: profileError?.code, message: profileError?.message, details: profileError?.details, hint: profileError?.hint, full: profileError })
       setSaveMsg('Hindi ma-save. Subukan ulit.')
@@ -192,7 +194,9 @@ export default function PartnerDashboard() {
     if (workerAge) kasambahayRow.age = parseInt(workerAge)
     if (workerSalary) kasambahayRow.asking_salary = parseInt(workerSalary)
     if (workerHowReferred) kasambahayRow.how_referred = workerHowReferred
+    console.log('[manual-add] step 2 — inserting kasambahay', kasambahayRow)
     const { error: kasambahayError } = await supabase.from('kasambahay').insert(kasambahayRow)
+    console.log('[manual-add] kasambahay result:', { kasambahayError })
     if (kasambahayError) {
       console.error('[partner-add] kasambahay insert error:', { code: kasambahayError.code, message: kasambahayError.message, details: kasambahayError.details, hint: kasambahayError.hint, full: kasambahayError })
       setSaveMsg(`ERROR sa pag-save ng kasambahay: ${kasambahayError.message}`)
