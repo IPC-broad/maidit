@@ -147,7 +147,7 @@ export default function PartnerPage() {
 
     setRefCode(code)
     setSubmitting1(false)
-    setStep('reflink')
+    router.push('/partner/pending')
   }
 
   const handleStep2 = async () => {
@@ -166,7 +166,7 @@ export default function PartnerPage() {
       }).eq('profile_id', user.id)
     }
     setSubmitting2(false)
-    router.push('/dashboard/partner')
+    router.push('/partner/pending')
   }
 
   const copyLink = () => {
@@ -587,7 +587,6 @@ export default function PartnerPage() {
         </div>
 
         <button style={{ ...s.goldBtn, marginBottom: '10px' }} onClick={() => setStep('step2')}>Kumpletuhin ang Profile Ko →</button>
-        <button style={s.outlineBtn} onClick={() => router.push('/dashboard/partner')}>Pumunta sa Dashboard</button>
       </div>
     </div>
   )
