@@ -236,8 +236,8 @@ export default function PayPage() {
             {hasTransport && (
               <div style={{ ...s.dotRow, borderBottom: '1px solid #f3f4f6', color: '#374151' }}>
                 <div>
-                  <div>🛡️ MaidIt Assisted Travel</div>
-                  <div style={{ fontSize: '.68rem', color: '#9ca3af', marginTop: '1px' }}>₱5,500 transport · ₱500 MaidIt fee</div>
+                  <div>MaidIt Assisted Transport</div>
+                  <div style={{ fontSize: '.68rem', color: '#9ca3af', marginTop: '1px' }}>₱3,500 transport · ₱1,000 travel allowance · ₱500 MaidIt fee</div>
                 </div>
                 <span style={{ color: '#92400e', fontWeight: 700 }}>+₱6,000</span>
               </div>
@@ -258,13 +258,15 @@ export default function PayPage() {
 
         {/* Transport note */}
         {hasTransport && (
-          <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '12px', padding: '12px 14px', marginBottom: '14px', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '1.1rem' }}>🛡️</span>
-            <div>
-              <div style={{ fontSize: '.74rem', fontWeight: 700, color: '#92400e', marginBottom: '3px' }}>Transport coordination</div>
-              <div style={{ fontSize: '.72rem', color: '#78350f', lineHeight: 1.6 }}>
-                If the kasambahay leaves without justifiable reason within 6 months of employment, you may recover transport assistance costs directly from her pursuant to RA 10361. MaidIt is not involved in this recovery — it is solely between you and the kasambahay.
-              </div>
+          <div style={{ background: '#fbf3e2', border: '1px solid #e8d4a0', borderRadius: '10px', padding: '10px 12px', marginBottom: '14px', fontSize: '11px', color: '#92400e', lineHeight: 1.7 }}>
+            <div>Transport arrangement: ₱3,500</div>
+            <div>Kasambahay travel allowance: ₱1,000</div>
+            <div>MaidIt assistance fee: ₱500</div>
+            <div style={{ marginTop: 8 }}>
+              Important: The ₱3,500 transport cost and ₱1,000 travel allowance are released only after MaidIt confirms the kasambahay is boarding the bus. If she does not board, the full ₱5,000 is refunded to you. The ₱500 MaidIt assistance fee is non-refundable once transport is arranged.
+            </div>
+            <div style={{ marginTop: 8 }}>
+              If the kasambahay leaves your home within 6 months without justifiable reason, you may recover the ₱4,000 directly from her pursuant to RA 10361. MaidIt is not involved in this recovery.
             </div>
           </div>
         )}

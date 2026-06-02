@@ -614,42 +614,21 @@ export default function SendOfferPage() {
                   onClick={() => setForm(f => ({ ...f, transport_arrangement: 'maidit_transport' }))}
                   style={{ padding: 14, borderRadius: 14, cursor: 'pointer', border: `${isMaidIt ? 2 : 1.5}px solid ${isMaidIt ? C.amber : C.line}`, background: isMaidIt ? C.amberSoft : C.paper }}
                 >
-                  <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginBottom: 4 }}>🛡️ MaidIt Assisted</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginBottom: 4 }}>MaidIt Assisted Transport — ₱5,000</div>
                   <div style={{ fontSize: 12, color: C.ink2, lineHeight: 1.5 }}>We coordinate and guarantee arrival.</div>
-                  {!isMaidIt && (
-                    <div style={{ marginTop: 8 }}>
-                      <div style={{ fontFamily: serif, fontSize: 18, fontWeight: 600, color: C.amber }}>+₱6,000</div>
-                      <div style={{ fontSize: 11, color: C.amberDeep, marginTop: 2 }}>one-time fee</div>
-                    </div>
-                  )}
-                  {isMaidIt && (
-                    <>
-                      <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 5, margin: '10px 0' }}>
-                        {[
-                          'Released only after confirmed arrival',
-                          'No direct money transfer needed',
-                          'If she doesn\'t arrive, ₱6,000 is returned',
-                        ].map((item, i) => (
-                          <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
-                            <span style={{ color: C.amber, fontWeight: 700, fontSize: 12, marginTop: 1 }}>✓</span>
-                            <span style={{ fontSize: 11.5, color: C.ink2, lineHeight: 1.5 }}>{item}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' as const }}>
-                        <span style={{ fontSize: 10.5, fontWeight: 600, background: C.amberLine, color: C.amberDeep, borderRadius: 6, padding: '3px 7px' }}>₱5,500 transport</span>
-                        <span style={{ fontSize: 10.5, fontWeight: 600, background: C.amberLine, color: C.amberDeep, borderRadius: 6, padding: '3px 7px' }}>₱500 MaidIt fee</span>
-                      </div>
-                    </>
-                  )}
                 </div>
               </div>
             )}
             {isMaidIt && (
-              <div style={{ background: '#fbf3e2', border: '1px solid #e8d4a0', borderRadius: 12, padding: '12px 14px', marginTop: 12, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '1rem', flexShrink: 0 }}>🚌</span>
-                <div style={{ fontSize: 12, color: '#374151', lineHeight: 1.6 }}>
-                  If the kasambahay leaves without justifiable reason within 6 months of employment, you may recover transport assistance costs directly from her pursuant to RA 10361. MaidIt is not involved in this recovery — it is solely between you and the kasambahay.
+              <div style={{ background: '#fbf3e2', border: '1px solid #e8d4a0', borderRadius: 10, padding: '10px 12px', marginTop: 12, fontSize: 11, color: '#92400e', lineHeight: 1.7 }}>
+                <div>Transport arrangement: ₱3,500</div>
+                <div>Kasambahay travel allowance: ₱1,000</div>
+                <div>MaidIt assistance fee: ₱500</div>
+                <div style={{ marginTop: 8 }}>
+                  Important: The ₱3,500 transport cost and ₱1,000 travel allowance are released only after MaidIt confirms the kasambahay is boarding the bus. If she does not board, the full ₱5,000 is refunded to you. The ₱500 MaidIt assistance fee is non-refundable once transport is arranged.
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  If the kasambahay leaves your home within 6 months without justifiable reason, you may recover the ₱4,000 directly from her pursuant to RA 10361. MaidIt is not involved in this recovery.
                 </div>
               </div>
             )}
