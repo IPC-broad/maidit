@@ -48,6 +48,7 @@ export default function PartnerDashboard() {
   const [payouts, setPayouts] = useState<Payout[]>([])
   const [workers, setWorkers] = useState<Worker[]>([])
   const [workerOffers, setWorkerOffers] = useState<any[]>([])
+  const [proxyOffers, setProxyOffers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
@@ -122,6 +123,22 @@ export default function PartnerDashboard() {
           .in('kasambahay_id', workerIds)
           .in('status', ['pending', 'countered', 'agreed'])
         setWorkerOffers(offersData || [])
+      }
+
+      // Proxy offers — two-step fetch
+      const { data: proxies } = await supabase
+        .from('kasambahay')
+        .select('profile_id')
+        .eq('proxy_mode', true)
+        .eq('proxy_partner_id', partnerData.profile_id)
+      const proxyKbIds = (proxies || []).map((k: any) => k.profile_id)
+      if (proxyKbIds.length > 0) {
+        const { data: proxyOffersData } = await supabase
+          .from('offers')
+          .select('id, kasambahay_id, status, salary, setup, city, start_date, scope, urgency')
+          .in('kasambahay_id', proxyKbIds)
+          .in('status', ['pending', 'countered'])
+        setProxyOffers(proxyOffersData || [])
       }
       setLoading(false)
     }
@@ -453,7 +470,7 @@ export default function PartnerDashboard() {
             ) : workers.map((w: any) => {
               const st = statusLabel[w.status] || statusLabel.draft
               const isProxy = w.proxy_mode && w.proxy_partner_id === partner.profile_id
-              const pendingOffer = isProxy ? workerOffers.find((o: any) => o.kasambahay_id === w.id && o.status === 'pending') : undefined
+              const pendingOffer = isProxy ? proxyOffers.find((o: any) => o.kasambahay_id === w.profile_id && o.status === 'pending') : undefined
               return (
                 <div key={w.id} style={{ background: '#fff', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px', border: '1px solid #ede8e0' }}>
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -502,7 +519,7 @@ export default function PartnerDashboard() {
                             setProxyActioning(pendingOffer.id)
                             const { supabase } = await import('../../../lib/supabase')
                             await supabase.from('offers').update({ status: 'agreed', negotiated_by: 'partner' }).eq('id', pendingOffer.id)
-                            setWorkerOffers(prev => prev.filter((o: any) => o.id !== pendingOffer.id))
+                            setProxyOffers(prev => prev.filter((o: any) => o.id !== pendingOffer.id))
                             setProxyActioning(null)
                           }}
                           style={{ flex: 1, padding: '10px 6px', borderRadius: '10px', border: 'none', background: C.forest, color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, opacity: proxyActioning ? 0.6 : 1 }}
@@ -522,7 +539,7 @@ export default function PartnerDashboard() {
                             setProxyActioning(pendingOffer.id)
                             const { supabase } = await import('../../../lib/supabase')
                             await supabase.from('offers').update({ status: 'declined', negotiated_by: 'partner' }).eq('id', pendingOffer.id)
-                            setWorkerOffers(prev => prev.filter((o: any) => o.id !== pendingOffer.id))
+                            setProxyOffers(prev => prev.filter((o: any) => o.id !== pendingOffer.id))
                             setProxyActioning(null)
                           }}
                           style={{ flex: 1, padding: '10px 6px', borderRadius: '10px', border: `1.5px solid ${C.line}`, background: 'transparent', color: C.ink3, fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: sans }}
@@ -994,7 +1011,7 @@ export default function PartnerDashboard() {
                   ...(counterDateInput ? { counter_start_date: counterDateInput } : {}),
                   negotiated_by: 'partner',
                 }).eq('id', counterSheet)
-                setWorkerOffers(prev => prev.filter((o: any) => o.id !== counterSheet))
+                setProxyOffers(prev => prev.filter((o: any) => o.id !== counterSheet))
                 setCounterSheet(null)
                 setProxyActioning(null)
               }}
