@@ -33,7 +33,12 @@ export default function HWDashboard() {
       const { supabase } = await import('../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user || null)
-      const { data } = await supabase.from('kasambahay').select('*, profiles(*)')
+      const { data } = await supabase.from('kasambahay').select(`
+        id, profile_id, asking_salary, setup, skills,
+        province, selfie_url, availability, referred_by,
+        has_govt_id, has_nbi, edad, how_referred,
+        partner_photo_url, facebook_url
+      `)
       setProfiles(data || [])
       let hw: any = null
       if (user) {
@@ -135,7 +140,7 @@ export default function HWDashboard() {
   const filters = ['All', 'Stay-in', 'Stay-out', 'Metro Manila', 'Province']
 
   const filtered = profiles.filter(p => {
-    if (!p.profiles) return false
+    if (!p.id) return false
     if (filter === 'All') return true
     if (filter === 'Stay-in') return p.setup === 'Stay-in'
     if (filter === 'Stay-out') return p.setup === 'Stay-out'
@@ -269,16 +274,16 @@ export default function HWDashboard() {
               <div key={kb.id} style={{ background:'#fff', borderRadius:'14px', padding:'13px 14px', boxShadow:'0 2px 8px rgba(0,0,0,.06)', border:'1.5px solid #f3f4f6' }}>
                 <div style={{ display:'flex', gap:'11px', alignItems:'center', marginBottom:'9px' }}>
                   <div style={{ width:'46px', height:'46px', borderRadius:'50%', background:'#fdf3e3', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.2rem', flexShrink:0, border:'2px solid rgba(201,148,58,.2)', overflow:'hidden' }}>
-                    {kb.profiles?.selfie_url
-                      ? <img src={kb.profiles.selfie_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }} />
+                    {kb.selfie_url
+                      ? <img src={kb.selfie_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }} />
                       : '👩'}
                   </div>
                   <div style={{ flex:1 }}>
                     <div style={{ fontWeight:700, fontSize:'.9rem', color:'#111827' }}>
-                      {kb.profiles?.full_name?.split(' ')[0]} {kb.profiles?.full_name?.split(' ')[1]?.[0]}.
-                      {kb.age && <span style={{ fontSize:'.72rem', fontWeight:500, color:'#9ca3af', marginLeft:'5px' }}>{kb.age} yrs old</span>}
+                      {kb.profile_id}
+                      {kb.edad && <span style={{ fontSize:'.72rem', fontWeight:500, color:'#9ca3af', marginLeft:'5px' }}>{kb.edad} yrs old</span>}
                     </div>
-                    <div style={{ fontSize:'.68rem', color:'#6b7280' }}>{kb.province || kb.profiles?.city} · {kb.setup}</div>
+                    <div style={{ fontSize:'.68rem', color:'#6b7280' }}>{kb.province} · {kb.setup}</div>
                   </div>
                   <div style={{ textAlign:'right' }}>
                     <div style={{ fontFamily:'serif', fontSize:'1rem', fontWeight:900, color:'#1a6b3c' }}>₱{kb.asking_salary?.toLocaleString()}</div>
@@ -512,14 +517,14 @@ export default function HWDashboard() {
           )}
           {applicants.map((app: any) => {
             const kb = app.kasambahay
-            const kbName = kb?.profiles?.full_name || 'Kasambahay'
+            const kbName = kb?.profile_id || 'Kasambahay'
             return (
               <div key={app.id} style={{ background:'#fff', borderRadius:'14px', border:'1px solid #ede8e0', overflow:'hidden', marginBottom:'12px' }}>
                 <div style={{ padding:'13px 14px' }}>
                   <div style={{ display:'flex', gap:'11px', alignItems:'center', marginBottom:'9px' }}>
                     <div style={{ width:'44px', height:'44px', borderRadius:'50%', background:'#fdf3e3', border:'2px solid #fde8c0', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px', flexShrink:0, overflow:'hidden' }}>
-                      {kb?.profiles?.selfie_url
-                        ? <img src={kb.profiles.selfie_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }} />
+                      {kb?.selfie_url
+                        ? <img src={kb.selfie_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }} />
                         : '👩'}
                     </div>
                     <div style={{ flex:1 }}>
