@@ -188,7 +188,12 @@ export default function BrowsePage() {
       setHomeownerCity(prof?.city || null)
       setHomeownerProvince(prof?.city || null)
     }
-    const { data, error } = await supabase
+    const { createClient } = await import('@supabase/supabase-js')
+    const anonClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    const { data, error } = await anonClient
       .from('kasambahay')
       .select(`
         id, profile_id, asking_salary, setup, skills,
@@ -200,7 +205,7 @@ export default function BrowsePage() {
         )
       `)
       .limit(20)
-    console.log('[browse] query result — count:', data?.length, 'error:', error?.message)
+    console.log('[browse] anon query — count:', data?.length, 'error:', error?.message)
     setProfiles(data || [])
     setLoading(false)
   }
