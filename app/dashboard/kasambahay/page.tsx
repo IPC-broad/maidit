@@ -499,6 +499,14 @@ export default function KBDashboard() {
                       <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '10px 12px', fontSize: '13px', color: '#166534', fontWeight: 700, textAlign: 'center' as const, marginBottom: '10px' }}>
                         💰 Bayad na! Maghanda ka na.
                       </div>
+                      {offer.transport_service === true && (
+                        <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '9px', padding: '10px 12px', marginBottom: '10px', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                          <span style={{ fontSize: '13px', flexShrink: 0 }}>🚌</span>
+                          <div style={{ fontSize: '12px', color: '#92400e', lineHeight: 1.6 }}>
+                            Ang transport assistance na ginastos ng employer para ikaw ay safe na makarating sa pagtatrabahuan ay bahagi ng iyong deployment expenses. Ayon sa RA 10361, maaaring ibalik ito sa employer kung aalis ka nang walang makatwirang dahilan sa loob ng 6 na buwan.
+                          </div>
+                        </div>
+                      )}
                       {offer.homeowner?.profiles?.mobile && (
                         <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px' }}>
                           <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '6px' }}>I-contact ang employer mo</div>

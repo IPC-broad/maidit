@@ -254,7 +254,6 @@ export default function BrowsePage() {
   }
 
   const filtered = profiles.filter(p => {
-    if (!p.profile) return false
     if (passed[p.id]) return false
     if (search) {
       const q = search.toLowerCase()

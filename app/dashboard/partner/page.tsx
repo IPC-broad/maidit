@@ -621,6 +621,9 @@ export default function PartnerDashboard() {
                 </div>
               )
             })}
+            <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '12px', padding: '12px 14px', marginTop: '8px', fontSize: '12px', color: '#92400e', lineHeight: 1.6, fontFamily: sans }}>
+              ⚠️ Kapag hindi nagtagal ang kasambahay sa loob ng 30 araw, ang ₱500 na recruitment fee ay ibabawas sa iyong kita.
+            </div>
           </>
         )}
 
