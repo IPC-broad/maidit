@@ -374,7 +374,7 @@ export default function SendOfferPage() {
                 value={form.start_date}
                 min={new Date().toISOString().split('T')[0]}
                 onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))}
-                style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%' }}
+                style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}
               />
             </div>
           </label>

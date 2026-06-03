@@ -131,16 +131,19 @@ export default function PartnerDashboard() {
       // Proxy offers — two-step fetch
       const { data: proxies } = await supabase
         .from('kasambahay')
-        .select('profile_id')
+        .select('id, profile_id')
         .eq('proxy_mode', true)
         .eq('proxy_partner_id', partnerData.profile_id)
-      const proxyKbIds = (proxies || []).map((k: any) => k.profile_id)
+      const proxyKbIds = (proxies || []).map((k: any) => k.id)
+      console.log('[proxy-offers] proxies:', proxies)
+      console.log('[proxy-offers] proxyKbIds:', proxyKbIds)
       if (proxyKbIds.length > 0) {
         const { data: proxyOffersData } = await supabase
           .from('offers')
           .select('id, kasambahay_id, status, salary, setup, city, start_date, scope, urgency')
           .in('kasambahay_id', proxyKbIds)
           .in('status', ['pending', 'countered'])
+        console.log('[proxy-offers] offers:', proxyOffersData)
         setProxyOffers(proxyOffersData || [])
       }
       setLoading(false)
