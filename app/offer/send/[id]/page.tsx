@@ -185,7 +185,7 @@ export default function SendOfferPage() {
 
   const kbProvince = kb?.province || ''
   const sameProvince = !!(hwProvinceKey && kbProvince && hwProvinceKey === kbProvince)
-  const showTransportSection = !!(kb && kbProvince && (hwProvinceKey !== kbProvince))
+  const showTransportSection = !!(kb && kbProvince && !sameProvince)
   const showMaidItOption = TRANSPORT_PROVINCES.includes(kbProvince)
   console.log('[transport]', { kbProvince, hwProvinceKey, sameProvince, showTransportSection, showMaidItOption })
   const isDirect = form.transport_arrangement === 'direct' || (showTransportSection && !showMaidItOption)
