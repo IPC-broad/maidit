@@ -60,6 +60,8 @@ export default function PartnerDashboard() {
   const [counterDateInput, setCounterDateInput] = useState('')
   const [proxyActioning, setProxyActioning] = useState<string | null>(null)
   const [isFacebook, setIsFacebook] = useState(false)
+  const [offerChecklists, setOfferChecklists] = useState<Record<string, Record<string, boolean>>>({})
+  const [offerCounters, setOfferCounters] = useState<Record<string, { salary: string; date: string }>>({})
   const photoRef = useRef<HTMLInputElement>(null)
 
   const [workerForm, setWorkerForm] = useState({
@@ -169,6 +171,17 @@ export default function PartnerDashboard() {
   const toggleSkill = (skill: string) => {
     setWorkerForm(f => ({ ...f, skills: f.skills.includes(skill) ? f.skills.filter(s => s !== skill) : [...f.skills, skill] }))
   }
+
+  const defaultCl = { salary: true, setup: true, location: true, start_date: true, transport: true }
+  const getCl = (offerId: string) => offerChecklists[offerId] ?? { ...defaultCl }
+  const tickOffer = (offerId: string, key: string) => setOfferChecklists(prev => {
+    const cl = prev[offerId] ?? { ...defaultCl }
+    return { ...prev, [offerId]: { ...cl, [key]: !cl[key] } }
+  })
+  const getCtr = (offerId: string) => offerCounters[offerId] ?? { salary: '', date: '' }
+  const setCtr = (offerId: string, key: 'salary' | 'date', val: string) => setOfferCounters(prev => ({
+    ...prev, [offerId]: { ...(prev[offerId] ?? { salary: '', date: '' }), [key]: val }
+  }))
 
   const toggleGovtId = (id: string) => {
     if (id === 'Wala') {
@@ -506,72 +519,175 @@ export default function PartnerDashboard() {
                     </div>
                     <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: st.bg, color: st.color, whiteSpace: 'nowrap' as const, border: `1px solid ${st.color}30` }}>{st.label}</span>
                   </div>
-                  {isProxy && pendingOffer && (
-                    <div style={{ marginTop: '12px', borderTop: `1px solid ${C.line}`, paddingTop: '12px' }}>
-                      <div style={{ background: C.amberSoft, border: `1px solid ${C.amberLine}`, borderRadius: '10px', padding: '8px 12px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '16px' }}>🤝</span>
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#92400e', fontFamily: sans }}>May offer para sa kanya — ikaw ang kumakatawan</span>
-                      </div>
-                      <div style={{ background: C.paper2, borderRadius: '10px', padding: '10px 12px', marginBottom: '10px' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                          <div>
-                            <div style={{ fontSize: '10px', color: C.ink3, marginBottom: '2px', fontFamily: sans }}>Salary</div>
-                            <div style={{ fontFamily: serif, fontSize: '16px', fontWeight: 400, color: C.forest }}>₱{pendingOffer.salary?.toLocaleString()}<span style={{ fontSize: '10px', color: C.ink3 }}>/buwan</span></div>
-                          </div>
-                          <div>
-                            <div style={{ fontSize: '10px', color: C.ink3, marginBottom: '2px', fontFamily: sans }}>Lokasyon</div>
-                            <div style={{ fontSize: '13px', fontWeight: 700, fontFamily: sans }}>{pendingOffer.city || '—'}</div>
-                          </div>
-                          <div>
-                            <div style={{ fontSize: '10px', color: C.ink3, marginBottom: '2px', fontFamily: sans }}>Setup</div>
-                            <div style={{ fontSize: '13px', fontWeight: 700, fontFamily: sans }}>{pendingOffer.setup || '—'}</div>
-                          </div>
-                          {pendingOffer.start_date && (
-                            <div>
-                              <div style={{ fontSize: '10px', color: C.ink3, marginBottom: '2px', fontFamily: sans }}>Simula</div>
-                              <div style={{ fontSize: '12px', fontWeight: 600, fontFamily: sans }}>{pendingOffer.start_date}</div>
+                  {isProxy && pendingOffer && (() => {
+                    const cl = getCl(pendingOffer.id)
+                    const ctr = getCtr(pendingOffer.id)
+                    const hasCounter = !cl.salary || !cl.setup || !cl.location || !cl.start_date || !cl.transport
+                    const counterValid = !(!cl.salary && !ctr.salary)
+                    const fmtDate = pendingOffer.start_date
+                      ? new Date(pendingOffer.start_date + 'T00:00:00').toLocaleDateString('fil-PH', { month: 'long', day: 'numeric', year: 'numeric' })
+                      : null
+                    const tBox = (checked: boolean) => ({
+                      width: '22px', height: '22px', borderRadius: '6px', flexShrink: 0 as const,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                      background: checked ? '#16a34a' : '#ef4444',
+                    })
+                    const tStatus = (checked: boolean) => ({ fontSize: '10px', fontWeight: 700 as const, color: checked ? '#16a34a' : '#ef4444', marginTop: '2px', fontFamily: sans })
+                    const rowStyle = { padding: '10px 12px', borderBottom: `1px solid ${C.line}` }
+                    const rowStyleLast = { padding: '10px 12px' }
+                    const ctrBox = { marginTop: '8px', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '8px', padding: '8px 10px' }
+                    const ctrLabel = { fontSize: '10px', fontWeight: 700 as const, color: '#92400e', marginBottom: '5px', fontFamily: sans }
+                    const ctrInput = { flex: 1, padding: '7px 9px', border: '1.5px solid #fde8c0', borderRadius: '7px', fontFamily: sans, fontSize: '13px', outline: 'none', background: '#fff', width: '100%', boxSizing: 'border-box' as const }
+                    return (
+                      <div style={{ marginTop: '12px', borderTop: `1px solid ${C.line}`, paddingTop: '12px' }}>
+                        {/* Amber banner */}
+                        <div style={{ background: C.amberSoft, border: `1px solid ${C.amberLine}`, borderRadius: '10px', padding: '8px 12px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '16px' }}>🤝</span>
+                          <span style={{ fontSize: '11px', fontWeight: 700, color: '#92400e', fontFamily: sans }}>May offer para sa kanya — ikaw ang kumakatawan</span>
+                        </div>
+
+                        {/* Toggle rows */}
+                        <div style={{ background: C.paper2, border: `1px solid ${C.line}`, borderRadius: '10px', marginBottom: '10px', overflow: 'hidden' }}>
+                          <div style={{ padding: '7px 12px', borderBottom: `1px solid ${C.line}` }}>
+                            <div style={{ fontSize: '9px', fontWeight: 700, color: C.ink3, textTransform: 'uppercase' as const, letterSpacing: '.05em', fontFamily: sans }}>
+                              I-toggle — berde kung sang-ayon, pula kung hindi
                             </div>
+                          </div>
+
+                          {/* Salary */}
+                          <div style={rowStyle}>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                              <div style={tBox(cl.salary)} onClick={() => tickOffer(pendingOffer.id, 'salary')}>
+                                <span style={{ color: '#fff', fontSize: '11px', fontWeight: 900 }}>{cl.salary ? '✓' : '✗'}</span>
+                              </div>
+                              <div style={{ flex: 1 }} onClick={() => tickOffer(pendingOffer.id, 'salary')}>
+                                <div style={{ fontSize: '13px', color: '#374151', fontFamily: sans }}>Sweldo: <strong>₱{pendingOffer.salary?.toLocaleString()}/buwan</strong></div>
+                                <div style={tStatus(cl.salary)}>{cl.salary ? '✓ Sang-ayon' : '✗ Hindi sang-ayon'}</div>
+                              </div>
+                            </div>
+                            {!cl.salary && (
+                              <div style={ctrBox}>
+                                <div style={ctrLabel}>Ano ang gusto mong sweldo?</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                  <span style={{ fontSize: '13px', color: C.amber, fontWeight: 700 }}>₱</span>
+                                  <input type="number" placeholder={w.asking_salary ? String(w.asking_salary) : 'e.g. 9000'} value={ctr.salary}
+                                    onChange={e => setCtr(pendingOffer.id, 'salary', e.target.value)}
+                                    style={{ ...ctrInput }} />
+                                  <span style={{ fontSize: '10px', color: C.ink3, whiteSpace: 'nowrap' as const }}>/buwan</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Setup */}
+                          <div style={rowStyle}>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }} onClick={() => tickOffer(pendingOffer.id, 'setup')}>
+                              <div style={tBox(cl.setup)}><span style={{ color: '#fff', fontSize: '11px', fontWeight: 900 }}>{cl.setup ? '✓' : '✗'}</span></div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '13px', color: '#374151', fontFamily: sans }}>Setup: <strong>{pendingOffer.setup || '—'}</strong></div>
+                                <div style={tStatus(cl.setup)}>{cl.setup ? '✓ Sang-ayon' : '✗ Hindi sang-ayon'}</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Location */}
+                          <div style={rowStyle}>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }} onClick={() => tickOffer(pendingOffer.id, 'location')}>
+                              <div style={tBox(cl.location)}><span style={{ color: '#fff', fontSize: '11px', fontWeight: 900 }}>{cl.location ? '✓' : '✗'}</span></div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '13px', color: '#374151', fontFamily: sans }}>Lokasyon: <strong>{pendingOffer.city || '—'}</strong></div>
+                                <div style={tStatus(cl.location)}>{cl.location ? '✓ Sang-ayon' : '✗ Hindi sang-ayon'}</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Start date */}
+                          <div style={rowStyle}>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                              <div style={tBox(cl.start_date)} onClick={() => tickOffer(pendingOffer.id, 'start_date')}>
+                                <span style={{ color: '#fff', fontSize: '11px', fontWeight: 900 }}>{cl.start_date ? '✓' : '✗'}</span>
+                              </div>
+                              <div style={{ flex: 1 }} onClick={() => tickOffer(pendingOffer.id, 'start_date')}>
+                                <div style={{ fontSize: '13px', color: '#374151', fontFamily: sans }}>Simula ng trabaho: <strong>{fmtDate || '—'}</strong></div>
+                                <div style={tStatus(cl.start_date)}>{cl.start_date ? '✓ Sang-ayon' : '✗ Hindi sang-ayon'}</div>
+                              </div>
+                            </div>
+                            {!cl.start_date && (
+                              <div style={ctrBox}>
+                                <div style={ctrLabel}>Anong petsa ang gusto mo?</div>
+                                <input type="date" value={ctr.date} min={new Date().toISOString().split('T')[0]}
+                                  onChange={e => setCtr(pendingOffer.id, 'date', e.target.value)}
+                                  style={{ ...ctrInput }} />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Transport */}
+                          <div style={rowStyleLast}>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }} onClick={() => tickOffer(pendingOffer.id, 'transport')}>
+                              <div style={tBox(cl.transport)}><span style={{ color: '#fff', fontSize: '11px', fontWeight: 900 }}>{cl.transport ? '✓' : '✗'}</span></div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '13px', color: '#374151', fontFamily: sans }}>
+                                  Transportasyon: <strong>{pendingOffer.transport_service ? 'MaidIt Assisted (₱5,000)' : 'Direct (libre)'}</strong>
+                                </div>
+                                <div style={tStatus(cl.transport)}>{cl.transport ? '✓ Sang-ayon' : '✗ Hindi sang-ayon'}</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action buttons */}
+                        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px', marginBottom: '10px' }}>
+                          {!hasCounter ? (
+                            <button
+                              disabled={!!proxyActioning}
+                              onClick={async () => {
+                                setProxyActioning(pendingOffer.id)
+                                const { supabase } = await import('../../../lib/supabase')
+                                await supabase.from('offers').update({ status: 'agreed', negotiated_by: 'partner' }).eq('id', pendingOffer.id)
+                                setProxyOffers(prev => prev.filter((o: any) => o.id !== pendingOffer.id))
+                                setProxyActioning(null)
+                              }}
+                              style={{ width: '100%', padding: '11px', borderRadius: '10px', border: 'none', background: C.forest, color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, opacity: proxyActioning ? 0.6 : 1 }}
+                            >{proxyActioning === pendingOffer.id ? 'Nagse-save...' : 'Tanggapin ✓'}</button>
+                          ) : (
+                            <button
+                              disabled={!!proxyActioning || !counterValid}
+                              onClick={async () => {
+                                setProxyActioning(pendingOffer.id)
+                                const { supabase } = await import('../../../lib/supabase')
+                                await supabase.from('offers').update({
+                                  status: 'countered',
+                                  negotiated_by: 'partner',
+                                  ...(!cl.salary && ctr.salary ? { counter_salary: parseInt(ctr.salary) } : {}),
+                                  ...(!cl.start_date && ctr.date ? { counter_start_date: ctr.date } : {}),
+                                }).eq('id', pendingOffer.id)
+                                setProxyOffers(prev => prev.filter((o: any) => o.id !== pendingOffer.id))
+                                setProxyActioning(null)
+                              }}
+                              style={{ width: '100%', padding: '11px', borderRadius: '10px', border: 'none', background: C.amber, color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, opacity: (proxyActioning || !counterValid) ? 0.5 : 1 }}
+                            >{proxyActioning === pendingOffer.id ? 'Nagse-save...' : 'I-submit ang Counter →'}</button>
                           )}
+                          <button
+                            disabled={!!proxyActioning}
+                            onClick={async () => {
+                              setProxyActioning(pendingOffer.id)
+                              const { supabase } = await import('../../../lib/supabase')
+                              await supabase.from('offers').update({ status: 'declined', negotiated_by: 'partner' }).eq('id', pendingOffer.id)
+                              setProxyOffers(prev => prev.filter((o: any) => o.id !== pendingOffer.id))
+                              setProxyActioning(null)
+                            }}
+                            style={{ width: '100%', padding: '10px', borderRadius: '10px', border: `1.5px solid ${C.line}`, background: 'transparent', color: C.ink3, fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: sans }}
+                          >Tanggihan</button>
+                        </div>
+
+                        {/* Disclaimer */}
+                        <div style={{ background: C.amberSoft, border: `1px solid ${C.amberLine}`, borderRadius: '10px', padding: '9px 12px', fontSize: '11px', color: '#92400e', lineHeight: 1.5, fontFamily: sans }}>
+                          Ikaw ang kumakatawan sa kanya. Siguraduhing nakausap mo na siya bago mag-accept o mag-counter.
                         </div>
                       </div>
-                      <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
-                        <button
-                          disabled={!!proxyActioning}
-                          onClick={async () => {
-                            setProxyActioning(pendingOffer.id)
-                            const { supabase } = await import('../../../lib/supabase')
-                            await supabase.from('offers').update({ status: 'agreed', negotiated_by: 'partner' }).eq('id', pendingOffer.id)
-                            setProxyOffers(prev => prev.filter((o: any) => o.id !== pendingOffer.id))
-                            setProxyActioning(null)
-                          }}
-                          style={{ flex: 1, padding: '10px 6px', borderRadius: '10px', border: 'none', background: C.forest, color: '#fff', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, opacity: proxyActioning ? 0.6 : 1 }}
-                        >Tanggapin ✓</button>
-                        <button
-                          disabled={!!proxyActioning}
-                          onClick={() => {
-                            setCounterSalaryInput(w.asking_salary ? String(w.asking_salary) : '')
-                            setCounterDateInput('')
-                            setCounterSheet(pendingOffer.id)
-                          }}
-                          style={{ flex: 1, padding: '10px 6px', borderRadius: '10px', border: `1.5px solid ${C.forest}`, background: 'transparent', color: C.forest, fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans }}
-                        >I-counter</button>
-                        <button
-                          disabled={!!proxyActioning}
-                          onClick={async () => {
-                            setProxyActioning(pendingOffer.id)
-                            const { supabase } = await import('../../../lib/supabase')
-                            await supabase.from('offers').update({ status: 'declined', negotiated_by: 'partner' }).eq('id', pendingOffer.id)
-                            setProxyOffers(prev => prev.filter((o: any) => o.id !== pendingOffer.id))
-                            setProxyActioning(null)
-                          }}
-                          style={{ flex: 1, padding: '10px 6px', borderRadius: '10px', border: `1.5px solid ${C.line}`, background: 'transparent', color: C.ink3, fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: sans }}
-                        >Tanggihan</button>
-                      </div>
-                      <div style={{ background: C.amberSoft, border: `1px solid ${C.amberLine}`, borderRadius: '10px', padding: '9px 12px', fontSize: '11px', color: '#92400e', lineHeight: 1.5, fontFamily: sans }}>
-                        Ikaw ang kumakatawan sa kanya. Siguraduhing nakausap mo na siya bago mag-accept o mag-counter.
-                      </div>
-                    </div>
-                  )}
+                    )
+                  })()}
                 </div>
               )
             })}
