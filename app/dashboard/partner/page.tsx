@@ -245,7 +245,9 @@ export default function PartnerDashboard() {
     if (workerAge) kasambahayRow.edad = parseInt(workerAge)
     if (workerSalary) kasambahayRow.asking_salary = parseInt(workerSalary)
     if (workerHowReferred) kasambahayRow.how_referred = workerHowReferred
-    console.log('[manual-add] step 2 — inserting kasambahay', kasambahayRow)
+    console.log('[proxy-insert] proxy_partner_id:', partner.profile_id)
+    console.log('[proxy-insert] referred_by:', partner.referral_code)
+    console.log('[proxy-insert] full kasambahayRow:', JSON.stringify(kasambahayRow))
     const { error: kasambahayError } = await supabase.from('kasambahay').insert(kasambahayRow)
     console.log('[manual-add] kasambahay result:', { kasambahayError })
     if (kasambahayError) {
