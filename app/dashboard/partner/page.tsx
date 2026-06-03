@@ -483,7 +483,8 @@ export default function PartnerDashboard() {
               </div>
             ) : workers.map((w: any) => {
               const isProxy = w.proxy_mode && w.proxy_partner_id === partner.profile_id
-              const pendingOffer = isProxy ? proxyOffers.find((o: any) => o.kasambahay_id === w.profile_id && o.status === 'pending') : undefined
+              const pendingOffer = isProxy ? proxyOffers.find((o: any) => o.kasambahay_id === w.id && o.status === 'pending') : undefined
+              console.log('[worker-match] w.id:', w.id, 'w.profile_id:', w.profile_id, 'found offer:', pendingOffer)
               const workerOffer = workerOffers.find((o: any) => o.kasambahay_id === w.id)
               const st = workerOffer && ['pending','agreed'].includes(workerOffer.status)
                 ? { label: 'May aktibong offer', bg: '#eff6ff', color: '#2563eb' }
@@ -493,7 +494,9 @@ export default function PartnerDashboard() {
               return (
                 <div key={w.id} style={{ background: '#fff', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px', border: '1px solid #ede8e0' }}>
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#fef3e2', border: '2px solid #fde8c0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>👩</div>
+                    <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#27500A', border: '2px solid #fde8c0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 800, color: '#fff', flexShrink: 0, fontFamily: sans }}>
+                      {(() => { const n = profileNames[w.profile_id] || w.full_name || ''; const parts = n.trim().split(' '); return parts.length >= 2 ? parts[0][0].toUpperCase() + parts[parts.length - 1][0].toUpperCase() : n[0]?.toUpperCase() || '?' })()}
+                    </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: '15px', color: '#111827' }}>{profileNames[w.profile_id] || w.full_name || 'Kasambahay'}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '1px' }}>
