@@ -958,7 +958,7 @@ export default function PartnerDashboard() {
                         {workerConfirmed && <span style={{ color: '#fff', fontSize: '13px', fontWeight: 900 }}>✓</span>}
                       </div>
                       <div style={{ fontSize: '13px', color: C.ink, lineHeight: 1.6, fontFamily: sans }}>
-                        Pinatutunayan ko na ang kasambahay na ito ay isang tunay na tao at personal niyang ipinahahayag ang kanyang interes na maging bahagi ng MaidIt platform.
+                        Pinatutunayan ko na ang kasambahay na ito ay personal na nagbigay ng kanyang pahintulot na irehistro siya sa MaidIt platform sa pamamagitan ko bilang kanyang Community Partner.
                       </div>
                     </div>
 
