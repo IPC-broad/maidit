@@ -14,13 +14,13 @@ const serif = "'Instrument Serif', Georgia, serif"
 const sans  = "'Geist', ui-sans-serif, sans-serif"
 
 const SKILLS = [
-  'All-Around Maid',
   'Pagluluto',
   'Paglalaba',
   'Paglilinis',
   'Pag-aalaga ng Bata',
   'Pag-aalaga ng Matanda',
   'Pag-aalaga ng Alagang Hayop',
+  'Pamimili',
   'Pagmamaneho',
 ]
 const SETUPS = ['Stay-in', 'Stay-out', 'Kahit alin']
@@ -115,6 +115,7 @@ export default function PartnerDashboard() {
             wProfileMap[p.id] = lastInitial ? `${first} ${lastInitial}` : first
           }
         })
+        console.log('[profileNames]', wProfileMap)
         setProfileNames(wProfileMap)
       }
       setWorkers(workersData || [])
@@ -241,6 +242,7 @@ export default function PartnerDashboard() {
       availability: workerForm.availability,
       province: workerForm.province,
       partner_photo_url: photoUrl || null,
+      is_verified: false,
     }
     if (workerAge) kasambahayRow.edad = parseInt(workerAge)
     if (workerSalary) kasambahayRow.asking_salary = parseInt(workerSalary)
@@ -477,15 +479,20 @@ export default function PartnerDashboard() {
                 <div style={{ fontSize: '12px', color: '#9ca3af' }}>Mag-tap ng "Mag-refer" para magsimula.</div>
               </div>
             ) : workers.map((w: any) => {
-              const st = statusLabel[w.status] || statusLabel.draft
               const isProxy = w.proxy_mode && w.proxy_partner_id === partner.profile_id
               const pendingOffer = isProxy ? proxyOffers.find((o: any) => o.kasambahay_id === w.profile_id && o.status === 'pending') : undefined
+              const workerOffer = workerOffers.find((o: any) => o.kasambahay_id === w.id)
+              const st = workerOffer && ['pending','agreed'].includes(workerOffer.status)
+                ? { label: 'May aktibong offer', bg: '#eff6ff', color: '#2563eb' }
+                : workerOffer && ['hired','completed'].includes(workerOffer.status)
+                ? { label: 'Na-hire na 🎉', bg: '#f0fdf4', color: '#166534' }
+                : { label: 'Aktibo sa platform', bg: '#f0fdf4', color: '#1a6b3c' }
               return (
                 <div key={w.id} style={{ background: '#fff', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px', border: '1px solid #ede8e0' }}>
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#fef3e2', border: '2px solid #fde8c0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>👩</div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 700, fontSize: '15px', color: '#111827' }}>{profileNames[w.profile_id] || 'Kasambahay'}</div>
+                      <div style={{ fontWeight: 700, fontSize: '15px', color: '#111827' }}>{profileNames[w.profile_id] || w.full_name || 'Kasambahay'}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '1px' }}>
                         <span style={{ fontSize: '12px', color: '#6b7280' }}>{w.province}</span>
                         {isProxy && <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 7px', borderRadius: '4px', background: C.amberSoft, color: '#92400e', border: `1px solid ${C.amberLine}` }}>Proxy</span>}
@@ -588,26 +595,16 @@ export default function PartnerDashboard() {
                   <div style={{ fontFamily: sans, fontSize: '14px', fontWeight: 700, color: C.ink }}>I-share ang Link</div>
                 </div>
                 <div style={{ fontSize: '12px', color: C.ink3, lineHeight: 1.5, marginBottom: '12px' }}>I-kopya o i-share ang iyong referral link sa kasambahay.</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                  <button onClick={() => { navigator.clipboard.writeText(`https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`).catch(() => {}); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
-                    style={{ padding: '10px 6px', borderRadius: '10px', background: copied ? '#f0fdf4' : '#f3f4f6', border: `1px solid ${copied ? '#bbf7d0' : C.line}`, color: copied ? C.forest : C.ink, fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '3px' }}>
-                    <span style={{ fontSize: '18px' }}>{copied ? '✅' : '📋'}</span>
-                    <span>{copied ? 'Copied!' : 'Copy Link'}</span>
-                  </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
                   <button onClick={shareSMS}
-                    style={{ padding: '10px 6px', borderRadius: '10px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#2563eb', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '3px' }}>
+                    style={{ flex: 1, padding: '10px 6px', borderRadius: '10px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#2563eb', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '3px' }}>
                     <span style={{ fontSize: '18px' }}>💬</span>
                     <span>SMS</span>
                   </button>
                   <button onClick={() => { const l = encodeURIComponent(`https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`); window.open(`fb-messenger://share?link=${l}`, '_blank') }}
-                    style={{ padding: '10px 6px', borderRadius: '10px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1877f2', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '3px' }}>
+                    style={{ flex: 1, padding: '10px 6px', borderRadius: '10px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1877f2', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '3px' }}>
                     <span style={{ fontSize: '18px' }}>💬</span>
                     <span>Messenger</span>
-                  </button>
-                  <button onClick={() => { const l = encodeURIComponent(`https://maidit.vercel.app/signup/kasambahay?ref=${referralCode}`); window.open(`https://wa.me/?text=${l}`, '_blank') }}
-                    style={{ padding: '10px 6px', borderRadius: '10px', background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '3px' }}>
-                    <span style={{ fontSize: '18px' }}>🟢</span>
-                    <span>WhatsApp</span>
                   </button>
                 </div>
               </div>
