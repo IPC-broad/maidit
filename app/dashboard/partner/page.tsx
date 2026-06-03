@@ -59,6 +59,7 @@ export default function PartnerDashboard() {
   const [counterSalaryInput, setCounterSalaryInput] = useState('')
   const [counterDateInput, setCounterDateInput] = useState('')
   const [proxyActioning, setProxyActioning] = useState<string | null>(null)
+  const [isFacebook, setIsFacebook] = useState(false)
   const photoRef = useRef<HTMLInputElement>(null)
 
   const [workerForm, setWorkerForm] = useState({
@@ -89,6 +90,7 @@ export default function PartnerDashboard() {
       const { supabase } = await import('../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+      if (user.app_metadata?.provider === 'facebook') setIsFacebook(true)
       const { data: partnerData } = await supabase
         .from('partners').select('*, profiles(*)').eq('profile_id', user.id).single()
       if (!partnerData) { router.push('/'); return }
@@ -308,6 +310,11 @@ export default function PartnerDashboard() {
               <span style={{ fontSize: '10px', fontWeight: 700, padding: '3px 9px', borderRadius: '50px', background: isGold ? 'rgba(240,201,122,.25)' : 'rgba(255,255,255,.15)', color: isGold ? '#f0c97a' : 'rgba(255,255,255,.85)', border: isGold ? '1px solid rgba(240,201,122,.4)' : '1px solid rgba(255,255,255,.25)', fontFamily: sans }}>
                 {isGold ? '⭐ VIP Partner' : 'Community Partner'}
               </span>
+              {isFacebook && (
+                <span style={{ fontSize: '10px', fontWeight: 600, padding: '3px 9px', borderRadius: '50px', background: 'rgba(24,119,242,.15)', color: '#a8c8ff', border: '1px solid rgba(24,119,242,.3)', fontFamily: sans }}>
+                  🔗 Connected via Facebook
+                </span>
+              )}
               {partner?.flagged && (
                 <span style={{ fontSize: '10px', fontWeight: 700, padding: '3px 9px', borderRadius: '50px', background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', fontFamily: sans }}>
                   ⚠️ Flagged

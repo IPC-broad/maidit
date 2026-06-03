@@ -21,12 +21,14 @@ export default function KBDashboard() {
   const [copied, setCopied] = useState(false)
   const [activeHomeowners, setActiveHomeowners] = useState(14)
   const [nearbyFamilies, setNearbyFamilies] = useState<any[]>([])
+  const [isFacebook, setIsFacebook] = useState(false)
 
   useEffect(() => {
     const init = async () => {
       const { supabase } = await import('../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+      if (user.app_metadata?.provider === 'facebook') setIsFacebook(true)
       const { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       setProfile(prof)
       const { data: kbData } = await supabase.from('kasambahay').select('*').eq('profile_id', user.id).single()
@@ -184,6 +186,7 @@ export default function KBDashboard() {
           </div>
           <div>
             <div style={{ fontFamily: 'serif', fontSize: '16px', fontWeight: 900, color: '#1a1a1a' }}>{profile?.full_name}</div>
+            {isFacebook && <div style={{ fontSize: '10px', color: '#1877f2', fontWeight: 600 }}>🔗 Connected via Facebook</div>}
             <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#6b7280' }}>
               {kb?.status === 'available' && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />}
               <span>{kb?.status === 'available' ? 'Available' : kb?.status === 'hired' ? 'Naka-hire' : 'Pending'} · {kb?.province || profile?.city || '—'}</span>
