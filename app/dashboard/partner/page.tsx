@@ -496,7 +496,7 @@ export default function PartnerDashboard() {
               </div>
             ) : workers.map((w: any) => {
               const isProxy = w.proxy_mode && w.proxy_partner_id === partner.profile_id
-              const pendingOffer = isProxy ? proxyOffers.find((o: any) => o.kasambahay_id === w.id && o.status === 'pending') : undefined
+              const pendingOffer = isProxy ? proxyOffers.find((o: any) => o.kasambahay_id === w.id && ['pending', 'countered'].includes(o.status)) : undefined
               console.log('[worker-match] w.id:', w.id, 'w.profile_id:', w.profile_id, 'found offer:', pendingOffer)
               const workerOffer = workerOffers.find((o: any) => o.kasambahay_id === w.id)
               const st = workerOffer && ['pending','agreed'].includes(workerOffer.status)
