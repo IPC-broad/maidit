@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { provinces as PH } from '../../../../lib/ph-locations'
 
@@ -110,7 +110,7 @@ export default function SendOfferPage() {
       const { supabase } = await import('../../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-      const { data: kbData } = await supabase.from('kasambahay').select('*, profiles(full_name, mobile, city)').eq('id', kasambahayId).single()
+      const { data: kbData } = await supabase.from('kasambahay').select('*').eq('id', kasambahayId).single()
       setKb(kbData)
       const TEST_EMAILS = ['test@maidit.com', 'homeowner@maidit.app', 'test.kasambahay@maidit.app', 'partner@maidit.com']
       const isTestAccount = TEST_EMAILS.includes(user.email ?? '')
@@ -183,19 +183,14 @@ export default function SendOfferPage() {
 
   const toggleScope = (sc: string) => setForm(f => ({ ...f, scope: f.scope.includes(sc) ? f.scope.filter((x: string) => x !== sc) : [...f.scope, sc] }))
 
-  const kbProvince = kb?.province || ''
-  const sameProvince = !!(hwProvinceKey && kbProvince && hwProvinceKey === kbProvince)
-  const showTransportSection = !!(kb && kbProvince && !sameProvince)
-  const showMaidItOption = TRANSPORT_PROVINCES.includes(kbProvince)
-  console.log('[transport-debug]', {
-    kbProvince,
-    hwProvinceKey,
-    sameProvince,
-    showTransportSection,
-    showMaidItOption,
-    kb_id: kb?.id,
-    kb_province_raw: kb?.province
-  })
+  const { showTransportSection, showMaidItOption } = useMemo(() => {
+    const kbProvince = kb?.province || ''
+    const sameProvince = !!(hwProvinceKey && kbProvince && hwProvinceKey === kbProvince)
+    const showTransportSection = !!(kb && kbProvince && !sameProvince)
+    const showMaidItOption = TRANSPORT_PROVINCES.includes(kbProvince)
+    console.log('[transport-memo]', { kbProvince, hwProvinceKey, sameProvince, showTransportSection, showMaidItOption })
+    return { showTransportSection, showMaidItOption }
+  }, [kb, hwProvinceKey])
   const isDirect = form.transport_arrangement === 'direct' || (showTransportSection && !showMaidItOption)
   const isMaidIt = form.transport_arrangement === 'maidit_transport'
   const transportBlocked = showTransportSection && showMaidItOption && !form.transport_arrangement
