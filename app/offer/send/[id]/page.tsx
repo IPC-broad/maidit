@@ -630,7 +630,7 @@ export default function SendOfferPage() {
                   style={{ padding: 14, borderRadius: 14, cursor: 'pointer', border: `${isMaidIt ? 2 : 1.5}px solid ${isMaidIt ? C.amber : C.line}`, background: isMaidIt ? C.amberSoft : C.paper }}
                 >
                   <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginBottom: 4 }}>MaidIt Assisted Transport — ₱5,000</div>
-                  <div style={{ fontSize: 12, color: C.ink2, lineHeight: 1.5 }}>We coordinate and guarantee arrival.</div>
+                  <div style={{ fontSize: 12, color: C.ink2, lineHeight: 1.5 }}>We assist and facilitate transport arrangements.</div>
                 </div>
               </div>
             )}
