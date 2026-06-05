@@ -26,6 +26,7 @@ export default function PartnerSignupPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [showPass, setShowPass] = useState(false)
+  const [referringPartnerCode, setReferringPartnerCode] = useState('')
   const [form, setForm] = useState({
     first_name: '',
     last_name: '',
@@ -42,6 +43,8 @@ export default function PartnerSignupPage() {
     link.rel = 'stylesheet'
     link.href = 'https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@400;500;600;700&display=swap'
     document.head.appendChild(link)
+    const ref = new URLSearchParams(window.location.search).get('ref')
+    if (ref) setReferringPartnerCode(ref.toUpperCase())
     return () => { document.head.removeChild(link) }
   }, [])
 
@@ -86,14 +89,22 @@ export default function PartnerSignupPage() {
       city: form.city,
     })
 
-    await supabase.from('partners').insert({
+    const { data: newPartner } = await supabase.from('partners').insert({
       profile_id: userId,
       referral_code: refCode,
       province: form.province,
       city: form.city,
       barangay: form.barangay,
       estimated_referrals: form.estimated_referrals,
-    })
+    }).select('id').single()
+
+    if (referringPartnerCode && newPartner) {
+      const { data: referrer } = await supabase
+        .from('partners').select('id').eq('referral_code', referringPartnerCode).single()
+      if (referrer) {
+        await supabase.from('partners').update({ referred_by_partner_id: referrer.id }).eq('id', newPartner.id)
+      }
+    }
 
     setLoading(false)
     setSuccess(true)

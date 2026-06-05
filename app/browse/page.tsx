@@ -425,7 +425,7 @@ export default function BrowsePage() {
                     color: '#27500A',
                     letterSpacing: '0.01em',
                   }}>
-                    Community Partner
+                    Referred by Community Partner
                   </div>
                 )}
               </div>

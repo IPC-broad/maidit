@@ -455,16 +455,19 @@ export default function KBDashboard() {
                       return hText !== '—' ? (
                         <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #f3f4f6' }}>
                           <div style={s.lbl10}>Pamilya</div>
-                          <div style={{ fontSize: '12px', fontWeight: 600 }}>
-                            {hText}
-                            {offer.pets && offer.pets !== 'No' && offer.pets !== 'Wala' && offer.pets !== 'No Pets' && ` · ${petsText(offer.pets)}`}
-                          </div>
+                          <div style={{ fontSize: '12px', fontWeight: 600 }}>{hText}</div>
                         </div>
                       ) : null
                     })()}
+                    {offer.pets && offer.pets !== 'No' && offer.pets !== 'Wala' && offer.pets !== 'No Pets' && offer.pets !== 'None' && (
+                      <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #f3f4f6' }}>
+                        <div style={s.lbl10}>Alagang hayop</div>
+                        <div style={{ fontSize: '12px', fontWeight: 600 }}>{petsText(offer.pets)}</div>
+                      </div>
+                    )}
                     {offer.scope?.length > 0 && (
                       <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #f3f4f6' }}>
-                        <div style={s.lbl10}>Kailangan</div>
+                        <div style={s.lbl10}>Trabaho</div>
                         <div style={{ fontSize: '12px', fontWeight: 600 }}>{offer.scope.join(', ')}</div>
                       </div>
                     )}

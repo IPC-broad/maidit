@@ -268,11 +268,20 @@ export default function SendOfferPage() {
           {/* Info */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: C.ink3, letterSpacing: '0.07em', textTransform: 'uppercase' as const, marginBottom: 2 }}>OFFERING TO</div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: C.ink, lineHeight: 1.2, whiteSpace: 'nowrap' as const, overflow: 'hidden', textOverflow: 'ellipsis' }}>{fullName}</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: C.ink, lineHeight: 1.2, whiteSpace: 'nowrap' as const, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {fullName}{kb.edad ? <span style={{ fontSize: 11, fontWeight: 400, color: C.ink3, marginLeft: 5 }}>{kb.edad} yrs old</span> : null}
+            </div>
             <div style={{ fontSize: 12, color: C.ink3, display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
               <span style={{ color: C.forest }}><IcPin /></span>
               {kb.province}{kb.setup ? ` · ${kb.setup}` : ''}
             </div>
+            {kb.skills?.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 4, marginTop: 4 }}>
+                {kb.skills.slice(0, 4).map((sk: string) => (
+                  <span key={sk} style={{ fontSize: 9, padding: '2px 6px', borderRadius: 4, background: C.forestSoft, color: C.forestDeep, fontWeight: 600 }}>{sk}</span>
+                ))}
+              </div>
+            )}
           </div>
           {/* Asking salary */}
           {kb.asking_salary ? (
@@ -369,7 +378,7 @@ export default function SendOfferPage() {
             <div style={{ width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.paper2, borderRight: `1px solid ${C.line}`, color: C.ink3, flexShrink: 0 }}>
               <IcCal />
             </div>
-            <div style={{ flex: 1, padding: '0 14px', position: 'relative' }}>
+            <div style={{ flex: 1, padding: '0 14px', position: 'relative', zIndex: 10 }}>
               <div style={{ fontSize: fmtDate ? 14 : 13, color: fmtDate ? C.ink : C.ink4, fontWeight: fmtDate ? 500 : 400 }}>
                 {fmtDate || 'Pick a date…'}
               </div>
@@ -378,7 +387,7 @@ export default function SendOfferPage() {
                 value={form.start_date}
                 min={new Date().toISOString().split('T')[0]}
                 onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))}
-                style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}
+                style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%', zIndex: 10 }}
               />
             </div>
           </label>

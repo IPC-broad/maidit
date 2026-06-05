@@ -77,6 +77,11 @@ export default function PartnerDashboard() {
   const [step1Errors, setStep1Errors] = useState<Record<string, string>>({})
   const [step2Errors, setStep2Errors] = useState<Record<string, string>>({})
   const [profileNames, setProfileNames] = useState<Record<string, string>>({})
+  const [subAgents, setSubAgents] = useState<any[]>([])
+  const [subAgentNames, setSubAgentNames] = useState<Record<string, string>>({})
+  const [subAgentWorkerCounts, setSubAgentWorkerCounts] = useState<Record<string, number>>({})
+  const [subAgentHiredCounts, setSubAgentHiredCounts] = useState<Record<string, number>>({})
+  const [subAgentCopied, setSubAgentCopied] = useState(false)
 
   useEffect(() => {
     const link = document.createElement('link')
@@ -148,6 +153,31 @@ export default function PartnerDashboard() {
         console.log('[proxy-offers] offers:', proxyOffersData)
         setProxyOffers(proxyOffersData || [])
       }
+      // Sub-agents (gold only)
+      if (partnerData.tier === 'gold') {
+        const { data: saData } = await supabase
+          .from('partners').select('id, profile_id, referral_code')
+          .eq('referred_by_partner_id', partnerData.id)
+        if (saData && saData.length > 0) {
+          const saProfileIds = saData.map((sa: any) => sa.profile_id).filter(Boolean)
+          const { data: saProfiles } = await supabase.from('profiles').select('id, full_name').in('id', saProfileIds)
+          const saNameMap: Record<string, string> = {}
+          ;(saProfiles || []).forEach((p: any) => { saNameMap[p.id] = p.full_name || '—' })
+          setSubAgentNames(saNameMap)
+          const saCodes = saData.map((sa: any) => sa.referral_code).filter(Boolean)
+          const { data: saKbs } = await supabase.from('kasambahay').select('id, referred_by, status').in('referred_by', saCodes)
+          const wMap: Record<string, number> = {}
+          const hMap: Record<string, number> = {}
+          ;(saKbs || []).forEach((kb: any) => {
+            wMap[kb.referred_by] = (wMap[kb.referred_by] || 0) + 1
+            if (kb.status === 'hired') hMap[kb.referred_by] = (hMap[kb.referred_by] || 0) + 1
+          })
+          setSubAgentWorkerCounts(wMap)
+          setSubAgentHiredCounts(hMap)
+          setSubAgents(saData)
+        }
+      }
+
       setLoading(false)
     }
     init()
@@ -286,6 +316,21 @@ export default function PartnerDashboard() {
   const totalEarned = payouts.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0)
   const totalPending = payouts.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0)
   const isGold = partner?.tier === 'gold'
+  const totalOverrideEarnings = subAgents.reduce((sum, sa) => sum + (subAgentHiredCounts[sa.referral_code] || 0) * 500, 0)
+  const subAgentLink = `https://maidit.vercel.app/signup/partner?ref=${referralCode}`
+  const copySubAgentLink = () => {
+    navigator.clipboard.writeText(subAgentLink).catch(() => {})
+    setSubAgentCopied(true)
+    setTimeout(() => setSubAgentCopied(false), 2000)
+  }
+  const shareSubAgentSMS = () => {
+    const msg = encodeURIComponent(`Kumita bilang Partner Agent ng MaidIt! Libre mag-join. Gamitin ang link ko: ${subAgentLink}`)
+    window.open(`sms:?body=${msg}`, '_blank')
+  }
+  const shareSubAgentMessenger = () => {
+    const l = encodeURIComponent(subAgentLink)
+    window.open(`fb-messenger://share?link=${l}`, '_blank')
+  }
   const hiredCount = workers.filter(w => w.status === 'hired').length
   const workersWithPendingOffer = workers.filter(w => workerOffers.some(o => o.kasambahay_id === w.id))
 
@@ -731,6 +776,85 @@ export default function PartnerDashboard() {
                 </div>
               </div>
             </div>
+
+            {/* SUB-AGENT SECTIONS — gold only */}
+            {isGold && (
+              <>
+                {/* MGA SUB-AGENT list */}
+                <div style={{ marginTop: '8px', marginBottom: '16px' }}>
+                  <div style={{ fontFamily: sans, fontSize: '10px', fontWeight: 700, color: C.amber, textTransform: 'uppercase' as const, letterSpacing: '.08em', marginBottom: '10px' }}>MGA SUB-AGENT</div>
+                  {subAgents.length === 0 ? (
+                    <div style={{ background: C.paper, borderRadius: '14px', border: `1px solid ${C.line}`, padding: '18px', textAlign: 'center' as const }}>
+                      <div style={{ fontSize: '13px', color: C.ink3 }}>Wala ka pang sub-agents. I-recruit ang ibang partner gamit ang iyong link sa ibaba.</div>
+                    </div>
+                  ) : subAgents.map((sa: any) => {
+                    const saName = subAgentNames[sa.profile_id] || '—'
+                    const saWorkers = subAgentWorkerCounts[sa.referral_code] || 0
+                    const saHired = subAgentHiredCounts[sa.referral_code] || 0
+                    const saOverride = saHired * 500
+                    return (
+                      <div key={sa.id} style={{ background: C.paper, borderRadius: '14px', border: `1.5px solid ${C.amberLine}`, padding: '14px 16px', marginBottom: '8px' }}>
+                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '10px' }}>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: C.amberSoft, border: `2px solid ${C.amberLine}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 800, color: C.amber, flexShrink: 0, fontFamily: sans }}>
+                            {saName.trim().split(' ').map((p: string) => p[0]).join('').toUpperCase().slice(0, 2) || '?'}
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: 700, fontSize: '14px', color: C.ink, fontFamily: sans }}>{saName}</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                              <span style={{ fontSize: '10px', color: C.ink3, fontFamily: sans }}>Code: <strong style={{ color: C.forest }}>{sa.referral_code}</strong></span>
+                              <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 7px', borderRadius: '4px', background: C.amberSoft, color: '#92400e', border: `1px solid ${C.amberLine}`, fontFamily: sans }}>Sub-agent</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px' }}>
+                          <div style={{ background: C.paper2, borderRadius: '9px', padding: '8px', textAlign: 'center' as const }}>
+                            <div style={{ fontFamily: serif, fontSize: '18px', color: C.ink }}>{saWorkers}</div>
+                            <div style={{ fontSize: '10px', color: C.ink3, fontFamily: sans }}>Kasambahay</div>
+                          </div>
+                          <div style={{ background: C.paper2, borderRadius: '9px', padding: '8px', textAlign: 'center' as const }}>
+                            <div style={{ fontFamily: serif, fontSize: '18px', color: C.forest }}>{saHired}</div>
+                            <div style={{ fontSize: '10px', color: C.ink3, fontFamily: sans }}>Na-hire</div>
+                          </div>
+                          <div style={{ background: C.amberSoft, borderRadius: '9px', padding: '8px', textAlign: 'center' as const, border: `1px solid ${C.amberLine}` }}>
+                            <div style={{ fontFamily: serif, fontSize: '18px', color: C.amber }}>₱{saOverride.toLocaleString()}</div>
+                            <div style={{ fontSize: '10px', color: '#92400e', fontFamily: sans }}>Override</div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* I-recruit ang Sub-agent share card */}
+                <div style={{ background: '#fffbeb', border: `1.5px solid #fde68a`, borderRadius: '16px', padding: '16px', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '22px' }}>⭐</span>
+                    <div style={{ fontFamily: sans, fontSize: '14px', fontWeight: 700, color: '#92400e' }}>I-recruit ang Sub-agent</div>
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#b45309', lineHeight: 1.5, marginBottom: '10px' }}>I-share ang partner link mo. Kumita ka ng ₱500 override sa bawat kasambahay na ma-hire ng iyong sub-agent.</div>
+                  <div style={{ fontSize: '11px', color: '#92400e', fontFamily: sans, wordBreak: 'break-all' as const, marginBottom: '10px', background: '#fffbeb', borderRadius: '7px', padding: '6px 8px', border: '1px solid #fde68a' }}>
+                    maidit.vercel.app/signup/partner?ref={referralCode}
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={copySubAgentLink}
+                      style={{ flex: 1, padding: '10px 6px', borderRadius: '10px', background: subAgentCopied ? '#92400e' : '#fffbeb', border: `1.5px solid ${subAgentCopied ? '#92400e' : '#fde68a'}`, color: subAgentCopied ? '#fff' : '#92400e', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '3px' }}>
+                      <span style={{ fontSize: '16px' }}>{subAgentCopied ? '✓' : '📋'}</span>
+                      <span>{subAgentCopied ? 'Copied!' : 'Copy'}</span>
+                    </button>
+                    <button onClick={shareSubAgentSMS}
+                      style={{ flex: 1, padding: '10px 6px', borderRadius: '10px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#2563eb', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '3px' }}>
+                      <span style={{ fontSize: '16px' }}>💬</span>
+                      <span>SMS</span>
+                    </button>
+                    <button onClick={shareSubAgentMessenger}
+                      style={{ flex: 1, padding: '10px 6px', borderRadius: '10px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1877f2', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '3px' }}>
+                      <span style={{ fontSize: '16px' }}>💬</span>
+                      <span>Messenger</span>
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </>
         )}
 
@@ -790,6 +914,38 @@ export default function PartnerDashboard() {
             <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '12px', padding: '12px 14px', marginTop: '8px', fontSize: '12px', color: '#92400e', lineHeight: 1.6, fontFamily: sans }}>
               ⚠️ Kapag hindi nagtagal ang kasambahay sa loob ng 30 araw, ang ₱500 na recruitment fee ay ibabawas sa iyong kita.
             </div>
+
+            {/* Override Commissions — gold only */}
+            {isGold && subAgents.length > 0 && (
+              <div style={{ marginTop: '16px' }}>
+                <div style={{ fontFamily: sans, fontSize: '10px', fontWeight: 700, color: C.amber, textTransform: 'uppercase' as const, letterSpacing: '.08em', marginBottom: '10px' }}>Override Commissions</div>
+                <div style={{ background: C.paper, borderRadius: '14px', border: `1.5px solid ${C.amberLine}`, padding: '14px 16px', marginBottom: '8px' }}>
+                  <div style={{ fontSize: '11px', color: '#92400e', marginBottom: '12px', fontFamily: sans, lineHeight: 1.5 }}>
+                    Kumita ka ng ₱500 para sa bawat kasambahay na na-hire ng iyong sub-agents.
+                  </div>
+                  {subAgents.map((sa: any) => {
+                    const saName = subAgentNames[sa.profile_id] || '—'
+                    const saHired = subAgentHiredCounts[sa.referral_code] || 0
+                    const saOverride = saHired * 500
+                    return (
+                      <div key={sa.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 0', borderBottom: `1px solid ${C.line}` }}>
+                        <div>
+                          <div style={{ fontSize: '13px', fontWeight: 600, color: C.ink, fontFamily: sans }}>{saName}</div>
+                          <div style={{ fontSize: '11px', color: C.ink3, fontFamily: sans }}>{saHired} hired × ₱500</div>
+                        </div>
+                        <div style={{ fontFamily: serif, fontSize: '16px', color: saOverride > 0 ? C.amber : C.ink3 }}>
+                          ₱{saOverride.toLocaleString()}
+                        </div>
+                      </div>
+                    )
+                  })}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '10px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: C.ink, fontFamily: sans }}>Total Override</div>
+                    <div style={{ fontFamily: serif, fontSize: '20px', color: C.amber, fontWeight: 400 }}>₱{totalOverrideEarnings.toLocaleString()}</div>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
 

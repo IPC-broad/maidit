@@ -279,7 +279,7 @@ export default function OfferReviewPage() {
               <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.scope ? '✓' : '✗'}</span>
             </div>
             <div style={{ flex: 1 }}>
-              <div style={s.checkLabel}>Mga gawaing bahay: <strong>{offer.scope?.join(', ')}</strong></div>
+              <div style={s.checkLabel}>Trabaho: <strong>{offer.scope?.join(', ')}</strong></div>
               <div style={toggleStatus(checklist.scope)}>{checklist.scope ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}</div>
             </div>
           </div>
@@ -363,7 +363,7 @@ export default function OfferReviewPage() {
                 <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.household ? '✓' : '✗'}</span>
               </div>
               <div style={{ flex: 1 }}>
-                <div style={s.checkLabel}>Mga miyembro ng pamilya: <strong>{householdStr}</strong></div>
+                <div style={s.checkLabel}>Pamilya: <strong>{householdStr}</strong></div>
                 <div style={toggleStatus(checklist.household)}>{checklist.household ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}</div>
               </div>
             </div>
@@ -376,7 +376,7 @@ export default function OfferReviewPage() {
                 <span style={{ color:'#fff', fontSize:'.75rem', fontWeight:900 }}>{checklist.pets ? '✓' : '✗'}</span>
               </div>
               <div style={{ flex: 1 }}>
-                <div style={s.checkLabel}>Mga alagang hayop: <strong>{offer.pets}</strong></div>
+                <div style={s.checkLabel}>Alagang hayop: <strong>{offer.pets}</strong></div>
                 <div style={toggleStatus(checklist.pets)}>{checklist.pets ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}</div>
               </div>
             </div>
