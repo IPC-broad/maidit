@@ -27,15 +27,17 @@ export default function SelfieCapture() {
     script.onload = async () => {
       try {
         const faceapi = (window as any).faceapi
-        await faceapi.nets.tinyFaceDetector.loadFromUri(
-          'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights'
-        )
+        await faceapi.nets.tinyFaceDetector.loadFromUri('/models')
         setFaceApiReady(true)
-      } catch {
+      } catch (e) {
+        console.error('[face-api] model load error:', e)
         setFaceStatus('unavailable')
       }
     }
-    script.onerror = () => setFaceStatus('unavailable')
+    script.onerror = () => {
+      console.error('[face-api] script failed to load')
+      setFaceStatus('unavailable')
+    }
     document.head.appendChild(script)
     return () => { try { document.head.removeChild(script) } catch {} }
   }, [])
@@ -63,8 +65,8 @@ export default function SelfieCapture() {
         if (detections.length === 0) setFaceStatus('no_face')
         else if (detections.length === 1) setFaceStatus('face_ok')
         else setFaceStatus('multi_face')
-      } catch {
-        // skip frame on transient error
+      } catch (e) {
+        console.error('[face-api] detection error:', e)
       }
     }, 1000)
 

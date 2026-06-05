@@ -26,7 +26,15 @@ export default function PartnerSignupPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [showPass, setShowPass] = useState(false)
-  const [referringPartnerCode, setReferringPartnerCode] = useState('')
+  const [referringPartnerCode, setReferringPartnerCode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const ref = new URLSearchParams(window.location.search).get('ref')
+      return ref ? ref.toUpperCase() : ''
+    }
+    return ''
+  })
+  const isGoldReferral = referringPartnerCode.length > 0
+
   const [form, setForm] = useState({
     first_name: '',
     last_name: '',
@@ -182,36 +190,40 @@ export default function PartnerSignupPage() {
           </span>
         </div>
 
-        {/* Earning Cards */}
-        <div style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
-          {/* Card 1 — White */}
-          <div style={{ flex: 1, background: C.paper, border: `1.5px solid ${C.line}`, borderRadius: 16, padding: '16px 14px' }}>
-            <div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', color: C.ink3, fontFamily: sans, marginBottom: 4 }}>
-              REFERRAL FEE
-            </div>
-            <div style={{ fontFamily: serif, fontSize: 36, color: C.forestDeep, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 4 }}>
-              ₱500
-            </div>
-            <div style={{ fontSize: 11, color: C.ink3, fontFamily: sans, marginBottom: 2 }}>per kasambahay hired</div>
-            <div style={{ fontSize: 11, color: C.ink3, fontFamily: sans }}>Per each successful hire</div>
-          </div>
+        {/* Earning Cards — hidden when signing up via a gold referral link */}
+        {!isGoldReferral && (
+          <>
+            <div style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
+              {/* Card 1 — White */}
+              <div style={{ flex: 1, background: C.paper, border: `1.5px solid ${C.line}`, borderRadius: 16, padding: '16px 14px' }}>
+                <div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', color: C.ink3, fontFamily: sans, marginBottom: 4 }}>
+                  REFERRAL FEE
+                </div>
+                <div style={{ fontFamily: serif, fontSize: 36, color: C.forestDeep, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 4 }}>
+                  ₱500
+                </div>
+                <div style={{ fontSize: 11, color: C.ink3, fontFamily: sans, marginBottom: 2 }}>per kasambahay hired</div>
+                <div style={{ fontSize: 11, color: C.ink3, fontFamily: sans }}>Per each successful hire</div>
+              </div>
 
-          {/* Card 2 — Amber */}
-          <div style={{ flex: 1, background: C.amberSoft, border: `1.5px solid ${C.amberLine}`, borderRadius: 16, padding: '16px 14px' }}>
-            <div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', color: C.amberDeep, fontFamily: sans, marginBottom: 4 }}>
-              + BONUS
+              {/* Card 2 — Amber */}
+              <div style={{ flex: 1, background: C.amberSoft, border: `1.5px solid ${C.amberLine}`, borderRadius: 16, padding: '16px 14px' }}>
+                <div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', color: C.amberDeep, fontFamily: sans, marginBottom: 4 }}>
+                  + BONUS
+                </div>
+                <div style={{ fontFamily: serif, fontSize: 36, color: C.amberDeep, lineHeight: 1.1, marginBottom: 4 }}>
+                  +₱500
+                </div>
+                <div style={{ fontSize: 11, color: C.amberDeep, fontFamily: sans, fontWeight: 700, marginBottom: 2 }}>Transport Bonus</div>
+                <div style={{ fontSize: 11, color: C.amberDeep, fontFamily: sans, opacity: 0.75 }}>Leyte / Samar / Bicol only</div>
+              </div>
             </div>
-            <div style={{ fontFamily: serif, fontSize: 36, color: C.amberDeep, lineHeight: 1.1, marginBottom: 4 }}>
-              +₱500
-            </div>
-            <div style={{ fontSize: 11, color: C.amberDeep, fontFamily: sans, fontWeight: 700, marginBottom: 2 }}>Transport Bonus</div>
-            <div style={{ fontSize: 11, color: C.amberDeep, fontFamily: sans, opacity: 0.75 }}>Leyte / Samar / Bicol only</div>
-          </div>
-        </div>
 
-        <div style={{ fontSize: 11, color: C.ink3, textAlign: 'center', marginTop: 8, marginBottom: 20, fontFamily: sans }}>
-          Referral code shown on your dashboard after signup.
-        </div>
+            <div style={{ fontSize: 11, color: C.ink3, textAlign: 'center', marginTop: 8, marginBottom: 20, fontFamily: sans }}>
+              Referral code shown on your dashboard after signup.
+            </div>
+          </>
+        )}
 
         {/* Form Card */}
         <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: '20px 18px' }}>
