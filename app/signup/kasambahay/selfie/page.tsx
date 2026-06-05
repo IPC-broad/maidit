@@ -3,25 +3,83 @@
 import { useRef, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
+type FaceStatus = 'loading' | 'no_face' | 'face_ok' | 'multi_face' | 'unavailable'
+
 export default function SelfieCapture() {
   const router = useRouter()
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const detectionInterval = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const [photo, setPhoto] = useState<string | null>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [uploading, setUploading] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [isMobile, setIsMobile] = useState(true)
+  const [faceStatus, setFaceStatus] = useState<FaceStatus>('loading')
+  const [faceApiReady, setFaceApiReady] = useState(false)
 
-  // Pre-load the tiny face detector model as soon as the component mounts so
-  // it is ready by the time the user takes a photo.
+  // Load face-api.js from CDN and initialise the tiny face detector model
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js'
+    script.onload = async () => {
+      try {
+        const faceapi = (window as any).faceapi
+        await faceapi.nets.tinyFaceDetector.loadFromUri(
+          'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights'
+        )
+        setFaceApiReady(true)
+      } catch {
+        setFaceStatus('unavailable')
+      }
+    }
+    script.onerror = () => setFaceStatus('unavailable')
+    document.head.appendChild(script)
+    return () => { try { document.head.removeChild(script) } catch {} }
+  }, [])
+
+  // Run face detection every second once both camera stream and model are ready
+  useEffect(() => {
+    if (!faceApiReady || !stream || photo) {
+      if (detectionInterval.current) {
+        clearInterval(detectionInterval.current)
+        detectionInterval.current = null
+      }
+      return
+    }
+
+    const faceapi = (window as any).faceapi
+
+    detectionInterval.current = setInterval(async () => {
+      const video = videoRef.current
+      if (!video || video.readyState < 2) return
+      try {
+        const detections = await faceapi.detectAllFaces(
+          video,
+          new faceapi.TinyFaceDetectorOptions()
+        )
+        if (detections.length === 0) setFaceStatus('no_face')
+        else if (detections.length === 1) setFaceStatus('face_ok')
+        else setFaceStatus('multi_face')
+      } catch {
+        // skip frame on transient error
+      }
+    }, 1000)
+
+    return () => {
+      if (detectionInterval.current) {
+        clearInterval(detectionInterval.current)
+        detectionInterval.current = null
+      }
+    }
+  }, [faceApiReady, stream, photo])
+
   useEffect(() => {
     const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
     setIsMobile(mobile)
     if (mobile) startCamera()
-
     return () => stopCamera()
   }, [])
 
@@ -44,6 +102,10 @@ export default function SelfieCapture() {
   }
 
   const stopCamera = () => {
+    if (detectionInterval.current) {
+      clearInterval(detectionInterval.current)
+      detectionInterval.current = null
+    }
     stream?.getTracks().forEach(track => track.stop())
   }
 
@@ -78,7 +140,10 @@ export default function SelfieCapture() {
 
   const retake = () => {
     setPhoto(null)
-    if (isMobile) startCamera()
+    if (isMobile) {
+      setFaceStatus(faceApiReady ? 'no_face' : 'loading')
+      startCamera()
+    }
   }
 
   const savePhoto = async () => {
@@ -119,6 +184,17 @@ export default function SelfieCapture() {
     router.push('/signup/kasambahay/success')
   }
 
+  // Capture is allowed when exactly 1 face detected, or when face-api unavailable (fallback)
+  const captureAllowed = faceStatus === 'face_ok' || faceStatus === 'unavailable'
+
+  const faceStatusUI: Record<FaceStatus, { bg: string; text: string; msg: string }> = {
+    loading:     { bg: 'bg-gray-50',   text: 'text-gray-500',   msg: 'Naglo-load ng face detection…' },
+    no_face:     { bg: 'bg-red-50',    text: 'text-red-700',    msg: 'Hindi nakita ang mukha mo. Siguraduhing nakaharap ka sa camera.' },
+    face_ok:     { bg: 'bg-green-50',  text: 'text-green-700',  msg: 'Nakita ang mukha mo ✓ Handa na para kumuha ng litrato.' },
+    multi_face:  { bg: 'bg-amber-50',  text: 'text-amber-700',  msg: 'Isa lang dapat makita sa camera.' },
+    unavailable: { bg: 'bg-gray-50',   text: 'text-gray-500',   msg: 'Face verification unavailable. Admin will review manually.' },
+  }
+
   return (
     <div className="min-h-screen bg-[#faf7f2] flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-md">
@@ -144,7 +220,7 @@ export default function SelfieCapture() {
                 </button>
               </div>
             ) : (
-              <div className="bg-black rounded-2xl overflow-hidden mb-4">
+              <div className="bg-black rounded-2xl overflow-hidden mb-3">
                 {!photo ? (
                   <video ref={videoRef} autoPlay playsInline muted className="w-full h-[320px] object-cover" />
                 ) : (
@@ -153,10 +229,21 @@ export default function SelfieCapture() {
               </div>
             )}
 
+            {/* Face detection status — shown only when camera is live */}
+            {!cameraError && !photo && (
+              <div className={`text-center text-sm font-semibold py-2 px-4 rounded-xl mb-3 ${faceStatusUI[faceStatus].bg} ${faceStatusUI[faceStatus].text}`}>
+                {faceStatusUI[faceStatus].msg}
+              </div>
+            )}
+
             {!cameraError && (
               <>
                 {!photo ? (
-                  <button onClick={capturePhoto} className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold">
+                  <button
+                    onClick={capturePhoto}
+                    disabled={!captureAllowed}
+                    className="w-full bg-[#1a6b3c] text-white py-3 rounded-xl font-semibold disabled:opacity-40"
+                  >
                     Kunan ng Selfie
                   </button>
                 ) : (
