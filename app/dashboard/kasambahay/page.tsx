@@ -19,6 +19,7 @@ export default function KBDashboard() {
   const [uploadingClearance, setUploadingClearance] = useState(false)
   const [uploadMsg, setUploadMsg] = useState('')
   const [copied, setCopied] = useState(false)
+  const [homeownerContacts, setHomeownerContacts] = useState<any[]>([])
   const [activeHomeowners, setActiveHomeowners] = useState(14)
   const [nearbyFamilies, setNearbyFamilies] = useState<any[]>([])
   const [isFacebook, setIsFacebook] = useState(false)
@@ -38,19 +39,21 @@ export default function KBDashboard() {
       if (kbData) {
         const { data: offersData, error: offersError } = await supabase
           .from('offers')
-          .select(`
-            *, household, pets, scope, urgency, start_date, transport_service,
-            homeowner_address, homeowner_waze_pin,
-            homeowner:homeowner_id(
-              id,
-              profile:profile_id(full_name, mobile, facebook_url)
-            )
-          `)
+          .select('*, household, pets, scope, urgency, start_date, transport_service, homeowner_address, homeowner_waze_pin')
           .eq('kasambahay_id', kbData.id)
         console.log('offersData:', offersData)
         console.log('offersError:', offersError)
         console.log('kbData.id:', kbData?.id)
         setOffers(offersData || [])
+        const paidOffers = (offersData || []).filter(o => o.status === 'paid')
+        if (paidOffers.length > 0) {
+          const homeownerIds = paidOffers.map(o => o.homeowner_id)
+          const { data: hwData } = await supabase
+            .from('homeowners')
+            .select('id, profile:profile_id(full_name, mobile, facebook_url)')
+            .in('id', homeownerIds)
+          setHomeownerContacts(hwData || [])
+        }
         const { data: apps } = await supabase.from('applications').select('job_id').eq('kasambahay_id', kbData.id)
         if (apps) {
           const ids = apps.map((a: any) => a.job_id)
@@ -554,8 +557,11 @@ export default function KBDashboard() {
                           )}
                         </div>
                       )}
-                      {offer.homeowner?.profile?.mobile && (() => {
-                        const hwFbRaw = offer.homeowner?.profile?.facebook_url
+                      {(() => {
+                        const hwContact = homeownerContacts.find(h => h.id === offer.homeowner_id)
+                        const hwProfile = hwContact?.profile
+                        if (!hwProfile?.mobile) return null
+                        const hwFbRaw = hwProfile.facebook_url
                         const hwMessengerUrl = (() => {
                           if (!hwFbRaw) return null
                           const match = hwFbRaw.match(/facebook\.com\/(?:profile\.php\?id=)?([^/?&]+)/)
@@ -565,10 +571,10 @@ export default function KBDashboard() {
                         return (
                           <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px' }}>
                             <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '6px' }}>I-CONTACT ANG EMPLOYER MO</div>
-                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{offer.homeowner.profile.full_name}</div>
-                            <div style={{ fontSize: '13px', color: '#374151', marginBottom: '10px' }}>{offer.homeowner.profile.mobile}</div>
+                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{hwProfile.full_name}</div>
+                            <div style={{ fontSize: '13px', color: '#374151', marginBottom: '10px' }}>{hwProfile.mobile}</div>
                             <div style={{ display: 'flex', gap: '6px' }}>
-                              <a href={`sms:${offer.homeowner.profile.mobile}`} style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#27500A', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>📱 I-SMS</a>
+                              <a href={`sms:${hwProfile.mobile}`} style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#27500A', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>📱 I-SMS</a>
                               {hwMessengerUrl && (
                                 <a href={hwMessengerUrl} target="_blank" rel="noreferrer" style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#0084FF', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Messenger</a>
                               )}
