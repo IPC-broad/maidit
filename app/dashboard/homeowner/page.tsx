@@ -38,7 +38,8 @@ export default function HWDashboard() {
         id, profile_id, asking_salary, setup, skills,
         province, selfie_url, availability, referred_by,
         has_govt_id, has_nbi, edad, how_referred,
-        partner_photo_url, facebook_url
+        partner_photo_url, facebook_url,
+        civil_status, num_children
       `)
       const profileIds = (data || []).map((k: any) => k.profile_id).filter(Boolean)
       const { data: profileData } = await supabase.from('profiles').select('id, full_name').in('id', profileIds)
@@ -315,6 +316,12 @@ export default function HWDashboard() {
                     <span key={skill} style={{ fontSize:'.67rem', padding:'3px 7px', borderRadius:'4px', background:'#e8f5ee', color:'#1a6b3c' }}>{skill}</span>
                   ))}
                 </div>
+                {(kb.civil_status || kb.num_children > 0) && (
+                  <div style={{ display:'flex', gap:'10px', marginBottom:'9px', flexWrap:'wrap' }}>
+                    {kb.civil_status && <span style={{ fontSize:'11px', color:'#9ca3af' }}>Civil status: {kb.civil_status}</span>}
+                    {kb.num_children > 0 && <span style={{ fontSize:'11px', color:'#9ca3af' }}>May {kb.num_children} anak</span>}
+                  </div>
+                )}
                 {offered[kb.id] ? (
                   <div style={{ background:'#e8f5ee', border:'1.5px solid rgba(26,107,60,.2)', borderRadius:'9px', padding:'9px', textAlign:'center', fontSize:'.76rem', color:'#1a6b3c', fontWeight:700 }}>Offer sent! Waiting for response</div>
                 ) : (

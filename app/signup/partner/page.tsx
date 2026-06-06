@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { provinces } from '../../../lib/ph-locations'
 
@@ -26,6 +26,15 @@ export default function PartnerSignupPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [showPass, setShowPass] = useState(false)
+
+  // Selfie camera
+  const [selfieData, setSelfieData] = useState<string | null>(null)
+  const [stream, setStream] = useState<MediaStream | null>(null)
+  const [faceApiReady, setFaceApiReady] = useState(false)
+  const [faceStatus, setFaceStatus] = useState<'loading' | 'no_face' | 'face_ok' | 'multi_face' | 'unavailable'>('loading')
+  const [cameraActive, setCameraActive] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const detectionInterval = useRef<NodeJS.Timeout | null>(null)
   const [referringPartnerCode, setReferringPartnerCode] = useState(() => {
     if (typeof window !== 'undefined') {
       const ref = new URLSearchParams(window.location.search).get('ref')
@@ -56,6 +65,71 @@ export default function PartnerSignupPage() {
     return () => { document.head.removeChild(link) }
   }, [])
 
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = '/face-api.min.js'
+    script.onload = async () => {
+      try {
+        const faceapi = (window as any).faceapi
+        await faceapi.nets.tinyFaceDetector.loadFromUri('/models')
+        setFaceApiReady(true)
+      } catch {
+        setFaceStatus('unavailable')
+      }
+    }
+    script.onerror = () => setFaceStatus('unavailable')
+    document.head.appendChild(script)
+    return () => { try { document.head.removeChild(script) } catch {} }
+  }, [])
+
+  useEffect(() => {
+    if (stream && videoRef.current) {
+      videoRef.current.srcObject = stream
+      videoRef.current.play().catch(() => {})
+    }
+  }, [stream, cameraActive])
+
+  useEffect(() => {
+    if (!faceApiReady || !stream || selfieData) {
+      if (detectionInterval.current) clearInterval(detectionInterval.current)
+      return
+    }
+    const faceapi = (window as any).faceapi
+    detectionInterval.current = setInterval(async () => {
+      const video = videoRef.current
+      if (!video || video.readyState < 2) return
+      try {
+        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+        if (detections.length === 0) setFaceStatus('no_face')
+        else if (detections.length === 1) setFaceStatus('face_ok')
+        else setFaceStatus('multi_face')
+      } catch {}
+    }, 1000)
+    return () => { if (detectionInterval.current) clearInterval(detectionInterval.current) }
+  }, [faceApiReady, stream, selfieData])
+
+  const startCamera = async () => {
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+      setStream(s)
+      setCameraActive(true)
+    } catch {
+      setFaceStatus('unavailable')
+    }
+  }
+
+  const capturePhoto = () => {
+    const video = videoRef.current
+    if (!video) return
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    canvas.getContext('2d')?.drawImage(video, 0, 0)
+    setSelfieData(canvas.toDataURL('image/jpeg', 0.8))
+    stream?.getTracks().forEach(t => t.stop())
+    setStream(null)
+  }
+
   const handleProvinceChange = (prov: string) => {
     const cities = (provinces as Record<string, string[]>)[prov] || []
     setForm(f => ({ ...f, province: prov, city: cities[0] || '', barangay: '' }))
@@ -69,6 +143,7 @@ export default function PartnerSignupPage() {
     if (form.mobile.length < 10) { setError('Ilagay ang tamang cellphone number.'); return }
     if (form.password.length < 8) { setError('Ang password ay dapat hindi bababa sa 8 characters.'); return }
     if (!form.province || !form.city) { setError('Piliin ang iyong probinsya at lungsod.'); return }
+    if (!selfieData) { setError('Kailangan ang selfie bago mag-sign up.'); return }
 
     setLoading(true)
     setError('')
@@ -112,6 +187,19 @@ export default function PartnerSignupPage() {
       if (referrer) {
         await supabase.from('partners').update({ referred_by_partner_id: referrer.id }).eq('id', newPartner.id)
       }
+    }
+
+    if (selfieData && userId) {
+      try {
+        const blob = await fetch(selfieData).then(r => r.blob())
+        const { data: upload } = await supabase.storage
+          .from('uploads')
+          .upload(`partner-selfies/${userId}.jpg`, blob, { contentType: 'image/jpeg', upsert: true })
+        if (upload) {
+          const { data: { publicUrl } } = supabase.storage.from('uploads').getPublicUrl(`partner-selfies/${userId}.jpg`)
+          await supabase.from('profiles').update({ selfie_url: publicUrl }).eq('id', userId)
+        }
+      } catch {}
     }
 
     setLoading(false)
@@ -373,6 +461,61 @@ export default function PartnerSignupPage() {
               <option value="51+">51+</option>
             </select>
           </div>
+        </div>
+
+        {/* Selfie section */}
+        <div style={{ background: C.paper, border: `1px solid ${C.line}`, borderRadius: 18, padding: '16px 18px', marginTop: 14 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.07em', color: C.ink3, marginBottom: 4, fontFamily: sans }}>
+            Selfie <span style={{ color: '#dc2626' }}>(Required)</span>
+          </div>
+          <p style={{ fontSize: 13, color: C.ink3, marginBottom: 12, fontFamily: sans }}>
+            Para ma-verify ang iyong pagkakakilanlan.
+          </p>
+
+          {!cameraActive && !selfieData && (
+            <button onClick={startCamera}
+              style={{ width: '100%', padding: '13px', background: C.forest, color: C.paper, borderRadius: 12, border: 'none', fontSize: 14, fontWeight: 700, fontFamily: sans, cursor: 'pointer' }}>
+              📷 Buksan ang Camera
+            </button>
+          )}
+
+          {cameraActive && !selfieData && (
+            <div>
+              <video ref={videoRef} autoPlay playsInline muted
+                style={{ width: '100%', borderRadius: 12, background: '#000', maxHeight: 280, objectFit: 'cover' as const }} />
+              <div style={{ textAlign: 'center', padding: '8px 0', fontSize: 12, fontWeight: 600, fontFamily: sans,
+                color: faceStatus === 'face_ok' ? '#27a040' : faceStatus === 'no_face' ? '#cc3333' : faceStatus === 'multi_face' ? C.amber : C.ink3 }}>
+                {faceStatus === 'loading' && '⏳ Ino-load ang face detection...'}
+                {faceStatus === 'no_face' && '❌ Hindi nakita ang mukha mo. Harapin ang camera.'}
+                {faceStatus === 'face_ok' && '✓ Nakita ang mukha mo — handa na!'}
+                {faceStatus === 'multi_face' && '⚠️ Isa lang dapat makita sa camera.'}
+                {faceStatus === 'unavailable' && '📷 Maaaring kumuha ng litrato'}
+              </div>
+              <button
+                onClick={capturePhoto}
+                disabled={faceStatus !== 'face_ok' && faceStatus !== 'unavailable'}
+                style={{ width: '100%', padding: '13px',
+                  background: (faceStatus === 'face_ok' || faceStatus === 'unavailable') ? C.forest : '#ccc',
+                  color: C.paper, borderRadius: 12, border: 'none', fontSize: 14, fontWeight: 700, fontFamily: sans,
+                  cursor: (faceStatus === 'face_ok' || faceStatus === 'unavailable') ? 'pointer' : 'not-allowed',
+                  marginTop: 8 }}>
+                📸 Kumuha ng Selfie
+              </button>
+            </div>
+          )}
+
+          {selfieData && (
+            <div style={{ textAlign: 'center' as const }}>
+              <img src={selfieData} alt="selfie"
+                style={{ width: 110, height: 110, borderRadius: '50%', objectFit: 'cover' as const, border: `3px solid ${C.forest}` }} />
+              <div style={{ color: '#27a040', fontWeight: 600, marginTop: 8, fontSize: 13, fontFamily: sans }}>✓ Selfie na-kuha!</div>
+              <button
+                onClick={() => { setSelfieData(null); setCameraActive(false); setFaceStatus('loading') }}
+                style={{ marginTop: 6, background: 'none', border: 'none', color: C.amber, fontSize: 12, cursor: 'pointer', fontWeight: 600, fontFamily: sans }}>
+                Ulitin
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Error */}
