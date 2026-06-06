@@ -719,10 +719,13 @@ export default function SendOfferPage() {
                 <div>Kasambahay travel allowance: ₱1,000</div>
                 <div>MaidIt assistance fee: ₱500</div>
                 <div style={{ marginTop: 8 }}>
-                  Important: The ₱3,500 transport cost and ₱1,000 travel allowance are released only after MaidIt confirms the kasambahay is boarding the bus. If she does not board, the full ₱5,000 is refunded to you. The ₱500 MaidIt assistance fee is non-refundable once transport is arranged.
+                  The ₱3,500 transport cost and ₱1,000 travel allowance are released only after MaidIt confirms the kasambahay is boarding. If she does not board, the full ₱4,500 is refunded to you.
                 </div>
                 <div style={{ marginTop: 8 }}>
-                  If the kasambahay leaves your home within 6 months without justifiable reason, you may recover the ₱4,000 directly from her pursuant to RA 10361. MaidIt is not involved in this recovery.
+                  Note: If the kasambahay leaves your home within 6 months without valid reason, you may recover the ₱3,500 transport fee and ₱1,000 travel allowance directly from her — this is an agreement between you and the kasambahay. MaidIt is not involved in this recovery.
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  The ₱500 MaidIt Assisted Transport fee is non-refundable, except if the kasambahay does not show up at all.
                 </div>
               </div>
             )}

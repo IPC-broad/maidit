@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     if (homeowner_id) metadata.homeowner_id = homeowner_id
     if (type) metadata.type = type
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://maidit.vercel.app'
+    const siteUrl = process.env.NEXT_PUBLIC_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://maidit.vercel.app'
     const redirect = offer_id && type === 'hire'
       ? { redirect: { success: `${siteUrl}/arrival/${offer_id}`, failed: `${siteUrl}/pay/${offer_id}` } }
       : {}

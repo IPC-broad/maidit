@@ -134,7 +134,7 @@ export default function PartnerDashboard() {
       const workerIds = (workersData || []).map((w: any) => w.id)
       if (workerIds.length > 0) {
         const { data: offersData } = await supabase
-          .from('offers').select('id, kasambahay_id, status, salary, setup, city, start_date, scope, urgency, transport_service, departed_at')
+          .from('offers').select('id, kasambahay_id, status, salary, setup, city, start_date, scope, urgency, transport_service, departed_at, negotiated_by')
           .in('kasambahay_id', workerIds)
           .in('status', ['pending', 'countered', 'agreed', 'payment_pending', 'paid', 'active', 'hired'])
         setWorkerOffers(offersData || [])
@@ -481,8 +481,7 @@ export default function PartnerDashboard() {
           <div style={{ background: "#fef3e2", border: "1px solid #fde8c0", borderRadius: "12px", padding: "12px 14px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => setTab("workers")}>
             <span style={{ fontSize: "20px" }}>📨</span>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: "13px", fontWeight: 700, color: "#92400e" }}>{workersWithPendingOffer.length} referral mo may natanggap na job offer!</div>
-              <div style={{ fontSize: "11px", color: "#b45309", marginTop: "1px" }}>Tulungan silang sagutin ito para makuha mo ang iyong kita.</div>
+              <div style={{ fontSize: "13px", fontWeight: 700, color: "#92400e" }}>May {workersWithPendingOffer.length} kang referral na nakatanggap ng job offer. Tingnan ito.</div>
             </div>
           </div>
         )}
@@ -770,10 +769,20 @@ export default function PartnerDashboard() {
                                   {pendingOffer.transport_service ? (
                                     <>
                                       <span style={{ display:'inline-flex', alignItems:'center', gap:4, background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0', borderRadius:50, padding:'2px 8px', fontSize:11, fontWeight:700 }}>MaidIt Assisted Transport ✓</span>
-                                      <div style={{ fontSize:11, color:'#6b7280', marginTop:4, lineHeight:1.5 }}>Bayad na ng homeowner — ikaw ang mag-aayos ng sakay (₱3,500 released sa iyo pagkatapos ng boarding)</div>
+                                      <div style={{ fontSize:11, color:'#374151', marginTop:6, lineHeight:1.6 }}>
+                                        Ang homeowner ay nagbayad ng ₱5,000 para masigurado ang maayos na pagdating ng kasambahay sa kanyang address.
+                                      </div>
+                                      <div style={{ fontSize:11, color:'#374151', marginTop:6, lineHeight:1.8 }}>
+                                        Breakdown:<br />
+                                        • ₱3,500 — pamasahe (ibibigay pagkatapos ng boarding confirmation)<br />
+                                        • ₱1,000 — travel allowance ng kasambahay (ibibigay pagkatapos ng boarding confirmation)<br />
+                                        {pendingOffer.negotiated_by === 'sub-partner'
+                                          ? '• ₱500 — matatanggap ng iyong sub-partner kung siya ang mag-aayos ng transportasyon ng kasambahay'
+                                          : '• ₱500 — pre-released sa iyo bilang partner dahil ikaw ang mag-aayos ng transportasyon (ikaw ang magbubook ng byahe)'}
+                                      </div>
                                     </>
                                   ) : (
-                                    <>Transportasyon: <strong>Direct (kasambahay ang aayos)</strong></>
+                                    <span style={{ fontSize:13, color:'#374151' }}>Direct — kasambahay ang aayos ng sariling transport</span>
                                   )}
                                 </div>
                                 <div style={tStatus(cl.transport)}>{cl.transport ? '✓ Sang-ayon' : '✗ Hindi sang-ayon'}</div>

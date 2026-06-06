@@ -704,19 +704,19 @@ export default function HWDashboard() {
       {addressModalOffer && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:200, display:'flex', alignItems:'flex-end', justifyContent:'center' }} onClick={() => !savingAddress && setAddressModalOffer(null)}>
           <div style={{ background:'#fff', borderRadius:'20px 20px 0 0', padding:'24px 20px 36px', width:'100%', maxWidth:'480px', fontFamily:'sans-serif' }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, color:'#111827', marginBottom:'4px' }}>One more step before payment</div>
+            <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, color:'#111827', marginBottom:'4px' }}>Your home address</div>
             <div style={{ fontSize:'13px', color:'#6b7280', marginBottom:'20px', lineHeight:1.6 }}>
-              Because you selected MaidIt Assisted Transport, we need your full address so we can arrange pickup for your kasambahay.
+              We need your exact home address so we can arrange the transport of your kasambahay directly to your home.
             </div>
-            <div style={{ fontSize:'12px', fontWeight:700, color:'#374151', marginBottom:'6px' }}>Full address *</div>
+            <div style={{ fontSize:'12px', fontWeight:700, color:'#374151', marginBottom:'6px' }}>Full home address *</div>
             <input
               type="text"
-              placeholder="123 Sampaguita St, BF Homes, Muntinlupa City"
+              placeholder="e.g. 123 Sampaguita St, BF Homes, Muntinlupa City"
               value={addressInput}
               onChange={e => setAddressInput(e.target.value)}
               style={{ width:'100%', padding:'10px 12px', border:'1.5px solid #e5e7eb', borderRadius:'9px', fontFamily:'sans-serif', fontSize:'14px', outline:'none', color:'#111827', boxSizing:'border-box' as const, marginBottom:'14px' }}
             />
-            <div style={{ fontSize:'12px', fontWeight:700, color:'#374151', marginBottom:'6px' }}>Waze/Google Maps pin <span style={{ fontWeight:400, color:'#9ca3af' }}>(optional)</span></div>
+            <div style={{ fontSize:'12px', fontWeight:700, color:'#374151', marginBottom:'6px' }}>Waze/Google Maps pin <span style={{ fontWeight:400, color:'#9ca3af' }}>(optional but recommended)</span></div>
             <input
               type="text"
               placeholder="https://waze.com/ul?ll=..."
@@ -724,7 +724,7 @@ export default function HWDashboard() {
               onChange={e => setWazePinInput(e.target.value)}
               style={{ width:'100%', padding:'10px 12px', border:'1.5px solid #e5e7eb', borderRadius:'9px', fontFamily:'sans-serif', fontSize:'14px', outline:'none', color:'#111827', boxSizing:'border-box' as const, marginBottom:'6px' }}
             />
-            <div style={{ fontSize:'11px', color:'#9ca3af', marginBottom:'18px', lineHeight:1.5 }}>Open Waze → Share → Copy Link. This helps your kasambahay find your home.</div>
+            <div style={{ fontSize:'11px', color:'#9ca3af', marginBottom:'18px', lineHeight:1.5 }}>Open Waze → Share → Copy Link. Helps our partner find your home faster.</div>
             <button
               disabled={!addressInput.trim() || savingAddress}
               onClick={async () => {
