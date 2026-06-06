@@ -36,10 +36,18 @@ export default function KBDashboard() {
       const { data: jobsData } = await supabase.from('jobs').select('*').eq('active', true)
       setJobs(jobsData || [])
       if (kbData) {
-        const { data: offersData } = await supabase
+        const { data: offersData, error: offersError } = await supabase
           .from('offers')
-          .select('*, household, pets, scope, urgency, start_date, transport_service, homeowner_address, homeowner_waze_pin, homeowner:homeowner_id(*, profiles(full_name, mobile, facebook_url))')
+          .select(`
+            *, household, pets, scope, urgency, start_date, transport_service,
+            homeowner_address, homeowner_waze_pin,
+            homeowner:homeowner_id(
+              id,
+              profile:profile_id(full_name, mobile, facebook_url)
+            )
+          `)
           .eq('kasambahay_id', kbData.id)
+        console.log('Kasambahay offers raw:', offersData, offersError)
         setOffers(offersData || [])
         const { data: apps } = await supabase.from('applications').select('job_id').eq('kasambahay_id', kbData.id)
         if (apps) {
@@ -165,6 +173,9 @@ export default function KBDashboard() {
     if (!['pending','agreed','countered','payment_pending','paid','active','hired'].includes(o.status)) return false
     if (o.status === 'pending' && Date.now() - new Date(o.created_at).getTime() > EXPIRE_MS) return false
     return true
+  }).sort((a, b) => {
+    const priority = ['paid','active','hired','agreed','payment_pending','countered','pending']
+    return priority.indexOf(a.status) - priority.indexOf(b.status)
   })
   const pastOffers = offers.filter(o => {
     if (['declined','cancelled','counter_declined'].includes(o.status)) return true
@@ -541,8 +552,8 @@ export default function KBDashboard() {
                           )}
                         </div>
                       )}
-                      {offer.homeowner?.profiles?.mobile && (() => {
-                        const hwFbRaw = offer.homeowner?.profiles?.facebook_url
+                      {offer.homeowner?.profile?.mobile && (() => {
+                        const hwFbRaw = offer.homeowner?.profile?.facebook_url
                         const hwMessengerUrl = (() => {
                           if (!hwFbRaw) return null
                           const match = hwFbRaw.match(/facebook\.com\/(?:profile\.php\?id=)?([^/?&]+)/)
@@ -552,10 +563,10 @@ export default function KBDashboard() {
                         return (
                           <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px' }}>
                             <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '6px' }}>I-CONTACT ANG EMPLOYER MO</div>
-                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{offer.homeowner.profiles.full_name}</div>
-                            <div style={{ fontSize: '13px', color: '#374151', marginBottom: '10px' }}>{offer.homeowner.profiles.mobile}</div>
+                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{offer.homeowner.profile.full_name}</div>
+                            <div style={{ fontSize: '13px', color: '#374151', marginBottom: '10px' }}>{offer.homeowner.profile.mobile}</div>
                             <div style={{ display: 'flex', gap: '6px' }}>
-                              <a href={`sms:${offer.homeowner.profiles.mobile}`} style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#27500A', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>📱 I-SMS</a>
+                              <a href={`sms:${offer.homeowner.profile.mobile}`} style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#27500A', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>📱 I-SMS</a>
                               {hwMessengerUrl && (
                                 <a href={hwMessengerUrl} target="_blank" rel="noreferrer" style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#0084FF', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Messenger</a>
                               )}
@@ -587,7 +598,7 @@ export default function KBDashboard() {
                     <div style={{ padding: '12px 14px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                         <div>
-                          <div style={{ fontWeight: 700, fontSize: '13px', color: '#6b7280', marginBottom: '2px' }}>{offer.homeowner?.profiles?.full_name?.split(' ')[0] || 'Homeowner'}</div>
+                          <div style={{ fontWeight: 700, fontSize: '13px', color: '#6b7280', marginBottom: '2px' }}>{offer.homeowner?.profile?.full_name?.split(' ')[0] || 'Homeowner'}</div>
                           <div style={{ fontSize: '11px', color: '#9ca3af' }}>{new Date(offer.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
                         </div>
                         <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: '#f3f4f6', color: '#6b7280', whiteSpace: 'nowrap' as const }}>{pastLabel}</span>
