@@ -99,6 +99,11 @@ export default function SendOfferPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [hwId, setHwId] = useState<string | null>(null)
+  const [hwDbId, setHwDbId] = useState<string | null>(null)
+  const [offersToday, setOffersToday] = useState(0)
+  const [isFreeOffer, setIsFreeOffer] = useState(true)
+  const [batchPaid, setBatchPaid] = useState(false)
+  const [batchPayLoading, setBatchPayLoading] = useState(false)
   const [hwProvinceKey, setHwProvinceKey] = useState<string | null>(null)
   const [transportDirectType, setTransportDirectType] = useState<'homeowner_pays' | 'reimburse' | 'kasambahay_pays' | ''>('')
   const [imgError, setImgError] = useState(false)
@@ -110,8 +115,15 @@ export default function SendOfferPage() {
       if (!user) { router.push('/login'); return }
       const { data: kbData } = await supabase.from('kasambahay').select('*').eq('id', kasambahayId).single()
       setKb(kbData)
-      const { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
-      if (hw?.id) setHwId(hw.id)
+      const today = new Date().toISOString().split('T')[0]
+      const { data: hw } = await supabase.from('homeowners').select('daily_offers_used, daily_offers_date, id').eq('profile_id', user.id).single()
+      if (hw?.id) {
+        setHwId(hw.id)
+        setHwDbId(hw.id)
+        const usedToday = hw?.daily_offers_date === today ? (hw?.daily_offers_used || 0) : 0
+        setOffersToday(usedToday)
+        setIsFreeOffer(usedToday < 2)
+      }
       const { data: prof } = await supabase.from('profiles').select('city').eq('id', user.id).single()
       const hwCity = prof?.city || null
       if (hwCity) {
@@ -170,6 +182,14 @@ export default function SendOfferPage() {
       if (kbRef?.referred_by) {
         await fetch('/api/send-sms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'referral_offer_received', offerId: newOffer.id, partnerId: kbRef.referred_by }) }).catch(() => {})
       }
+    }
+    // Update daily offer count
+    if (hw?.id) {
+      const today2 = new Date().toISOString().split('T')[0]
+      await supabase.from('homeowners').update({
+        daily_offers_used: offersToday + 1,
+        daily_offers_date: today2,
+      }).eq('id', hw.id)
     }
     setSubmitting(false)
     setSuccess(true)
@@ -290,6 +310,51 @@ export default function SendOfferPage() {
 
       {/* ── BODY ── */}
       <div style={{ padding: '28px 18px 8px' }}>
+
+        {/* Daily offer status */}
+        {isFreeOffer ? (
+          <div style={{ fontSize: 12, color: '#16a34a', fontWeight: 600, marginBottom: 14 }}>
+            ✓ Free offer ({offersToday} of 2 used today)
+          </div>
+        ) : !batchPaid ? (
+          <div style={{ background: C.amberSoft, border: `1.5px solid ${C.amberLine}`, borderRadius: 12, padding: '14px 16px', marginBottom: 20 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: C.amberDeep, marginBottom: 6 }}>
+              Naubos na ang 2 libreng offer mo ngayon.
+            </div>
+            <div style={{ fontSize: 12, color: C.amberDeep, lineHeight: 1.6, marginBottom: 12 }}>
+              Mag-send ng 2 pa — ₱100 lang via QR Ph.
+            </div>
+            <button
+              onClick={async () => {
+                setBatchPayLoading(true)
+                try {
+                  const res = await fetch('/api/pay-offer-batch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ homeowner_id: hwDbId }),
+                  })
+                  const data = await res.json()
+                  if (data.url) window.open(data.url, '_blank')
+                  else setBatchPayLoading(false)
+                } catch { setBatchPayLoading(false) }
+              }}
+              disabled={batchPayLoading}
+              style={{ width: '100%', padding: '11px', borderRadius: 10, background: C.amber, color: '#fff', border: 'none', fontFamily: sans, fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: batchPayLoading ? 0.6 : 1 }}
+            >
+              {batchPayLoading ? 'Naghahanda...' : 'Bayaran ng ₱100 →'}
+            </button>
+            <button
+              onClick={() => setBatchPaid(true)}
+              style={{ width: '100%', padding: '8px', background: 'none', border: 'none', fontFamily: sans, fontSize: 12, color: C.ink3, cursor: 'pointer', marginTop: 4 }}
+            >
+              Nabayaran na? I-click dito →
+            </button>
+          </div>
+        ) : (
+          <div style={{ fontSize: 12, color: '#16a34a', fontWeight: 600, marginBottom: 14 }}>
+            ✓ Paid batch — puwede ka nang mag-send
+          </div>
+        )}
 
         {error && (
           <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, padding: '11px 14px', fontSize: 13, color: '#dc2626', marginBottom: 20 }}>{error}</div>
@@ -669,8 +734,8 @@ export default function SendOfferPage() {
         </div>
         <button
           onClick={handleSendOffer}
-          disabled={submitting || transportBlocked}
-          style={{ width: '100%', height: 52, borderRadius: 14, border: 'none', background: submitting || transportBlocked ? C.ink4 : C.forest, color: C.paper, fontFamily: sans, fontSize: 15, fontWeight: 600, cursor: submitting || transportBlocked ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, letterSpacing: '-0.005em', transition: 'background .15s' }}
+          disabled={submitting || transportBlocked || (!isFreeOffer && !batchPaid)}
+          style={{ width: '100%', height: 52, borderRadius: 14, border: 'none', background: submitting || transportBlocked || (!isFreeOffer && !batchPaid) ? C.ink4 : C.forest, color: C.paper, fontFamily: sans, fontSize: 15, fontWeight: 600, cursor: submitting || transportBlocked || (!isFreeOffer && !batchPaid) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, letterSpacing: '-0.005em', transition: 'background .15s' }}
         >
           {submitting ? 'Sending…' : <>Send Offer <IcArrowRight size={15} /></>}
         </button>
