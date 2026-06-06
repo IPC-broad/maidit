@@ -38,7 +38,7 @@ export default function KBDashboard() {
       if (kbData) {
         const { data: offersData } = await supabase
           .from('offers')
-          .select('*, household, pets, scope, urgency, start_date, homeowner:homeowner_id(*, profiles(full_name, mobile))')
+          .select('*, household, pets, scope, urgency, start_date, transport_service, homeowner_address, homeowner_waze_pin, homeowner:homeowner_id(*, profiles(full_name, mobile))')
           .eq('kasambahay_id', kbData.id)
         setOffers(offersData || [])
         const { data: apps } = await supabase.from('applications').select('job_id').eq('kasambahay_id', kbData.id)
@@ -511,6 +511,20 @@ export default function KBDashboard() {
                           <div style={{ fontSize: '12px', color: '#92400e', lineHeight: 1.6 }}>
                             Ang transport assistance na ginastos ng employer para ikaw ay safe na makarating sa pagtatrabahuan ay bahagi ng iyong deployment expenses. Ayon sa RA 10361, maaaring ibalik ito sa employer kung aalis ka nang walang makatwirang dahilan sa loob ng 6 na buwan.
                           </div>
+                        </div>
+                      )}
+                      {offer.transport_service === true && offer.homeowner_address && (
+                        <div style={{ background: '#f0f5ec', border: '1px solid #c8e0b8', borderRadius: 10, padding: '10px 12px', marginBottom: '10px', fontSize: 12 }}>
+                          <div style={{ fontWeight: 700, color: '#27500A', marginBottom: 4 }}>✅ Binayaran na ang iyong transport</div>
+                          <div style={{ color: '#4a4a3a', lineHeight: 1.6 }}>
+                            Ang iyong employer ay nasa: <strong>{offer.homeowner_address}</strong>
+                          </div>
+                          {offer.homeowner_waze_pin && (
+                            <a href={offer.homeowner_waze_pin} target="_blank" rel="noopener noreferrer"
+                               style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 6, padding: '5px 12px', background: '#27500A', color: '#fff', borderRadius: 8, fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>
+                              🗺 Buksan sa Waze
+                            </a>
+                          )}
                         </div>
                       )}
                       {offer.homeowner?.profiles?.mobile && (
