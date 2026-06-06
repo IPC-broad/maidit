@@ -191,7 +191,7 @@ export default function BrowsePage() {
     }
     const { data, error } = await supabase
       .from('kasambahay')
-      .select('id, profile_id, asking_salary, setup, skills, province, selfie_url, availability, edad')
+      .select('id, profile_id, asking_salary, setup, skills, province, selfie_url, availability, edad, civil_status, num_children')
       .limit(20)
     console.log('[browse-v2] count:', data?.length, 'error:', error?.message, 'raw:', JSON.stringify(data?.slice(0,1)))
     const profileIds = (data || []).map((k: any) => k.profile_id).filter(Boolean)
@@ -487,6 +487,11 @@ export default function BrowsePage() {
                 )}
               </div>
             )}
+            {kb.civil_status && (
+              <div style={{ fontSize: 11, color: C.ink3, marginTop: 3 }}>
+                {kb.civil_status}{kb.num_children > 0 ? ` · May ${kb.num_children} anak` : ''}
+              </div>
+            )}
 
           </div>
         </div>
@@ -770,12 +775,14 @@ export default function BrowsePage() {
             )}
 
             {/* Visible cards */}
-            {visibleCards.map(renderKBCard)}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: 16 }}>
+              {visibleCards.map(renderKBCard)}
+            </div>
 
             {/* Logged-out: blurred remainder + unlock wall */}
             {lockedCards.length > 0 && (
               <div style={{ position: 'relative', width: '100%' }}>
-                <div style={{ filter: 'blur(6px)', pointerEvents: 'none', userSelect: 'none' as const, width: '100%' }}>
+                <div style={{ filter: 'blur(6px)', pointerEvents: 'none', userSelect: 'none' as const, width: '100%', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: 16 }}>
                   {lockedCards.slice(0, 2).map(renderKBCard)}
                 </div>
                 <div style={{

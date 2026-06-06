@@ -81,7 +81,7 @@ export default function HomeownerLanding() {
   }, [])
 
   return (
-    <main style={{ minHeight: '100vh', background: C.paper2, fontFamily: sans }}>
+    <main style={{ minHeight: '100vh', background: C.paper2, fontFamily: sans, maxWidth: 600, margin: '0 auto' }}>
 
       {/* Sticky nav */}
       <nav style={{

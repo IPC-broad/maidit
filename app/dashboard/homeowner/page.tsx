@@ -282,7 +282,7 @@ export default function HWDashboard() {
               ))}
             </div>
           </div>
-          <div style={{ padding:'4px 16px 32px', display:'flex', flexDirection:'column', gap:'12px' }}>
+          <div style={{ padding:'4px 16px 32px', maxWidth: 960, margin: '0 auto', width: '100%', boxSizing: 'border-box' as const, display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(380px, 1fr))', gap:'12px' }}>
             {filtered.length === 0 && <div style={{ textAlign:'center', padding:'40px 20px', color:'#6b7280', fontSize:'.84rem' }}>No profiles found.</div>}
             {filtered.map((kb) => (
               <div key={kb.id} style={{ background:'#fff', borderRadius:'14px', padding:'13px 14px', boxShadow:'0 2px 8px rgba(0,0,0,.06)', border:'1.5px solid #f3f4f6' }}>

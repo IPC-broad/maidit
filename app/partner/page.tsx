@@ -227,7 +227,7 @@ export default function PartnerPage() {
 
   // ─── LANDING ───
   if (step === 'landing') return (
-    <div style={{ minHeight: '100vh', background: C.paper2, fontFamily: sans, color: C.ink }}>
+    <div style={{ minHeight: '100vh', background: C.paper2, fontFamily: sans, color: C.ink, maxWidth: 600, margin: '0 auto' }}>
 
       {/* HERO — photo background */}
       <div style={{ position: 'relative', overflow: 'hidden' }}>

@@ -56,7 +56,7 @@ export default function GoldPartnerPage() {
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', background: C.paper2, fontFamily: sans, color: C.ink, maxWidth: 430, margin: '0 auto', paddingBottom: 48 }}>
+    <div style={{ minHeight: '100vh', background: C.paper2, fontFamily: sans, color: C.ink, maxWidth: 600, margin: '0 auto', paddingBottom: 48 }}>
 
       {/* NAV */}
       <nav style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: C.paper, borderBottom: `1px solid ${C.line}` }}>

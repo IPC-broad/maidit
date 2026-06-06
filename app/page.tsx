@@ -25,7 +25,7 @@ export default function Home() {
   }, [])
 
   return (
-    <main style={{ minHeight: '100vh', background: C.paper, fontFamily: sans, paddingBottom: 32 }}>
+    <main style={{ minHeight: '100vh', background: C.paper, fontFamily: sans, paddingBottom: 32, maxWidth: 480, margin: '0 auto' }}>
 
       {/* Nav */}
       <nav style={{

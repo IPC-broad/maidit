@@ -479,6 +479,9 @@ export default function PartnerSignupPage() {
           <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.07em', color: C.ink3, marginBottom: 4, fontFamily: sans }}>
             Selfie <span style={{ color: '#dc2626' }}>(Required)</span>
           </div>
+          <div style={{ fontSize: 10, color: '#888', marginBottom: 4 }}>
+            Face API: {faceApiReady ? '✓ Ready' : faceStatus === 'unavailable' ? '⚠ Unavailable' : '⏳ Loading...'}
+          </div>
           <p style={{ fontSize: 13, color: C.ink3, marginBottom: 12, fontFamily: sans }}>
             Para ma-verify ang iyong pagkakakilanlan.
           </p>
