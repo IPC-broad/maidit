@@ -175,6 +175,11 @@ export default function HomeownerSignup() {
   }
   const strength = pwStrength(form.password)
 
+  const isValidPHMobile = (num: string) => {
+    const cleaned = num.replace(/\s+/g, '').replace(/-/g, '')
+    return /^(09|\+639|639)\d{9}$/.test(cleaned)
+  }
+
   const handleSignup = async () => {
     if (!isFacebook && form.password.length < 8) { setError('Password must be at least 8 characters'); return }
     setLoading(true)
@@ -415,6 +420,7 @@ export default function HomeownerSignup() {
           <button
             onClick={() => {
               if (!form.full_name || !form.email) { setError('Please fill in all fields'); return }
+              if (form.mobile && !isValidPHMobile('0' + form.mobile.replace(/^0/, ''))) { setError('Ilagay ang wastong Philippine mobile number (e.g. 09XX XXX XXXX)'); return }
               if (!isFacebook && form.password.length < 8) { setError('Password must be at least 8 characters'); return }
               setError(''); setStep(2)
             }}

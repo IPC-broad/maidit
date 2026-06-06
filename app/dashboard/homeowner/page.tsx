@@ -316,10 +316,9 @@ export default function HWDashboard() {
                     <span key={skill} style={{ fontSize:'.67rem', padding:'3px 7px', borderRadius:'4px', background:'#e8f5ee', color:'#1a6b3c' }}>{skill}</span>
                   ))}
                 </div>
-                {(kb.civil_status || kb.num_children > 0) && (
-                  <div style={{ display:'flex', gap:'10px', marginBottom:'9px', flexWrap:'wrap' }}>
-                    {kb.civil_status && <span style={{ fontSize:'11px', color:'#9ca3af' }}>Civil status: {kb.civil_status}</span>}
-                    {kb.num_children > 0 && <span style={{ fontSize:'11px', color:'#9ca3af' }}>May {kb.num_children} anak</span>}
+                {kb.civil_status && (
+                  <div style={{fontSize:'11px', color:'#8a8a7a', marginTop:2, marginBottom:9}}>
+                    {kb.civil_status}{kb.num_children > 0 ? ` · May ${kb.num_children} anak` : ''}
                   </div>
                 )}
                 {offered[kb.id] ? (

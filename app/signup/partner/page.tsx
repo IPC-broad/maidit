@@ -130,6 +130,11 @@ export default function PartnerSignupPage() {
     setStream(null)
   }
 
+  const isValidPHMobile = (num: string) => {
+    const cleaned = num.replace(/\s+/g, '').replace(/-/g, '')
+    return /^(09|\+639|639)\d{9}$/.test(cleaned)
+  }
+
   const handleProvinceChange = (prov: string) => {
     const cities = (provinces as Record<string, string[]>)[prov] || []
     setForm(f => ({ ...f, province: prov, city: cities[0] || '', barangay: '' }))
@@ -140,7 +145,7 @@ export default function PartnerSignupPage() {
       setError('Punan ang lahat ng required fields.')
       return
     }
-    if (form.mobile.length < 10) { setError('Ilagay ang tamang cellphone number.'); return }
+    if (!isValidPHMobile('0' + form.mobile)) { setError('Ilagay ang wastong Philippine mobile number (e.g. 09XX XXX XXXX)'); return }
     if (form.password.length < 8) { setError('Ang password ay dapat hindi bababa sa 8 characters.'); return }
     if (!form.province || !form.city) { setError('Piliin ang iyong probinsya at lungsod.'); return }
     if (!selfieData) { setError('Kailangan ang selfie bago mag-sign up.'); return }

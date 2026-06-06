@@ -203,6 +203,11 @@ export default function KasambahaySignup() {
     reader.readAsDataURL(file)
   }
 
+  const isValidPHMobile = (num: string) => {
+    const cleaned = num.replace(/\s+/g, '').replace(/-/g, '')
+    return /^(09|\+639|639)\d{9}$/.test(cleaned)
+  }
+
   const startCamera = async () => {
     try {
       const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
@@ -235,8 +240,8 @@ export default function KasambahaySignup() {
       setError('Punan ang lahat ng fields')
       return
     }
-    if (form.mobile.length < 11) {
-      setError('Ilagay ang tamang mobile number (11 digits)')
+    if (!isValidPHMobile(form.mobile)) {
+      setError('Ilagay ang wastong Philippine mobile number (e.g. 09XX XXX XXXX)')
       return
     }
     if (!isFacebook && form.password.length < 8) {

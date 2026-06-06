@@ -82,6 +82,7 @@ export default function PartnerDashboard() {
   const [subAgentWorkerCounts, setSubAgentWorkerCounts] = useState<Record<string, number>>({})
   const [subAgentHiredCounts, setSubAgentHiredCounts] = useState<Record<string, number>>({})
   const [subAgentCopied, setSubAgentCopied] = useState(false)
+  const [showWelcome, setShowWelcome] = useState(false)
 
   useEffect(() => {
     const link = document.createElement('link')
@@ -126,6 +127,9 @@ export default function PartnerDashboard() {
         setProfileNames(wProfileMap)
       }
       setWorkers(workersData || [])
+      const isFirstVisit = (workersData || []).length === 0 && (payoutsData || []).length === 0 && (partnerData.balance ?? 0) === 0
+      const dismissed = typeof window !== 'undefined' && localStorage.getItem('partner-welcome-dismissed')
+      if (isFirstVisit && !dismissed) setShowWelcome(true)
       const workerIds = (workersData || []).map((w: any) => w.id)
       if (workerIds.length > 0) {
         const { data: offersData } = await supabase
@@ -198,6 +202,11 @@ export default function PartnerDashboard() {
     window.open(`sms:?body=${msg}`, '_blank')
   }
 
+  const isValidPHMobile = (num: string) => {
+    const cleaned = num.replace(/\s+/g, '').replace(/-/g, '')
+    return /^(09|\+639|639)\d{9}$/.test(cleaned)
+  }
+
   const toggleSkill = (skill: string) => {
     setWorkerForm(f => ({ ...f, skills: f.skills.includes(skill) ? f.skills.filter(s => s !== skill) : [...f.skills, skill] }))
   }
@@ -237,8 +246,8 @@ export default function PartnerDashboard() {
     if (!apelyido || !pangalan || !mobile || !province) {
       setSaveMsg('Pakisulat ang lahat ng required fields.'); return
     }
-    if (mobile.length !== 11 || !mobile.startsWith('09')) {
-      setSaveMsg('Pakisulat ang tamang 11-digit mobile number.'); return
+    if (!isValidPHMobile(mobile)) {
+      setSaveMsg('Ilagay ang wastong Philippine mobile number (e.g. 09XX XXX XXXX)'); return
     }
     if (workerForm.skills.length === 0) {
       setSaveMsg('Pumili ng kahit isang kasanayan.'); return
@@ -405,6 +414,27 @@ export default function PartnerDashboard() {
       </div>
 
       <div style={{ padding: '14px 16px' }}>
+        {/* Welcome banner — first-time approved partner */}
+        {showWelcome && (
+          <div style={{ background: '#f0f5ec', border: '1px solid #c8e0b0', borderRadius: 14, padding: '14px 16px', marginBottom: 16, position: 'relative' }}>
+            <button
+              onClick={() => { localStorage.setItem('partner-welcome-dismissed', '1'); setShowWelcome(false) }}
+              style={{ position: 'absolute', top: 10, right: 12, background: 'none', border: 'none', fontSize: 18, color: '#6b7280', cursor: 'pointer', lineHeight: 1, padding: 0 }}
+              aria-label="Dismiss"
+            >×</button>
+            <div style={{ fontSize: 28, marginBottom: 6 }}>🎉</div>
+            <div style={{ fontFamily: serif, fontSize: 18, color: C.forestDeep, marginBottom: 6 }}>Welcome sa MaidIt Partner Program!</div>
+            <div style={{ fontSize: 13, color: C.ink2, lineHeight: 1.6, marginBottom: 12, fontFamily: sans }}>
+              Approved ka na. Simulan na ang pag-refer ng mga kasambahay at kumita sa bawat matagumpay na hire.
+            </div>
+            <button
+              onClick={() => { setTab('add'); setReferMode('manual'); setManualStep(1) }}
+              style={{ padding: '10px 18px', background: C.forest, color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 700, fontFamily: sans, cursor: 'pointer' }}
+            >
+              Mag-refer ngayon →
+            </button>
+          </div>
+        )}
         {/* Negative balance warning */}
         {(partner?.balance ?? 0) < 0 && (
           <div style={{ background: '#fef2f2', border: '1.5px solid #fecaca', borderRadius: '12px', padding: '12px 14px', marginBottom: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
