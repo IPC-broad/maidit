@@ -1,4 +1,4 @@
-const CACHE = 'maidit-v7'
+const CACHE = 'maidit-v8'
 const PRECACHE = ['/']
 
 // Paths that must always go to the network (never serve cached)
