@@ -56,9 +56,9 @@ export default function HWDashboard() {
       setProfiles(data || [])
       let hw: any = null
       if (user) {
-        const { data: hwData } = await supabase.from('homeowners').select('id, subscription_credit_used, subscription_expires_at').eq('profile_id', user.id).single()
+        const { data: hwData } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
         if (!hwData) {
-          const { data: created } = await supabase.from('homeowners').insert({ profile_id: user.id }).select('id, subscription_credit_used, subscription_expires_at').single()
+          const { data: created } = await supabase.from('homeowners').insert({ profile_id: user.id }).select('id').single()
           hw = created
         } else {
           hw = hwData
@@ -106,7 +106,7 @@ export default function HWDashboard() {
           estimated_arrival, kasambahay_id, negotiated_by,
           kasambahay:kasambahay_id(
             id, province, setup, selfie_url, asking_salary,
-            profile:profile_id(full_name, mobile)
+            profile:profile_id(full_name)
           )
         `)
         .eq('homeowner_id', hw.id)
@@ -186,13 +186,6 @@ export default function HWDashboard() {
   }
 
   const actionCount = offers.filter(o => o.status === 'agreed' || o.status === 'countered').length
-
-  const creditApplicable =
-    hwMeta &&
-    !hwMeta.subscription_credit_used &&
-    hwMeta.subscription_expires_at &&
-    new Date(hwMeta.subscription_expires_at) > new Date()
-  const hireFee = creditApplicable ? '2,001' : '2,500'
 
   const toIntl = (mobile: string | undefined) => {
     if (!mobile) return ''
@@ -358,7 +351,6 @@ export default function HWDashboard() {
               ? { label: 'Counter from Partner', bg: '#fef3e2', color: '#c9943a' }
               : offerStatusMap[offer.status] || { label: offer.status, bg: '#f3f4f6', color: '#6b7280' }
             const kbName = offer.kasambahay?.profile?.full_name || 'Kasambahay'
-            const kbMobile = offer.kasambahay?.profile?.mobile
             const isPaid = ['paid','active'].includes(offer.status)
             const isHired = offer.status === 'hired'
             const needsPayment = offer.status === 'agreed'
@@ -487,20 +479,9 @@ export default function HWDashboard() {
                       Proceed to Hire →
                     </button>
                   )}
-                  {(isPaid || isHired) && kbMobile && (
-                    <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:'10px', padding:'12px 14px', marginBottom:'8px' }}>
-                      <div style={{ fontSize:'10px', fontWeight:700, textTransform:'uppercase' as const, letterSpacing:'.5px', color:'#166534', marginBottom:'8px' }}>Contact your kasambahay</div>
-                      {isPaid && !offer.arrived_at && (
-                        <div style={{ fontSize:'12px', color:'#166534', marginBottom:'10px', lineHeight:1.5 }}>Your kasambahay is on her way. You can now contact her directly.</div>
-                      )}
-                      <div style={{ fontSize:'13px', fontWeight:700, color:'#111827', marginBottom:'2px' }}>{kbName}</div>
-                      <div style={{ fontSize:'13px', color:'#374151', marginBottom:'10px' }}>{kbMobile}</div>
-                      <div style={{ display:'flex', gap:'6px', marginBottom:'8px' }}>
-                        <a href={`viber://chat?number=${toIntl(kbMobile)}`} style={{ flex:1, padding:'9px', borderRadius:'9px', background:'#7c3aed', color:'#fff', fontFamily:'sans-serif', fontSize:'12px', fontWeight:700, cursor:'pointer', textAlign:'center' as const, textDecoration:'none', display:'block' }}>💬 Viber</a>
-                        <a href={`https://wa.me/${toIntl(kbMobile)}`} target="_blank" rel="noreferrer" style={{ flex:1, padding:'9px', borderRadius:'9px', background:'#16a34a', color:'#fff', fontFamily:'sans-serif', fontSize:'12px', fontWeight:700, cursor:'pointer', textAlign:'center' as const, textDecoration:'none', display:'block' }}>💬 WhatsApp</a>
-                        <button onClick={() => navigator.clipboard.writeText(kbMobile)} style={{ padding:'9px 12px', borderRadius:'9px', background:'transparent', border:'1.5px solid #e5e7eb', color:'#6b7280', fontFamily:'sans-serif', fontSize:'12px', fontWeight:600, cursor:'pointer' }}>Copy</button>
-                      </div>
-                      <div style={{ fontSize:'10px', color:'#6b7280', lineHeight:1.5 }}>Future hires through MaidIt include rematch protection.</div>
+                  {(isPaid || isHired) && (
+                    <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:'10px', padding:'10px 12px', marginBottom:'8px', fontSize:'12px', color:'#166534', lineHeight:1.5 }}>
+                      Contact details available in the arrival confirmation page.
                     </div>
                   )}
                   {isHired && (

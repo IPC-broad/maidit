@@ -149,12 +149,9 @@ export default function BrowsePage() {
   const [saved, setSaved] = useState<Record<string, boolean>>({})
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({})
   const [offersLoaded, setOffersLoaded] = useState(false)
-  const [subscribeModalId, setSubscribeModalId] = useState<string | null>(null)
-  const [subscribeLoading, setSubscribeLoading] = useState(false)
   const [homeownerProvince, setHomeownerProvince] = useState<string | null>(null)
   const [homeownerCity, setHomeownerCity] = useState<string | null>(null)
   const [lastOfferSetup, setLastOfferSetup] = useState<string | null>(null)
-  const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null)
   const [homeownerDbId, setHomeownerDbId] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<'best' | 'newest' | 'salary-asc' | 'salary-desc'>('best')
   const [profileModalKb, setProfileModalKb] = useState<any>(null)
@@ -166,18 +163,12 @@ export default function BrowsePage() {
     setCurrentUser(user || null)
     console.log('[browse] currentUser:', user?.id ?? 'not logged in')
     if (user) {
-      const TEST_EMAILS = ['test@maidit.com', 'homeowner@maidit.app', 'test.kasambahay@maidit.app', 'partner@maidit.com']
-      const isTestAccount = TEST_EMAILS.includes(user.email ?? '')
-
-      const { data: hw, error: hwError } = await supabase
+      const { data: hw } = await supabase
         .from('homeowners')
-        .select('id, subscription_expires_at, subscription_credit_used, preferred_setup')
+        .select('id, preferred_setup')
         .eq('profile_id', user.id)
         .single()
-      if (hwError) {
-        setIsSubscribed(isTestAccount ? true : false)
-      } else {
-        setIsSubscribed(isTestAccount ? true : !!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date()))
+      if (hw) {
         setLastOfferSetup(hw?.preferred_setup || null)
         setHomeownerDbId(hw?.id || null)
       }
@@ -222,34 +213,13 @@ export default function BrowsePage() {
     if (hw) {
       const { data } = await supabase
         .from('offers')
-        .select('*, kasambahay:kasambahay_id(*, profiles(full_name, mobile))')
+        .select('*, kasambahay:kasambahay_id(*, profiles(full_name))')
         .eq('homeowner_id', hw.id)
         .order('created_at', { ascending: false })
       setOffers(data || [])
     }
     setOffersLoaded(true)
     setOffersLoading(false)
-  }
-
-  const handleSubscribe = async () => {
-    setSubscribeLoading(true)
-    try {
-      const res = await fetch('/api/create-payment-link', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: 49900,
-          description: 'MaidIt Subscription - ₱499',
-          homeowner_id: homeownerDbId,
-          type: 'subscription',
-        }),
-      })
-      const data = await res.json()
-      if (data.checkout_url) window.location.href = data.checkout_url
-      else setSubscribeLoading(false)
-    } catch {
-      setSubscribeLoading(false)
-    }
   }
 
   const isProvince = (province: string) => !!(province && !METRO.includes(province))
@@ -340,13 +310,11 @@ export default function BrowsePage() {
 
     const handleSendOffer = () => {
       if (!currentUser) router.push('/signup/homeowner')
-      else if (isSubscribed) router.push(`/offer/send/${kb.id}`)
-      else setSubscribeModalId(kb.id)
+      else router.push(`/offer/send/${kb.id}`)
     }
     const handleSeeProfile = () => {
       if (!currentUser) router.push('/signup/homeowner')
-      else if (isSubscribed) setProfileModalKb(kb)
-      else setSubscribeModalId(kb.id)
+      else setProfileModalKb(kb)
     }
 
     return (
@@ -676,50 +644,8 @@ export default function BrowsePage() {
             </div>
           </div>
 
-          {/* ── SUBSCRIPTION BANNER — unsubscribed ── */}
-          {currentUser && isSubscribed === false && (
-            <div style={{
-              margin: '14px 18px 0',
-              background: 'linear-gradient(180deg, #fbf3e2 0%, #f5e6c2 100%)',
-              border: `1px solid ${C.amberLine}`, borderRadius: 18,
-              padding: '16px 18px', position: 'relative', overflow: 'hidden',
-            }}>
-              <div style={{ position: 'absolute', top: 14, right: 18, color: C.amber, opacity: 0.45 }}>
-                <IcSparkle size={14} />
-              </div>
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '3px 9px 3px 7px', background: C.paper,
-                color: C.amberDeep, border: `1px solid ${C.amberLine}`,
-                borderRadius: 999, fontSize: 10, fontWeight: 600, letterSpacing: '0.08em',
-                marginBottom: 10, textTransform: 'uppercase' as const,
-              }}>
-                <IcLock /> Unlock More
-              </div>
-              <div style={{ fontFamily: serif, fontSize: 22, lineHeight: 1.15, color: C.forestDeep, letterSpacing: '-0.015em' }}>
-                Reach <em style={{ color: C.amber }}>every</em> kasambahay on MaidIt.
-              </div>
-              <div style={{ fontSize: 12.5, color: C.amberDeep, opacity: 0.85, marginTop: 6, lineHeight: 1.4 }}>
-                Send 10 job offers · 1 post — ₱499/month, cancel anytime.
-              </div>
-              <button
-                onClick={handleSubscribe}
-                disabled={subscribeLoading}
-                style={{
-                  marginTop: 14, width: '100%', height: 46, borderRadius: 13,
-                  background: C.amberDeep, color: C.paper, fontFamily: sans,
-                  fontSize: 14, fontWeight: 600, letterSpacing: '-0.005em', border: 'none',
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  cursor: 'pointer', opacity: subscribeLoading ? 0.6 : 1,
-                }}
-              >
-                {subscribeLoading ? 'Preparing...' : 'Subscribe'} <IcArrowRight />
-              </button>
-            </div>
-          )}
-
-          {/* ── CREDITS BANNER — subscribed ── */}
-          {currentUser && isSubscribed && (
+          {/* ── MATCHES BANNER — logged in ── */}
+          {currentUser && (
             <div style={{
               margin: '14px 18px 0',
               background: `linear-gradient(135deg, ${C.forestSoft} 0%, #e5eede 100%)`,
@@ -869,8 +795,7 @@ export default function BrowsePage() {
               </div>
             )}
 
-            {/* Subscribed footer */}
-            {currentUser && isSubscribed && (
+            {currentUser && (
               <div style={{
                 margin: '10px 0 18px', padding: '14px 16px',
                 border: `1px dashed ${C.forestLine}`, borderRadius: 16, background: C.forestSoft,
@@ -1059,30 +984,6 @@ export default function BrowsePage() {
         )
       })()}
 
-      {/* ── SUBSCRIBE MODAL ── */}
-      {subscribeModalId && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div style={{ background: C.paper, borderRadius: '18px', padding: '24px 20px', maxWidth: '320px', width: '100%' }}>
-            <div style={{ fontFamily: serif, fontSize: '1.2rem', color: C.ink, marginBottom: '6px' }}>Subscribe to Send Offers</div>
-            <p style={{ fontSize: '.82rem', color: C.ink2, lineHeight: 1.6, margin: '0 0 20px' }}>
-              A ₱499/month subscription gives you platform access and a ₱499 credit toward your first hire fee.
-            </p>
-            <button
-              onClick={handleSubscribe}
-              disabled={subscribeLoading}
-              style={{ width: '100%', padding: '12px', borderRadius: '12px', border: 'none', background: C.forest, color: C.paper, fontFamily: sans, fontSize: '.9rem', fontWeight: 700, cursor: 'pointer', marginBottom: '10px', opacity: subscribeLoading ? .6 : 1 }}
-            >
-              {subscribeLoading ? 'Preparing payment...' : 'Subscribe for ₱499 →'}
-            </button>
-            <button
-              onClick={() => setSubscribeModalId(null)}
-              style={{ width: '100%', padding: '8px', background: 'none', border: 'none', fontFamily: sans, fontSize: '.8rem', color: C.ink3, cursor: 'pointer' }}
-            >
-              Maybe later
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* ── BOTTOM NAV ── */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: C.paper, borderTop: `1px solid ${C.line}`, display: 'flex', boxShadow: '0 -2px 10px rgba(0,0,0,.04)' }}>

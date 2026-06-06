@@ -432,7 +432,7 @@ export default function HomeownerLanding() {
           textAlign: 'center',
           marginTop: 10,
         }}>
-          Free to get started.
+          Free to browse. Free to send offers. Pay ₱2,500 only when you hire.
         </div>
       </div>
 
