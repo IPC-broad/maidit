@@ -7,27 +7,47 @@ export default function PayPage() {
   const params = useParams()
   const offerId = params?.id as string
 
+  console.log('PAY PAGE LOADED, id param:', params?.id)
+
   const [offer, setOffer] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
   const [linkError, setLinkError] = useState(false)
   const [step, setStep] = useState<'pay' | 'already'>('pay')
   const [userEmail, setUserEmail] = useState('')
+  const [notFound, setNotFound] = useState(false)
 
   useEffect(() => {
     const init = async () => {
+      if (!offerId || offerId === 'undefined' || offerId === 'null') {
+        console.log('PAY PAGE REDIRECTING because: bad offerId value =', offerId)
+        router.push('/dashboard/homeowner')
+        return
+      }
+
       const { supabase } = await import('../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
+      if (!user) {
+        console.log('PAY PAGE REDIRECTING because: no authenticated user session')
+        router.push('/login')
+        return
+      }
       setUserEmail(user.email || '')
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('offers')
         .select('*, kasambahay:kasambahay_id(*, profiles(full_name))')
         .eq('id', offerId)
         .single()
 
-      if (!data) { router.push('/dashboard/homeowner'); return }
+      console.log('Offer fetch result:', data, error)
+
+      if (!data) {
+        console.log('PAY PAGE: offer not found for id:', offerId, '— error:', error?.message)
+        setNotFound(true)
+        setLoading(false)
+        return
+      }
 
       let { data: hw } = await supabase
         .from('homeowners')
@@ -46,7 +66,13 @@ export default function PayPage() {
 
       setOffer(data)
 
-      if (['paid', 'payment_pending', 'active', 'hired'].includes(data.status)) {
+      if (['active', 'hired'].includes(data.status)) {
+        console.log('PAY PAGE REDIRECTING because: offer already hired/active, status =', data.status)
+        router.push(`/arrival/${offerId}`)
+        return
+      }
+
+      if (['paid', 'payment_pending'].includes(data.status)) {
         setStep('already')
         setLoading(false)
         return
@@ -101,6 +127,15 @@ export default function PayPage() {
   }
 
   if (loading) return <div style={{ ...s.center, color: '#6b7280' }}>Loading...</div>
+
+  if (notFound) return (
+    <div style={{ ...s.center, gap: '12px' }}>
+      <div style={{ fontSize: '2rem' }}>⚠️</div>
+      <div style={{ fontFamily: 'serif', fontSize: '1.1rem', fontWeight: 900, color: '#111827' }}>Offer not found</div>
+      <div style={{ fontSize: '.8rem', color: '#6b7280' }}>Offer ID: {offerId}</div>
+      <a href="/dashboard/homeowner" style={{ color: '#1a6b3c', fontSize: '.85rem', fontWeight: 700 }}>Go back to dashboard</a>
+    </div>
+  )
 
   if (step === 'already') return (
     <div style={s.center}>

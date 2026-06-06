@@ -109,7 +109,7 @@ export default function HWDashboard() {
           created_at, arrived_at, rematch_available, rematch_expires_at,
           estimated_arrival, kasambahay_id, negotiated_by,
           kasambahay:kasambahay_id(
-            id, province, setup, selfie_url, asking_salary,
+            province, setup, selfie_url, asking_salary,
             profile:profile_id(full_name)
           )
         `)
@@ -514,12 +514,20 @@ export default function HWDashboard() {
                   {needsPayment && (
                     <button style={{ width:'100%', padding:'11px', borderRadius:'10px', background:'#1a6b3c', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'13px', fontWeight:700, cursor:'pointer' }}
                       onClick={() => {
+                        const id = offer?.id
+                        console.log('handleProceedToHire fired', id)
+                        if (!id) {
+                          alert('Error: offer ID missing. Check console.')
+                          return
+                        }
                         if (offer.transport_service === true) {
                           setAddressModalOffer(offer)
                           setAddressInput('')
                           setWazePinInput('')
                         } else {
-                          router.push(`/pay/${offer.id}`)
+                          console.log('Proceeding to:', `/pay/${id}`)
+                          window.location.href = `/pay/${id}`
+                          console.log('window.location.href set to:', window.location.href)
                         }
                       }}>
                       Proceed to Hire →

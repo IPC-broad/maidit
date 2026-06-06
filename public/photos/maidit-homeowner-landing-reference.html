@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>MaidIt — Homeowner Landing (Reference)</title>
+<style>
+  :root {
+    --forest: #27500A; --forest-deep: #1c3b07; --forest-soft: #f0f5ec;
+    --amber: #c9943a; --amber-deep: #a87528; --amber-soft: #fbf3e2;
+    --paper: #faf9f5; --paper-warm: #f3ede0; --line: #e8e4db;
+    --ink: #1a1a14; --ink-mid: #4a4a3a; --ink-light: #8a8a7a;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Geist',sans-serif; background:var(--paper); color:var(--ink); max-width:430px; margin:0 auto; }
+
+  nav { padding:12px 18px; display:flex; align-items:center; justify-content:space-between; background:var(--paper); border-bottom:1px solid var(--line); }
+  .logo { font-family:'Instrument Serif',serif; font-size:22px; color:var(--forest-deep); }
+  .logo span { color:var(--amber); }
+  .back { font-size:18px; color:var(--forest); font-weight:600; }
+
+  /* PHOTO HERO */
+  .hero {
+    position:relative;
+    height:340px;
+    overflow:hidden;
+  }
+  .hero img {
+    width:100%; height:100%;
+    object-fit:cover;
+    object-position:center 15%;
+  }
+  .hero-overlay {
+    position:absolute; inset:0;
+    background:linear-gradient(to bottom, rgba(28,59,7,0.15) 0%, rgba(28,59,7,0.55) 60%, rgba(28,59,7,0.88) 100%);
+  }
+  .hero-pill {
+    position:absolute; top:16px; left:16px;
+    background:var(--amber); color:#fff;
+    font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+    padding:4px 12px; border-radius:50px;
+  }
+  .hero-text {
+    position:absolute; bottom:0; left:0; right:0;
+    padding:20px 20px 0;
+  }
+  .hero-headline {
+    font-family:'Instrument Serif',serif;
+    font-size:28px; color:#fff; line-height:1.15; margin-bottom:6px;
+  }
+  .hero-headline em { color:var(--amber); font-style:italic; }
+  .hero-sub { font-size:13px; color:rgba(255,255,255,0.75); }
+
+  /* CTA CARD — floats over hero */
+  .cta-card {
+    margin:-28px 14px 0;
+    background:#fff;
+    border-radius:22px;
+    padding:20px 18px;
+    box-shadow:0 8px 32px rgba(28,59,7,0.16);
+    position:relative;
+    z-index:10;
+  }
+  .btn-primary {
+    width:100%; background:var(--forest); color:#fff;
+    border:none; border-radius:50px; padding:14px 20px;
+    font-size:14px; font-weight:700; font-family:'Geist',sans-serif;
+    cursor:pointer; text-align:center; display:block; margin-bottom:10px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .btn-primary .arrow {
+    width:28px; height:28px; background:rgba(255,255,255,0.2);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:14px;
+  }
+  .btn-secondary {
+    width:100%; background:transparent;
+    border:1.5px solid var(--forest); color:var(--forest);
+    border-radius:50px; padding:12px 20px;
+    font-size:13px; font-weight:600; font-family:'Geist',sans-serif;
+    cursor:pointer; text-align:center; display:block;
+  }
+
+  /* HOW IT WORKS */
+  .section { padding:24px 18px 0; }
+  .section-eyebrow { font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-light); margin-bottom:6px; }
+  .section-title { font-family:'Instrument Serif',serif; font-size:22px; color:var(--ink); margin-bottom:16px; line-height:1.2; }
+  .section-title em { color:var(--amber); font-style:italic; }
+
+  .steps { display:flex; flex-direction:column; gap:14px; }
+  .step { display:flex; gap:14px; align-items:flex-start; }
+  .step-num {
+    width:32px; height:32px; border-radius:50%;
+    background:var(--forest-soft); border:1px solid #c8e0b8;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; color:var(--forest);
+    flex-shrink:0;
+  }
+  .step-body { padding-top:4px; }
+  .step-title { font-size:13px; font-weight:700; color:var(--ink); margin-bottom:2px; }
+  .step-sub { font-size:12px; color:var(--ink-light); line-height:1.5; }
+
+  /* PROFILE CAROUSEL */
+  .carousel-section { padding:24px 0 0; }
+  .carousel-header { padding:0 18px 12px; }
+  .carousel-title { font-family:'Instrument Serif',serif; font-size:20px; color:var(--ink); line-height:1.2; }
+  .carousel-title em { color:var(--amber); font-style:italic; }
+  .carousel-sub { font-size:12px; color:var(--ink-light); margin-top:2px; }
+  .carousel-scroll { display:flex; gap:10px; overflow-x:auto; padding:0 18px 4px; scrollbar-width:none; }
+  .carousel-scroll::-webkit-scrollbar { display:none; }
+  .profile-card {
+    background:#fff; border:1px solid var(--line); border-radius:18px;
+    overflow:hidden; flex-shrink:0; width:170px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.06);
+  }
+  .profile-photo { width:100%; height:140px; object-fit:cover; object-position:center top; background:var(--forest-soft); }
+  .profile-body { padding:10px 12px; }
+  .profile-name { font-size:13px; font-weight:700; color:var(--ink); }
+  .profile-role { font-size:10px; color:var(--ink-light); margin-top:1px; }
+  .profile-quote { font-size:10px; color:var(--ink-mid); font-style:italic; margin-top:5px; line-height:1.4; }
+  .profile-salary { font-family:'Instrument Serif',serif; font-size:15px; color:var(--forest); margin-top:6px; }
+  .profile-salary span { font-size:10px; font-family:'Geist',sans-serif; color:var(--ink-light); }
+  .see-all { margin:8px 18px 0; font-size:12px; font-weight:600; color:var(--forest); }
+
+  /* BOTTOM CTA */
+  .bottom-cta {
+    margin:24px 14px 0;
+    background:linear-gradient(150deg, var(--forest-deep), var(--forest));
+    border-radius:22px; padding:24px 20px;
+    position:relative; overflow:hidden;
+  }
+  .bottom-cta::before {
+    content:''; position:absolute; top:-40px; right:-40px;
+    width:180px; height:180px;
+    background:radial-gradient(circle, rgba(201,148,58,0.2), transparent 70%);
+  }
+  .bottom-cta-eyebrow { font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber); margin-bottom:6px; position:relative; }
+  .bottom-cta-title { font-family:'Instrument Serif',serif; font-size:24px; color:#fff; line-height:1.2; margin-bottom:6px; position:relative; }
+  .bottom-cta-sub { font-size:12px; color:rgba(255,255,255,0.65); margin-bottom:16px; position:relative; }
+  .bottom-cta-btn {
+    background:#fff; color:var(--forest-deep);
+    border:none; border-radius:50px; padding:12px 24px;
+    font-size:13px; font-weight:700; font-family:'Geist',sans-serif;
+    cursor:pointer; position:relative; display:inline-block;
+  }
+  .bottom-cta-fine { font-size:11px; color:rgba(255,255,255,0.45); margin-top:10px; position:relative; }
+
+  footer { padding:24px 18px; text-align:center; font-size:11px; color:var(--ink-light); border-top:1px solid var(--line); margin-top:24px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="back">←</span>
+  <div class="logo">Maid<span>It</span></div>
+  <div style="width:32px"></div>
+</nav>
+
+<!-- PHOTO HERO -->
+<div class="hero">
+  <img src="hero-family.jpg" alt=""
+    onerror="this.style.display='none'; this.parentElement.style.background='linear-gradient(160deg,#1c3b07,#27500A)'"/>
+  <div class="hero-overlay"></div>
+  <div class="hero-pill">For Homeowners</div>
+  <div class="hero-text">
+    <div class="hero-headline">Find your trusted kasambahay <em>safely.</em></div>
+    <div class="hero-sub">Browse real profiles. Hire with confidence.</div>
+  </div>
+</div>
+
+<!-- CTA CARD -->
+<div class="cta-card">
+  <button class="btn-primary">
+    Browse Kasambahay Profiles
+    <span class="arrow">→</span>
+  </button>
+  <button class="btn-secondary">Post a Job</button>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section">
+  <div class="section-eyebrow">How it works</div>
+  <div class="section-title">Three steps to find<br>your <em>perfect match.</em></div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Browse verified profiles</div>
+        <div class="step-sub">View kasambahay with skills, experience, and selfie verification.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Send a job offer</div>
+        <div class="step-sub">Agree on salary, setup, and start date directly.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Hire safely</div>
+        <div class="step-sub">Pay the hire fee only after she arrives at your home.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE CAROUSEL -->
+<div class="carousel-section">
+  <div class="carousel-header">
+    <div class="carousel-title">Some <em>wonderful</em> people<br>looking for a home.</div>
+    <div class="carousel-sub">This week's verified kasambahay</div>
+  </div>
+  <div class="carousel-scroll">
+    <div class="profile-card">
+      <img src="hero-kasambahay.jpg" class="profile-photo" alt=""
+        onerror="this.style.background='#c8e0b8'"/>
+      <div class="profile-body">
+        <div class="profile-name">Ana R. · 28</div>
+        <div class="profile-role">All-around · Stay-in</div>
+        <div class="profile-quote">"Mahal ko ang trabaho ko."</div>
+        <div class="profile-salary">₱12,000 <span>/mo</span></div>
+      </div>
+    </div>
+    <div class="profile-card">
+      <div class="profile-photo" style="background:linear-gradient(135deg,#d4e8c8,#a8c890);display:flex;align-items:center;justify-content:center;font-size:48px;">👩</div>
+      <div class="profile-body">
+        <div class="profile-name">Rosa M. · 35</div>
+        <div class="profile-role">Yaya · Stay-in</div>
+        <div class="profile-quote">"Honest and on time."</div>
+        <div class="profile-salary">₱10,000 <span>/mo</span></div>
+      </div>
+    </div>
+    <div class="profile-card">
+      <div class="profile-photo" style="background:linear-gradient(135deg,#e8d4c8,#c8a890);display:flex;align-items:center;justify-content:center;font-size:48px;">👩</div>
+      <div class="profile-body">
+        <div class="profile-name">Maria T. · 32</div>
+        <div class="profile-role">Cook · Stay-out</div>
+        <div class="profile-quote">"Luto para sa puso."</div>
+        <div class="profile-salary">₱9,000 <span>/mo</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="see-all">See all profiles →</div>
+</div>
+
+<!-- BOTTOM CTA -->
+<div class="bottom-cta">
+  <div class="bottom-cta-eyebrow">Get started today</div>
+  <div class="bottom-cta-title">Find your kasambahay<br>in minutes.</div>
+  <div class="bottom-cta-sub">Browse real profiles. Hire with confidence.</div>
+  <button class="bottom-cta-btn">Sign Up Free →</button>
+  <div class="bottom-cta-fine">Free to get started.</div>
+</div>
+
+<footer>MaidIt · The trusted kasambahay marketplace · Philippines</footer>
+</body>
+</html>

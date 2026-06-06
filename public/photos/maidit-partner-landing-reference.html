@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>MaidIt — Partner Landing (Reference)</title>
+<style>
+  :root {
+    --forest: #27500A; --forest-deep: #1c3b07; --forest-soft: #f0f5ec;
+    --amber: #c9943a; --amber-deep: #a87528; --amber-soft: #fbf3e2;
+    --paper: #faf9f5; --paper-warm: #f3ede0; --line: #e8e4db;
+    --ink: #1a1a14; --ink-mid: #4a4a3a; --ink-light: #8a8a7a;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Geist',sans-serif; background:var(--paper); color:var(--ink); max-width:430px; margin:0 auto; }
+
+  nav { padding:12px 18px; display:flex; align-items:center; justify-content:space-between; background:var(--paper); border-bottom:1px solid var(--line); }
+  .logo { font-family:'Instrument Serif',serif; font-size:22px; color:var(--forest-deep); }
+  .logo span { color:var(--amber); }
+  .back { font-size:18px; color:var(--forest); font-weight:600; }
+  .partner-tag { font-size:11px; font-weight:600; color:var(--ink-light); }
+
+  /* PHOTO HERO */
+  .hero { position:relative; height:360px; overflow:hidden; }
+  .hero img { width:100%; height:100%; object-fit:cover; object-position:center 20%; }
+  .hero-overlay {
+    position:absolute; inset:0;
+    background:linear-gradient(to bottom, rgba(28,59,7,0.2) 0%, rgba(28,59,7,0.55) 50%, rgba(28,59,7,0.92) 100%);
+  }
+  .hero-content { position:absolute; bottom:0; left:0; right:0; padding:20px 18px 0; }
+  .hero-eyebrow-pill {
+    display:inline-flex; align-items:center; gap:5px;
+    background:rgba(255,255,255,0.15); backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,0.25); border-radius:50px;
+    padding:5px 12px; font-size:10px; font-weight:700;
+    color:#fff; margin-bottom:10px;
+    letter-spacing:0.06em; text-transform:uppercase;
+  }
+  .hero-eyebrow-pill span { color:var(--amber); }
+  .hero-headline { font-family:'Instrument Serif',serif; font-size:28px; color:#fff; line-height:1.15; margin-bottom:4px; }
+  .hero-headline em { color:var(--amber); font-style:italic; }
+
+  /* EARNING CARDS — overlap hero */
+  .earn-wrap {
+    margin:-24px 14px 0;
+    background:#fff;
+    border-radius:22px;
+    padding:18px 16px 14px;
+    box-shadow:0 8px 32px rgba(28,59,7,0.16);
+    position:relative; z-index:10;
+  }
+  .earn-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-light); margin-bottom:10px; }
+  .earn-cards { display:flex; gap:8px; margin-bottom:10px; }
+  .earn-card { flex:1; border-radius:14px; padding:14px 12px; }
+  .earn-white { background:var(--forest-soft); border:1px solid #c8e0b8; }
+  .earn-amber { background:var(--amber); position:relative; }
+  .earn-new {
+    position:absolute; top:8px; right:8px;
+    background:rgba(255,255,255,0.25); color:#fff;
+    font-size:8px; font-weight:700; border-radius:50px; padding:2px 7px;
+  }
+  .earn-num { font-family:'Instrument Serif',serif; font-size:26px; color:var(--forest-deep); }
+  .earn-amber .earn-num { color:#fff; }
+  .earn-tag { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--forest); margin-top:3px; }
+  .earn-amber .earn-tag { color:rgba(255,255,255,0.85); }
+  .earn-disclaimer { font-size:10px; color:var(--ink-light); font-style:italic; line-height:1.4; }
+
+  /* PAANO SECTION */
+  .section { padding:24px 18px 0; }
+  .section-eyebrow { font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-light); margin-bottom:6px; }
+  .section-title { font-family:'Instrument Serif',serif; font-size:20px; color:var(--ink); margin-bottom:16px; }
+
+  .steps { display:flex; flex-direction:column; gap:0; }
+  .step { display:flex; gap:14px; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--line); }
+  .step:last-child { border-bottom:none; }
+  .step-num {
+    width:28px; height:28px; border-radius:50%;
+    background:var(--amber-soft); border:1px solid #e8d4a0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; color:var(--amber-deep); flex-shrink:0;
+  }
+  .step-body { padding-top:2px; }
+  .step-title { font-size:13px; font-weight:700; color:var(--ink); margin-bottom:2px; }
+  .step-sub { font-size:12px; color:var(--ink-light); line-height:1.5; }
+
+  /* BOTTOM CTA */
+  .bottom-cta {
+    margin:24px 14px 0;
+    background:linear-gradient(150deg, var(--forest-deep) 0%, var(--forest) 100%);
+    border-radius:22px; padding:24px 20px;
+    position:relative; overflow:hidden;
+  }
+  .bottom-cta::before {
+    content:''; position:absolute; top:-60px; right:-60px;
+    width:220px; height:220px;
+    background:radial-gradient(circle, rgba(201,148,58,0.18), transparent 70%);
+  }
+  .bottom-cta-eyebrow {
+    font-size:10px; font-weight:700; letter-spacing:0.1em;
+    text-transform:uppercase; color:var(--amber);
+    margin-bottom:6px; position:relative;
+  }
+  .bottom-cta-title {
+    font-family:'Instrument Serif',serif; font-size:26px;
+    color:#fff; line-height:1.15; margin-bottom:6px; position:relative;
+  }
+  .bottom-cta-sub { font-size:12px; color:rgba(255,255,255,0.6); margin-bottom:18px; line-height:1.5; position:relative; }
+  .bottom-cta-btn {
+    width:100%; background:var(--amber); color:#fff;
+    border:none; border-radius:50px; padding:14px 24px;
+    font-size:14px; font-weight:700; font-family:'Geist',sans-serif;
+    cursor:pointer; position:relative;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .bottom-cta-btn .arrow {
+    width:28px; height:28px; background:rgba(255,255,255,0.2);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+  }
+
+  footer { padding:24px 18px; text-align:center; font-size:11px; color:var(--ink-light); border-top:1px solid var(--line); margin-top:24px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="back">←</span>
+  <div class="logo">Maid<span>It</span></div>
+  <span class="partner-tag">Partner</span>
+</nav>
+
+<!-- PHOTO HERO -->
+<div class="hero">
+  <img src="hero-family.jpg" alt=""
+    onerror="this.style.display='none'; this.parentElement.style.background='linear-gradient(160deg,#1c3b07,#27500A)'"/>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow-pill">✦ <span>Kumita habang nakakatulong</span></div>
+    <div class="hero-headline">I-refer ang kasambahay.<br>Kumita ka sa bawat <em>matagumpay na hire.</em></div>
+  </div>
+</div>
+
+<!-- EARNING CARDS -->
+<div class="earn-wrap">
+  <div class="earn-label">Bawat matagumpay na hire</div>
+  <div class="earn-cards">
+    <div class="earn-card earn-white">
+      <div class="earn-num">₱500</div>
+      <div class="earn-tag">Referral Fee</div>
+    </div>
+    <div class="earn-card earn-amber">
+      <div class="earn-new">NEW</div>
+      <div class="earn-num">+₱500</div>
+      <div class="earn-tag">Transport Bonus</div>
+    </div>
+  </div>
+  <div class="earn-disclaimer">*Transport bonus para lang sa kasambahay na galing Leyte, Samar at Bicol.</div>
+</div>
+
+<!-- PAANO -->
+<div class="section">
+  <div class="section-eyebrow">Paano</div>
+  <div class="section-title">Tatlong hakbang lang.</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Mag-sign up bilang Partner</div>
+        <div class="step-sub">Libre. 3 minuto lang. Walang quota.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">I-refer ang kakilala mong kasambahay</div>
+        <div class="step-sub">I-share ang iyong link sa Messenger o text.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Kumita kapag siya ay na-hire</div>
+        <div class="step-sub">₱500 + bonus. Diretso sa GCash o bank mo.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM CTA -->
+<div class="bottom-cta">
+  <div class="bottom-cta-eyebrow">Simulan na ngayon —</div>
+  <div class="bottom-cta-title">Maging Community Partner.</div>
+  <div class="bottom-cta-sub">Walang minimum. Walang deadline. Bawat referral, sayo na.</div>
+  <button class="bottom-cta-btn">
+    I-sign up — libre
+    <span class="arrow">→</span>
+  </button>
+</div>
+
+<footer>MaidIt · The trusted kasambahay marketplace · Philippines</footer>
+</body>
+</html>
