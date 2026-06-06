@@ -23,6 +23,11 @@ export default function OfferReviewPage() {
   const [counterDate, setCounterDate] = useState('')
   const [transportCountered, setTransportCountered] = useState('')
 
+  const [showAddressModal, setShowAddressModal] = useState(false)
+  const [addressInput, setAddressInput] = useState('')
+  const [wazePinInput, setWazePinInput] = useState('')
+  const [savingAddress, setSavingAddress] = useState(false)
+
   const [checklist, setChecklist] = useState({
     salary: true,
     location: true,

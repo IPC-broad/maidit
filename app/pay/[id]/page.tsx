@@ -8,28 +8,16 @@ export default function PayPage() {
   const offerId = params?.id as string
 
   const [offer, setOffer] = useState<any>(null)
-  const [hwRecord, setHwRecord] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
   const [linkError, setLinkError] = useState(false)
   const [step, setStep] = useState<'pay' | 'already'>('pay')
-  const [skipLoading, setSkipLoading] = useState(false)
-  const [isTester, setIsTester] = useState(false)
 
   useEffect(() => {
     const init = async () => {
       const { supabase } = await import('../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-
-      const TEST_EMAILS = [
-        'test@maidit.com',
-        'homeowner@maidit.app',
-        'test.kasambahay@maidit.app',
-        'partner@maidit.com',
-      ]
-      const isTester = TEST_EMAILS.includes(user?.email ?? '')
-      setIsTester(isTester)
 
       const { data } = await supabase
         .from('offers')
@@ -41,7 +29,7 @@ export default function PayPage() {
 
       let { data: hw } = await supabase
         .from('homeowners')
-        .select('id, subscription_credit_used, subscription_expires_at')
+        .select('id')
         .eq('profile_id', user.id)
         .single()
 
@@ -49,12 +37,11 @@ export default function PayPage() {
         const { data: created } = await supabase
           .from('homeowners')
           .insert({ profile_id: user.id })
-          .select('id, subscription_credit_used, subscription_expires_at')
+          .select('id')
           .single()
         hw = created
       }
 
-      setHwRecord(hw)
       setOffer(data)
 
       if (['paid', 'payment_pending', 'active', 'hired'].includes(data.status)) {
@@ -63,17 +50,9 @@ export default function PayPage() {
         return
       }
 
-      const now = new Date()
-      const creditOk = hw &&
-        !hw.subscription_credit_used &&
-        hw.subscription_expires_at &&
-        new Date(hw.subscription_expires_at) > now
       const transport = data.transport_service === true
-      const amount =
-        !transport &&  creditOk ? 200100 :
-        !transport && !creditOk ? 250000 :
-         transport &&  creditOk ? 800100 :
-                                   850000
+      // Flat amounts: ₱2,500 hire fee + ₱5,000 transport if applicable
+      const amount = transport ? 750000 : 250000
 
       try {
         const res = await fetch('/api/create-payment-link', {
@@ -102,16 +81,9 @@ export default function PayPage() {
     init()
   }, [offerId])
 
-  const now = new Date()
-  const creditApplicable =
-    hwRecord &&
-    !hwRecord.subscription_credit_used &&
-    hwRecord.subscription_expires_at &&
-    new Date(hwRecord.subscription_expires_at) > now
-
   const hasTransport = offer?.transport_service === true
-  const baseFee = creditApplicable ? 2001 : 2500
-  const transportFee = hasTransport ? 6000 : 0
+  const baseFee = 2500
+  const transportFee = hasTransport ? 5000 : 0
   const total = baseFee + transportFee
 
   const s: any = {
@@ -155,7 +127,6 @@ export default function PayPage() {
     { icon: '✅', text: '1 free rematch for eligible no-shows or early departures' },
     { icon: '✅', text: 'Verified kasambahay profile' },
     { icon: '📱', text: 'Contact details provided after payment' },
-    ...(creditApplicable ? [{ icon: '🎁', text: 'Your ₱499 first-hire credit has already been applied' }] : []),
   ]
 
   return (
@@ -220,39 +191,23 @@ export default function PayPage() {
             <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#6b7280', marginBottom: '12px' }}>Today's Payment</div>
 
             {/* Line items */}
-            <div style={{ ...s.dotRow, borderBottom: '1px solid #f3f4f6', color: '#374151' }}>
-              <span>Hiring Fee</span>
-              {creditApplicable
-                ? <span style={{ textDecoration: 'line-through', color: '#9ca3af' }}>₱2,500</span>
-                : <span style={{ fontWeight: 600 }}>₱2,500</span>
-              }
+            <div style={{ ...s.dotRow, borderBottom: hasTransport ? '1px solid #f3f4f6' : 'none', color: '#374151' }}>
+              <span>Hire Fee</span>
+              <span style={{ fontWeight: 600 }}>₱2,500</span>
             </div>
-            {creditApplicable && (
-              <div style={{ ...s.dotRow, borderBottom: hasTransport ? '1px solid #f3f4f6' : 'none', color: '#1a6b3c' }}>
-                <span>First Hire Credit</span>
-                <span style={{ fontWeight: 700 }}>−₱499</span>
-              </div>
-            )}
             {hasTransport && (
               <div style={{ ...s.dotRow, borderBottom: '1px solid #f3f4f6', color: '#374151' }}>
                 <div>
                   <div>MaidIt Assisted Transport</div>
                   <div style={{ fontSize: '.68rem', color: '#9ca3af', marginTop: '1px' }}>₱3,500 transport · ₱1,000 travel allowance · ₱500 MaidIt fee</div>
                 </div>
-                <span style={{ color: '#92400e', fontWeight: 700 }}>+₱6,000</span>
+                <span style={{ color: '#92400e', fontWeight: 700 }}>+₱5,000</span>
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', marginTop: '2px' }}>
               <span style={{ fontWeight: 700, color: '#111827', fontSize: '.9rem' }}>Total Today</span>
               <span style={{ fontSize: '1.5rem', fontWeight: 900, color: '#1a6b3c', fontFamily: 'serif' }}>₱{total.toLocaleString()}</span>
             </div>
-
-            {/* Credit chip */}
-            {creditApplicable && (
-              <div style={{ marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '.72rem', color: '#166534', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '20px', padding: '4px 10px', fontWeight: 600 }}>
-                ✅ ₱499 first-hire credit applied
-              </div>
-            )}
           </div>
         </div>
 
@@ -263,10 +218,10 @@ export default function PayPage() {
             <div>Kasambahay travel allowance: ₱1,000</div>
             <div>MaidIt assistance fee: ₱500</div>
             <div style={{ marginTop: 8 }}>
-              Important: The ₱3,500 transport cost and ₱1,000 travel allowance are released only after MaidIt confirms the kasambahay is boarding the bus. If she does not board, the full ₱5,000 is refunded to you. The ₱500 MaidIt assistance fee is non-refundable once transport is arranged.
+              Important: The ₱3,500 transport cost and ₱1,000 travel allowance are released only after MaidIt confirms the kasambahay is boarding the bus. If she does not board, the ₱4,500 is refunded to you. The ₱500 MaidIt assistance fee is non-refundable once transport is arranged.
             </div>
             <div style={{ marginTop: 8 }}>
-              If the kasambahay leaves your home within 6 months without justifiable reason, you may recover the ₱4,000 directly from her pursuant to RA 10361. MaidIt is not involved in this recovery.
+              If the kasambahay leaves your home within 6 months without justifiable reason, you may recover the transport assistance costs directly from her pursuant to RA 10361. MaidIt is not involved in this recovery.
             </div>
           </div>
         )}
@@ -311,24 +266,6 @@ export default function PayPage() {
           </button>
         )}
 
-        {/* Test account skip — TEMPORARY, remove by 2026-07-01 */}
-        {isTester && (
-          <button
-            style={{ width: '100%', height: '52px', borderRadius: '12px', border: 'none', background: '#c9943a', color: '#fff', fontFamily: 'sans-serif', fontSize: '1rem', fontWeight: 700, cursor: skipLoading ? 'not-allowed' : 'pointer', marginBottom: '10px', opacity: skipLoading ? .6 : 1 }}
-            disabled={skipLoading}
-            onClick={async () => {
-              setSkipLoading(true)
-              const { supabase } = await import('../../../lib/supabase')
-              await supabase.from('offers').update({
-                status: 'paid',
-                paid_at: new Date().toISOString(),
-              }).eq('id', offerId)
-              router.push(`/arrival/${offerId}`)
-            }}
-          >
-            {skipLoading ? 'Processing…' : 'Skip Payment (Test Account) →'}
-          </button>
-        )}
 
         <div style={{ fontSize: '.67rem', color: '#9ca3af', textAlign: 'center' as const, marginTop: '6px', lineHeight: 1.6 }}>
           Secured by PayMongo · QRPh, GCash, credit card accepted<br />
