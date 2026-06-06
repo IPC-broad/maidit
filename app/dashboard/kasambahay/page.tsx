@@ -508,6 +508,14 @@ export default function KBDashboard() {
 
                   {offerIsHired && (
                     <>
+                      {offer.status === 'paid' && (
+                        <div style={{ background: '#fef9c3', border: '1px solid #fde047', borderRadius: '10px', padding: '12px 14px', marginBottom: '10px' }}>
+                          <div style={{ fontSize: '13px', fontWeight: 700, color: '#713f12', marginBottom: '4px' }}>🎉 Hired ka na!</div>
+                          <div style={{ fontSize: '12px', color: '#78350f', lineHeight: 1.6 }}>
+                            Congratulations! Maghanda ka na para sa iyong bagong trabaho. Makikipag-ugnayan sa iyo ang iyong partner o ang homeowner para sa susunod na hakbang.
+                          </div>
+                        </div>
+                      )}
                       <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '10px 12px', fontSize: '13px', color: '#166534', fontWeight: 700, textAlign: 'center' as const, marginBottom: '10px' }}>
                         💰 Bayad na! Maghanda ka na.
                       </div>

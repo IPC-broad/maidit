@@ -620,6 +620,34 @@ export default function PartnerDashboard() {
                     </div>
                     <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: st.bg, color: st.color, whiteSpace: 'nowrap' as const, border: `1px solid ${st.color}30` }}>{st.label}</span>
                   </div>
+                  {/* Hired notification banner */}
+                  {workerOffer && workerOffer.status === 'paid' && (
+                    <div style={{ marginTop: '12px', borderTop: `1px solid ${C.line}`, paddingTop: '12px' }}>
+                      <div style={{ background: '#fef9c3', border: '1px solid #fde047', borderRadius: '10px', padding: '12px 14px', marginBottom: '10px' }}>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#713f12', marginBottom: '4px', fontFamily: sans }}>
+                          🎉 Na-hire na ang iyong referral!
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#78350f', lineHeight: 1.6, fontFamily: sans }}>
+                          {(profileNames[w.profile_id] || w.full_name || 'Ang kasambahay').split(' ')[0]} ay magiging kasambahay ni {workerOffer.city || 'homeowner'} homeowner. Ikaw ang magiging punto ng kontakto para masigurado na makakarating siya sa kanyang destinasyon.
+                        </div>
+                      </div>
+                      <div style={{ background: '#fffbeb', border: '1px solid #fde8c0', borderRadius: '10px', padding: '12px 14px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#92400e', marginBottom: '8px', fontFamily: sans }}>Mga Susunod na Hakbang</div>
+                        {workerOffer.transport_service === true ? (
+                          <div style={{ fontSize: '12px', color: '#78350f', lineHeight: 1.8, fontFamily: sans }}>
+                            <div>1. 📞 Makipag-ugnayan sa kasambahay at alamin kung kailan siya makakaalis.</div>
+                            <div>2. 🎟️ Mag-book ng bus ticket papunta sa {workerOffer.city || 'destinasyon'}.</div>
+                            <div>3. ✅ I-click ang &ldquo;Confirm na Nakasakay sa Bus&rdquo; pagkatapos siyang makasakay.</div>
+                            <div>4. 💰 Matatanggap mo ang ₱3,500 transport fee at ₱500 bonus pagkatapos ma-confirm ng homeowner ang pagdating.</div>
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: '12px', color: '#78350f', lineHeight: 1.6, fontFamily: sans }}>
+                            📞 Makipag-ugnayan sa kasambahay at i-encourage siyang magtungo sa kanyang bagong employer. Matatanggap mo ang ₱500 referral fee pagkatapos ma-confirm ng homeowner ang pagdating.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                   {/* Boarding confirmation card — Section 10 */}
                   {workerOffer && workerOffer.transport_service === true && ['paid','active'].includes(workerOffer.status) && !workerOffer.departed_at && (
                     <div style={{ marginTop: '12px', borderTop: `1px solid ${C.line}`, paddingTop: '12px' }}>
