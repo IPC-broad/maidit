@@ -403,6 +403,40 @@ export default function HWDashboard() {
                     </div>
                     <span style={{ fontSize:'10px', fontWeight:700, padding:'4px 10px', borderRadius:'50px', background:st.bg, color:st.color, whiteSpace:'nowrap' as const }}>{st.label}</span>
                   </div>
+                  {/* Status timeline */}
+                  {!['declined','counter_declined','placement_ended'].includes(offer.status) && (() => {
+                    const steps = [
+                      { key: 'sent',    label: 'Sent' },
+                      { key: 'review',  label: 'Reviewing' },
+                      { key: 'pay',     label: 'Payment' },
+                      { key: 'hired',   label: 'Hired' },
+                    ]
+                    const stepIdx = (() => {
+                      if (['paid','active','hired'].includes(offer.status)) return 3
+                      if (['agreed','payment_pending'].includes(offer.status)) return 2
+                      if (['reviewed','countered','fare_pending','fare_countered'].includes(offer.status)) return 1
+                      return 0
+                    })()
+                    return (
+                      <div style={{ display:'flex', alignItems:'center', marginBottom:'10px' }}>
+                        {steps.map((step, i) => {
+                          const done = i < stepIdx
+                          const active = i === stepIdx
+                          return (
+                            <div key={step.key} style={{ display:'flex', alignItems:'center', flex: i < steps.length - 1 ? 1 : 0 }}>
+                              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'2px' }}>
+                                <div style={{ width:'10px', height:'10px', borderRadius:'50%', background: done || active ? '#1a6b3c' : '#e5e7eb', border: active ? '2px solid #1a6b3c' : done ? '2px solid #1a6b3c' : '2px solid #e5e7eb', flexShrink:0 }} />
+                                <span style={{ fontSize:'8px', color: done || active ? '#1a6b3c' : '#9ca3af', fontWeight: active ? 700 : 500, whiteSpace:'nowrap' }}>{step.label}</span>
+                              </div>
+                              {i < steps.length - 1 && (
+                                <div style={{ flex:1, height:'2px', background: done ? '#1a6b3c' : '#e5e7eb', margin:'0 3px', marginBottom:'10px' }} />
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )
+                  })()}
                   {offer.status === 'pending' && (
                     <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:'8px' }}>
                       <button

@@ -134,9 +134,9 @@ export default function PartnerDashboard() {
       const workerIds = (workersData || []).map((w: any) => w.id)
       if (workerIds.length > 0) {
         const { data: offersData } = await supabase
-          .from('offers').select('id, kasambahay_id, status, salary, setup, city, start_date, scope, urgency')
+          .from('offers').select('id, kasambahay_id, status, salary, setup, city, start_date, scope, urgency, transport_service, departed_at')
           .in('kasambahay_id', workerIds)
-          .in('status', ['pending', 'countered', 'agreed'])
+          .in('status', ['pending', 'countered', 'agreed', 'payment_pending', 'paid', 'active', 'hired'])
         setWorkerOffers(offersData || [])
       }
 
@@ -593,11 +593,19 @@ export default function PartnerDashboard() {
               const pendingOffer = isProxy ? proxyOffers.find((o: any) => o.kasambahay_id === w.id && ['pending', 'countered'].includes(o.status)) : undefined
               console.log('[worker-match] w.id:', w.id, 'w.profile_id:', w.profile_id, 'found offer:', pendingOffer)
               const workerOffer = workerOffers.find((o: any) => o.kasambahay_id === w.id)
-              const st = workerOffer && ['pending','agreed'].includes(workerOffer.status)
-                ? { label: 'May aktibong offer', bg: '#eff6ff', color: '#2563eb' }
-                : workerOffer && ['hired','completed'].includes(workerOffer.status)
-                ? { label: 'Na-hire na 🎉', bg: '#f0fdf4', color: '#166534' }
-                : { label: 'Aktibo sa platform', bg: '#f0fdf4', color: '#1a6b3c' }
+              const st = (() => {
+                if (!workerOffer) return { label: 'Aktibo sa platform', bg: '#f0fdf4', color: '#1a6b3c' }
+                const offerStatusLabels: Record<string, { label: string; bg: string; color: string }> = {
+                  pending:         { label: 'Naghihintay ng sagot', bg: '#fef3e2', color: '#c9943a' },
+                  countered:       { label: 'May counter offer', bg: '#fff5f5', color: '#dc2626' },
+                  agreed:          { label: 'Accepted — Babayaran', bg: '#eff6ff', color: '#2563eb' },
+                  payment_pending: { label: 'Nasa proseso ang bayad', bg: '#fffbeb', color: '#92400e' },
+                  paid:            { label: 'Bayad na ✅', bg: '#f0fdf4', color: '#166534' },
+                  active:          { label: 'Bayad na ✅', bg: '#f0fdf4', color: '#166534' },
+                  hired:           { label: 'Na-hire na 🎉', bg: '#f0fdf4', color: '#166534' },
+                }
+                return offerStatusLabels[workerOffer.status] || { label: workerOffer.status, bg: '#f3f4f6', color: '#6b7280' }
+              })()
               return (
                 <div key={w.id} style={{ background: '#fff', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px', border: '1px solid #ede8e0' }}>
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -613,6 +621,43 @@ export default function PartnerDashboard() {
                     </div>
                     <span style={{ fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '50px', background: st.bg, color: st.color, whiteSpace: 'nowrap' as const, border: `1px solid ${st.color}30` }}>{st.label}</span>
                   </div>
+                  {/* Boarding confirmation card — Section 10 */}
+                  {workerOffer && workerOffer.transport_service === true && ['paid','active'].includes(workerOffer.status) && !workerOffer.departed_at && (
+                    <div style={{ marginTop: '12px', borderTop: `1px solid ${C.line}`, paddingTop: '12px' }}>
+                      <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '10px', padding: '10px 12px', marginBottom: '10px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#92400e', marginBottom: '4px', fontFamily: sans }}>🚌 Kailangang i-confirm ang boarding</div>
+                        <div style={{ fontSize: '11px', color: '#78350f', lineHeight: 1.5, fontFamily: sans }}>
+                          Bayad na ang transport. I-confirm na nakasakay na ang kasambahay sa bus patungo sa employer.
+                        </div>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          const ok = window.confirm('I-confirm na nakasakay na ang kasambahay sa bus?')
+                          if (!ok) return
+                          const res = await fetch('/api/confirm-boarding', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ offer_id: workerOffer.id }),
+                          })
+                          if (res.ok) {
+                            setWorkerOffers(prev => prev.map((o: any) =>
+                              o.id === workerOffer.id ? { ...o, departed_at: new Date().toISOString() } : o
+                            ))
+                          }
+                        }}
+                        style={{ width: '100%', padding: '11px', borderRadius: '10px', border: 'none', background: C.forest, color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: sans }}
+                      >
+                        ✅ Confirm na Nakasakay sa Bus
+                      </button>
+                    </div>
+                  )}
+                  {workerOffer && workerOffer.transport_service === true && workerOffer.departed_at && (
+                    <div style={{ marginTop: '10px', borderTop: `1px solid ${C.line}`, paddingTop: '10px' }}>
+                      <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '8px 12px', fontSize: '11px', color: '#166534', fontFamily: sans }}>
+                        🚌 Nakasakay na — {new Date(workerOffer.departed_at).toLocaleDateString('fil-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </div>
+                    </div>
+                  )}
                   {isProxy && pendingOffer && (() => {
                     const cl = getCl(pendingOffer.id)
                     const ctr = getCtr(pendingOffer.id)
