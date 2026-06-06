@@ -42,7 +42,7 @@ export default function HWDashboard() {
         id, profile_id, asking_salary, setup, skills,
         province, selfie_url, availability, referred_by,
         has_govt_id, has_nbi, edad, how_referred,
-        partner_photo_url, facebook_url,
+        partner_photo_url,
         civil_status, num_children
       `)
       const profileIds = (data || []).map((k: any) => k.profile_id).filter(Boolean)
@@ -134,7 +134,7 @@ export default function HWDashboard() {
       if (jobIds.length > 0) {
         const { data } = await supabase
           .from('applications')
-          .select('*, kasambahay:kasambahay_id(*, profiles(full_name, mobile))')
+          .select('*, kasambahay:kasambahay_id(*, profiles(full_name))')
           .in('job_id', jobIds)
           .order('created_at', { ascending: false })
         setApplicants(data || [])
