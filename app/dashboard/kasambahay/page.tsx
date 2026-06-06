@@ -533,7 +533,7 @@ export default function KBDashboard() {
                         </div>
                       )}
                       <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '10px 12px', fontSize: '13px', color: '#166534', fontWeight: 700, textAlign: 'center' as const, marginBottom: '10px' }}>
-                        💰 Bayad na! Maghanda ka na.
+                        🎉 Hired ka na! Maghanda na para sa start ng trabaho mo.
                       </div>
                       {offer.transport_service === true && (
                         <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '9px', padding: '10px 12px', marginBottom: '10px', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
@@ -560,6 +560,9 @@ export default function KBDashboard() {
                       {(() => {
                         const hwContact = homeownerContacts.find(h => h.id === offer.homeowner_id)
                         const hwProfile = hwContact?.profile
+                        console.log('homeownerContacts:', homeownerContacts)
+                        console.log('offer.homeowner_id:', offer.homeowner_id)
+                        console.log('hwContact:', hwContact)
                         if (!hwProfile?.mobile) return null
                         const hwFbRaw = hwProfile.facebook_url
                         const hwMessengerUrl = (() => {
