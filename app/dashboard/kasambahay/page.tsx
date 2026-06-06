@@ -48,11 +48,22 @@ export default function KBDashboard() {
         const paidOffers = (offersData || []).filter(o => o.status === 'paid')
         if (paidOffers.length > 0) {
           const homeownerIds = paidOffers.map(o => o.homeowner_id)
-          const { data: hwData } = await supabase
+          const { data: hwRows } = await supabase
             .from('homeowners')
-            .select('id, profile:profile_id(full_name, mobile, facebook_url)')
+            .select('id, profile_id')
             .in('id', homeownerIds)
-          setHomeownerContacts(hwData || [])
+          if (hwRows && hwRows.length > 0) {
+            const profileIds = hwRows.map(h => h.profile_id)
+            const { data: profileRows } = await supabase
+              .from('profiles')
+              .select('id, full_name, mobile, facebook_url')
+              .in('id', profileIds)
+            const merged = hwRows.map(h => ({
+              id: h.id,
+              profile: (profileRows || []).find(p => p.id === h.profile_id) || null
+            }))
+            setHomeownerContacts(merged)
+          }
         }
         const { data: apps } = await supabase.from('applications').select('job_id').eq('kasambahay_id', kbData.id)
         if (apps) {
