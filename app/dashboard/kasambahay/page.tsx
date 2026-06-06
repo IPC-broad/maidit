@@ -38,7 +38,7 @@ export default function KBDashboard() {
       if (kbData) {
         const { data: offersData } = await supabase
           .from('offers')
-          .select('*, household, pets, scope, urgency, start_date, transport_service, homeowner_address, homeowner_waze_pin, homeowner:homeowner_id(*, profiles(full_name, mobile))')
+          .select('*, household, pets, scope, urgency, start_date, transport_service, homeowner_address, homeowner_waze_pin, homeowner:homeowner_id(*, profiles(full_name, mobile, facebook_url))')
           .eq('kasambahay_id', kbData.id)
         setOffers(offersData || [])
         const { data: apps } = await supabase.from('applications').select('job_id').eq('kasambahay_id', kbData.id)
@@ -533,17 +533,28 @@ export default function KBDashboard() {
                           )}
                         </div>
                       )}
-                      {offer.homeowner?.profiles?.mobile && (
-                        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px' }}>
-                          <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '6px' }}>I-contact ang employer mo</div>
-                          <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{offer.homeowner.profiles.full_name}</div>
-                          <div style={{ fontSize: '13px', color: '#374151', marginBottom: '10px' }}>{offer.homeowner.profiles.mobile}</div>
-                          <div style={{ display: 'flex', gap: '6px' }}>
-                            <a href={`viber://chat?number=${toIntl(offer.homeowner.profiles.mobile)}`} style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#7c3aed', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Viber</a>
-                            <a href={`https://wa.me/${toIntl(offer.homeowner.profiles.mobile)}`} target="_blank" rel="noreferrer" style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#16a34a', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 WhatsApp</a>
+                      {offer.homeowner?.profiles?.mobile && (() => {
+                        const hwFbRaw = offer.homeowner?.profiles?.facebook_url
+                        const hwMessengerUrl = (() => {
+                          if (!hwFbRaw) return null
+                          const match = hwFbRaw.match(/facebook\.com\/(?:profile\.php\?id=)?([^/?&]+)/)
+                          if (match?.[1]) return `https://m.me/${match[1]}`
+                          return null
+                        })()
+                        return (
+                          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px' }}>
+                            <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '6px' }}>I-CONTACT ANG EMPLOYER MO</div>
+                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{offer.homeowner.profiles.full_name}</div>
+                            <div style={{ fontSize: '13px', color: '#374151', marginBottom: '10px' }}>{offer.homeowner.profiles.mobile}</div>
+                            <div style={{ display: 'flex', gap: '6px' }}>
+                              <a href={`sms:${offer.homeowner.profiles.mobile}`} style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#27500A', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>📱 I-SMS</a>
+                              {hwMessengerUrl && (
+                                <a href={hwMessengerUrl} target="_blank" rel="noreferrer" style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#0084FF', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Messenger</a>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )
+                      })()}
                     </>
                   )}
                 </div>

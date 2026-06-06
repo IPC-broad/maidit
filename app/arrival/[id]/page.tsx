@@ -126,18 +126,18 @@ export default function ArrivalPage() {
       <div style={{ display: 'flex', gap: '8px' }}>
         <a
           href={`sms:+${toIntl(kbMobile)}`}
-          style={{ flex: 1, padding: '10px', borderRadius: '9px', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '.8rem', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}
+          style={{ flex: 1, padding: '10px', borderRadius: '9px', background: '#27500A', color: '#fff', fontFamily: 'sans-serif', fontSize: '.8rem', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}
         >
-          📱 Send SMS
+          📱 I-SMS
         </a>
         {kbMessengerUrl && (
           <a
             href={kbMessengerUrl}
             target="_blank"
             rel="noreferrer"
-            style={{ flex: 1, padding: '10px', borderRadius: '9px', background: '#1877f2', color: '#fff', fontFamily: 'sans-serif', fontSize: '.8rem', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}
+            style={{ flex: 1, padding: '10px', borderRadius: '9px', background: '#0084FF', color: '#fff', fontFamily: 'sans-serif', fontSize: '.8rem', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}
           >
-            💙 Messenger
+            💬 Messenger
           </a>
         )}
       </div>

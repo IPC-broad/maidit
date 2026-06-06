@@ -319,9 +319,17 @@ export default function PayPage() {
           <button
             style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #e5e7eb', background: '#f9fafb', color: '#9ca3af', fontFamily: 'sans-serif', fontSize: '.75rem', fontWeight: 600, cursor: 'pointer', marginTop: '8px' }}
             onClick={async () => {
-              const { supabase } = await import('../../../lib/supabase')
-              await supabase.from('offers').update({ status: 'paid' }).eq('id', offerId)
-              router.push(`/arrival/${offerId}`)
+              try {
+                const { supabase } = await import('../../../lib/supabase')
+                await supabase
+                  .from('offers')
+                  .update({ status: 'paid', paid_at: new Date().toISOString() })
+                  .eq('id', offerId)
+                console.log('Skip: navigating to', `/arrival/${offerId}`)
+                window.location.href = `/arrival/${offerId}`
+              } catch (err) {
+                console.error('Skip failed:', err)
+              }
             }}
           >
             Skip payment — test accounts only
