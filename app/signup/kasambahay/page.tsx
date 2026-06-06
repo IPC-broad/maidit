@@ -48,7 +48,12 @@ export default function KasambahaySignup() {
 
   // Selfie
   const [selfieData, setSelfieData] = useState<string | null>(null)
-  const selfieRef = useRef<HTMLInputElement>(null)
+  const [stream, setStream] = useState<MediaStream | null>(null)
+  const [faceApiReady, setFaceApiReady] = useState(false)
+  const [faceStatus, setFaceStatus] = useState<'loading' | 'no_face' | 'face_ok' | 'multi_face' | 'unavailable'>('loading')
+  const [cameraActive, setCameraActive] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const detectionInterval = useRef<NodeJS.Timeout | null>(null)
   const idRef = useRef<HTMLInputElement>(null)
   const policeRef = useRef<HTMLInputElement>(null)
   const [isMobile, setIsMobile] = useState(false)
@@ -134,6 +139,43 @@ export default function KasambahaySignup() {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
+  useEffect(() => {
+    if (step !== 2) return
+    const script = document.createElement('script')
+    script.src = '/face-api.min.js'
+    script.onload = async () => {
+      try {
+        const faceapi = (window as any).faceapi
+        await faceapi.nets.tinyFaceDetector.loadFromUri('/models')
+        setFaceApiReady(true)
+      } catch {
+        setFaceStatus('unavailable')
+      }
+    }
+    script.onerror = () => setFaceStatus('unavailable')
+    document.head.appendChild(script)
+    return () => { try { document.head.removeChild(script) } catch {} }
+  }, [step])
+
+  useEffect(() => {
+    if (!faceApiReady || !stream || selfieData) {
+      if (detectionInterval.current) clearInterval(detectionInterval.current)
+      return
+    }
+    const faceapi = (window as any).faceapi
+    detectionInterval.current = setInterval(async () => {
+      const video = videoRef.current
+      if (!video || video.readyState < 2) return
+      try {
+        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+        if (detections.length === 0) setFaceStatus('no_face')
+        else if (detections.length === 1) setFaceStatus('face_ok')
+        else setFaceStatus('multi_face')
+      } catch {}
+    }, 1000)
+    return () => { if (detectionInterval.current) clearInterval(detectionInterval.current) }
+  }, [faceApiReady, stream, selfieData])
+
   const filteredProvs = provinces.filter(p =>
     p.name.toLowerCase().includes(provSearch.toLowerCase())
   ).slice(0, 80)
@@ -154,12 +196,31 @@ export default function KasambahaySignup() {
     reader.readAsDataURL(file)
   }
 
-  const handleSelfie = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = (ev) => setSelfieData(ev.target?.result as string)
-    reader.readAsDataURL(file)
+  const startCamera = async () => {
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+      setStream(s)
+      setCameraActive(true)
+      if (videoRef.current) {
+        videoRef.current.srcObject = s
+        videoRef.current.play()
+      }
+    } catch {
+      setFaceStatus('unavailable')
+    }
+  }
+
+  const capturePhoto = () => {
+    const video = videoRef.current
+    if (!video) return
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    canvas.getContext('2d')?.drawImage(video, 0, 0)
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
+    setSelfieData(dataUrl)
+    stream?.getTracks().forEach(t => t.stop())
+    setStream(null)
   }
 
   const checkMobile = () => {
@@ -738,41 +799,51 @@ export default function KasambahaySignup() {
             <p style={{ fontSize:'13px', color:C.ink3, lineHeight:1.5, marginBottom:'12px', fontFamily:sans }}>
               Kinakailangan para ma-verify ang iyong identity.
             </p>
-            <div style={{ display:'flex', flexDirection:'column' as const, alignItems:'center', gap:'12px' }}>
-              {/* Circular preview */}
-              <div style={{
-                width: '96px',
-                height: '96px',
-                borderRadius: '50%',
-                border: selfieData ? `3px solid ${C.forest}` : `2px dashed ${C.forest}`,
-                overflow: 'hidden',
-                background: selfieData ? 'transparent' : C.paper2,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                {selfieData
-                  ? <img src={selfieData} alt="selfie" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-                  : <span style={{ fontSize:'28px' }}>🤳</span>
-                }
-              </div>
-              <button
-                type="button"
-                onClick={() => selfieRef.current?.click()}
-                style={{ padding:'10px 20px', borderRadius:'999px', border:`1.5px solid ${C.forest}`, background:C.paper, color:C.forest, fontFamily:sans, fontSize:'14px', fontWeight:700, cursor:'pointer' }}
-              >
-                📷 Kumuha ng Selfie
+
+            {!cameraActive && !selfieData && (
+              <button onClick={startCamera}
+                style={{width:'100%', padding:'14px', background:'#27500A', color:'#fff', borderRadius:'50px', border:'none', fontSize:'14px', fontWeight:700, fontFamily:'Geist,sans-serif', cursor:'pointer'}}>
+                📷 Buksan ang Camera
               </button>
-            </div>
-            <input
-              ref={selfieRef}
-              type="file"
-              accept="image/*"
-              capture={isMobile ? 'user' : undefined}
-              style={{ display:'none' }}
-              onChange={handleSelfie}
-            />
+            )}
+
+            {cameraActive && !selfieData && (
+              <div>
+                <video ref={videoRef} autoPlay playsInline muted
+                  style={{width:'100%', borderRadius:'16px', background:'#000', maxHeight:'320px', objectFit:'cover'}}/>
+                <div style={{textAlign:'center', padding:'8px 0', fontSize:'12px', fontWeight:600,
+                  color: faceStatus==='face_ok' ? '#27a040' : faceStatus==='no_face' ? '#cc3333' : faceStatus==='multi_face' ? '#c9943a' : '#888'}}>
+                  {faceStatus==='loading' && '⏳ Ino-load ang face detection...'}
+                  {faceStatus==='no_face' && '❌ Hindi nakita ang mukha mo. Harapin ang camera.'}
+                  {faceStatus==='face_ok' && '✓ Nakita ang mukha mo — handa na!'}
+                  {faceStatus==='multi_face' && '⚠️ Isa lang dapat makita sa camera.'}
+                  {faceStatus==='unavailable' && '📷 Maaaring kumuha ng litrato'}
+                </div>
+                <button
+                  onClick={capturePhoto}
+                  disabled={faceStatus !== 'face_ok' && faceStatus !== 'unavailable'}
+                  style={{width:'100%', padding:'14px',
+                    background: (faceStatus==='face_ok' || faceStatus==='unavailable') ? '#27500A' : '#ccc',
+                    color:'#fff', borderRadius:'50px', border:'none', fontSize:'14px', fontWeight:700,
+                    fontFamily:'Geist,sans-serif',
+                    cursor: (faceStatus==='face_ok' || faceStatus==='unavailable') ? 'pointer' : 'not-allowed',
+                    marginTop:'8px'}}>
+                  📸 Kumuha ng Selfie
+                </button>
+              </div>
+            )}
+
+            {selfieData && (
+              <div style={{textAlign:'center'}}>
+                <img src={selfieData} style={{width:'120px', height:'120px', borderRadius:'50%', objectFit:'cover', border:'3px solid #27500A'}} alt="selfie"/>
+                <div style={{color:'#27a040', fontWeight:600, marginTop:'8px', fontSize:'13px'}}>✓ Selfie na-kuha!</div>
+                <button
+                  onClick={() => { setSelfieData(null); setCameraActive(false); setFaceStatus('loading') }}
+                  style={{marginTop:'8px', background:'none', border:'none', color:'#c9943a', fontSize:'12px', cursor:'pointer', fontWeight:600}}>
+                  Ulitin
+                </button>
+              </div>
+            )}
           </div>
 
           <button
