@@ -36,7 +36,17 @@ export default function PayPage() {
 
       const { data, error } = await supabase
         .from('offers')
-        .select('*, kasambahay:kasambahay_id(*, profiles(full_name))')
+        .select(`
+          *,
+          kasambahay:kasambahay_id(
+            id,
+            asking_salary,
+            setup,
+            province,
+            selfie_url,
+            skills
+          )
+        `)
         .eq('id', offerId)
         .single()
 
