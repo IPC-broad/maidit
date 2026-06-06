@@ -767,7 +767,14 @@ export default function PartnerDashboard() {
                               <div style={tBox(cl.transport)}><span style={{ color: '#fff', fontSize: '11px', fontWeight: 900 }}>{cl.transport ? '✓' : '✗'}</span></div>
                               <div style={{ flex: 1 }}>
                                 <div style={{ fontSize: '13px', color: '#374151', fontFamily: sans }}>
-                                  Transportasyon: <strong>{pendingOffer.transport_service ? 'MaidIt Assisted (₱5,000)' : 'Direct (libre)'}</strong>
+                                  {pendingOffer.transport_service ? (
+                                    <>
+                                      <span style={{ display:'inline-flex', alignItems:'center', gap:4, background:'#f0fdf4', color:'#1a6b3c', border:'1px solid #bbf7d0', borderRadius:50, padding:'2px 8px', fontSize:11, fontWeight:700 }}>MaidIt Assisted Transport ✓</span>
+                                      <div style={{ fontSize:11, color:'#6b7280', marginTop:4, lineHeight:1.5 }}>Bayad na ng homeowner — ikaw ang mag-aayos ng sakay (₱3,500 released sa iyo pagkatapos ng boarding)</div>
+                                    </>
+                                  ) : (
+                                    <>Transportasyon: <strong>Direct (kasambahay ang aayos)</strong></>
+                                  )}
                                 </div>
                                 <div style={tStatus(cl.transport)}>{cl.transport ? '✓ Sang-ayon' : '✗ Hindi sang-ayon'}</div>
                               </div>

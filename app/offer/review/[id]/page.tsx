@@ -76,7 +76,7 @@ export default function OfferReviewPage() {
   }
 
   const transportLabel = () => {
-    if (offer?.transport_service) return '🛡️ MaidIt Assisted Travel (kasama sa bayad)'
+    if (offer?.transport_service) return 'MaidIt Assisted 🚐'
     const t = offer?.transport_direct_type
     if (t === 'homeowner_pays') return 'Amo ang magbabayad ng pamasahe'
     if (t === 'reimburse') return 'Ako muna ang sasagot pero irereimburse ng amo pagdating ko'
@@ -129,7 +129,11 @@ export default function OfferReviewPage() {
     }
 
     setSubmitting(false)
-    setAction('done')
+    if (isCounter) {
+      setAction('done')
+    } else {
+      router.push('/dashboard/kasambahay')
+    }
   }
 
   const handleDecline = async () => {
@@ -310,6 +314,11 @@ export default function OfferReviewPage() {
                 <div style={s.checkLabel} onClick={() => { tick('transport'); if (checklist.transport) setTransportCountered('') }}>
                   Transportasyon: <strong>{transportLabel()}</strong>
                 </div>
+                {offer?.transport_service && (
+                  <div style={{ fontSize: '11px', color: '#6b7280', marginTop: 3, lineHeight: 1.5 }}>
+                    Sisimulan ang transport ng MaidIt. Ibibigay sa iyo ang address ng homeowner pagkatapos ma-confirm ang iyong boarding.
+                  </div>
+                )}
                 <div style={toggleStatus(checklist.transport)} onClick={() => { tick('transport'); if (checklist.transport) setTransportCountered('') }}>
                   {checklist.transport ? '✓ Sang-ayon ako' : '✗ Hindi sang-ayon'}
                 </div>

@@ -471,6 +471,12 @@ export default function KBDashboard() {
                         <div style={{ fontSize: '12px', fontWeight: 600 }}>{offer.scope.join(', ')}</div>
                       </div>
                     )}
+                    {offer.transport_service === true && (
+                      <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #f3f4f6' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#1a6b3c' }}>MaidIt Assisted 🚐</div>
+                        <div style={{ fontSize: '11px', color: '#6b7280', marginTop: 2, lineHeight: 1.5 }}>Sisimulan ang transport ng MaidIt. Ibibigay sa iyo ang address ng homeowner pagkatapos ma-confirm ang iyong boarding.</div>
+                      </div>
+                    )}
                   </div>
 
                   {offer.status === 'pending' && (

@@ -104,6 +104,7 @@ export default function SendOfferPage() {
   const [isFreeOffer, setIsFreeOffer] = useState(true)
   const [batchPaid, setBatchPaid] = useState(false)
   const [batchPayLoading, setBatchPayLoading] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
   const [hwProvinceKey, setHwProvinceKey] = useState<string | null>(null)
   const [transportDirectType, setTransportDirectType] = useState<'homeowner_pays' | 'reimburse' | 'kasambahay_pays' | ''>('')
   const [imgError, setImgError] = useState(false)
@@ -113,6 +114,7 @@ export default function SendOfferPage() {
       const { supabase } = await import('../../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+      setUserEmail(user.email || '')
       const { data: kbData } = await supabase.from('kasambahay').select('*').eq('id', kasambahayId).single()
       setKb(kbData)
       const today = new Date().toISOString().split('T')[0]
@@ -349,6 +351,15 @@ export default function SendOfferPage() {
             >
               Nabayaran na? I-click dito →
             </button>
+            {/* ⚠️ REMOVE skip button by July 1, 2026 */}
+            {(userEmail.endsWith('@maidit.com') || userEmail.endsWith('@maidit.app')) && (
+              <button
+                onClick={() => setBatchPaid(true)}
+                style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#f9fafb', fontFamily: sans, fontSize: '11px', color: '#9ca3af', fontWeight: 600, cursor: 'pointer', marginTop: 4 }}
+              >
+                Skip payment — test accounts only
+              </button>
+            )}
           </div>
         ) : (
           <div style={{ fontSize: 12, color: '#16a34a', fontWeight: 600, marginBottom: 14 }}>

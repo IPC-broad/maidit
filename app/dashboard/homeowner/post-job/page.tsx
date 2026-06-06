@@ -7,6 +7,7 @@ export default function PostJobPage() {
 
   const [hwId, setHwId] = useState<string | null>(null)
   const [initLoading, setInitLoading] = useState(true)
+  const [userEmail, setUserEmail] = useState('')
   const [error, setError] = useState('')
   const [step, setStep] = useState<'form' | 'review' | 'pay' | 'confirm' | 'done'>('form')
   const [submitting, setSubmitting] = useState(false)
@@ -32,6 +33,7 @@ export default function PostJobPage() {
       const { supabase } = await import('../../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+      setUserEmail(user.email || '')
 
       let { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
       if (!hw) {
@@ -246,9 +248,15 @@ export default function PostJobPage() {
             Pay ₱499 via PayMongo →
           </button>
         )}
-        <button style={s.btnOutline} onClick={() => router.push('/dashboard/homeowner')}>
-          Pay later
-        </button>
+        {/* ⚠️ REMOVE skip button by July 1, 2026 */}
+        {(userEmail.endsWith('@maidit.com') || userEmail.endsWith('@maidit.app')) && (
+          <button
+            style={{ width:'100%', padding:'10px', borderRadius:'10px', border:'1px solid #e5e7eb', background:'#f9fafb', color:'#9ca3af', fontFamily:'sans-serif', fontSize:'.75rem', fontWeight:600, cursor:'pointer', marginTop:'4px' }}
+            onClick={handlePost}
+          >
+            Skip payment — test accounts only
+          </button>
+        )}
         <div style={{ fontSize: '.67rem', color: '#9ca3af', textAlign: 'center' as const, marginTop: '14px', lineHeight: 1.6 }}>
           Secured by PayMongo · QRPh, GCash, credit card accepted<br/>
           Job goes live after payment is verified.

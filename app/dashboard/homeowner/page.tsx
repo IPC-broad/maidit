@@ -704,11 +704,11 @@ export default function HWDashboard() {
       {addressModalOffer && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:200, display:'flex', alignItems:'flex-end', justifyContent:'center' }} onClick={() => !savingAddress && setAddressModalOffer(null)}>
           <div style={{ background:'#fff', borderRadius:'20px 20px 0 0', padding:'24px 20px 36px', width:'100%', maxWidth:'480px', fontFamily:'sans-serif' }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, color:'#111827', marginBottom:'4px' }}>Isang hakbang pa bago mag-bayad</div>
+            <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, color:'#111827', marginBottom:'4px' }}>One more step before payment</div>
             <div style={{ fontSize:'13px', color:'#6b7280', marginBottom:'20px', lineHeight:1.6 }}>
-              Kailangan namin ang iyong address para ma-arrange ang transport para sa iyong kasambahay.
+              Because you selected MaidIt Assisted Transport, we need your full address so we can arrange pickup for your kasambahay.
             </div>
-            <div style={{ fontSize:'12px', fontWeight:700, color:'#374151', marginBottom:'6px' }}>Kumpletong address *</div>
+            <div style={{ fontSize:'12px', fontWeight:700, color:'#374151', marginBottom:'6px' }}>Full address *</div>
             <input
               type="text"
               placeholder="123 Sampaguita St, BF Homes, Muntinlupa City"
@@ -724,24 +724,25 @@ export default function HWDashboard() {
               onChange={e => setWazePinInput(e.target.value)}
               style={{ width:'100%', padding:'10px 12px', border:'1.5px solid #e5e7eb', borderRadius:'9px', fontFamily:'sans-serif', fontSize:'14px', outline:'none', color:'#111827', boxSizing:'border-box' as const, marginBottom:'6px' }}
             />
-            <div style={{ fontSize:'11px', color:'#9ca3af', marginBottom:'18px', lineHeight:1.5 }}>Buksan ang Waze → Share → Copy Link. Para mahanap ng kasambahay ang iyong bahay.</div>
+            <div style={{ fontSize:'11px', color:'#9ca3af', marginBottom:'18px', lineHeight:1.5 }}>Open Waze → Share → Copy Link. This helps your kasambahay find your home.</div>
             <button
               disabled={!addressInput.trim() || savingAddress}
               onClick={async () => {
                 if (!addressInput.trim()) return
+                const capturedId = addressModalOffer.id
                 setSavingAddress(true)
                 const { supabase } = await import('../../../lib/supabase')
                 await supabase.from('offers').update({
                   homeowner_address: addressInput.trim(),
                   homeowner_waze_pin: wazePinInput.trim() || null,
-                }).eq('id', addressModalOffer.id)
+                }).eq('id', capturedId)
                 setSavingAddress(false)
                 setAddressModalOffer(null)
-                router.push(`/pay/${addressModalOffer.id}`)
+                router.push(`/pay/${capturedId}`)
               }}
               style={{ width:'100%', padding:'13px', borderRadius:'12px', border:'none', background: !addressInput.trim() || savingAddress ? '#e5e7eb' : '#1a6b3c', color: !addressInput.trim() || savingAddress ? '#9ca3af' : '#fff', fontFamily:'sans-serif', fontSize:'.95rem', fontWeight:700, cursor: !addressInput.trim() || savingAddress ? 'default' : 'pointer' }}
             >
-              {savingAddress ? 'Nagse-save...' : 'I-save at magbayad →'}
+              {savingAddress ? 'Saving...' : 'Save & proceed to payment →'}
             </button>
           </div>
         </div>
