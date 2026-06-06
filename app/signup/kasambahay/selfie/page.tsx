@@ -19,8 +19,16 @@ export default function SelfieCapture() {
   const [isMobile, setIsMobile] = useState(true)
   const [faceStatus, setFaceStatus] = useState<FaceStatus>('loading')
   const [faceApiReady, setFaceApiReady] = useState(false)
+  const [debugLogs, setDebugLogs] = useState<string[]>([])
 
-  // Load face-api.js from CDN and initialise the tiny face detector model
+  const showDebug = typeof window !== 'undefined' && window.location.search.includes('debug=1')
+
+  const log = (msg: string) => {
+    console.log(msg)
+    setDebugLogs(prev => [...prev.slice(-10), msg])
+  }
+
+  // Load face-api.js locally and initialise the tiny face detector model
   useEffect(() => {
     const script = document.createElement('script')
     script.src = '/face-api.min.js'
@@ -30,12 +38,12 @@ export default function SelfieCapture() {
         await faceapi.nets.tinyFaceDetector.loadFromUri('/models')
         setFaceApiReady(true)
       } catch (e) {
-        console.error('[face-api] model load error:', e)
+        log(`[face-api] model load error: ${e}`)
         setFaceStatus('unavailable')
       }
     }
     script.onerror = () => {
-      console.error('[face-api] script failed to load')
+      log('[face-api] script failed to load')
       setFaceStatus('unavailable')
     }
     document.head.appendChild(script)
@@ -66,7 +74,7 @@ export default function SelfieCapture() {
         else if (detections.length === 1) setFaceStatus('face_ok')
         else setFaceStatus('multi_face')
       } catch (e) {
-        console.error('[face-api] detection error:', e)
+        log(`[face-api] detection error: ${e}`)
       }
     }, 1000)
 
@@ -155,12 +163,12 @@ export default function SelfieCapture() {
       const { supabase } = await import('../../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        console.log('[selfie] No user session — redirecting to login')
+        log('[selfie] No user session — redirecting to login')
         setUploading(false)
         router.push('/login')
         return
       }
-      console.log('[selfie] Uploading selfie for user:', user.id)
+      log(`[selfie] Uploading selfie for user: ${user.id}`)
 
       const blob = await fetch(photo).then(r => r.blob())
       const path = `${user.id}/selfie.png`
@@ -169,16 +177,16 @@ export default function SelfieCapture() {
         .from('Selfies')
         .upload(path, blob, { upsert: true, contentType: 'image/png' })
 
-      console.log('[selfie] Upload result:', uploadError ?? 'success')
+      log(`[selfie] Upload result: ${uploadError ?? 'success'}`)
 
       const { data: { publicUrl } } = supabase.storage.from('Selfies').getPublicUrl(path)
-      console.log('[selfie] Public URL:', publicUrl)
+      log(`[selfie] Public URL: ${publicUrl}`)
 
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ selfie_url: publicUrl })
         .eq('id', user.id)
-      console.log('[selfie] Profile update result:', updateError ?? 'success')
+      log(`[selfie] Profile update result: ${updateError ?? 'success'}`)
     } catch (err) {
       console.error('[selfie] Unexpected error:', err)
     }
@@ -235,6 +243,12 @@ export default function SelfieCapture() {
             {!cameraError && !photo && (
               <div className={`text-center text-sm font-semibold py-2 px-4 rounded-xl mb-3 ${faceStatusUI[faceStatus].bg} ${faceStatusUI[faceStatus].text}`}>
                 {faceStatusUI[faceStatus].msg}
+              </div>
+            )}
+
+            {(process.env.NODE_ENV === 'development' || showDebug) && (
+              <div style={{background:'#111',color:'#0f0',padding:'8px',fontSize:'10px',fontFamily:'monospace',marginTop:'8px',borderRadius:'8px',maxHeight:'100px',overflow:'auto'}}>
+                {debugLogs.map((l, i) => <div key={i}>{l}</div>)}
               </div>
             )}
 
