@@ -22,7 +22,7 @@ export default function OfferConfirmPage() {
 
       const { data } = await supabase
         .from('offers')
-        .select('*, kasambahay(*, profiles(*))')
+        .select('*, kasambahay:kasambahay_id(id, province, profile:profile_id(full_name, mobile, facebook_url))')
         .eq('id', offerId)
         .single()
 
@@ -127,8 +127,8 @@ export default function OfferConfirmPage() {
     </div>
   )
 
-  const kbName = offer?.kasambahay?.profiles?.full_name?.split(' ')[0]
-  const kbProvince = offer?.kasambahay?.province || offer?.kasambahay?.profiles?.city
+  const kbName = offer?.kasambahay?.profile?.full_name?.split(' ')[0]
+  const kbProvince = offer?.kasambahay?.province || offer?.kasambahay?.profile?.city
   const hasTransport = offer?.transport_arrangement !== null
   const fareEstimate = offer?.fare_estimate
 

@@ -22,7 +22,7 @@ export default function ArrivalPage() {
 
       const { data } = await supabase
         .from('offers')
-        .select('*, kasambahay:kasambahay_id(referred_by, facebook_url, profiles(full_name, mobile))')
+        .select('*, kasambahay:kasambahay_id(referred_by, facebook_url, profile:profile_id(full_name, mobile))')
         .eq('id', offerId)
         .single()
 
@@ -90,8 +90,8 @@ export default function ArrivalPage() {
     return m.startsWith('0') ? '63' + m.slice(1) : m.startsWith('63') ? m : '63' + m
   }
 
-  const kbMobile = offer?.kasambahay?.profiles?.mobile
-  const kbFullName = offer?.kasambahay?.profiles?.full_name || 'your kasambahay'
+  const kbMobile = offer?.kasambahay?.profile?.mobile
+  const kbFullName = offer?.kasambahay?.profile?.full_name || 'your kasambahay'
   const kbFirstName = kbFullName.split(' ')[0]
   const kbFacebookRaw = offer?.kasambahay?.facebook_url
   // Build m.me URL from facebook_url without exposing the raw URL

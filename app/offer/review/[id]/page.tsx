@@ -49,7 +49,7 @@ export default function OfferReviewPage() {
       if (!user) { router.push('/login'); return }
       const { data } = await supabase
         .from('offers')
-        .select('*, urgency, start_date, household, pets, scope, transport_service, transport_direct_type, homeowners(*, profiles(*)), kasambahay:kasambahay_id(proxy_mode)')
+        .select('*, urgency, start_date, household, pets, scope, transport_service, transport_direct_type, homeowner:homeowner_id(id, profile:profile_id(city)), kasambahay:kasambahay_id(proxy_mode)')
         .eq('id', offerId)
         .single()
       setOffer(data)
@@ -205,7 +205,7 @@ export default function OfferReviewPage() {
     </div>
   )
 
-  const hwCity = offer?.homeowners?.profiles?.city || offer?.city || ''
+  const hwCity = offer?.homeowner?.profile?.city || offer?.city || ''
   const showFare = isProvince && checklist.transport &&
     !offer?.transport_service &&
     (offer?.transport_direct_type === 'homeowner_pays' || offer?.transport_direct_type === 'reimburse')

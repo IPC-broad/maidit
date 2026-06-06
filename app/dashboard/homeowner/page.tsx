@@ -134,7 +134,7 @@ export default function HWDashboard() {
       if (jobIds.length > 0) {
         const { data } = await supabase
           .from('applications')
-          .select('*, kasambahay:kasambahay_id(*, profiles(full_name))')
+          .select('*, kasambahay:kasambahay_id(*, profile:profile_id(full_name))')
           .in('job_id', jobIds)
           .order('created_at', { ascending: false })
         setApplicants(data || [])
@@ -533,7 +533,21 @@ export default function HWDashboard() {
                       Proceed to Hire →
                     </button>
                   )}
-                  {(isPaid || isHired) && (
+                  {isPaid && (
+                    <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px', marginBottom: '8px' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#166534', marginBottom: '4px' }}>✅ Hired! Naghihintay na ang kasambahay.</div>
+                      <div style={{ fontSize: '12px', color: '#374151', marginBottom: '10px', lineHeight: 1.5 }}>
+                        Makipag-ugnayan sa iyong kasambahay para i-coordinate ang kanyang pagdating.
+                      </div>
+                      <a
+                        href={`/arrival/${offer.id}`}
+                        style={{ display: 'block', padding: '10px', borderRadius: '9px', background: '#1a6b3c', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center', textDecoration: 'none' }}
+                      >
+                        View Contact Details →
+                      </a>
+                    </div>
+                  )}
+                  {(!isPaid && isHired) && (
                     <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:'10px', padding:'10px 12px', marginBottom:'8px', fontSize:'12px', color:'#166534', lineHeight:1.5 }}>
                       Contact details available in the arrival confirmation page.
                     </div>

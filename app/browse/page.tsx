@@ -213,7 +213,7 @@ export default function BrowsePage() {
     if (hw) {
       const { data } = await supabase
         .from('offers')
-        .select('*, kasambahay:kasambahay_id(*, profiles(full_name))')
+        .select('*, kasambahay:kasambahay_id(id, profile:profile_id(full_name))')
         .eq('homeowner_id', hw.id)
         .order('created_at', { ascending: false })
       setOffers(data || [])
