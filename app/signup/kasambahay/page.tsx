@@ -158,6 +158,13 @@ export default function KasambahaySignup() {
   }, [step])
 
   useEffect(() => {
+    if (stream && videoRef.current) {
+      videoRef.current.srcObject = stream
+      videoRef.current.play().catch(() => {})
+    }
+  }, [stream, cameraActive])
+
+  useEffect(() => {
     if (!faceApiReady || !stream || selfieData) {
       if (detectionInterval.current) clearInterval(detectionInterval.current)
       return
@@ -201,10 +208,6 @@ export default function KasambahaySignup() {
       const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
       setStream(s)
       setCameraActive(true)
-      if (videoRef.current) {
-        videoRef.current.srcObject = s
-        videoRef.current.play()
-      }
     } catch {
       setFaceStatus('unavailable')
     }
@@ -315,8 +318,8 @@ export default function KasambahaySignup() {
       age: form.age ? parseInt(form.age) : null,
       availability: form.availability || 'Immediate',
       skills: skills,
-      civil_status: form.civil_status,
-      num_children: form.num_children,
+      civil_status: form.civil_status || null,
+      num_children: parseInt(form.num_children) || 0,
       ...(referredBy ? { referred_by: referredBy } : {}),
       ...(fbProviderId ? { facebook_url: `https://facebook.com/${fbProviderId}` } : {}),
       ...(form.facebook_url.trim() ? { facebook_url: form.facebook_url.trim() } : {})
@@ -629,6 +632,7 @@ export default function KasambahaySignup() {
             <div style={s.sectionTitle}>Kasanayan (Skills)</div>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
               {[
+                'All-Around Maid (Lahat ng gawaing bahay)',
                 'Pagluluto','Paglalaba','Paglilinis','Pag-aalaga ng Bata',
                 'Pag-aalaga ng Matanda','Pag-aalaga ng Alagang Hayop','Pamimili','Pagmamaneho'
               ].map(skill => (
@@ -796,6 +800,7 @@ export default function KasambahaySignup() {
             <div style={s.sectionTitle}>
               Selfie <span style={{ color: '#dc2626', fontWeight:700 }}>(required)</span>
             </div>
+            {console.log('[selfie] rendering, cameraActive:', cameraActive, 'selfieData:', !!selfieData) as any}
             <p style={{ fontSize:'13px', color:C.ink3, lineHeight:1.5, marginBottom:'12px', fontFamily:sans }}>
               Kinakailangan para ma-verify ang iyong identity.
             </p>
