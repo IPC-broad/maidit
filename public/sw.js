@@ -1,4 +1,4 @@
-const CACHE = 'maidit-v8'
+const CACHE = 'maidit-v9'
 const PRECACHE = ['/']
 
 // Paths that must always go to the network (never serve cached)
@@ -33,8 +33,17 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return
   const url = new URL(e.request.url)
 
-  // Always go to network for Supabase, PayMongo, and external APIs
-  if (url.hostname.includes('supabase.co') || url.hostname.includes('paymongo.com')) return
+  // Never intercept payment or arrival flows — let the browser handle natively
+  if (
+    url.pathname.startsWith('/arrival/') ||
+    url.pathname.startsWith('/pay/') ||
+    url.hostname.includes('paymongo.com') ||
+    url.search.includes('redirect') ||
+    url.search.includes('payment')
+  ) return
+
+  // Always go to network for Supabase and external APIs
+  if (url.hostname.includes('supabase.co')) return
 
   // Network-first for dynamic paths — never serve stale
   const isNetworkFirst = NETWORK_FIRST.some(p => url.pathname === p || url.pathname.startsWith(p + '/'))
