@@ -47,7 +47,9 @@ export default function KBDashboard() {
             )
           `)
           .eq('kasambahay_id', kbData.id)
-        console.log('Kasambahay offers raw:', offersData, offersError)
+        console.log('offersData:', offersData)
+        console.log('offersError:', offersError)
+        console.log('kbData.id:', kbData?.id)
         setOffers(offersData || [])
         const { data: apps } = await supabase.from('applications').select('job_id').eq('kasambahay_id', kbData.id)
         if (apps) {
