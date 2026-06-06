@@ -2,17 +2,16 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-const PAYMONGO_LINK_499 = process.env.NEXT_PUBLIC_PAYMONGO_LINK_499 || ''
-
 export default function PostJobPage() {
   const router = useRouter()
 
   const [hwId, setHwId] = useState<string | null>(null)
-  const [isTester, setIsTester] = useState(false)
   const [initLoading, setInitLoading] = useState(true)
   const [error, setError] = useState('')
   const [step, setStep] = useState<'form' | 'review' | 'pay' | 'confirm' | 'done'>('form')
   const [submitting, setSubmitting] = useState(false)
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
+  const [payLinkLoading, setPayLinkLoading] = useState(false)
 
   const [form, setForm] = useState({
     salary: '',
@@ -33,9 +32,6 @@ export default function PostJobPage() {
       const { supabase } = await import('../../../../lib/supabase')
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-
-      const { data: profData } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
-      setIsTester((profData?.full_name || '').toLowerCase().includes('test'))
 
       let { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
       if (!hw) {
@@ -77,14 +73,6 @@ export default function PostJobPage() {
     })
 
     if (error) { setSubmitting(false); setError(error.message); return }
-
-    // Set subscription expiry if not already set (starts 30-day credit window)
-    const { data: hw } = await supabase.from('homeowners').select('id, subscription_expires_at').eq('id', hwId).single()
-    if (hw && !hw.subscription_expires_at) {
-      const exp = new Date()
-      exp.setDate(exp.getDate() + 30)
-      await supabase.from('homeowners').update({ subscription_expires_at: exp.toISOString() }).eq('id', hwId)
-    }
 
     setSubmitting(false)
     setStep('done')
@@ -130,7 +118,7 @@ export default function PostJobPage() {
       <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🎉</div>
       <h1 style={{ fontFamily: 'serif', fontSize: '1.5rem', fontWeight: 900, color: '#1a6b3c', marginBottom: '8px' }}>Job Posted!</h1>
       <p style={{ color: '#6b7280', fontSize: '.84rem', lineHeight: 1.7, marginBottom: '24px' }}>
-        Your job post and offer credits are now active. Start browsing and sending offers to kasambahay!
+        Your job post is now live. Kasambahay who apply will show up in your Applicants tab.
       </p>
       <button style={{ ...s.btn, maxWidth: '300px' }} onClick={() => router.push('/dashboard/homeowner')}>
         Back to Dashboard
@@ -149,7 +137,7 @@ export default function PostJobPage() {
           Did you complete the payment? 💳
         </div>
         <div style={{ fontSize: '.76rem', color: '#6b7280', marginBottom: '20px', lineHeight: 1.6 }}>
-          Once payment is confirmed, your job post and offer credits will be activated automatically.
+          Once payment is confirmed, your job post will go live and kasambahay can start applying.
         </div>
         <div style={{ ...s.card, background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
           <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.8 }}>
@@ -166,9 +154,11 @@ export default function PostJobPage() {
         >
           {submitting ? 'Posting your job...' : "✅ Yes, I've paid ₱499"}
         </button>
-        <button style={s.btnBlue} onClick={() => window.open(PAYMONGO_LINK_499, '_blank')}>
-          ↗ Re-open PayMongo
-        </button>
+        {checkoutUrl && (
+          <button style={s.btnBlue} onClick={() => window.open(checkoutUrl, '_blank')}>
+            ↗ Re-open PayMongo
+          </button>
+        )}
         <button style={s.btnOutline} onClick={() => setStep('pay')}>
           ← Back
         </button>
@@ -185,25 +175,19 @@ export default function PostJobPage() {
       </div>
       <div style={s.body}>
         <div style={{ fontFamily: 'serif', fontSize: '1.15rem', fontWeight: 900, marginBottom: '4px' }}>
-          One-Time Activation Fee 🎯
+          One-Time Job Post Fee 🎯
         </div>
         <div style={{ fontSize: '.76rem', color: '#6b7280', marginBottom: '20px', lineHeight: 1.6 }}>
-          Pay once to post your job and send up to 10 job offers to qualified candidates.
+          Pay ₱499 to post your job listing. Kasambahay can see and apply to your post directly.
         </div>
 
         <div style={{ ...s.card, background: '#1a6b3c', border: 'none', textAlign: 'center' as const, padding: '22px' }}>
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '1px', color: 'rgba(255,255,255,.5)', marginBottom: '6px' }}>
-            Job Listing Fee
+            Job Post Fee
           </div>
           <div style={{ fontFamily: 'serif', fontSize: '2.8rem', fontWeight: 900, color: '#fff', marginBottom: '4px' }}>₱499</div>
           <div style={{ fontSize: '.7rem', color: 'rgba(255,255,255,.6)' }}>
-            One-time payment • Includes 1 job post + up to 10 offer credits
-          </div>
-        </div>
-
-        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '11px', padding: '12px 14px', marginBottom: '14px' }}>
-          <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.7 }}>
-            💡 <strong>First hire credit included:</strong> Your ₱499 subscription includes one hiring fee credit valid for 30 days. First hire: <strong>₱2,001</strong>. Subsequent hires within 30 days: ₱2,500.
+            One-time payment • Job post goes live immediately
           </div>
         </div>
 
@@ -211,8 +195,8 @@ export default function PostJobPage() {
           <div style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#9ca3af', marginBottom: '10px' }}>What's included</div>
           {[
             { icon: '📋', text: '1 active job listing visible to all kasambahay' },
-            { icon: '👥', text: 'Send up to 10 job offers' },
-            { icon: '💬', text: 'Message and send offers directly to candidates' },
+            { icon: '✋', text: 'Kasambahay can apply directly to your post' },
+            { icon: '📨', text: 'Send offers to applicants from your dashboard' },
             { icon: '🛡️', text: 'Ongoing MaidIt support throughout your hiring process' },
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', gap: '10px', padding: '7px 0', borderBottom: i < 3 ? '1px solid #f3f4f6' : 'none', alignItems: 'flex-start' }}>
@@ -236,17 +220,37 @@ export default function PostJobPage() {
           ))}
         </div>
 
-        <button style={s.btnAmber} onClick={() => { setStep('confirm'); window.open(PAYMONGO_LINK_499, '_blank') }}>
-          Pay ₱499 via PayMongo →
-        </button>
-        <div style={{ fontSize: '.7rem', color: '#6b7280', textAlign: 'center' as const, marginTop: '-4px', marginBottom: '14px', lineHeight: 1.6 }}>
-          💡 Your ₱499 subscription includes one hiring fee credit for 30 days. First hire: ₱2,001. Subsequent hires: ₱2,500.
-        </div>
+        {payLinkLoading ? (
+          <div style={{ background: '#f9fafb', border: '1.5px solid #e5e7eb', borderRadius: '11px', padding: '14px', marginBottom: '10px', textAlign: 'center' as const }}>
+            <div style={{ fontSize: '.78rem', color: '#6b7280' }}>Preparing secure payment link…</div>
+          </div>
+        ) : (
+          <button style={s.btnAmber} onClick={async () => {
+            if (!hwId) return
+            setPayLinkLoading(true)
+            try {
+              const res = await fetch('/api/pay-job-post', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ homeowner_id: hwId }),
+              })
+              const data = await res.json()
+              if (data.checkout_url) {
+                setCheckoutUrl(data.checkout_url)
+                setStep('confirm')
+                window.open(data.checkout_url, '_blank')
+              }
+            } catch {}
+            setPayLinkLoading(false)
+          }}>
+            Pay ₱499 via PayMongo →
+          </button>
+        )}
         <button style={s.btnOutline} onClick={() => router.push('/dashboard/homeowner')}>
           Pay later
         </button>
         <div style={{ fontSize: '.67rem', color: '#9ca3af', textAlign: 'center' as const, marginTop: '14px', lineHeight: 1.6 }}>
-          Secured by PayMongo · QRPh accepted<br/>
+          Secured by PayMongo · QRPh, GCash, credit card accepted<br/>
           Job goes live after payment is verified.
         </div>
       </div>
@@ -281,34 +285,15 @@ export default function PostJobPage() {
           ))}
         </div>
 
-        <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '11px', padding: '12px 14px', marginBottom: '10px' }}>
+        <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '11px', padding: '12px 14px', marginBottom: '18px' }}>
           <div style={{ fontSize: '.74rem', color: '#92400e', lineHeight: 1.6 }}>
-            💡 Post this job for <strong>₱499</strong> — one-time payment via PayMongo. Your listing goes live immediately after payment.
-          </div>
-        </div>
-
-        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '11px', padding: '12px 14px', marginBottom: '18px' }}>
-          <div style={{ fontSize: '.74rem', color: '#166534', lineHeight: 1.7 }}>
-            <strong>✅ Your ₱499 posting includes:</strong><br/>
-            • Up to 10 job offers<br/>
-            • 1 discounted first hire within 30 days<br/>
-            <br/>
-            Your first hire is only <strong>₱2,001</strong>. Additional hires use the standard <strong>₱2,500</strong> hiring fee.
+            💡 Post this job for <strong>₱499</strong> — one-time payment. Your listing goes live immediately after payment and kasambahay can start applying.
           </div>
         </div>
 
         <button style={s.btnAmber} onClick={() => setStep('pay')}>
           Continue to Payment →
         </button>
-        {isTester && (
-          <button
-            style={{ ...s.btnOutline, marginBottom: '8px', color: '#6b7280', fontSize: '.78rem' }}
-            onClick={handlePost}
-            disabled={submitting}
-          >
-            {submitting ? 'Posting...' : 'Skip Payment (Test Mode)'}
-          </button>
-        )}
         <button style={s.btnOutline} onClick={() => setStep('form')}>
           ← Edit Job
         </button>
