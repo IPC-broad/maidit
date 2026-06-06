@@ -93,7 +93,15 @@ export default function ArrivalPage() {
   const kbMobile = offer?.kasambahay?.profiles?.mobile
   const kbFullName = offer?.kasambahay?.profiles?.full_name || 'your kasambahay'
   const kbFirstName = kbFullName.split(' ')[0]
-  const kbFacebookUrl = offer?.kasambahay?.facebook_url
+  const kbFacebookRaw = offer?.kasambahay?.facebook_url
+  // Build m.me URL from facebook_url without exposing the raw URL
+  const kbMessengerUrl = (() => {
+    if (!kbFacebookRaw) return null
+    // Extract username/id from facebook.com/username or facebook.com/profile.php?id=xxx
+    const match = kbFacebookRaw.match(/facebook\.com\/(?:profile\.php\?id=)?([^/?&]+)/)
+    if (match?.[1]) return `https://m.me/${match[1]}`
+    return null
+  })()
   const kbInitials = kbFullName.split(' ').map((n: string) => n[0]).filter(Boolean).join('').slice(0, 2).toUpperCase()
 
   if (loading) return (
@@ -122,14 +130,14 @@ export default function ArrivalPage() {
         >
           📱 Send SMS
         </a>
-        {kbFacebookUrl && (
+        {kbMessengerUrl && (
           <a
-            href={kbFacebookUrl}
+            href={kbMessengerUrl}
             target="_blank"
             rel="noreferrer"
             style={{ flex: 1, padding: '10px', borderRadius: '9px', background: '#1877f2', color: '#fff', fontFamily: 'sans-serif', fontSize: '.8rem', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}
           >
-            💬 Messenger
+            💙 Messenger
           </a>
         )}
       </div>

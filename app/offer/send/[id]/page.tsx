@@ -96,10 +96,8 @@ export default function SendOfferPage() {
     transport_arrangement: '' as 'direct' | 'maidit_transport' | '',
   })
   const [submitting, setSubmitting] = useState(false)
-  const [subscribeLoading, setSubscribeLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const [showPaywall, setShowPaywall] = useState(false)
   const [hwId, setHwId] = useState<string | null>(null)
   const [hwProvinceKey, setHwProvinceKey] = useState<string | null>(null)
   const [transportDirectType, setTransportDirectType] = useState<'homeowner_pays' | 'reimburse' | 'kasambahay_pays' | ''>('')
@@ -112,11 +110,7 @@ export default function SendOfferPage() {
       if (!user) { router.push('/login'); return }
       const { data: kbData } = await supabase.from('kasambahay').select('*').eq('id', kasambahayId).single()
       setKb(kbData)
-      const TEST_EMAILS = ['test@maidit.com', 'homeowner@maidit.app', 'test.kasambahay@maidit.app', 'partner@maidit.com']
-      const isTestAccount = TEST_EMAILS.includes(user.email ?? '')
-      const { data: hw } = await supabase.from('homeowners').select('id, subscription_expires_at').eq('profile_id', user.id).single()
-      const subscribed = isTestAccount || !!(hw?.subscription_expires_at && new Date(hw.subscription_expires_at) > new Date())
-      if (!subscribed) setShowPaywall(true)
+      const { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
       if (hw?.id) setHwId(hw.id)
       const { data: prof } = await supabase.from('profiles').select('city').eq('id', user.id).single()
       const hwCity = prof?.city || null
@@ -682,42 +676,6 @@ export default function SendOfferPage() {
         </button>
       </div>
 
-      {/* ── PAYWALL MODAL ── */}
-      {showPaywall && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 100 }}>
-          <div style={{ background: C.paper, borderRadius: 20, padding: '24px 20px', maxWidth: 340, width: '100%' }}>
-            <div style={{ fontFamily: serif, fontSize: 22, color: C.ink, marginBottom: 8, letterSpacing: '-0.015em' }}>Subscribe to Send Offers</div>
-            <div style={{ fontSize: 13, color: C.ink2, marginBottom: 20, lineHeight: 1.6 }}>
-              A ₱499/month subscription gives you platform access and a ₱499 credit toward your first hire fee.
-            </div>
-            <button
-              style={{ width: '100%', height: 48, borderRadius: 13, border: 'none', background: C.forest, color: C.paper, fontFamily: sans, fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 10, opacity: subscribeLoading ? 0.6 : 1 }}
-              disabled={subscribeLoading}
-              onClick={async () => {
-                setSubscribeLoading(true)
-                try {
-                  const res = await fetch('/api/create-payment-link', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount: 49900, description: 'MaidIt Subscription - ₱499', homeowner_id: hwId, type: 'subscription' }),
-                  })
-                  const data = await res.json()
-                  if (data.checkout_url) { window.location.href = data.checkout_url }
-                  else setSubscribeLoading(false)
-                } catch { setSubscribeLoading(false) }
-              }}
-            >
-              {subscribeLoading ? 'Preparing payment...' : 'Subscribe for ₱499 →'}
-            </button>
-            <button
-              style={{ width: '100%', padding: '12px', borderRadius: 13, border: `1.5px solid ${C.line}`, background: 'transparent', color: C.ink3, fontFamily: sans, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
-              onClick={() => router.push('/browse')}
-            >
-              Maybe later
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
