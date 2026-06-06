@@ -83,6 +83,7 @@ export default function PartnerDashboard() {
   const [subAgentHiredCounts, setSubAgentHiredCounts] = useState<Record<string, number>>({})
   const [subAgentCopied, setSubAgentCopied] = useState(false)
   const [showWelcome, setShowWelcome] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
 
   useEffect(() => {
     const link = document.createElement('link')
@@ -403,12 +404,30 @@ export default function PartnerDashboard() {
             >
               + Mag-refer
             </button>
-            <button
-              onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.auth.signOut(); router.push('/login') }}
-              style={{ padding: '7px 12px', borderRadius: '50px', background: 'transparent', border: '1.5px solid rgba(255,255,255,.35)', color: 'rgba(255,255,255,.85)', fontSize: '11px', fontWeight: 600, cursor: 'pointer', fontFamily: sans }}
-            >
-              Sign Out
-            </button>
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setShowMenu(v => !v)}
+                style={{ padding: '7px 10px', borderRadius: '50px', background: 'transparent', border: '1.5px solid rgba(255,255,255,.35)', color: 'rgba(255,255,255,.85)', fontSize: '16px', fontWeight: 600, cursor: 'pointer', lineHeight: 1 }}
+              >
+                ⋮
+              </button>
+              {showMenu && (
+                <div style={{ position: 'absolute', top: '110%', right: 0, background: '#fff', border: '1px solid #e8e4db', borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,.12)', zIndex: 50, minWidth: 180, overflow: 'hidden' }}>
+                  <button
+                    onClick={() => { setShowMenu(false); router.push('/profile/partner') }}
+                    style={{ width: '100%', padding: '12px 16px', background: 'none', border: 'none', textAlign: 'left' as const, fontSize: 14, color: '#1a1d18', cursor: 'pointer', fontFamily: sans, borderBottom: '1px solid #f0ede8' }}
+                  >
+                    I-edit ang Profile
+                  </button>
+                  <button
+                    onClick={async () => { setShowMenu(false); const { supabase } = await import('../../../lib/supabase'); await supabase.auth.signOut(); router.push('/') }}
+                    style={{ width: '100%', padding: '12px 16px', background: 'none', border: 'none', textAlign: 'left' as const, fontSize: 14, color: '#dc2626', cursor: 'pointer', fontFamily: sans }}
+                  >
+                    Mag-sign out
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -857,15 +876,17 @@ export default function PartnerDashboard() {
 
                 {/* I-recruit ang Sub-agent share card */}
                 <div style={{ background: '#fffbeb', border: `1.5px solid #fde68a`, borderRadius: '16px', padding: '16px', marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
                     <span style={{ fontSize: '22px' }}>⭐</span>
-                    <div style={{ fontFamily: sans, fontSize: '14px', fontWeight: 700, color: '#92400e' }}>I-recruit ang Sub-agent</div>
+                    <div style={{ fontFamily: sans, fontSize: '14px', fontWeight: 700, color: '#92400e' }}>+ I-recruit ang Sub-agent</div>
                   </div>
-                  <div style={{ fontSize: '12px', color: '#b45309', lineHeight: 1.5, marginBottom: '10px' }}>I-share ang partner link mo. Kumita ka ng ₱500 override sa bawat kasambahay na ma-hire ng iyong sub-agent.</div>
+                  <div style={{ fontSize: '12px', color: '#b45309', lineHeight: 1.5, marginBottom: '10px' }}>
+                    Kapag nag-sign up ang isang partner gamit ang link na ito, sila ay magiging sub-agent mo. Kikita ka sa bawat hire nila.
+                  </div>
                   <div style={{ fontSize: '11px', color: '#92400e', fontFamily: sans, wordBreak: 'break-all' as const, marginBottom: '10px', background: '#fffbeb', borderRadius: '7px', padding: '6px 8px', border: '1px solid #fde68a' }}>
                     maidit.vercel.app/signup/partner?ref={referralCode}
                   </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                     <button onClick={copySubAgentLink}
                       style={{ flex: 1, padding: '10px 6px', borderRadius: '10px', background: subAgentCopied ? '#92400e' : '#fffbeb', border: `1.5px solid ${subAgentCopied ? '#92400e' : '#fde68a'}`, color: subAgentCopied ? '#fff' : '#92400e', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: '3px' }}>
                       <span style={{ fontSize: '16px' }}>{subAgentCopied ? '✓' : '📋'}</span>
@@ -882,6 +903,19 @@ export default function PartnerDashboard() {
                       <span>Messenger</span>
                     </button>
                   </div>
+                  {/* 3-step mini flow */}
+                  {[
+                    'I-share ang link sa gustong maging Community Partner',
+                    'Mag-sign up sila gamit ang iyong link — libre',
+                    'Kikita ka sa bawat matagumpay na hire ng iyong sub-agent',
+                  ].map((step, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, margin: '4px 0' }}>
+                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#c9943a', flexShrink: 0, marginTop: 4 }} />
+                      <div style={{ fontSize: 11, color: '#b45309', fontFamily: sans, lineHeight: 1.5 }}>
+                        <strong>Step {i + 1}:</strong> {step}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </>
             )}

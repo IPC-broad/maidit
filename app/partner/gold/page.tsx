@@ -190,7 +190,7 @@ export default function GoldPartnerPage() {
           onClick={() => router.push('/signup/partner?ref=MAIDIT-RN0001')}
           style={{ width: '100%', background: C.amber, color: '#fff', border: 'none', borderRadius: 50, padding: '14px 20px', fontSize: 14, fontWeight: 700, fontFamily: sans, cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
         >
-          <span>I-sign up — libre →</span>
+          <span>Maging Community Gold Partner →</span>
           <span style={{ width: 28, height: 28, background: 'rgba(255,255,255,0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>→</span>
         </button>
 

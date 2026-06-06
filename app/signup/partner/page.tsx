@@ -66,18 +66,24 @@ export default function PartnerSignupPage() {
   }, [])
 
   useEffect(() => {
+    console.log('[face-api partner] loading...')
     const script = document.createElement('script')
     script.src = '/face-api.min.js'
     script.onload = async () => {
       try {
         const faceapi = (window as any).faceapi
         await faceapi.nets.tinyFaceDetector.loadFromUri('/models')
+        console.log('[face-api partner] model ready')
         setFaceApiReady(true)
-      } catch {
+      } catch(e) {
+        console.error('[face-api partner] model error:', e)
         setFaceStatus('unavailable')
       }
     }
-    script.onerror = () => setFaceStatus('unavailable')
+    script.onerror = () => {
+      console.error('[face-api partner] script failed')
+      setFaceStatus('unavailable')
+    }
     document.head.appendChild(script)
     return () => { try { document.head.removeChild(script) } catch {} }
   }, [])
@@ -548,7 +554,7 @@ export default function PartnerSignupPage() {
             marginTop: 18,
           }}
         >
-          {loading ? 'Sandali lang...' : 'Mag-sign up →'}
+          {loading ? 'Sandali lang...' : isGoldReferral ? 'Maging Community Gold Partner →' : 'Maging Community Partner →'}
         </button>
 
         {/* Divider */}
