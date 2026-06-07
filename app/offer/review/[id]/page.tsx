@@ -245,7 +245,7 @@ export default function OfferReviewPage() {
         {error && <div style={s.err}>⚠️ {error}</div>}
 
         <div style={s.card}>
-          <div style={s.cardTitle}>I-toggle ang bawat item — berde kung sang-ayon, pula kung hindi</div>
+          <div style={s.cardTitle}>I-uncheck (pindutin ang berde) kung hindi ka sang-ayon — magiging pula ito. Maaari kang mag-lagay ng iyong panukala sa ibaba.</div>
 
           {/* SALARY */}
           <div style={s.row}>

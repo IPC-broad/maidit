@@ -125,6 +125,7 @@ export default function SendOfferPage() {
         const usedToday = hw?.daily_offers_date === today ? (hw?.daily_offers_used || 0) : 0
         setOffersToday(usedToday)
         setIsFreeOffer(usedToday < 2)
+        if (usedToday >= 4) setBatchPaid(true)
       }
       const { data: prof } = await supabase.from('profiles').select('city').eq('id', user.id).single()
       const hwCity = prof?.city || null
@@ -238,10 +239,6 @@ export default function SendOfferPage() {
     setForm(f => ({ ...f, [key]: String(next) }))
   }
 
-  // Formatted start date display
-  const fmtDate = form.start_date
-    ? new Date(form.start_date + 'T00:00:00').toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })
-    : ''
 
   if (success) return (
     <div style={{ minHeight: '100vh', background: C.paper2, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center', padding: 28, textAlign: 'center' as const, fontFamily: sans }}>
@@ -354,7 +351,16 @@ export default function SendOfferPage() {
             {/* ⚠️ REMOVE skip button by July 1, 2026 */}
             {(userEmail.endsWith('@maidit.com') || userEmail.endsWith('@maidit.app')) && (
               <button
-                onClick={() => setBatchPaid(true)}
+                onClick={async () => {
+                  if (hwDbId) {
+                    await fetch('/api/pay-offer-batch', {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ homeowner_id: hwDbId }),
+                    }).catch(() => {})
+                  }
+                  setBatchPaid(true)
+                }}
                 style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#f9fafb', fontFamily: sans, fontSize: '11px', color: '#9ca3af', fontWeight: 600, cursor: 'pointer', marginTop: 4 }}
               >
                 Skip payment — test accounts only
@@ -444,23 +450,18 @@ export default function SendOfferPage() {
         {/* Start date */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: C.ink3, marginBottom: 10 }}>Start Date <span style={{ fontWeight: 400, color: C.ink4 }}>(optional)</span></div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 0, background: C.paper, border: `1.5px solid ${C.line}`, borderRadius: 14, overflow: 'hidden', cursor: 'pointer' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 0, background: C.paper, border: `1.5px solid ${C.line}`, borderRadius: 14, overflow: 'hidden' }}>
             <div style={{ width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.paper2, borderRight: `1px solid ${C.line}`, color: C.ink3, flexShrink: 0 }}>
               <IcCal />
             </div>
-            <div style={{ flex: 1, padding: '0 14px', position: 'relative', zIndex: 10 }}>
-              <div style={{ fontSize: fmtDate ? 14 : 13, color: fmtDate ? C.ink : C.ink4, fontWeight: fmtDate ? 500 : 400 }}>
-                {fmtDate || 'Pick a date…'}
-              </div>
-              <input
-                type="date"
-                value={form.start_date}
-                min={new Date().toISOString().split('T')[0]}
-                onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))}
-                style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%', zIndex: 10 }}
-              />
-            </div>
-          </label>
+            <input
+              type="date"
+              value={form.start_date}
+              min={new Date().toISOString().split('T')[0]}
+              onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))}
+              style={{ flex: 1, border: 'none', outline: 'none', padding: '0 14px', height: 48, fontSize: 14, fontFamily: sans, color: form.start_date ? C.ink : C.ink4, background: 'transparent', cursor: 'pointer', width: '100%' }}
+            />
+          </div>
         </div>
 
         {/* Setup toggle */}
@@ -719,13 +720,10 @@ export default function SendOfferPage() {
                 <div>Kasambahay travel allowance: ₱1,000</div>
                 <div>MaidIt assistance fee: ₱500</div>
                 <div style={{ marginTop: 8 }}>
-                  The ₱3,500 transport cost and ₱1,000 travel allowance are released only after MaidIt confirms the kasambahay is boarding. If she does not board, the full ₱4,500 is refunded to you.
+                  The ₱3,500 transport cost and ₱1,000 travel allowance are released only after MaidIt confirms the kasambahay is boarding. If the kasambahay does not board the bus, the full ₱5,000 will be refunded to you.
                 </div>
                 <div style={{ marginTop: 8 }}>
-                  Note: If the kasambahay leaves your home within 6 months without valid reason, you may recover the ₱3,500 transport fee and ₱1,000 travel allowance directly from her — this is an agreement between you and the kasambahay. MaidIt is not involved in this recovery.
-                </div>
-                <div style={{ marginTop: 8 }}>
-                  The ₱500 MaidIt Assisted Transport fee is non-refundable, except if the kasambahay does not show up at all.
+                  If she leaves your home within 6 months without valid reason, you may recover the transport costs directly from her — this is an agreement between you and the kasambahay. MaidIt is not involved in this recovery.
                 </div>
               </div>
             )}

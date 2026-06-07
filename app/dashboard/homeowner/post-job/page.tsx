@@ -52,12 +52,9 @@ export default function PostJobPage() {
     scope: f.scope.includes(s) ? f.scope.filter(x => x !== s) : [...f.scope, s]
   }))
 
-  const handlePost = async () => {
-    if (!hwId) { setError('Could not load your profile. Please refresh and try again.'); return }
-    setSubmitting(true)
-    setError('')
+  const insertJob = async () => {
+    if (!hwId) return null
     const { supabase } = await import('../../../../lib/supabase')
-
     const { error } = await supabase.from('jobs').insert({
       homeowner_id: hwId,
       salary: parseInt(form.salary),
@@ -71,13 +68,29 @@ export default function PostJobPage() {
       scope: form.scope,
       household: form.household,
       pets: form.pets,
-      active: true
+      active: true,
+      paid_at: new Date().toISOString(),
     })
+    return error
+  }
 
+  const handlePost = async () => {
+    if (!hwId) { setError('Could not load your profile. Please refresh and try again.'); return }
+    setSubmitting(true)
+    setError('')
+    const error = await insertJob()
     if (error) { setSubmitting(false); setError(error.message); return }
-
     setSubmitting(false)
     setStep('done')
+  }
+
+  const handleSkipPost = async () => {
+    if (!hwId) { setError('Could not load your profile. Please refresh and try again.'); return }
+    setSubmitting(true)
+    setError('')
+    const error = await insertJob()
+    if (error) { setSubmitting(false); setError(error.message); return }
+    window.location.href = '/dashboard/homeowner?tab=jobs'
   }
 
   const s: any = {
@@ -252,7 +265,8 @@ export default function PostJobPage() {
         {(userEmail.endsWith('@maidit.com') || userEmail.endsWith('@maidit.app')) && (
           <button
             style={{ width:'100%', padding:'10px', borderRadius:'10px', border:'1px solid #e5e7eb', background:'#f9fafb', color:'#9ca3af', fontFamily:'sans-serif', fontSize:'.75rem', fontWeight:600, cursor:'pointer', marginTop:'4px' }}
-            onClick={handlePost}
+            onClick={handleSkipPost}
+            disabled={submitting}
           >
             Skip payment — test accounts only
           </button>

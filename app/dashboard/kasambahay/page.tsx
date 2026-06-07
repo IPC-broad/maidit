@@ -535,16 +535,17 @@ export default function KBDashboard() {
 
                   {offerIsHired && (
                     <>
-                      {offer.status === 'paid' && (
-                        <div style={{ background: '#fef9c3', border: '1px solid #fde047', borderRadius: '10px', padding: '12px 14px', marginBottom: '10px' }}>
-                          <div style={{ fontSize: '13px', fontWeight: 700, color: '#713f12', marginBottom: '4px' }}>🎉 Hired ka na!</div>
-                          <div style={{ fontSize: '12px', color: '#78350f', lineHeight: 1.6 }}>
-                            Congratulations! Maghanda ka na para sa iyong bagong trabaho. Makikipag-ugnayan sa iyo ang iyong partner o ang homeowner para sa susunod na hakbang.
-                          </div>
+                      <div style={{ background: '#fff', border: '4px solid #16a34a', borderRadius: '14px', padding: '16px', marginBottom: '12px', textAlign: 'center' as const }}>
+                        <div style={{ fontSize: '28px', marginBottom: '4px' }}>🎉</div>
+                        <div style={{ fontSize: '22px', fontWeight: 900, color: '#166534', fontFamily: 'serif', marginBottom: '6px' }}>HIRED!</div>
+                        <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a6b3c', lineHeight: 1.5 }}>
+                          Congratulations! Maghanda ka na para sa iyong bagong trabaho.
                         </div>
-                      )}
-                      <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '10px 12px', fontSize: '13px', color: '#166534', fontWeight: 700, textAlign: 'center' as const, marginBottom: '10px' }}>
-                        🎉 Hired ka na! Maghanda na para sa start ng trabaho mo.
+                        {offer.status === 'paid' && (
+                          <div style={{ fontSize: '12px', color: '#4b5563', lineHeight: 1.6, marginTop: '6px' }}>
+                            Makikipag-ugnayan sa iyo ang iyong partner o ang homeowner para sa susunod na hakbang.
+                          </div>
+                        )}
                       </div>
                       {offer.transport_service === true && (
                         <div style={{ background: '#fef3e2', border: '1px solid #fde8c0', borderRadius: '9px', padding: '10px 12px', marginBottom: '10px', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
@@ -571,9 +572,8 @@ export default function KBDashboard() {
                       {(() => {
                         const hwContact = homeownerContacts.find(h => h.id === offer.homeowner_id)
                         const hwProfile = hwContact?.profile
-                        console.log('homeownerContacts:', homeownerContacts)
-                        console.log('offer.homeowner_id:', offer.homeowner_id)
-                        console.log('hwContact:', hwContact)
+                        console.log('hwContact for offer', offer.id, ':', hwContact)
+                        console.log('homeownerContacts array:', homeownerContacts)
                         if (!hwProfile?.mobile) return null
                         const hwFbRaw = hwProfile.facebook_url
                         const hwMessengerUrl = (() => {
@@ -583,14 +583,14 @@ export default function KBDashboard() {
                           return null
                         })()
                         return (
-                          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px' }}>
-                            <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#166534', marginBottom: '6px' }}>I-CONTACT ANG EMPLOYER MO</div>
-                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{hwProfile.full_name}</div>
-                            <div style={{ fontSize: '13px', color: '#374151', marginBottom: '10px' }}>{hwProfile.mobile}</div>
-                            <div style={{ display: 'flex', gap: '6px' }}>
-                              <a href={`sms:${hwProfile.mobile}`} style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#27500A', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>📱 I-SMS</a>
+                          <div style={{ background: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '12px', padding: '14px 16px' }}>
+                            <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#92400e', marginBottom: '8px' }}>I-CONTACT ANG EMPLOYER MO</div>
+                            <div style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{hwProfile.full_name}</div>
+                            <div style={{ fontSize: '14px', color: '#374151', marginBottom: '12px' }}>{hwProfile.mobile}</div>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <a href={`sms:${hwProfile.mobile}`} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#27500A', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>📱 I-SMS</a>
                               {hwMessengerUrl && (
-                                <a href={hwMessengerUrl} target="_blank" rel="noreferrer" style={{ flex: 1, padding: '9px', borderRadius: '9px', background: '#0084FF', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Messenger</a>
+                                <a href={hwMessengerUrl} target="_blank" rel="noreferrer" style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#0084FF', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Messenger</a>
                               )}
                             </div>
                           </div>

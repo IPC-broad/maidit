@@ -152,7 +152,7 @@ export default function PartnerDashboard() {
       if (proxyKbIds.length > 0) {
         const { data: proxyOffersData } = await supabase
           .from('offers')
-          .select('id, kasambahay_id, status, salary, setup, city, start_date, scope, urgency')
+          .select('id, kasambahay_id, status, salary, setup, city, start_date, scope, urgency, transport_service, negotiated_by')
           .in('kasambahay_id', proxyKbIds)
           .in('status', ['pending', 'countered'])
         console.log('[proxy-offers] offers:', proxyOffersData)
@@ -716,7 +716,7 @@ export default function PartnerDashboard() {
                         <div style={{ background: C.paper2, border: `1px solid ${C.line}`, borderRadius: '10px', marginBottom: '10px', overflow: 'hidden' }}>
                           <div style={{ padding: '7px 12px', borderBottom: `1px solid ${C.line}` }}>
                             <div style={{ fontSize: '9px', fontWeight: 700, color: C.ink3, textTransform: 'uppercase' as const, letterSpacing: '.05em', fontFamily: sans }}>
-                              I-toggle — berde kung sang-ayon, pula kung hindi
+                              I-uncheck (pindutin ang berde) kung hindi ka sang-ayon — magiging pula ito. Maaari kang mag-lagay ng iyong panukala sa ibaba.
                             </div>
                           </div>
 

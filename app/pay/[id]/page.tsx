@@ -171,7 +171,7 @@ export default function PayPage() {
   const initials = kbFullName.split(' ').map((n: string) => n[0]).filter(Boolean).join('').slice(0, 2).toUpperCase()
 
   const whatYouGet = [
-    { icon: '✅', text: '1 free rematch for eligible no-shows or early departures' },
+    { icon: '✅', text: '1 free rematch for no-shows or early departures within 30 days from hiring date' },
     { icon: '✅', text: 'Verified kasambahay profile' },
     { icon: '📱', text: 'Contact details provided after payment' },
   ]
@@ -288,8 +288,8 @@ export default function PayPage() {
         <div style={{ background: '#f3f4f6', borderRadius: '12px', padding: '13px 16px', marginBottom: '18px', textAlign: 'center' as const }}>
           <div style={{ fontSize: '.78rem', fontWeight: 700, color: '#374151', marginBottom: '3px' }}>🛡️ Safe hiring with MaidIt</div>
           <div style={{ fontSize: '.72rem', color: '#6b7280', lineHeight: 1.6 }}>
-            Includes verified profile and 1 free rematch for eligible<br />
-            no-shows or early departures.
+            Includes verified profile and 1 free rematch for no-shows<br />
+            or early departures within 30 days from hiring date.
           </div>
         </div>
 
