@@ -9,10 +9,12 @@ export default function PostJobPage() {
   const [initLoading, setInitLoading] = useState(true)
   const [userEmail, setUserEmail] = useState('')
   const [error, setError] = useState('')
-  const [step, setStep] = useState<'form' | 'review' | 'pay' | 'confirm' | 'done'>('form')
+  const [step, setStep] = useState<'form' | 'review' | 'pay' | 'confirm'>('form')
   const [submitting, setSubmitting] = useState(false)
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
   const [payLinkLoading, setPayLinkLoading] = useState(false)
+  const [posted, setPosted] = useState(false)
+  const [postedJobId, setPostedJobId] = useState<string | null>(null)
 
   const [form, setForm] = useState({
     salary: '',
@@ -74,17 +76,18 @@ export default function PostJobPage() {
     console.log('insertJob payload:', payload)
     const { data, error } = await supabase.from('job_posts').insert(payload).select('id').single()
     console.log('insertJob result:', { data, error })
-    return error || null
+    return { error: error || null, id: data?.id || null }
   }
 
   const handlePost = async () => {
     if (!hwId) { setError('Could not load your profile. Please refresh and try again.'); return }
     setSubmitting(true)
     setError('')
-    const error = await insertJob()
+    const { error, id } = await insertJob()
     if (error) { setSubmitting(false); setError((error as any).message || 'Insert failed'); return }
     setSubmitting(false)
-    setStep('done')
+    setPostedJobId(id)
+    setPosted(true)
   }
 
   const handleSkipPost = async () => {
@@ -93,9 +96,11 @@ export default function PostJobPage() {
     if (!hwId) { setError('Could not load your profile. Please refresh and try again.'); return }
     setSubmitting(true)
     setError('')
-    const error = await insertJob()
+    const { error, id } = await insertJob()
     if (error) { setSubmitting(false); setError((error as any).message || 'Insert failed'); return }
-    window.location.href = '/dashboard/homeowner?tab=jobs'
+    setSubmitting(false)
+    setPostedJobId(id)
+    setPosted(true)
   }
 
   const s: any = {
@@ -132,16 +137,43 @@ export default function PostJobPage() {
     </div>
   )
 
-  // ── DONE ──
-  if (step === 'done') return (
+  // ── SUCCESS CARD ──
+  if (posted) return (
     <div style={s.center}>
-      <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🎉</div>
-      <h1 style={{ fontFamily: 'serif', fontSize: '1.5rem', fontWeight: 900, color: '#1a6b3c', marginBottom: '8px' }}>Job Posted!</h1>
-      <p style={{ color: '#6b7280', fontSize: '.84rem', lineHeight: 1.7, marginBottom: '24px' }}>
-        Your job post is now live. Kasambahay who apply will show up in your Applicants tab.
+      <div style={{ fontSize: '48px', marginBottom: '20px' }}>🎉</div>
+      <h1 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: '24px', fontWeight: 400, color: '#27500A', marginBottom: '10px' }}>
+        Job Posted Successfully!
+      </h1>
+      <p style={{ color: '#6b7280', fontSize: '14px', lineHeight: 1.7, marginBottom: '24px', maxWidth: '300px' }}>
+        Your job is now live and visible to qualified kasambahays.
       </p>
-      <button style={{ ...s.btn, maxWidth: '300px' }} onClick={() => router.push('/dashboard/homeowner')}>
-        Back to Dashboard
+      <div style={{ width: '100%', maxWidth: '320px', background: '#fff', border: '1px solid #ede8e0', borderRadius: '14px', padding: '16px', marginBottom: '24px', textAlign: 'left' as const }}>
+        {[
+          { icon: '✨', text: 'Applicants are being matched to your requirements and may start applying soon.' },
+          { icon: '📬', text: "We'll notify you as applications come in." },
+        ].map((item, i) => (
+          <div key={i} style={{ display: 'flex', gap: '10px', padding: '8px 0', borderBottom: i === 0 ? '1px solid #f3f4f6' : 'none', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '16px', flexShrink: 0 }}>{item.icon}</span>
+            <span style={{ fontSize: '14px', color: '#374151', lineHeight: 1.55 }}>{item.text}</span>
+          </div>
+        ))}
+      </div>
+      <button
+        style={{ ...s.btn, maxWidth: '320px' }}
+        onClick={() => { window.location.href = '/dashboard/homeowner?tab=jobs' }}
+      >
+        View My Job →
+      </button>
+      <button
+        style={{ ...s.btnOutline, maxWidth: '320px' }}
+        onClick={() => {
+          setPosted(false)
+          setPostedJobId(null)
+          setStep('form')
+          setError('')
+        }}
+      >
+        Post Another Job
       </button>
     </div>
   )

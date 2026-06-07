@@ -4,10 +4,11 @@ import { useRouter } from 'next/navigation'
 
 export default function HWDashboard() {
   const router = useRouter()
-  const [tab, setTab] = useState<'browse' | 'offers' | 'applicants' | 'postjob'>(() => {
+  const [tab, setTab] = useState<'browse' | 'offers' | 'applicants' | 'jobs' | 'postjob'>(() => {
     if (typeof window !== 'undefined') {
       const urlTab = new URLSearchParams(window.location.search).get('tab')
-      if (urlTab === 'jobs' || urlTab === 'applicants') return 'applicants'
+      if (urlTab === 'jobs') return 'jobs'
+      if (urlTab === 'applicants') return 'applicants'
       if (urlTab === 'offers') return 'offers'
     }
     return 'browse'
@@ -37,6 +38,9 @@ export default function HWDashboard() {
   const [profileNames, setProfileNames] = useState<Record<string, string>>({})
   const [addressModalOffer, setAddressModalOffer] = useState<any>(null)
   const [addressInput, setAddressInput] = useState('')
+  const [jobPosts, setJobPosts] = useState<any[]>([])
+  const [jobPostsLoaded, setJobPostsLoaded] = useState(false)
+  const [jobPostsLoading, setJobPostsLoading] = useState(false)
   const [wazePinInput, setWazePinInput] = useState('')
   const [savingAddress, setSavingAddress] = useState(false)
 
@@ -95,10 +99,11 @@ export default function HWDashboard() {
         }
       }
       setLoading(false)
-      // If page was opened with ?tab=jobs, trigger applicants load
+      // If page was opened with a tab param, trigger the right load
       if (typeof window !== 'undefined') {
         const urlTab = new URLSearchParams(window.location.search).get('tab')
-        if (urlTab === 'jobs' || urlTab === 'applicants') loadApplicants()
+        if (urlTab === 'applicants') loadApplicants()
+        if (urlTab === 'jobs') loadJobPosts()
       }
     }
     init()
@@ -156,7 +161,33 @@ export default function HWDashboard() {
     setApplicantsLoading(false)
   }
 
-  const handleTabChange = (t: 'browse' | 'offers' | 'applicants' | 'postjob') => {
+  const loadJobPosts = async () => {
+    if (jobPostsLoaded) return
+    setJobPostsLoading(true)
+    const { supabase } = await import('../../../lib/supabase')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setJobPostsLoading(false); return }
+    const { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
+    if (hw) {
+      const { data: posts } = await supabase
+        .from('job_posts')
+        .select('*')
+        .eq('homeowner_id', hw.id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+      const postIds = (posts || []).map((p: any) => p.id)
+      let appCounts: Record<string, number> = {}
+      if (postIds.length > 0) {
+        const { data: apps } = await supabase.from('applications').select('job_id').in('job_id', postIds)
+        ;(apps || []).forEach((a: any) => { appCounts[a.job_id] = (appCounts[a.job_id] || 0) + 1 })
+      }
+      setJobPosts((posts || []).map((p: any) => ({ ...p, applicant_count: appCounts[p.id] || 0 })))
+    }
+    setJobPostsLoaded(true)
+    setJobPostsLoading(false)
+  }
+
+  const handleTabChange = (t: 'browse' | 'offers' | 'applicants' | 'jobs' | 'postjob') => {
     if (t === 'postjob') {
       if (!currentUser) { localStorage.setItem('maidit_intent', 'post_job'); router.push('/login'); return }
       router.push('/dashboard/homeowner/post-job')
@@ -165,6 +196,7 @@ export default function HWDashboard() {
     setTab(t)
     if (t === 'offers') loadOffers()
     if (t === 'applicants') loadApplicants()
+    if (t === 'jobs') loadJobPosts()
   }
 
   const filters = ['All', 'Stay-in', 'Stay-out', 'Metro Manila', 'Province']
@@ -601,6 +633,63 @@ export default function HWDashboard() {
         </div>
       )}
 
+      {tab === 'jobs' && (
+        <div style={{ padding:'16px 16px 32px' }}>
+          <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, marginBottom:'2px', color:'#111827' }}>My Job Posts</div>
+          <div style={{ fontSize:'.72rem', color:'#6b7280', marginBottom:'14px' }}>{jobPosts.length} active job {jobPosts.length === 1 ? 'listing' : 'listings'}</div>
+          {jobPostsLoading && <div style={{ textAlign:'center', padding:'40px', color:'#6b7280' }}>Loading...</div>}
+          {!jobPostsLoading && jobPosts.length === 0 && (
+            <div style={{ textAlign:'center', padding:'40px 20px' }}>
+              <div style={{ fontSize:'2.5rem', marginBottom:'12px' }}>📋</div>
+              <div style={{ color:'#6b7280', fontSize:'.84rem', lineHeight:1.7 }}>Wala ka pang naka-post na trabaho.</div>
+              <button
+                onClick={() => router.push('/dashboard/homeowner/post-job')}
+                style={{ marginTop:'16px', padding:'10px 20px', borderRadius:'10px', background:'#27500A', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'.84rem', fontWeight:700, cursor:'pointer' }}
+              >
+                Mag-post ng Trabaho →
+              </button>
+            </div>
+          )}
+          {jobPosts.map((job: any) => (
+            <div key={job.id} style={{ background:'#fff', borderRadius:'14px', border:'1px solid #ede8e0', overflow:'hidden', marginBottom:'12px' }}>
+              <div style={{ padding:'14px 16px' }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'8px' }}>
+                  <div style={{ fontWeight:700, fontSize:'15px', color:'#111827' }}>{job.title || 'Kasambahay Needed'}</div>
+                  <span style={{ fontSize:'10px', fontWeight:700, padding:'3px 8px', borderRadius:'50px', background:'#f0fdf4', color:'#166534', border:'1px solid #bbf7d0', whiteSpace:'nowrap' as const }}>
+                    Active
+                  </span>
+                </div>
+                <div style={{ fontSize:'12px', color:'#6b7280', marginBottom:'6px' }}>
+                  {job.setup} · {job.city}
+                </div>
+                <div style={{ fontFamily:'serif', fontSize:'17px', fontWeight:900, color:'#1a6b3c', marginBottom:'8px' }}>
+                  ₱{(job.salary_min || 0).toLocaleString()}
+                  {job.salary_max && job.salary_max !== job.salary_min ? `–₱${job.salary_max.toLocaleString()}` : ''}
+                  <span style={{ fontSize:'11px', fontWeight:400, color:'#9ca3af' }}>/mo</span>
+                </div>
+                <div style={{ fontSize:'11px', color:'#6b7280', marginBottom:'10px' }}>
+                  Accepting applicants · {job.applicant_count} applicant{job.applicant_count !== 1 ? 's' : ''}
+                </div>
+                <button
+                  style={{ width:'100%', padding:'10px', borderRadius:'9px', background:'#27500A', color:'#fff', border:'none', fontFamily:'sans-serif', fontSize:'13px', fontWeight:700, cursor:'pointer' }}
+                  onClick={() => handleTabChange('applicants')}
+                >
+                  View Applicants ({job.applicant_count}) →
+                </button>
+              </div>
+            </div>
+          ))}
+          {jobPosts.length > 0 && (
+            <button
+              onClick={() => router.push('/dashboard/homeowner/post-job')}
+              style={{ width:'100%', padding:'11px', borderRadius:'10px', border:'1.5px solid #ede8e0', background:'transparent', color:'#6b7280', fontFamily:'sans-serif', fontSize:'.84rem', fontWeight:600, cursor:'pointer', marginTop:'4px' }}
+            >
+              + Post Another Job
+            </button>
+          )}
+        </div>
+      )}
+
       {tab === 'applicants' && (
         <div style={{ padding:'16px 16px 32px' }}>
           <div style={{ fontFamily:'serif', fontSize:'1.1rem', fontWeight:900, marginBottom:'2px', color:'#111827' }}>Applicants</div>
@@ -799,10 +888,11 @@ export default function HWDashboard() {
 
       <div style={{ position:'fixed', bottom:0, left:0, right:0, background:'#fff', borderTop:'1px solid #f3f4f6', display:'flex' }}>
         {([
-          { id:'browse',     icon:'🔍', label:'Browse',     badge: 0 },
-          { id:'offers',     icon:'📋', label:'My Offers',  badge: actionCount },
+          { id:'browse',     icon:'🔍', label:'Browse',    badge: 0 },
+          { id:'offers',     icon:'📋', label:'Offers',    badge: actionCount },
+          { id:'jobs',       icon:'📌', label:'My Jobs',   badge: 0 },
           { id:'applicants', icon:'✋', label:'Applicants', badge: applicantCount },
-          { id:'postjob',    icon:'📝', label:'Post Job',   badge: 0 },
+          { id:'postjob',    icon:'📝', label:'Post Job',  badge: 0 },
         ] as const).map((t) => (
           <button key={t.id} onClick={() => handleTabChange(t.id)} style={{ flex:1, padding:'10px 4px 9px', display:'flex', flexDirection:'column', alignItems:'center', gap:'3px', border:'none', background:'transparent', cursor:'pointer', position:'relative' }}>
             <span style={{ fontSize:'1.1rem' }}>{t.icon}</span>
