@@ -125,7 +125,7 @@ export default function SendOfferPage() {
         const usedToday = hw?.daily_offers_date === today ? (hw?.daily_offers_used || 0) : 0
         setOffersToday(usedToday)
         setIsFreeOffer(usedToday < 2)
-        if (usedToday >= 4) setBatchPaid(true)
+        if (usedToday > 2) setBatchPaid(true)
       }
       const { data: prof } = await supabase.from('profiles').select('city').eq('id', user.id).single()
       const hwCity = prof?.city || null
@@ -450,8 +450,8 @@ export default function SendOfferPage() {
         {/* Start date */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: C.ink3, marginBottom: 10 }}>Start Date <span style={{ fontWeight: 400, color: C.ink4 }}>(optional)</span></div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 0, background: C.paper, border: `1.5px solid ${C.line}`, borderRadius: 14, overflow: 'hidden' }}>
-            <div style={{ width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.paper2, borderRight: `1px solid ${C.line}`, color: C.ink3, flexShrink: 0 }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', background: C.paper, border: `1.5px solid ${C.line}`, borderRadius: 14, overflow: 'hidden', height: 48 }}>
+            <div style={{ width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.paper2, borderRight: `1px solid ${C.line}`, color: C.ink3, flexShrink: 0, pointerEvents: 'none', zIndex: 1 }}>
               <IcCal />
             </div>
             <input
@@ -459,7 +459,7 @@ export default function SendOfferPage() {
               value={form.start_date}
               min={new Date().toISOString().split('T')[0]}
               onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))}
-              style={{ flex: 1, border: 'none', outline: 'none', padding: '0 14px', height: 48, fontSize: 14, fontFamily: sans, color: form.start_date ? C.ink : C.ink4, background: 'transparent', cursor: 'pointer', width: '100%' }}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none', outline: 'none', paddingLeft: 62, paddingRight: 14, fontSize: 14, fontFamily: sans, color: form.start_date ? C.ink : C.ink4, background: 'transparent', cursor: 'pointer', zIndex: 2 }}
             />
           </div>
         </div>

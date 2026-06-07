@@ -45,24 +45,27 @@ export default function KBDashboard() {
         console.log('offersError:', offersError)
         console.log('kbData.id:', kbData?.id)
         setOffers(offersData || [])
-        const paidOffers = (offersData || []).filter(o => o.status === 'paid')
+        const paidOffers = (offersData || []).filter(
+          o => ['paid', 'hired', 'active'].includes(o.status)
+        )
         if (paidOffers.length > 0) {
-          const homeownerIds = paidOffers.map(o => o.homeowner_id)
+          const hwIds = paidOffers.map(o => o.homeowner_id)
           const { data: hwRows } = await supabase
             .from('homeowners')
             .select('id, profile_id')
-            .in('id', homeownerIds)
+            .in('id', hwIds)
           if (hwRows && hwRows.length > 0) {
-            const profileIds = hwRows.map(h => h.profile_id)
+            const profileIds = hwRows.map((h: any) => h.profile_id)
             const { data: profileRows } = await supabase
               .from('profiles')
               .select('id, full_name, mobile, facebook_url')
               .in('id', profileIds)
-            const merged = hwRows.map(h => ({
+            const merged = hwRows.map((h: any) => ({
               id: h.id,
-              profile: (profileRows || []).find(p => p.id === h.profile_id) || null
+              profile: (profileRows || []).find((p: any) => p.id === h.profile_id) || null
             }))
             setHomeownerContacts(merged)
+            console.log('merged homeownerContacts:', merged)
           }
         }
         const { data: apps } = await supabase.from('applications').select('job_id').eq('kasambahay_id', kbData.id)
@@ -237,6 +240,20 @@ export default function KBDashboard() {
               <span key={i} style={{ fontSize: '10px', padding: '3px 8px', borderRadius: '50px', background: '#fef3e2', color: '#92400e', fontWeight: 600 }}>+ {item.label}</span>
             ))}
           </div>
+        </div>
+      )}
+
+      {isHired && (
+        <div style={{ background: '#27500A', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+          <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff', lineHeight: 1.4 }}>
+            🎉 Hired ka na! Makipag-ugnayan sa iyong employer para sa susunod na hakbang.
+          </div>
+          <button
+            onClick={() => setTab('offers')}
+            style={{ flexShrink: 0, padding: '8px 12px', borderRadius: '9px', border: '1.5px solid rgba(255,255,255,.4)', background: 'rgba(255,255,255,.15)', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const }}
+          >
+            Tingnan ang offer →
+          </button>
         </div>
       )}
 

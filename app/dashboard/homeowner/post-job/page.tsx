@@ -53,24 +53,27 @@ export default function PostJobPage() {
   }))
 
   const insertJob = async () => {
-    if (!hwId) return null
+    if (!hwId) return { error: new Error('No hwId') }
     const { supabase } = await import('../../../../lib/supabase')
-    const { error } = await supabase.from('jobs').insert({
+    const payload = {
       homeowner_id: hwId,
-      salary: parseInt(form.salary),
+      salary: parseInt(form.salary) || 9000,
       start_date: form.start_date || null,
-      urgency: form.urgency,
+      urgency: form.urgency || 'ASAP',
       custom_date: form.custom_date || null,
-      setup: form.setup,
-      day_off: form.day_off,
-      city: form.city,
-      area: form.area,
-      scope: form.scope,
+      setup: form.setup || 'Stay-in',
+      day_off: form.day_off || 'Every Sunday',
+      city: form.city || 'Quezon City',
+      area: form.area || null,
+      scope: form.scope.length > 0 ? form.scope : ['🧹 All-around Maid'],
       household: form.household,
-      pets: form.pets,
+      pets: form.pets || 'No',
       active: true,
       paid_at: new Date().toISOString(),
-    })
+    }
+    console.log('insertJob payload:', payload)
+    const { data, error } = await supabase.from('jobs').insert(payload).select('id').single()
+    console.log('insertJob result:', { data, error })
     return error
   }
 
@@ -79,17 +82,19 @@ export default function PostJobPage() {
     setSubmitting(true)
     setError('')
     const error = await insertJob()
-    if (error) { setSubmitting(false); setError(error.message); return }
+    if (error) { setSubmitting(false); setError((error as any).message || 'Insert failed'); return }
     setSubmitting(false)
     setStep('done')
   }
 
   const handleSkipPost = async () => {
+    console.log('handleSkipPost called')
+    console.log('form data:', { salary: form.salary, setup: form.setup, city: form.city, scope: form.scope, urgency: form.urgency })
     if (!hwId) { setError('Could not load your profile. Please refresh and try again.'); return }
     setSubmitting(true)
     setError('')
     const error = await insertJob()
-    if (error) { setSubmitting(false); setError(error.message); return }
+    if (error) { setSubmitting(false); setError((error as any).message || 'Insert failed'); return }
     window.location.href = '/dashboard/homeowner?tab=jobs'
   }
 

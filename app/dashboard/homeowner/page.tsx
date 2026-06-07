@@ -190,6 +190,7 @@ export default function HWDashboard() {
   }
 
   const actionCount = offers.filter(o => o.status === 'agreed' || o.status === 'countered').length
+  const paidOffer = offers.find(o => o.status === 'paid')
 
   const toIntl = (mobile: string | undefined) => {
     if (!mobile) return ''
@@ -243,6 +244,20 @@ export default function HWDashboard() {
         </h1>
         <button onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.auth.signOut(); router.push('/login') }} style={{ background:'none', border:'none', fontSize:'.72rem', color:'#9ca3af', cursor:'pointer', padding:0, fontFamily:'sans-serif' }}>Sign out</button>
       </div>
+
+      {paidOffer && (
+        <div style={{ background: '#27500A', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+          <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff', lineHeight: 1.4 }}>
+            ✅ Na-hire mo na ang iyong kasambahay! I-coordinate ang kanyang pagdating.
+          </div>
+          <button
+            onClick={() => router.push(`/arrival/${paidOffer.id}`)}
+            style={{ flexShrink: 0, padding: '8px 12px', borderRadius: '9px', border: '1.5px solid rgba(255,255,255,.4)', background: 'rgba(255,255,255,.15)', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const }}
+          >
+            Tingnan →
+          </button>
+        </div>
+      )}
 
       {actionCount > 0 && tab !== 'offers' && (
         <div style={{ margin:'12px 16px 0', background:'#c9943a', borderRadius:'12px', padding:'12px 14px', display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }} onClick={() => handleTabChange('offers')}>

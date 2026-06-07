@@ -343,6 +343,7 @@ export default function PartnerDashboard() {
   }
   const hiredCount = workers.filter(w => w.status === 'hired').length
   const workersWithPendingOffer = workers.filter(w => workerOffers.some(o => o.kasambahay_id === w.id))
+  const transportPaidOffer = workerOffers.find(o => o.status === 'paid' && o.transport_service === true)
 
   const newlyConfirmed = workers.filter(w => {
     if (w.status !== 'available') return false
@@ -374,6 +375,19 @@ export default function PartnerDashboard() {
 
   return (
     <div style={s.wrap}>
+      {transportPaidOffer && (
+        <div style={{ background: C.amber, padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+          <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff', lineHeight: 1.4, fontFamily: sans }}>
+            🚐 May kasambahay na naghihintay ng transport! I-confirm ang boarding.
+          </div>
+          <button
+            onClick={() => { setTab('workers') }}
+            style={{ flexShrink: 0, padding: '8px 12px', borderRadius: '9px', border: '1.5px solid rgba(255,255,255,.4)', background: 'rgba(255,255,255,.15)', color: '#fff', fontFamily: sans, fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const }}
+          >
+            Tingnan →
+          </button>
+        </div>
+      )}
       {/* HEADER — forest green gradient */}
       <div style={{ background: `linear-gradient(160deg, ${C.forestDarkest} 0%, ${C.forestDark} 50%, ${C.forestDeep} 100%)`, padding: '18px 16px 20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
