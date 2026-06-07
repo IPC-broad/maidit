@@ -246,13 +246,13 @@ export default function HWDashboard() {
       </div>
 
       {paidOffer && (
-        <div style={{ background: '#27500A', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+        <div style={{ background: '#27500A', borderLeft: '4px solid #c9943a', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
           <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff', lineHeight: 1.4 }}>
             ✅ Na-hire mo na ang iyong kasambahay! I-coordinate ang kanyang pagdating.
           </div>
           <button
             onClick={() => router.push(`/arrival/${paidOffer.id}`)}
-            style={{ flexShrink: 0, padding: '8px 12px', borderRadius: '9px', border: '1.5px solid rgba(255,255,255,.4)', background: 'rgba(255,255,255,.15)', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const }}
+            style={{ flexShrink: 0, padding: '8px 14px', borderRadius: '9px', border: 'none', background: '#c9943a', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const }}
           >
             Tingnan →
           </button>

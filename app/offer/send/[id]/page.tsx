@@ -450,16 +450,21 @@ export default function SendOfferPage() {
         {/* Start date */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: C.ink3, marginBottom: 10 }}>Start Date <span style={{ fontWeight: 400, color: C.ink4 }}>(optional)</span></div>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', background: C.paper, border: `1.5px solid ${C.line}`, borderRadius: 14, overflow: 'hidden', height: 48 }}>
-            <div style={{ width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.paper2, borderRight: `1px solid ${C.line}`, color: C.ink3, flexShrink: 0, pointerEvents: 'none', zIndex: 1 }}>
+          <div style={{ position: 'relative', overflow: 'hidden', background: C.paper, border: `1.5px solid ${C.line}`, borderRadius: 14, height: 48, display: 'flex', alignItems: 'center' }}>
+            <div style={{ width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.paper2, borderRight: `1px solid ${C.line}`, color: C.ink3, flexShrink: 0 }}>
               <IcCal />
             </div>
+            <span style={{ flex: 1, paddingLeft: 12, fontSize: 14, fontFamily: sans, color: form.start_date ? C.ink : C.ink4, pointerEvents: 'none' as const }}>
+              {form.start_date
+                ? new Date(form.start_date + 'T00:00:00').toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })
+                : 'Pumili ng petsa'}
+            </span>
             <input
               type="date"
               value={form.start_date}
               min={new Date().toISOString().split('T')[0]}
               onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none', outline: 'none', paddingLeft: 62, paddingRight: 14, fontSize: 14, fontFamily: sans, color: form.start_date ? C.ink : C.ink4, background: 'transparent', cursor: 'pointer', zIndex: 2 }}
+              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 10, border: 'none', outline: 'none' }}
             />
           </div>
         </div>

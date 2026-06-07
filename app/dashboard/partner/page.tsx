@@ -376,13 +376,13 @@ export default function PartnerDashboard() {
   return (
     <div style={s.wrap}>
       {transportPaidOffer && (
-        <div style={{ background: C.amber, padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+        <div style={{ background: C.amber, borderLeft: '4px solid #fff3', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
           <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff', lineHeight: 1.4, fontFamily: sans }}>
             🚐 May kasambahay na naghihintay ng transport! I-confirm ang boarding.
           </div>
           <button
             onClick={() => { setTab('workers') }}
-            style={{ flexShrink: 0, padding: '8px 12px', borderRadius: '9px', border: '1.5px solid rgba(255,255,255,.4)', background: 'rgba(255,255,255,.15)', color: '#fff', fontFamily: sans, fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const }}
+            style={{ flexShrink: 0, padding: '8px 14px', borderRadius: '9px', border: 'none', background: 'rgba(0,0,0,.2)', color: '#fff', fontFamily: sans, fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const }}
           >
             Tingnan →
           </button>
@@ -412,6 +412,12 @@ export default function PartnerDashboard() {
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.auth.signOut(); router.push('/') }}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.55)', fontSize: '11px', cursor: 'pointer', fontFamily: sans, padding: '0 2px' }}
+            >
+              Sign out
+            </button>
             <button
               onClick={() => { setTab('add'); setReferMode('choose') }}
               style={{ padding: '7px 12px', borderRadius: '50px', background: C.amber, border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: sans, whiteSpace: 'nowrap' as const }}

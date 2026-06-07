@@ -53,28 +53,28 @@ export default function PostJobPage() {
   }))
 
   const insertJob = async () => {
-    if (!hwId) return { error: new Error('No hwId') }
+    if (!hwId) return new Error('No hwId')
     const { supabase } = await import('../../../../lib/supabase')
+    const salaryNum = parseInt(form.salary) || 9000
     const payload = {
       homeowner_id: hwId,
-      salary: parseInt(form.salary) || 9000,
-      start_date: form.start_date || null,
+      title: 'Kasambahay Needed',
+      salary_min: salaryNum,
+      salary_max: salaryNum,
       urgency: form.urgency || 'ASAP',
-      custom_date: form.custom_date || null,
       setup: form.setup || 'Stay-in',
-      day_off: form.day_off || 'Every Sunday',
       city: form.city || 'Quezon City',
-      area: form.area || null,
+      province: 'Metro Manila',
       scope: form.scope.length > 0 ? form.scope : ['🧹 All-around Maid'],
       household: form.household,
       pets: form.pets || 'No',
-      active: true,
+      status: 'active',
       paid_at: new Date().toISOString(),
     }
     console.log('insertJob payload:', payload)
-    const { data, error } = await supabase.from('jobs').insert(payload).select('id').single()
+    const { data, error } = await supabase.from('job_posts').insert(payload).select('id').single()
     console.log('insertJob result:', { data, error })
-    return error
+    return error || null
   }
 
   const handlePost = async () => {

@@ -147,6 +147,9 @@ export default function ArrivalPage() {
   // ── STATE: ARRIVAL CONFIRMED (just now) ──
   if (done) return (
     <div style={{ minHeight: '100vh', background: '#faf8f5', fontFamily: 'sans-serif', color: '#111827' }}>
+      <div style={{ background: '#fff', borderBottom: '1px solid #ede8e0', padding: '10px 18px', display: 'flex', justifyContent: 'flex-end' }}>
+        <button onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.auth.signOut(); router.push('/') }} style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: '12px', cursor: 'pointer', fontFamily: 'sans-serif' }}>Sign out</button>
+      </div>
       {/* Green hero */}
       <div style={{ background: 'linear-gradient(160deg, #1a6b3c 0%, #155c33 100%)', padding: '48px 24px 36px', textAlign: 'center' as const }}>
         <div style={{ fontSize: '3rem', marginBottom: '14px' }}>🏠</div>
@@ -190,7 +193,8 @@ export default function ArrivalPage() {
     <div style={{ minHeight: '100vh', background: '#faf8f5', fontFamily: 'sans-serif', color: '#111827' }}>
       <div style={{ background: '#fff', borderBottom: '1px solid #ede8e0', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
         <button onClick={() => router.push('/dashboard/homeowner')} style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: '1.1rem', cursor: 'pointer', padding: 0 }}>←</button>
-        <span style={{ fontFamily: 'Georgia, serif', fontSize: '1rem', fontWeight: 900 }}>Trial In Progress</span>
+        <span style={{ fontFamily: 'Georgia, serif', fontSize: '1rem', fontWeight: 900, flex: 1 }}>Trial In Progress</span>
+        <button onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.auth.signOut(); router.push('/') }} style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: '12px', cursor: 'pointer', fontFamily: 'sans-serif' }}>Sign out</button>
       </div>
 
       <div style={{ padding: '20px 18px 56px', maxWidth: '480px', margin: '0 auto' }}>
@@ -250,7 +254,8 @@ export default function ArrivalPage() {
       {/* Header */}
       <div style={{ background: '#fff', borderBottom: '1px solid #ede8e0', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '10px', position: 'sticky' as const, top: 0, zIndex: 10 }}>
         <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: '1.1rem', cursor: 'pointer', padding: 0 }}>←</button>
-        <span style={{ fontFamily: 'Georgia, serif', fontSize: '1rem', fontWeight: 900 }}>Confirm Arrival</span>
+        <span style={{ fontFamily: 'Georgia, serif', fontSize: '1rem', fontWeight: 900, flex: 1 }}>Confirm Arrival</span>
+        <button onClick={async () => { const { supabase } = await import('../../../lib/supabase'); await supabase.auth.signOut(); router.push('/') }} style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: '12px', cursor: 'pointer', fontFamily: 'sans-serif' }}>Sign out</button>
       </div>
 
       {/* Hero */}

@@ -118,7 +118,7 @@ export default function KBDashboard() {
   const handleSignOut = async () => {
     const { supabase } = await import('../../../lib/supabase')
     await supabase.auth.signOut()
-    router.push('/login')
+    router.push('/')
   }
 
   const urgencyLabel = (u: string) => {
@@ -223,7 +223,10 @@ export default function KBDashboard() {
             </div>
           </div>
         </div>
-        <button onClick={() => setShowProfile(true)} style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '6px 12px', color: '#1a6b3c', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>Profile Ko</button>
+        <div style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'flex-end', gap: '4px' }}>
+          <button onClick={() => setShowProfile(true)} style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '9px', padding: '6px 12px', color: '#1a6b3c', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif' }}>Profile Ko</button>
+          <button onClick={handleSignOut} style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: '10px', cursor: 'pointer', fontFamily: 'sans-serif', padding: '0 2px' }}>Sign out</button>
+        </div>
       </div>
 
       {profilePct < 100 && (
@@ -244,15 +247,15 @@ export default function KBDashboard() {
       )}
 
       {isHired && (
-        <div style={{ background: '#27500A', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+        <div style={{ background: '#27500A', borderLeft: '4px solid #c9943a', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
           <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff', lineHeight: 1.4 }}>
             🎉 Hired ka na! Makipag-ugnayan sa iyong employer para sa susunod na hakbang.
           </div>
           <button
             onClick={() => setTab('offers')}
-            style={{ flexShrink: 0, padding: '8px 12px', borderRadius: '9px', border: '1.5px solid rgba(255,255,255,.4)', background: 'rgba(255,255,255,.15)', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const }}
+            style={{ flexShrink: 0, padding: '8px 14px', borderRadius: '9px', border: 'none', background: '#c9943a', color: '#fff', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const }}
           >
-            Tingnan ang offer →
+            Tingnan →
           </button>
         </div>
       )}
@@ -588,26 +591,26 @@ export default function KBDashboard() {
                       )}
                       {(() => {
                         const hwContact = homeownerContacts.find(h => h.id === offer.homeowner_id)
-                        const hwProfile = hwContact?.profile
                         console.log('hwContact for offer', offer.id, ':', hwContact)
+                        console.log('hwContact.profile:', hwContact?.profile)
                         console.log('homeownerContacts array:', homeownerContacts)
-                        if (!hwProfile?.mobile) return null
-                        const hwFbRaw = hwProfile.facebook_url
-                        const hwMessengerUrl = (() => {
-                          if (!hwFbRaw) return null
-                          const match = hwFbRaw.match(/facebook\.com\/(?:profile\.php\?id=)?([^/?&]+)/)
-                          if (match?.[1]) return `https://m.me/${match[1]}`
-                          return null
-                        })()
+                        if (!hwContact) return null
+                        const profile = hwContact.profile
+                        const match = profile?.facebook_url?.match(/facebook\.com\/(?:profile\.php\?id=)?([^/?&]+)/)
+                        const fbId = match?.[1]
                         return (
-                          <div style={{ background: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '12px', padding: '14px 16px' }}>
-                            <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: '#92400e', marginBottom: '8px' }}>I-CONTACT ANG EMPLOYER MO</div>
-                            <div style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: '2px' }}>{hwProfile.full_name}</div>
-                            <div style={{ fontSize: '14px', color: '#374151', marginBottom: '12px' }}>{hwProfile.mobile}</div>
+                          <div style={{ background: '#27500A', borderLeft: '4px solid #c9943a', padding: '16px 20px', marginTop: '12px', borderRadius: '0' }}>
+                            <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.5px', color: 'rgba(255,255,255,.7)', marginBottom: '8px' }}>I-CONTACT ANG EMPLOYER MO</div>
+                            <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff', marginBottom: '2px' }}>{profile?.full_name || 'Homeowner'}</div>
+                            {profile?.mobile && (
+                              <div style={{ fontSize: '14px', color: 'rgba(255,255,255,.85)', marginBottom: '12px' }}>{profile.mobile}</div>
+                            )}
                             <div style={{ display: 'flex', gap: '8px' }}>
-                              <a href={`sms:${hwProfile.mobile}`} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#27500A', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>📱 I-SMS</a>
-                              {hwMessengerUrl && (
-                                <a href={hwMessengerUrl} target="_blank" rel="noreferrer" style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#0084FF', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Messenger</a>
+                              {profile?.mobile && (
+                                <a href={`sms:${profile.mobile}`} style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#c9943a', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>📱 I-SMS</a>
+                              )}
+                              {fbId && (
+                                <a href={`https://m.me/${fbId}`} target="_blank" rel="noreferrer" style={{ flex: 1, padding: '12px', borderRadius: '10px', background: '#0084FF', color: '#fff', fontFamily: 'sans-serif', fontSize: '14px', fontWeight: 700, textAlign: 'center' as const, textDecoration: 'none', display: 'block' }}>💬 Messenger</a>
                               )}
                             </div>
                           </div>
