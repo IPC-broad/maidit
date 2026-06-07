@@ -48,18 +48,28 @@ export default function KBDashboard() {
         const paidOffers = (offersData || []).filter(
           o => ['paid', 'hired', 'active'].includes(o.status)
         )
+        // Debug: sample profiles to confirm columns
+        const { data: sampleProfile } = await supabase
+          .from('profiles')
+          .select('id, full_name, mobile')
+          .limit(3)
+        console.log('sample profiles:', sampleProfile)
+
         if (paidOffers.length > 0) {
-          const hwIds = paidOffers.map(o => o.homeowner_id)
+          const hwIds = paidOffers.map((o: any) => o.homeowner_id)
           const { data: hwRows } = await supabase
             .from('homeowners')
             .select('id, profile_id')
             .in('id', hwIds)
+          console.log('hwRows:', hwRows)
           if (hwRows && hwRows.length > 0) {
             const profileIds = hwRows.map((h: any) => h.profile_id)
-            const { data: profileRows } = await supabase
+            console.log('looking up profile_ids:', profileIds)
+            const { data: profileRows, error: profileError } = await supabase
               .from('profiles')
-              .select('id, full_name, mobile, facebook_url')
+              .select('*')
               .in('id', profileIds)
+            console.log('profileRows:', profileRows, profileError)
             const merged = hwRows.map((h: any) => ({
               id: h.id,
               profile: (profileRows || []).find((p: any) => p.id === h.profile_id) || null

@@ -24,11 +24,6 @@ const IcPin = () => (
     <path d="M12 22s7-7 7-12a7 7 0 10-14 0c0 5 7 12 7 12z"/><circle cx="12" cy="10" r="2.4"/>
   </svg>
 )
-const IcCal = () => (
-  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
-  </svg>
-)
 const IcArrowRight = ({ size = 16 }: { size?: number }) => (
   <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M5 12h14M13 5l7 7-7 7"/>
@@ -450,23 +445,13 @@ export default function SendOfferPage() {
         {/* Start date */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: C.ink3, marginBottom: 10 }}>Start Date <span style={{ fontWeight: 400, color: C.ink4 }}>(optional)</span></div>
-          <div style={{ position: 'relative', overflow: 'hidden', background: C.paper, border: `1.5px solid ${C.line}`, borderRadius: 14, height: 48, display: 'flex', alignItems: 'center' }}>
-            <div style={{ width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.paper2, borderRight: `1px solid ${C.line}`, color: C.ink3, flexShrink: 0 }}>
-              <IcCal />
-            </div>
-            <span style={{ flex: 1, paddingLeft: 12, fontSize: 14, fontFamily: sans, color: form.start_date ? C.ink : C.ink4, pointerEvents: 'none' as const }}>
-              {form.start_date
-                ? new Date(form.start_date + 'T00:00:00').toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })
-                : 'Pumili ng petsa'}
-            </span>
-            <input
-              type="date"
-              value={form.start_date}
-              min={new Date().toISOString().split('T')[0]}
-              onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))}
-              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 10, border: 'none', outline: 'none' }}
-            />
-          </div>
+          <input
+            type="date"
+            value={form.start_date || ''}
+            min={new Date().toISOString().split('T')[0]}
+            onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))}
+            style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1.5px solid #e5e3e2', fontSize: '15px', fontFamily: sans, background: '#fff', color: '#111827', boxSizing: 'border-box' as const, cursor: 'pointer' }}
+          />
         </div>
 
         {/* Setup toggle */}

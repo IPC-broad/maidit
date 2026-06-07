@@ -4,7 +4,14 @@ import { useRouter } from 'next/navigation'
 
 export default function HWDashboard() {
   const router = useRouter()
-  const [tab, setTab] = useState<'browse' | 'offers' | 'applicants' | 'postjob'>('browse')
+  const [tab, setTab] = useState<'browse' | 'offers' | 'applicants' | 'postjob'>(() => {
+    if (typeof window !== 'undefined') {
+      const urlTab = new URLSearchParams(window.location.search).get('tab')
+      if (urlTab === 'jobs' || urlTab === 'applicants') return 'applicants'
+      if (urlTab === 'offers') return 'offers'
+    }
+    return 'browse'
+  })
   const [profiles, setProfiles] = useState<any[]>([])
   const [offers, setOffers] = useState<any[]>([])
   const [applicants, setApplicants] = useState<any[]>([])
@@ -80,7 +87,7 @@ export default function HWDashboard() {
         }
         setOffered(offeredMap)
         // Load applicant count from job postings
-        const { data: jobsData } = await supabase.from('jobs').select('id').eq('homeowner_id', hw.id)
+        const { data: jobsData } = await supabase.from('job_posts').select('id').eq('homeowner_id', hw.id).eq('status', 'active')
         const jobIds = (jobsData || []).map((j: any) => j.id)
         if (jobIds.length > 0) {
           const { data: appsData } = await supabase.from('applications').select('id').in('job_id', jobIds)
@@ -88,6 +95,11 @@ export default function HWDashboard() {
         }
       }
       setLoading(false)
+      // If page was opened with ?tab=jobs, trigger applicants load
+      if (typeof window !== 'undefined') {
+        const urlTab = new URLSearchParams(window.location.search).get('tab')
+        if (urlTab === 'jobs' || urlTab === 'applicants') loadApplicants()
+      }
     }
     init()
   }, [])
@@ -129,7 +141,7 @@ export default function HWDashboard() {
     if (!user) { router.push('/login'); return }
     const { data: hw } = await supabase.from('homeowners').select('id').eq('profile_id', user.id).single()
     if (hw) {
-      const { data: jobsData } = await supabase.from('jobs').select('id').eq('homeowner_id', hw.id)
+      const { data: jobsData } = await supabase.from('job_posts').select('id').eq('homeowner_id', hw.id).eq('status', 'active')
       const jobIds = (jobsData || []).map((j: any) => j.id)
       if (jobIds.length > 0) {
         const { data } = await supabase
