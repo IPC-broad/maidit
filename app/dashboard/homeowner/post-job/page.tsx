@@ -83,7 +83,9 @@ export default function PostJobPage() {
     if (!hwId) { setError('Could not load your profile. Please refresh and try again.'); return }
     setSubmitting(true)
     setError('')
-    const { error, id } = await insertJob()
+    const result = await insertJob()
+    if (result instanceof Error) { setSubmitting(false); setError(result.message || 'Insert failed'); return }
+    const { error, id } = result
     if (error) { setSubmitting(false); setError((error as any).message || 'Insert failed'); return }
     setSubmitting(false)
     setPostedJobId(id)
@@ -96,7 +98,9 @@ export default function PostJobPage() {
     if (!hwId) { setError('Could not load your profile. Please refresh and try again.'); return }
     setSubmitting(true)
     setError('')
-    const { error, id } = await insertJob()
+    const result = await insertJob()
+    if (result instanceof Error) { setSubmitting(false); setError(result.message || 'Insert failed'); return }
+    const { error, id } = result
     if (error) { setSubmitting(false); setError((error as any).message || 'Insert failed'); return }
     setSubmitting(false)
     setPostedJobId(id)
