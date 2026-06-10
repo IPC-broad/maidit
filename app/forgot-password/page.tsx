@@ -2,21 +2,40 @@
 import { useState } from 'react'
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('')
+  const [input, setInput] = useState('')
   const [sent, setSent] = useState(false)
+  const [sentTo, setSentTo] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const handleSubmit = async () => {
-    if (!email.trim()) { setError('Please enter your email address.'); return }
+    if (!input.trim()) { setError('Please enter your email or mobile number.'); return }
     setLoading(true)
     setError('')
     const { supabase } = await import('../../lib/supabase')
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+    const val = input.trim().replace(/\s/g, '')
+    const isMobile = /^(\+63|09)\d{8,10}$/.test(val)
+    let emailToUse = val
+    if (isMobile) {
+      const normalized = val.startsWith('+63') ? '0' + val.slice(3) : val
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('mobile', normalized)
+        .single()
+      if (!prof?.email) {
+        setError('Hindi mahanap ang account na may mobile number na ito.')
+        setLoading(false)
+        return
+      }
+      emailToUse = prof.email
+    }
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(emailToUse, {
       redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
     })
     setLoading(false)
     if (resetError) { setError(resetError.message); return }
+    setSentTo(isMobile ? input.trim() : emailToUse)
     setSent(true)
   }
 
@@ -26,14 +45,14 @@ export default function ForgotPasswordPage() {
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🔑</div>
           <div style={{ fontFamily: 'serif', fontSize: '22px', fontWeight: 900, color: '#111827', marginBottom: '6px' }}>Forgot your password?</div>
-          <div style={{ fontSize: '13px', color: '#6b7280', lineHeight: 1.6 }}>Enter your email and we'll send you a reset link.</div>
+          <div style={{ fontSize: '13px', color: '#6b7280', lineHeight: 1.6 }}>Enter your email or mobile number and we'll send you a reset link.</div>
         </div>
 
         {sent ? (
           <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
             <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>✅</div>
             <div style={{ fontSize: '14px', fontWeight: 700, color: '#166534', marginBottom: '4px' }}>Check your email</div>
-            <div style={{ fontSize: '13px', color: '#166534', lineHeight: 1.6 }}>We sent a reset link to <strong>{email}</strong>. Check your inbox (and spam folder).</div>
+            <div style={{ fontSize: '13px', color: '#166534', lineHeight: 1.6 }}>We sent a reset link to <strong>{sentTo}</strong>. Check your inbox (and spam folder).</div>
           </div>
         ) : (
           <>
@@ -42,12 +61,12 @@ export default function ForgotPasswordPage() {
                 {error}
               </div>
             )}
-            <label style={{ fontSize: '12px', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '6px' }}>Email address</label>
+            <label style={{ fontSize: '12px', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '6px' }}>Email o mobile number</label>
             <input
-              type="email"
-              placeholder="you@email.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              type="text"
+              placeholder="you@email.com o 09XXXXXXXXX"
+              value={input}
+              onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSubmit()}
               style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', border: '1.5px solid #e5e7eb', fontSize: '14px', fontFamily: 'sans-serif', outline: 'none', boxSizing: 'border-box' as const, marginBottom: '14px' }}
             />

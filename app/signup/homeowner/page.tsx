@@ -201,6 +201,7 @@ export default function HomeownerSignup() {
       id: userId,
       role: 'homeowner',
       full_name: form.full_name,
+      email: form.email,
       mobile: form.mobile,
       city: form.city,
     })

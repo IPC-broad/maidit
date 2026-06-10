@@ -293,6 +293,7 @@ export default function KasambahaySignup() {
       id: userId,
       role: 'kasambahay',
       full_name: `${form.first_name} ${form.last_name}`,
+      email: `kb_${form.mobile}@maidit.app`,
       mobile: form.mobile,
       city: selProv!.name,
       verified: true,

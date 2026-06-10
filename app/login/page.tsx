@@ -81,13 +81,22 @@ function LoginForm() {
     setError('')
     try {
       const { supabase } = await import('../../lib/supabase')
-      const val = credential.trim()
-      const isMobile = /^(\+63|09)\d/.test(val) || /^\d{10,11}$/.test(val)
+      const val = credential.trim().replace(/\s/g, '')
+      const isMobile = /^(\+63|09)\d{8,10}$/.test(val)
       let loginEmail: string
       if (isMobile) {
-        const digits = val.replace(/\D/g, '')
-        const normalized = digits.startsWith('63') ? '0' + digits.slice(2) : digits
-        loginEmail = `kb_${normalized}@maidit.app`
+        const normalized = val.startsWith('+63') ? '0' + val.slice(3) : val
+        const { data: prof } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('mobile', normalized)
+          .single()
+        if (!prof?.email) {
+          setError('Hindi mahanap ang account na may mobile number na ito.')
+          setLoading(false)
+          return
+        }
+        loginEmail = prof.email
       } else {
         loginEmail = val
       }

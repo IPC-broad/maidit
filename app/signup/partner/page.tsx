@@ -179,6 +179,7 @@ export default function PartnerSignupPage() {
       id: userId,
       role: 'partner',
       full_name: fullName,
+      email: partnerEmail,
       mobile: mobile,
       city: form.city,
     })
