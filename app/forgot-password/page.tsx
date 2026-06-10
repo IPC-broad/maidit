@@ -18,17 +18,18 @@ export default function ForgotPasswordPage() {
     let emailToUse = val
     if (isMobile) {
       const normalized = val.startsWith('+63') ? '0' + val.slice(3) : val
-      const { data: prof } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('mobile', normalized)
-        .single()
-      if (!prof?.email) {
+      const res = await fetch('/api/lookup-mobile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: normalized }),
+      })
+      const json = await res.json()
+      if (!res.ok || !json.email) {
         setError('Hindi mahanap ang account na may mobile number na ito.')
         setLoading(false)
         return
       }
-      emailToUse = prof.email
+      emailToUse = json.email
     }
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(emailToUse, {
       redirectTo: `${window.location.origin}/auth/callback?type=recovery`,

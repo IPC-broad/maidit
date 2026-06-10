@@ -86,17 +86,20 @@ function LoginForm() {
       let loginEmail: string
       if (isMobile) {
         const normalized = val.startsWith('+63') ? '0' + val.slice(3) : val
-        const { data: prof } = await supabase
-          .from('profiles')
-          .select('email')
-          .eq('mobile', normalized)
-          .single()
-        if (!prof?.email) {
+        console.log('Looking up mobile:', normalized)
+        const res = await fetch('/api/lookup-mobile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mobile: normalized }),
+        })
+        const json = await res.json()
+        console.log('Profile lookup result:', json)
+        if (!res.ok || !json.email) {
           setError('Hindi mahanap ang account na may mobile number na ito.')
           setLoading(false)
           return
         }
-        loginEmail = prof.email
+        loginEmail = json.email
       } else {
         loginEmail = val
       }
