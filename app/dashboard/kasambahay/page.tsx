@@ -64,12 +64,12 @@ export default function KBDashboard() {
           console.log('hwRows:', hwRows)
           if (hwRows && hwRows.length > 0) {
             const profileIds = hwRows.map((h: any) => h.profile_id)
-            console.log('looking up profile_ids:', profileIds)
+            console.log('profileIds to look up:', profileIds)
             const { data: profileRows, error: profileError } = await supabase
               .from('profiles')
-              .select('*')
+              .select('id, full_name, mobile, email, facebook_url')
               .in('id', profileIds)
-            console.log('profileRows:', profileRows, profileError)
+            console.log('profileRows result:', profileRows, profileError)
             const merged = hwRows.map((h: any) => ({
               id: h.id,
               profile: (profileRows || []).find((p: any) => p.id === h.profile_id) || null
