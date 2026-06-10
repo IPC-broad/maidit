@@ -12,17 +12,17 @@ export async function POST(req: NextRequest) {
 
   console.log('[lookup-mobile] looking up mobile:', mobile)
 
-  const { data, error } = await supabaseAdmin
+  const { data: profile, error: lookupError } = await supabaseAdmin
     .from('profiles')
-    .select('email')
+    .select('email, mobile')
     .eq('mobile', mobile)
-    .single()
+    .maybeSingle()
 
-  console.log('[lookup-mobile] result:', { data, error })
+  console.log('[lookup-mobile] result:', { profile, lookupError, mobile })
 
-  if (!data?.email) {
+  if (!profile?.email) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
-  return NextResponse.json({ email: data.email })
+  return NextResponse.json({ email: profile.email })
 }

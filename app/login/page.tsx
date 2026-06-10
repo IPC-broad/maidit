@@ -83,10 +83,13 @@ function LoginForm() {
       const { supabase } = await import('../../lib/supabase')
       const val = credential.trim().replace(/\s/g, '')
       const isMobile = /^(\+63|09)\d{8,10}$/.test(val)
+      console.log('Raw input:', credential)
+      console.log('isMobile check:', isMobile, 'for input:', val)
       let loginEmail: string
       if (isMobile) {
         const normalized = val.startsWith('+63') ? '0' + val.slice(3) : val
-        console.log('Looking up mobile:', normalized)
+        console.log('Normalized:', normalized)
+        console.log('Attempting mobile lookup for:', normalized)
         const res = await fetch('/api/lookup-mobile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
