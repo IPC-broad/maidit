@@ -37,6 +37,12 @@ export default function AuthCallbackPage() {
         return
       }
 
+      const ADMIN_EMAILS = ['ruffa_eugenio@yahoo.com', 'ruffa.erodriguez@gmail.com', 'test@maidit.com', 'admin@maidit.com']
+      if (ADMIN_EMAILS.includes(user.email ?? '')) {
+        router.push('/admin/dashboard')
+        return
+      }
+
       // Check if profile exists
       const { data: profile } = await supabase
         .from('profiles')

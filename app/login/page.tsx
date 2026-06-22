@@ -11,6 +11,8 @@ const C = {
 const serif = "'Instrument Serif', Georgia, serif"
 const sans  = "'Geist', ui-sans-serif, sans-serif"
 
+const ADMIN_EMAILS = ['ruffa_eugenio@yahoo.com', 'ruffa.erodriguez@gmail.com', 'test@maidit.com', 'admin@maidit.com']
+
 const IcArrowRight = () => (
   <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M5 12h14M13 5l7 7-7 7"/>
@@ -104,6 +106,10 @@ const [error, setError]           = useState('')
       if (signInError) {
         setError('Incorrect email/mobile or password. Please try again.')
         setLoading(false)
+        return
+      }
+      if (ADMIN_EMAILS.includes(loginEmail)) {
+        router.push('/admin/dashboard')
         return
       }
       await redirectAfterLogin(supabase, data.user.id)

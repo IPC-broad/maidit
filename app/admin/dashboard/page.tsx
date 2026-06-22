@@ -66,13 +66,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     ;(async () => {
       const { supabase } = await import('../../../lib/supabase')
-      const { data } = await supabase.auth.getSession()
-      const session = data?.session
-      if (!session) { router.push('/login'); return }
-      const email = session.user?.email ?? ''
-      if (!ADMIN_EMAILS.includes(email)) { router.push('/login'); return }
-      setToken(session.access_token)
-      setUserEmail(email)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/login'); return }
+      if (!ADMIN_EMAILS.includes(user.email ?? '')) { router.push('/login'); return }
+      const { data: { session } } = await supabase.auth.getSession()
+      setToken(session?.access_token ?? '')
+      setUserEmail(user.email ?? '')
       setAuthed(true)
     })()
   }, [router])
