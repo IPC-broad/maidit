@@ -17,11 +17,6 @@ const IcArrowRight = () => (
   </svg>
 )
 
-const FacebookIcon = () => (
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-  </svg>
-)
 
 function LoginForm() {
   const router = useRouter()
@@ -31,8 +26,7 @@ function LoginForm() {
   const [credential, setCredential] = useState('')
   const [password, setPassword]     = useState('')
   const [loading, setLoading]       = useState(false)
-  const [fbLoading, setFbLoading]   = useState(false)
-  const [error, setError]           = useState('')
+const [error, setError]           = useState('')
   const [showPass, setShowPass]     = useState(false)
 
   useEffect(() => {
@@ -119,23 +113,7 @@ function LoginForm() {
     }
   }
 
-  const handleFacebookLogin = async () => {
-    setFbLoading(true)
-    setError('')
-    try {
-      const { supabase } = await import('../../lib/supabase')
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: 'facebook',
-        options: { redirectTo: `${window.location.origin}/auth/callback` },
-      })
-      if (oauthError) { setError(oauthError.message); setFbLoading(false) }
-    } catch {
-      setError('Facebook login failed. Please try again.')
-      setFbLoading(false)
-    }
-  }
-
-  const inputStyle: React.CSSProperties = {
+const inputStyle: React.CSSProperties = {
     width: '100%', padding: '13px 14px',
     border: `1.5px solid ${C.line}`, borderRadius: 13,
     fontFamily: sans, fontSize: 15, color: C.ink,
@@ -165,34 +143,6 @@ function LoginForm() {
               {error}
             </div>
           )}
-
-          {/* Facebook — TOP */}
-          <button
-            onClick={handleFacebookLogin}
-            disabled={fbLoading}
-            style={{
-              width: '100%', height: 52, borderRadius: 14, border: 'none',
-              background: '#1877f2', color: '#fff',
-              fontFamily: sans, fontSize: 15, fontWeight: 600,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-              cursor: fbLoading ? 'not-allowed' : 'pointer',
-              opacity: fbLoading ? 0.7 : 1, transition: 'opacity .15s',
-              boxShadow: '0 4px 14px -6px rgba(24,119,242,0.45)',
-            }}
-          >
-            <FacebookIcon />
-            {fbLoading ? 'Redirecting…' : 'Mag-login gamit ang Facebook'}
-          </button>
-          <div style={{ textAlign: 'center', fontSize: 12, color: C.ink3, marginTop: 6, marginBottom: 4 }}>
-            Pinakamabilis na paraan ng pag-login
-          </div>
-
-          {/* Divider */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0' }}>
-            <div style={{ flex: 1, height: 1, background: C.line }} />
-            <span style={{ fontSize: 12, color: C.ink4, whiteSpace: 'nowrap' }}>o mag-login gamit ang email/mobile</span>
-            <div style={{ flex: 1, height: 1, background: C.line }} />
-          </div>
 
           {/* Credential input */}
           <div style={{ marginBottom: 14 }}>
