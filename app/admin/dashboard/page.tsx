@@ -31,7 +31,6 @@ export default function AdminDashboard() {
   const router = useRouter()
 
   const [authed, setAuthed] = useState(false)
-  const [token, setToken] = useState('')
   const [userEmail, setUserEmail] = useState('')
   const [section, setSection] = useState<Section>('overview')
   const [stats, setStats] = useState<any>(null)
@@ -69,8 +68,6 @@ export default function AdminDashboard() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       if (!ADMIN_EMAILS.includes(user.email ?? '')) { router.push('/login'); return }
-      const { data: { session } } = await supabase.auth.getSession()
-      setToken(session?.access_token ?? '')
       setUserEmail(user.email ?? '')
       setAuthed(true)
     })()
@@ -79,7 +76,8 @@ export default function AdminDashboard() {
   const apiFetch = async (url: string, opts?: RequestInit) => {
     const res = await fetch(url, {
       ...opts,
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...(opts?.headers ?? {}) }
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', ...(opts?.headers ?? {}) }
     })
     return res.json()
   }
@@ -144,20 +142,20 @@ export default function AdminDashboard() {
     }
   }
 
-  // Fetch stats on token ready
+  // Fetch stats once authed
   useEffect(() => {
-    if (token) fetchStats()
-  }, [token])
+    if (authed) fetchStats()
+  }, [authed])
 
   // Lazy load sections
   useEffect(() => {
-    if (!token) return
+    if (!authed) return
     if (section === 'partners' && partners.length === 0) fetchPartners()
     if (section === 'homeowners' && homeowners.length === 0) fetchHomeowners()
     if (section === 'kasambahay' && kasambahay.length === 0) fetchKasambahay()
     if (section === 'offers' && offers.length === 0) fetchOffers()
     if (section === 'job-posts' && jobPosts.length === 0) fetchJobPosts()
-  }, [section, token])
+  }, [section, authed])
 
   const showActionMsg = (msg: string) => {
     setActionMsg(msg)

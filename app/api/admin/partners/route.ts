@@ -1,17 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
+import { createServerClient } from '@supabase/ssr'
 
 const ADMIN_EMAILS = ['ruffa_eugenio@yahoo.com', 'ruffa.erodriguez@gmail.com', 'test@maidit.com', 'admin@maidit.com']
 
-export async function GET(req: NextRequest) {
-  const token = req.headers.get('authorization')?.replace('Bearer ', '')
-  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function GET() {
+  const cookieStore = await cookies()
+  const supabaseAuth = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { get: (name) => cookieStore.get(name)?.value } }
+  )
+  const { data: { user } } = await supabaseAuth.auth.getUser()
+  if (!user || !ADMIN_EMAILS.includes(user.email ?? '')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   const sa = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
-  const { data: { user } } = await sa.auth.getUser(token)
-  if (!user || !ADMIN_EMAILS.includes(user.email ?? '')) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
 
   const { data: partnersData, error: partnersError } = await sa
     .from('partners')
