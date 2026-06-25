@@ -525,14 +525,15 @@ export default function AdminDashboard() {
         filtered.map(k => [
           k.profile?.full_name ?? k.name ?? '—',
           k.profile?.mobile ?? k.mobile ?? '—',
-          k.profile?.province ?? k.province ?? '—',
-          k.profile?.setup ?? k.setup ?? '—',
+          k.province ?? '—',
+          k.setup ?? '—',
           String(k.asking_salary ?? '—'),
-          k.is_verified ? 'Yes' : 'No',
+          k.has_govt_id ? 'Yes' : 'No',
+          k.has_nbi ? 'Yes' : 'No',
           k.referred_by ? (k.partner_referral_code ?? k.referred_by) : 'Direct',
           fmtDate(k.created_at)
         ]),
-        ['Name', 'Mobile', 'Province', 'Setup', 'Salary', 'Verified', 'Source', 'Joined']
+        ['Name', 'Mobile', 'Province', 'Setup', 'Salary', 'Govt ID', 'NBI', 'Source', 'Joined']
       )
     }
 
@@ -589,7 +590,7 @@ export default function AdminDashboard() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: sans, fontSize: 13 }}>
             <thead>
               <tr style={{ background: C.forestSoft }}>
-                {['Name', 'Mobile', 'Province', 'Setup', 'Salary', 'Source', 'Verified', 'Govt ID', 'NBI', 'Status', 'Joined'].map(h => (
+                {['Name', 'Mobile', 'Province', 'Setup', 'Salary', 'Source', 'Govt ID', 'NBI', 'Status', 'Joined'].map(h => (
                   <th key={h} style={{ padding: '10px 12px', textAlign: 'left', color: C.ink2, fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
@@ -602,7 +603,7 @@ export default function AdminDashboard() {
                   <tr key={k.id} style={{ background: i % 2 === 0 ? C.paper : C.paper2, borderBottom: `1px solid ${C.line}` }}>
                     <td style={{ padding: '10px 12px', color: C.ink }}>{k.profile?.full_name ?? k.name ?? '—'}</td>
                     <td style={{ padding: '10px 12px', color: C.ink2 }}>{k.profile?.mobile ?? k.mobile ?? '—'}</td>
-                    <td style={{ padding: '10px 12px', color: C.ink2 }}>{k.profile?.province ?? k.province ?? '—'}</td>
+                    <td style={{ padding: '10px 12px', color: C.ink2 }}>{k.province ?? '—'}</td>
                     <td style={{ padding: '10px 12px', color: C.ink2 }}>{k.setup ?? '—'}</td>
                     <td style={{ padding: '10px 12px', color: C.ink }}>₱{(k.asking_salary ?? 0).toLocaleString()}</td>
                     <td style={{ padding: '10px 12px' }}>
@@ -611,9 +612,8 @@ export default function AdminDashboard() {
                         : <span style={{ background: C.ink3 + '18', color: C.ink3, border: `1px solid ${C.ink3}44`, borderRadius: 12, padding: '2px 10px', fontSize: 12 }}>Direct</span>
                       }
                     </td>
-                    <td style={{ padding: '10px 12px', textAlign: 'center' }}>{k.is_verified ? <span style={{ color: C.green }}>✓</span> : <span style={{ color: C.ink3 }}>✗</span>}</td>
-                    <td style={{ padding: '10px 12px', textAlign: 'center' }}>{k.has_govt_id ? <span style={{ color: C.green }}>✓</span> : <span style={{ color: C.ink3 }}>✗</span>}</td>
-                    <td style={{ padding: '10px 12px', textAlign: 'center' }}>{k.has_nbi ? <span style={{ color: C.green }}>✓</span> : <span style={{ color: C.ink3 }}>✗</span>}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'center' }}>{k.has_govt_id ? <span style={{ color: C.green }}>✅</span> : <span style={{ color: C.ink3 }}>❌</span>}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'center' }}>{k.has_nbi ? <span style={{ color: C.green }}>✅</span> : <span style={{ color: C.ink3 }}>❌</span>}</td>
                     <td style={{ padding: '10px 12px' }}>
                       <span style={{ background: statusColor + '18', color: statusColor, border: `1px solid ${statusColor}44`, borderRadius: 12, padding: '2px 10px', fontSize: 12 }}>
                         {k.status ?? '—'}
@@ -624,7 +624,7 @@ export default function AdminDashboard() {
                 )
               })}
               {filtered.length === 0 && (
-                <tr><td colSpan={11} style={{ padding: '20px 12px', color: C.ink3, textAlign: 'center' }}>No results.</td></tr>
+                <tr><td colSpan={10} style={{ padding: '20px 12px', color: C.ink3, textAlign: 'center' }}>No results.</td></tr>
               )}
             </tbody>
           </table>

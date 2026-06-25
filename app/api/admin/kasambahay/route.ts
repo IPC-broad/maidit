@@ -25,7 +25,7 @@ export async function GET() {
 
   const { data: kbList, error: kbError } = await sa
     .from('kasambahay')
-    .select('*')
+    .select('id, profile_id, asking_salary, setup, province, skills, availability, referred_by, has_govt_id, has_nbi, civil_status, num_children, status, selfie_url, proxy_mode, edad, created_at')
     .order('created_at', { ascending: false })
 
   if (kbError) console.log('kasambahay error:', kbError)
