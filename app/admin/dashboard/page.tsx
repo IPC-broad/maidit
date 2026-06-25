@@ -351,12 +351,9 @@ export default function AdminDashboard() {
                       )}
                       <div style={{ flex: 1 }}>
                         <div style={{ fontFamily: serif, fontSize: 20, color: C.ink, marginBottom: 4 }}>
-                          {p.profile?.full_name ?? p.name ?? 'Unknown'}
+                          {p.profile?.full_name ?? 'Unknown'}
                         </div>
-                        <div style={{ fontFamily: sans, fontSize: 13, color: C.ink2, marginBottom: 2 }}>{p.mobile ?? p.profile?.mobile ?? '—'}</div>
-                        <div style={{ fontFamily: sans, fontSize: 13, color: C.ink3, marginBottom: 8 }}>
-                          {[p.profile?.city, p.profile?.province].filter(Boolean).join(', ') || '—'}
-                        </div>
+                        <div style={{ fontFamily: sans, fontSize: 13, color: C.ink2, marginBottom: 8 }}>{p.profile?.mobile ?? '—'}</div>
                         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10 }}>
                           <span style={{ background: C.amberSoft, color: C.amber, border: `1px solid ${C.amber}44`, borderRadius: 12, padding: '2px 10px', fontFamily: sans, fontSize: 12 }}>
                             Tier: {p.tier ?? '—'}
@@ -393,7 +390,7 @@ export default function AdminDashboard() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: sans, fontSize: 13 }}>
               <thead>
                 <tr style={{ background: C.forestSoft }}>
-                  {['Name', 'Mobile', 'Tier', 'Referral Code', 'Referred', 'Hired', 'Earnings', 'Joined', 'Approved'].map(h => (
+                  {['Name', 'Mobile', 'Tier', 'Referral Code', 'Referred', 'Hired', 'Earnings', 'Balance', 'Workers', 'Joined', 'Approved'].map(h => (
                     <th key={h} style={{ padding: '10px 12px', textAlign: 'left', color: C.ink2, fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
@@ -401,13 +398,15 @@ export default function AdminDashboard() {
               <tbody>
                 {allP.map((p: any, i: number) => (
                   <tr key={p.id} style={{ background: i % 2 === 0 ? C.paper : C.paper2, borderBottom: `1px solid ${C.line}` }}>
-                    <td style={{ padding: '10px 12px', color: C.ink }}>{p.profile?.full_name ?? p.name ?? '—'}</td>
-                    <td style={{ padding: '10px 12px', color: C.ink2 }}>{p.mobile ?? p.profile?.mobile ?? '—'}</td>
+                    <td style={{ padding: '10px 12px', color: C.ink }}>{p.profile?.full_name ?? '—'}</td>
+                    <td style={{ padding: '10px 12px', color: C.ink2 }}>{p.profile?.mobile ?? '—'}</td>
                     <td style={{ padding: '10px 12px', color: C.amber }}>{p.tier ?? '—'}</td>
                     <td style={{ padding: '10px 12px', fontFamily: 'monospace', fontSize: 12, color: C.forest }}>{p.referral_code ?? '—'}</td>
-                    <td style={{ padding: '10px 12px', color: C.ink2, textAlign: 'center' }}>{p.referred_count ?? 0}</td>
-                    <td style={{ padding: '10px 12px', color: C.ink2, textAlign: 'center' }}>{p.hired_count ?? 0}</td>
-                    <td style={{ padding: '10px 12px', color: C.ink }}>₱{((p.hired_count ?? 0) * 500).toLocaleString()}</td>
+                    <td style={{ padding: '10px 12px', color: C.ink2, textAlign: 'center' }}>{p.referral_count ?? 0}</td>
+                    <td style={{ padding: '10px 12px', color: C.ink2, textAlign: 'center' }}>{p.hire_count ?? 0}</td>
+                    <td style={{ padding: '10px 12px', color: C.ink }}>₱{(p.earnings ?? 0).toLocaleString()}</td>
+                    <td style={{ padding: '10px 12px', color: C.ink }}>₱{(p.balance ?? 0).toLocaleString()}</td>
+                    <td style={{ padding: '10px 12px', color: C.ink2, textAlign: 'center' }}>{p.worker_count ?? 0}</td>
                     <td style={{ padding: '10px 12px', color: C.ink3, whiteSpace: 'nowrap' }}>{fmtDate(p.created_at)}</td>
                     <td style={{ padding: '10px 12px', textAlign: 'center' }}>
                       {p.approved
@@ -441,14 +440,13 @@ export default function AdminDashboard() {
       exportCSV('homeowners.csv',
         filtered.map(h => [
           h.profile?.full_name ?? '—',
-          h.profile?.mobile ?? h.mobile ?? '—',
-          h.email ?? '—',
-          h.profile?.city ?? '—',
-          String(h.offers_count ?? 0),
-          String(h.hires_count ?? 0),
+          h.profile?.mobile ?? '—',
+          h.profile?.email ?? '—',
+          h.city ?? '—',
+          String(h.offer_count ?? 0),
           fmtDate(h.created_at)
         ]),
-        ['Name', 'Mobile', 'Email', 'City', 'Offers', 'Hires', 'Joined']
+        ['Name', 'Mobile', 'Email', 'City', 'Offers Sent', 'Joined']
       )
     }
 
@@ -470,7 +468,7 @@ export default function AdminDashboard() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: sans, fontSize: 13 }}>
             <thead>
               <tr style={{ background: C.forestSoft }}>
-                {['Name', 'Mobile', 'Email', 'City', 'Offers Sent', 'Hires', 'Last Active', 'Joined'].map(h => (
+                {['Name', 'Mobile', 'Email', 'City', 'Offers Sent', 'Joined'].map(h => (
                   <th key={h} style={{ padding: '10px 12px', textAlign: 'left', color: C.ink2, fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
@@ -479,17 +477,15 @@ export default function AdminDashboard() {
               {filtered.map((h: any, i: number) => (
                 <tr key={h.id} style={{ background: i % 2 === 0 ? C.paper : C.paper2, borderBottom: `1px solid ${C.line}` }}>
                   <td style={{ padding: '10px 12px', color: C.ink }}>{h.profile?.full_name ?? '—'}</td>
-                  <td style={{ padding: '10px 12px', color: C.ink2 }}>{h.profile?.mobile ?? h.mobile ?? '—'}</td>
-                  <td style={{ padding: '10px 12px', color: C.ink2 }}>{h.email ?? '—'}</td>
-                  <td style={{ padding: '10px 12px', color: C.ink2 }}>{h.profile?.city ?? '—'}</td>
-                  <td style={{ padding: '10px 12px', color: C.ink2, textAlign: 'center' }}>{h.offers_count ?? 0}</td>
-                  <td style={{ padding: '10px 12px', color: C.ink2, textAlign: 'center' }}>{h.hires_count ?? 0}</td>
-                  <td style={{ padding: '10px 12px', color: C.ink3, whiteSpace: 'nowrap' }}>{fmtDate(h.last_active ?? h.last_sign_in_at)}</td>
+                  <td style={{ padding: '10px 12px', color: C.ink2 }}>{h.profile?.mobile ?? '—'}</td>
+                  <td style={{ padding: '10px 12px', color: C.ink2 }}>{h.profile?.email ?? '—'}</td>
+                  <td style={{ padding: '10px 12px', color: C.ink2 }}>{h.city ?? '—'}</td>
+                  <td style={{ padding: '10px 12px', color: C.ink2, textAlign: 'center' }}>{h.offer_count ?? 0}</td>
                   <td style={{ padding: '10px 12px', color: C.ink3, whiteSpace: 'nowrap' }}>{fmtDate(h.created_at)}</td>
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={8} style={{ padding: '20px 12px', color: C.ink3, textAlign: 'center' }}>No results.</td></tr>
+                <tr><td colSpan={6} style={{ padding: '20px 12px', color: C.ink3, textAlign: 'center' }}>No results.</td></tr>
               )}
             </tbody>
           </table>
