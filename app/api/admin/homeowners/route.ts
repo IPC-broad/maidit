@@ -6,6 +6,10 @@ import { createServerClient } from '@supabase/ssr'
 const ADMIN_EMAILS = ['ruffa_eugenio@yahoo.com', 'ruffa.erodriguez@gmail.com', 'test@maidit.com', 'admin@maidit.com']
 
 export async function GET() {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json({ error: 'SERVICE_ROLE_KEY not configured' }, { status: 500 })
+  }
+
   const cookieStore = await cookies()
   const supabaseAuth = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,18 +21,16 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const sa = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+  const sa = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY)
 
-  const { data: hwData, error: hwError } = await sa
+  const { data: hwList, error: hwError } = await sa
     .from('homeowners')
-    .select('id, profile_id, preferred_setup, subscription_expires_at, created_at')
+    .select('*')
     .order('created_at', { ascending: false })
 
-  if (hwError) console.log('homeowners query error:', hwError)
+  if (hwError) console.log('homeowners error:', hwError)
 
-  const homeowners = hwData ?? []
-
-  const profileIds = homeowners.map((hw: any) => hw.profile_id).filter(Boolean)
+  const profileIds = (hwList ?? []).map((h: any) => h.profile_id).filter(Boolean)
 
   const [profilesRes, offersRes] = await Promise.all([
     profileIds.length > 0
@@ -36,11 +38,6 @@ export async function GET() {
       : Promise.resolve({ data: [] }),
     sa.from('offers').select('homeowner_id, status, created_at'),
   ])
-
-  const profileMap: Record<string, any> = {}
-  for (const p of (profilesRes.data ?? []) as any[]) {
-    profileMap[p.id] = p
-  }
 
   const offerCounts: Record<string, number> = {}
   const hireCounts: Record<string, number> = {}
@@ -56,13 +53,13 @@ export async function GET() {
     }
   }
 
-  const enriched = homeowners.map((hw: any) => ({
-    ...hw,
-    profile: profileMap[hw.profile_id] ?? null,
-    offer_count: offerCounts[hw.id] ?? 0,
-    hire_count: hireCounts[hw.id] ?? 0,
-    last_active: lastOfferDate[hw.id] ?? null,
+  const homeowners = (hwList ?? []).map((h: any) => ({
+    ...h,
+    profile: (profilesRes.data ?? []).find((p: any) => p.id === h.profile_id) ?? null,
+    offer_count: offerCounts[h.id] ?? 0,
+    hire_count: hireCounts[h.id] ?? 0,
+    last_active: lastOfferDate[h.id] ?? null,
   }))
 
-  return NextResponse.json({ homeowners: enriched })
+  return NextResponse.json({ homeowners })
 }
