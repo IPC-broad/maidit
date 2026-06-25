@@ -14,16 +14,34 @@ export async function GET(req: NextRequest) {
   }
 
   const [jobsRes, appsRes] = await Promise.all([
-    sa.from('job_posts').select(`
-      id, homeowner_id, title, setup, salary_min, salary_max, city, status,
-      urgency, scope, created_at, paid_at,
-      homeowner:homeowner_id(profile:profiles!profile_id(full_name, mobile))
-    `).order('created_at', { ascending: false }),
+    sa.from('job_posts')
+      .select('id, homeowner_id, title, setup, salary_min, salary_max, city, status, urgency, scope, created_at, paid_at')
+      .order('created_at', { ascending: false }),
     sa.from('applications').select('job_id'),
   ])
 
+  if (jobsRes.error) console.log('job_posts query error:', jobsRes.error)
+
   const jobs = jobsRes.data ?? []
   const apps = appsRes.data ?? []
+
+  const hwIds = [...new Set(jobs.map((j: any) => j.homeowner_id).filter(Boolean))]
+
+  const { data: hwData } = hwIds.length > 0
+    ? await sa.from('homeowners').select('id, profile_id').in('id', hwIds)
+    : { data: [] }
+
+  const profileIds = (hwData ?? []).map((h: any) => h.profile_id).filter(Boolean)
+
+  const { data: profiles } = profileIds.length > 0
+    ? await sa.from('profiles').select('id, full_name, mobile').in('id', profileIds)
+    : { data: [] }
+
+  const profileMap: Record<string, any> = {}
+  for (const p of (profiles ?? []) as any[]) profileMap[p.id] = p
+
+  const hwMap: Record<string, string> = {}
+  for (const hw of (hwData ?? []) as any[]) hwMap[hw.id] = hw.profile_id
 
   const appCounts: Record<string, number> = {}
   for (const a of apps as any[]) {
@@ -32,6 +50,7 @@ export async function GET(req: NextRequest) {
 
   const enriched = jobs.map((j: any) => ({
     ...j,
+    homeowner_name: profileMap[hwMap[j.homeowner_id]]?.full_name ?? null,
     applicant_count: appCounts[j.id] ?? 0,
   }))
 

@@ -12,12 +12,14 @@ function weekOf(dateStr: string): string {
 }
 
 export async function GET(req: NextRequest) {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json({ error: 'SERVICE_ROLE_KEY not configured' }, { status: 500 })
+  }
+
   const token = req.headers.get('authorization')?.replace('Bearer ', '')
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  const sa = createClient(url, key)
+  const sa = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY)
 
   const { data: { user } } = await sa.auth.getUser(token)
   if (!user || !ADMIN_EMAILS.includes(user.email ?? '')) {
@@ -35,6 +37,8 @@ export async function GET(req: NextRequest) {
     hwCount, kbCount, partnerCount,
     kbActive, partnersPending, jobPostsActive,
     signupsToday, signupsThisWeek, signupsLastWeek,
+    hwToday, kbToday, partnerToday,
+    kbViaPartners, kbDirect,
     offers, recentProfiles, kbProvinces,
   ] = await Promise.all([
     sa.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'homeowner').then(r => r.count ?? 0),
@@ -46,6 +50,11 @@ export async function GET(req: NextRequest) {
     sa.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', todayStart).then(r => r.count ?? 0),
     sa.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', weekStart).then(r => r.count ?? 0),
     sa.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', lastWeekStart).lt('created_at', weekStart).then(r => r.count ?? 0),
+    sa.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'homeowner').gte('created_at', todayStart).then(r => r.count ?? 0),
+    sa.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'kasambahay').gte('created_at', todayStart).then(r => r.count ?? 0),
+    sa.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'partner').gte('created_at', todayStart).then(r => r.count ?? 0),
+    sa.from('kasambahay').select('*', { count: 'exact', head: true }).not('referred_by', 'is', null).then(r => r.count ?? 0),
+    sa.from('kasambahay').select('*', { count: 'exact', head: true }).is('referred_by', null).then(r => r.count ?? 0),
     sa.from('offers').select('id, status, created_at').then(r => r.data ?? []),
     sa.from('profiles').select('created_at, role').gte('created_at', eightWeeksAgo).then(r => r.data ?? []),
     sa.from('kasambahay').select('province').not('province', 'is', null).then(r => r.data ?? []),
@@ -57,14 +66,12 @@ export async function GET(req: NextRequest) {
     ['paid', 'arrived'].includes(o.status) && o.created_at >= monthStart
   ).length * 2500
 
-  // Weekly signups chart (last 8 weeks)
   const weeklySignups: Record<string, number> = {}
   for (const p of recentProfiles as any[]) {
     const wk = weekOf(p.created_at)
     weeklySignups[wk] = (weeklySignups[wk] ?? 0) + 1
   }
 
-  // Weekly hires chart
   const weeklyHires: Record<string, number> = {}
   for (const o of offers as any[]) {
     if (['paid', 'arrived'].includes(o.status) && o.created_at >= eightWeeksAgo) {
@@ -73,7 +80,6 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Top provinces for kasambahay
   const provinceCounts: Record<string, number> = {}
   for (const kb of kbProvinces as any[]) {
     if (kb.province) provinceCounts[kb.province] = (provinceCounts[kb.province] ?? 0) + 1
@@ -83,7 +89,6 @@ export async function GET(req: NextRequest) {
     .slice(0, 10)
     .map(([label, value]) => ({ label, value }))
 
-  // Offer funnel
   const offerFunnel = {
     sent: offers.length,
     agreed: offers.filter((o: any) => ['agreed', 'paid', 'arrived'].includes(o.status)).length,
@@ -94,9 +99,9 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     totalUsers: hwCount + kbCount + partnerCount,
-    homeowners: hwCount,
-    kasambahay: kbCount,
-    partners: partnerCount,
+    totalHO: hwCount,
+    totalKB: kbCount,
+    totalPartners: partnerCount,
     kbActive,
     partnersPending,
     successfulHires,
@@ -105,6 +110,11 @@ export async function GET(req: NextRequest) {
     signupsToday,
     signupsThisWeek,
     signupsLastWeek,
+    hwToday,
+    kbToday,
+    partnerToday,
+    kbViaPartners,
+    kbDirect,
     offersByStatus: {
       pending: offers.filter((o: any) => o.status === 'pending').length,
       agreed: offers.filter((o: any) => o.status === 'agreed').length,

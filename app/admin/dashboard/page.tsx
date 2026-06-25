@@ -246,7 +246,11 @@ export default function AdminDashboard() {
         label: 'Revenue This Month',
         sub: ''
       },
-      { value: (stats.signupsToday ?? 0).toLocaleString(), label: 'New Today', sub: '' },
+      {
+        value: (stats.signupsToday ?? 0).toLocaleString(),
+        label: 'New Today',
+        sub: `${stats.hwToday ?? 0} HO · ${stats.kbToday ?? 0} KB · ${stats.partnerToday ?? 0} Partners`
+      },
       {
         value: (stats.signupsThisWeek ?? 0).toLocaleString(),
         label: 'New This Week',
@@ -256,12 +260,17 @@ export default function AdminDashboard() {
       },
     ]
 
+    const sourceCards = [
+      { value: (stats.kbViaPartners ?? 0).toLocaleString(), label: 'KB via Partners', color: C.green },
+      { value: (stats.kbDirect ?? 0).toLocaleString(), label: 'KB Direct Signups', color: C.ink3 },
+    ]
+
     const offerFunnel = stats.offerFunnel ?? {}
 
     return (
       <div>
         <h2 style={{ fontFamily: serif, fontSize: 26, color: C.ink, marginBottom: 20, fontWeight: 400 }}>Overview</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, marginBottom: 28 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, marginBottom: 20 }}>
           {cards.map((card, i) => (
             <div key={i} style={{
               background: C.paper, border: `1px solid ${C.line}`, borderRadius: 14, padding: 16,
@@ -270,6 +279,16 @@ export default function AdminDashboard() {
               <div style={{ fontFamily: serif, fontSize: 36, color: card.red ? C.red : C.forest, lineHeight: 1.1 }}>{card.value}</div>
               <div style={{ fontFamily: sans, fontSize: 12, color: C.ink3, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 6 }}>{card.label}</div>
               {card.sub && <div style={{ fontFamily: sans, fontSize: 11, color: C.ink3, marginTop: 4 }}>{card.sub}</div>}
+            </div>
+          ))}
+        </div>
+
+        <h3 style={{ fontFamily: sans, fontSize: 13, color: C.ink2, marginBottom: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Kasambahay Sources</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(180px, 240px))', gap: 12, marginBottom: 28 }}>
+          {sourceCards.map((card, i) => (
+            <div key={i} style={{ background: card.color + '10', border: `1px solid ${card.color}33`, borderRadius: 14, padding: 16 }}>
+              <div style={{ fontFamily: serif, fontSize: 36, color: card.color, lineHeight: 1.1 }}>{card.value}</div>
+              <div style={{ fontFamily: sans, fontSize: 12, color: card.color, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 6 }}>{card.label}</div>
             </div>
           ))}
         </div>
