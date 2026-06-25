@@ -25,15 +25,15 @@ export async function GET() {
 
   const { data: kbList, error: kbError } = await sa
     .from('kasambahay')
-    .select('id, profile_id, asking_salary, setup, province, skills, availability, referred_by, has_govt_id, has_nbi, civil_status, num_children, status, selfie_url, proxy_mode, edad, created_at')
-    .order('created_at', { ascending: false })
+    .select('id, profile_id, asking_salary, setup, province, skills, availability, referred_by, has_govt_id, has_nbi, civil_status, num_children, status, selfie_url, proxy_mode, edad')
+    .order('id', { ascending: false })
 
   if (kbError) console.log('kasambahay error:', kbError)
 
   const profileIds = (kbList ?? []).map((k: any) => k.profile_id).filter(Boolean)
 
   const { data: profiles } = profileIds.length > 0
-    ? await sa.from('profiles').select('id, full_name, mobile, email, city, created_at').in('id', profileIds)
+    ? await sa.from('profiles').select('id, full_name, mobile, email, created_at').in('id', profileIds)
     : { data: [] }
 
   const { data: partners } = await sa.from('partners').select('id, referral_code')

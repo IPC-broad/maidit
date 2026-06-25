@@ -25,8 +25,8 @@ export async function GET() {
 
   const { data: hwList, error: hwError } = await sa
     .from('homeowners')
-    .select('id, profile_id, city, province, address, preferred_setup, daily_offers_used, created_at')
-    .order('created_at', { ascending: false })
+    .select('id, profile_id, city, province, address, preferred_setup, daily_offers_used')
+    .order('id', { ascending: false })
 
   if (hwError) console.log('homeowners error:', hwError)
 
@@ -34,7 +34,7 @@ export async function GET() {
 
   const [profilesRes, offersRes] = await Promise.all([
     profileIds.length > 0
-      ? sa.from('profiles').select('id, full_name, mobile, email').in('id', profileIds)
+      ? sa.from('profiles').select('id, full_name, mobile, email, created_at').in('id', profileIds)
       : Promise.resolve({ data: [] }),
     sa.from('offers').select('homeowner_id, status, created_at'),
   ])

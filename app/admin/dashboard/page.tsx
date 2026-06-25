@@ -361,7 +361,7 @@ export default function AdminDashboard() {
                           <span style={{ fontFamily: 'monospace', fontSize: 12, background: C.forestSoft, color: C.forest, padding: '2px 10px', borderRadius: 8 }}>
                             {p.referral_code ?? '—'}
                           </span>
-                          <span style={{ fontFamily: sans, fontSize: 12, color: C.ink3 }}>Applied: {fmtDate(p.created_at)}</span>
+                          <span style={{ fontFamily: sans, fontSize: 12, color: C.ink3 }}>Applied: {fmtDate(p.profile?.created_at)}</span>
                         </div>
                         <div style={{ display: 'flex', gap: 8 }}>
                           <button
@@ -407,7 +407,7 @@ export default function AdminDashboard() {
                     <td style={{ padding: '10px 12px', color: C.ink }}>₱{(p.earnings ?? 0).toLocaleString()}</td>
                     <td style={{ padding: '10px 12px', color: C.ink }}>₱{(p.balance ?? 0).toLocaleString()}</td>
                     <td style={{ padding: '10px 12px', color: C.ink2, textAlign: 'center' }}>{p.worker_count ?? 0}</td>
-                    <td style={{ padding: '10px 12px', color: C.ink3, whiteSpace: 'nowrap' }}>{fmtDate(p.created_at)}</td>
+                    <td style={{ padding: '10px 12px', color: C.ink3, whiteSpace: 'nowrap' }}>{fmtDate(p.profile?.created_at)}</td>
                     <td style={{ padding: '10px 12px', textAlign: 'center' }}>
                       {p.approved
                         ? <span style={{ color: C.green, fontWeight: 700 }}>✓</span>
@@ -444,7 +444,7 @@ export default function AdminDashboard() {
           h.profile?.email ?? '—',
           h.city ?? '—',
           String(h.offer_count ?? 0),
-          fmtDate(h.created_at)
+          fmtDate(h.profile?.created_at)
         ]),
         ['Name', 'Mobile', 'Email', 'City', 'Offers Sent', 'Joined']
       )
@@ -481,7 +481,7 @@ export default function AdminDashboard() {
                   <td style={{ padding: '10px 12px', color: C.ink2 }}>{h.profile?.email ?? '—'}</td>
                   <td style={{ padding: '10px 12px', color: C.ink2 }}>{h.city ?? '—'}</td>
                   <td style={{ padding: '10px 12px', color: C.ink2, textAlign: 'center' }}>{h.offer_count ?? 0}</td>
-                  <td style={{ padding: '10px 12px', color: C.ink3, whiteSpace: 'nowrap' }}>{fmtDate(h.created_at)}</td>
+                  <td style={{ padding: '10px 12px', color: C.ink3, whiteSpace: 'nowrap' }}>{fmtDate(h.profile?.created_at)}</td>
                 </tr>
               ))}
               {filtered.length === 0 && (
@@ -527,7 +527,7 @@ export default function AdminDashboard() {
           k.has_govt_id ? 'Yes' : 'No',
           k.has_nbi ? 'Yes' : 'No',
           k.referred_by ? (k.partner_referral_code ?? k.referred_by) : 'Direct',
-          fmtDate(k.created_at)
+          fmtDate(k.profile?.created_at)
         ]),
         ['Name', 'Mobile', 'Province', 'Setup', 'Salary', 'Govt ID', 'NBI', 'Source', 'Joined']
       )
@@ -615,7 +615,7 @@ export default function AdminDashboard() {
                         {k.status ?? '—'}
                       </span>
                     </td>
-                    <td style={{ padding: '10px 12px', color: C.ink3, whiteSpace: 'nowrap' }}>{fmtDate(k.created_at)}</td>
+                    <td style={{ padding: '10px 12px', color: C.ink3, whiteSpace: 'nowrap' }}>{fmtDate(k.profile?.created_at)}</td>
                   </tr>
                 )
               })}

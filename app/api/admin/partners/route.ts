@@ -25,8 +25,8 @@ export async function GET() {
 
   const { data: partnerList, error: partnerError } = await sa
     .from('partners')
-    .select('id, profile_id, referral_code, tier, approved, balance, worker_count, gcash_number, flagged, flag_reason, referred_by_partner_id, created_at')
-    .order('created_at', { ascending: false })
+    .select('id, profile_id, referral_code, tier, approved, balance, worker_count, gcash_number, flagged, flag_reason, referred_by_partner_id')
+    .order('id', { ascending: false })
 
   if (partnerError) console.log('partners error:', partnerError)
 
@@ -34,7 +34,7 @@ export async function GET() {
 
   const [profilesRes, kbRes, offersRes] = await Promise.all([
     profileIds.length > 0
-      ? sa.from('profiles').select('id, full_name, mobile, email, selfie_url').in('id', profileIds)
+      ? sa.from('profiles').select('id, full_name, mobile, email, selfie_url, created_at').in('id', profileIds)
       : Promise.resolve({ data: [] }),
     sa.from('kasambahay').select('id, referred_by').not('referred_by', 'is', null),
     sa.from('offers').select('kasambahay_id, status'),
