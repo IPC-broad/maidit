@@ -13,23 +13,34 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const [hwRes, offersRes] = await Promise.all([
-    sa.from('homeowners').select(`
-      id, profile_id, preferred_setup, subscription_expires_at, created_at,
-      profile:profiles!profile_id(id, full_name, mobile, email, city, created_at)
-    `).order('created_at', { ascending: false }),
+  const { data: hwData, error: hwError } = await sa
+    .from('homeowners')
+    .select('id, profile_id, preferred_setup, subscription_expires_at, created_at')
+    .order('created_at', { ascending: false })
+
+  if (hwError) console.log('homeowners query error:', hwError)
+
+  const homeowners = hwData ?? []
+
+  const profileIds = homeowners.map((hw: any) => hw.profile_id).filter(Boolean)
+
+  const [profilesRes, offersRes] = await Promise.all([
+    profileIds.length > 0
+      ? sa.from('profiles').select('id, full_name, mobile, email, city, created_at').in('id', profileIds)
+      : Promise.resolve({ data: [] }),
     sa.from('offers').select('homeowner_id, status, created_at'),
   ])
 
-  const homeowners = hwRes.data ?? []
-  const offers = offersRes.data ?? []
+  const profileMap: Record<string, any> = {}
+  for (const p of (profilesRes.data ?? []) as any[]) {
+    profileMap[p.id] = p
+  }
 
-  // Count offers per homeowner
   const offerCounts: Record<string, number> = {}
   const hireCounts: Record<string, number> = {}
   const lastOfferDate: Record<string, string> = {}
 
-  for (const o of offers as any[]) {
+  for (const o of (offersRes.data ?? []) as any[]) {
     offerCounts[o.homeowner_id] = (offerCounts[o.homeowner_id] ?? 0) + 1
     if (['paid', 'arrived'].includes(o.status)) {
       hireCounts[o.homeowner_id] = (hireCounts[o.homeowner_id] ?? 0) + 1
@@ -41,6 +52,7 @@ export async function GET(req: NextRequest) {
 
   const enriched = homeowners.map((hw: any) => ({
     ...hw,
+    profile: profileMap[hw.profile_id] ?? null,
     offer_count: offerCounts[hw.id] ?? 0,
     hire_count: hireCounts[hw.id] ?? 0,
     last_active: lastOfferDate[hw.id] ?? null,

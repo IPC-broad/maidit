@@ -499,6 +499,10 @@ export default function AdminDashboard() {
       return true
     })
 
+    const totalCount = kasambahay.length
+    const viaPartnersCount = kasambahay.filter((k: any) => k.referred_by).length
+    const directCount = totalCount - viaPartnersCount
+
     const doExport = () => {
       exportCSV('kasambahay.csv',
         filtered.map(k => [
@@ -506,12 +510,12 @@ export default function AdminDashboard() {
           k.profile?.mobile ?? k.mobile ?? '—',
           k.profile?.province ?? k.province ?? '—',
           k.profile?.setup ?? k.setup ?? '—',
-          String(k.profile?.salary ?? k.salary ?? '—'),
-          k.verified ? 'Yes' : 'No',
-          k.partner_code ?? k.referral_code ?? '—',
+          String(k.asking_salary ?? '—'),
+          k.is_verified ? 'Yes' : 'No',
+          k.referred_by ? (k.partner_referral_code ?? k.referred_by) : 'Direct',
           fmtDate(k.created_at)
         ]),
-        ['Name', 'Mobile', 'Province', 'Setup', 'Salary', 'Verified', 'Partner Code', 'Joined']
+        ['Name', 'Mobile', 'Province', 'Setup', 'Salary', 'Verified', 'Source', 'Joined']
       )
     }
 
@@ -526,6 +530,20 @@ export default function AdminDashboard() {
           <button onClick={doExport} style={{ background: C.forest, color: '#fff', border: 'none', borderRadius: 8, padding: '7px 16px', fontFamily: sans, fontSize: 13, cursor: 'pointer' }}>
             Export CSV
           </button>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+          {[
+            { label: 'Total', value: totalCount, color: C.ink2 },
+            { label: 'Via Partners', value: viaPartnersCount, color: C.green },
+            { label: 'Direct', value: directCount, color: C.ink3 },
+          ].map(s => (
+            <div key={s.label} style={{
+              background: s.color + '12', border: `1px solid ${s.color}33`,
+              borderRadius: 20, padding: '4px 14px', fontFamily: sans, fontSize: 13, color: s.color, display: 'flex', gap: 6, alignItems: 'center'
+            }}>
+              <span>{s.label}:</span><strong>{s.value}</strong>
+            </div>
+          ))}
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
           <input
@@ -554,7 +572,7 @@ export default function AdminDashboard() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: sans, fontSize: 13 }}>
             <thead>
               <tr style={{ background: C.forestSoft }}>
-                {['Name', 'Mobile', 'Province', 'Setup', 'Salary', 'Partner Code', 'Verified', 'Govt ID', 'NBI', 'Status', 'Joined'].map(h => (
+                {['Name', 'Mobile', 'Province', 'Setup', 'Salary', 'Source', 'Verified', 'Govt ID', 'NBI', 'Status', 'Joined'].map(h => (
                   <th key={h} style={{ padding: '10px 12px', textAlign: 'left', color: C.ink2, fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
@@ -562,15 +580,21 @@ export default function AdminDashboard() {
             <tbody>
               {filtered.map((k: any, i: number) => {
                 const statusColor = k.status === 'available' ? C.green : k.status === 'hired' ? C.blue : C.ink3
+                const sourceCode = k.referred_by ? (k.partner_referral_code ?? k.referred_by) : null
                 return (
                   <tr key={k.id} style={{ background: i % 2 === 0 ? C.paper : C.paper2, borderBottom: `1px solid ${C.line}` }}>
                     <td style={{ padding: '10px 12px', color: C.ink }}>{k.profile?.full_name ?? k.name ?? '—'}</td>
                     <td style={{ padding: '10px 12px', color: C.ink2 }}>{k.profile?.mobile ?? k.mobile ?? '—'}</td>
                     <td style={{ padding: '10px 12px', color: C.ink2 }}>{k.profile?.province ?? k.province ?? '—'}</td>
-                    <td style={{ padding: '10px 12px', color: C.ink2 }}>{k.profile?.setup ?? k.setup ?? '—'}</td>
-                    <td style={{ padding: '10px 12px', color: C.ink }}>₱{(k.profile?.salary ?? k.salary ?? 0).toLocaleString()}</td>
-                    <td style={{ padding: '10px 12px', fontFamily: 'monospace', fontSize: 12, color: C.forest }}>{k.partner_code ?? k.referral_code ?? '—'}</td>
-                    <td style={{ padding: '10px 12px', textAlign: 'center' }}>{k.verified ? <span style={{ color: C.green }}>✓</span> : <span style={{ color: C.ink3 }}>✗</span>}</td>
+                    <td style={{ padding: '10px 12px', color: C.ink2 }}>{k.setup ?? '—'}</td>
+                    <td style={{ padding: '10px 12px', color: C.ink }}>₱{(k.asking_salary ?? 0).toLocaleString()}</td>
+                    <td style={{ padding: '10px 12px' }}>
+                      {sourceCode
+                        ? <span style={{ background: C.green + '18', color: C.green, border: `1px solid ${C.green}44`, borderRadius: 12, padding: '2px 10px', fontSize: 12, fontFamily: 'monospace' }}>{sourceCode}</span>
+                        : <span style={{ background: C.ink3 + '18', color: C.ink3, border: `1px solid ${C.ink3}44`, borderRadius: 12, padding: '2px 10px', fontSize: 12 }}>Direct</span>
+                      }
+                    </td>
+                    <td style={{ padding: '10px 12px', textAlign: 'center' }}>{k.is_verified ? <span style={{ color: C.green }}>✓</span> : <span style={{ color: C.ink3 }}>✗</span>}</td>
                     <td style={{ padding: '10px 12px', textAlign: 'center' }}>{k.has_govt_id ? <span style={{ color: C.green }}>✓</span> : <span style={{ color: C.ink3 }}>✗</span>}</td>
                     <td style={{ padding: '10px 12px', textAlign: 'center' }}>{k.has_nbi ? <span style={{ color: C.green }}>✓</span> : <span style={{ color: C.ink3 }}>✗</span>}</td>
                     <td style={{ padding: '10px 12px' }}>
